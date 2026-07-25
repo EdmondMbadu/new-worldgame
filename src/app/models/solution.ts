@@ -48,6 +48,13 @@ export class Solution {
   meetLink?: string;
   image?: string;
   isPrivate?: boolean;
+  communityVisibility?: 'community' | 'private';
+  feedEligible?: boolean;
+  feedStatus?: 'in-development' | 'submitted';
+  feedUpdatedAt?: any;
+  commentCount?: number;
+  teamMemberEmails?: string[];
+  solutionAdminEmails?: string[];
   category?: string;
   impact?: number;
   supporters?: number;
@@ -154,6 +161,10 @@ export class Comment {
   linkPreview?: LinkPreview;
   isAI?: boolean; // For AI-generated messages
   isLoading?: boolean; // For AI typing indicator
+  createdAt?: any;
+  createdAtMs?: number;
+  authorAvatar?: string;
+  authorEmail?: string;
 }
 
 export interface CommentReactions {

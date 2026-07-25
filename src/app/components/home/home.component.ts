@@ -2,7 +2,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { TranslateService } from '@ngx-translate/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
@@ -12,7 +12,10 @@ import { HOME_CHALLENGE_FR } from 'src/app/components/home/home-challenge-fr';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
-import { SolutionService } from 'src/app/services/solution.service';
+import {
+  CommunitySolutionFilter,
+  SolutionService,
+} from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 @Component({
@@ -53,9 +56,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   isInitialLoad = true; // fullscreen overlay when the page first opens
   isLoadingChallenges = true; // skeletons in the grid when (re)loading challenges
   isErrorChallenges = false; // error state if fetch fails
+  homeView: 'solutions' | 'challenges' = 'solutions';
+  communityFilter: CommunitySolutionFilter = 'all';
+  communitySolutions: Solution[] = [];
+  isLoadingCommunitySolutions = false;
+  isLoadingMoreCommunitySolutions = false;
+  communitySolutionsError = '';
+  hasMoreCommunitySolutions = false;
+  private communityCursor: any = null;
+  private readonly communityPageSize = 20;
 
   // (optional) simple cache hit to prevent flashing loader if we already have data for that category
-  private minOverlayMs = 400; // minimum visible time to prevent jarring flicker
+  private minOverlayMs = 120; // a brief transition without delaying the feed
   private initialStart = performance.now();
   private languageSub?: Subscription;
 
@@ -118,6 +130,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     private storage: AngularFireStorage,
     private challenge: ChallengesService,
     private router: Router,
+    private route: ActivatedRoute,
     private time: TimeService,
     private afs: AngularFirestore,
     private translate: TranslateService
@@ -131,9 +144,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.filterSolutions();
     window.scroll(0, 0);
 
-    // Categories are defined locally, so fetch the active category directly.
-    // The previous flow downloaded every challenge first and discarded it.
-    this.fetchChallenges(this.activeCategory, { isInitial: true });
+    const requestedView = this.route.snapshot.queryParamMap.get('view');
+    const requestedFilter = this.route.snapshot.queryParamMap.get('filter');
+    this.homeView = requestedView === 'challenges' ? 'challenges' : 'solutions';
+    if (
+      requestedFilter === 'in-development' ||
+      requestedFilter === 'submitted'
+    ) {
+      this.communityFilter = requestedFilter;
+    }
+
+    if (this.homeView === 'challenges') {
+      this.fetchChallenges(this.activeCategory, { isInitial: true });
+    } else {
+      void this.loadCommunitySolutions(true);
+    }
 
     this.auth.user$
       .pipe(
@@ -220,6 +245,246 @@ export class HomeComponent implements OnInit, OnDestroy {
   async setActiveCategory(category: string) {
     this.activeCategory = category;
     this.fetchChallenges(category);
+  }
+
+  async selectHomeView(view: 'solutions' | 'challenges'): Promise<void> {
+    if (this.homeView === view) return;
+    this.homeView = view;
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        view: view === 'challenges' ? 'challenges' : null,
+        filter:
+          view === 'solutions' && this.communityFilter !== 'all'
+            ? this.communityFilter
+            : null,
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+
+    if (view === 'challenges' && !this.titles.length) {
+      this.fetchChallenges(this.activeCategory);
+    } else if (view === 'solutions' && !this.communitySolutions.length) {
+      await this.loadCommunitySolutions(true);
+    }
+  }
+
+  async setCommunityFilter(filter: CommunitySolutionFilter): Promise<void> {
+    if (this.communityFilter === filter) return;
+    this.communityFilter = filter;
+    await this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { filter: filter === 'all' ? null : filter },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+    await this.loadCommunitySolutions(true);
+  }
+
+  async loadCommunitySolutions(reset = false): Promise<void> {
+    if (
+      this.isLoadingCommunitySolutions ||
+      this.isLoadingMoreCommunitySolutions
+    ) {
+      return;
+    }
+
+    if (reset) {
+      this.isLoadingCommunitySolutions = true;
+      this.communityCursor = null;
+      this.communitySolutions = [];
+      this.communitySolutionsError = '';
+    } else {
+      this.isLoadingMoreCommunitySolutions = true;
+    }
+
+    try {
+      const page = await this.solution.getCommunitySolutionsPage(
+        this.communityFilter,
+        this.communityPageSize,
+        this.communityCursor
+      );
+      this.communityCursor = page.cursor;
+      if (reset) {
+        this.communitySolutions = this.rankCommunitySolutions(page.solutions);
+      } else {
+        const existingIds = new Set(
+          this.communitySolutions.map((item) => item.solutionId)
+        );
+        const nextPage = this.rankCommunitySolutions(
+          page.solutions.filter(
+            (item) => item.solutionId && !existingIds.has(item.solutionId)
+          )
+        );
+        this.communitySolutions = [...this.communitySolutions, ...nextPage];
+      }
+      this.hasMoreCommunitySolutions = page.hasMore;
+      if (reset) this.restoreCommunityScroll();
+    } catch (error) {
+      console.error('Unable to load community solutions', error);
+      this.communitySolutionsError =
+        'We could not load community solutions. Please try again.';
+    } finally {
+      this.isLoadingCommunitySolutions = false;
+      this.isLoadingMoreCommunitySolutions = false;
+      if (this.isInitialLoad) this.finishInitialOverlay();
+    }
+  }
+
+  openCommunitySolution(solution: Solution): void {
+    if (!solution.solutionId) return;
+    sessionStorage.setItem(
+      'communitySolutionsScroll',
+      String(window.scrollY || 0)
+    );
+    void this.router.navigate(['/solution-preview', solution.solutionId], {
+      queryParams: {
+        returnTo: this.router.url,
+        from: 'community',
+      },
+    });
+  }
+
+  startSolution(): void {
+    void this.router.navigate(['/create-solution']);
+  }
+
+  communityExcerpt(solution: Solution): string {
+    const source =
+      solution.description ||
+      solution.strategyReview ||
+      solution.content ||
+      Object.values(solution.status || {}).find(Boolean) ||
+      '';
+    const clean = String(source)
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return clean.length > 210 ? `${clean.slice(0, 207).trim()}…` : clean;
+  }
+
+  communityProgress(solution: Solution): number {
+    if (solution.finished === 'true') return 100;
+    const answers = Object.values(solution.status || {}).filter(
+      (value) => String(value || '').replace(/<[^>]*>/g, '').trim().length > 15
+    ).length;
+    const supporting = [
+      solution.description,
+      solution.strategyReview,
+      solution.content,
+    ].filter(
+      (value) => String(value || '').replace(/<[^>]*>/g, '').trim().length > 30
+    ).length;
+    return Math.min(90, Math.max(10, (answers + supporting) * 10));
+  }
+
+  communityMemberCount(solution: Solution): number {
+    if (Array.isArray(solution.teamMemberEmails)) {
+      return Math.max(1, solution.teamMemberEmails.length);
+    }
+    const value: any = solution.participants;
+    return Math.max(
+      1,
+      Array.isArray(value)
+        ? value.length
+        : value && typeof value === 'object'
+        ? Object.keys(value).length
+        : 0
+    );
+  }
+
+  communityInitials(solution: Solution): string {
+    const name = String(
+      solution.authorName || solution.authorEmail || solution.title || 'GS'
+    ).trim();
+    const words = name.split(/\s+/).filter(Boolean);
+    return words.length > 1
+      ? `${words[0][0]}${words[1][0]}`.toUpperCase()
+      : name.slice(0, 2).toUpperCase();
+  }
+
+  handleCommunityImageError(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    if (!image) return;
+
+    image.style.display = 'none';
+    image.nextElementSibling?.classList.remove('hidden');
+  }
+
+  communityActivityLabel(solution: Solution): string {
+    const raw =
+      solution.feedUpdatedAt ||
+      solution.lastSubstantiveEditAt ||
+      solution.updatedAt ||
+      solution.submissionDate ||
+      solution.creationDate;
+    const date = raw?.toDate?.() || (raw ? new Date(raw) : null);
+    if (!date || Number.isNaN(date.getTime())) return 'Recently active';
+    const seconds = Math.max(1, Math.floor((Date.now() - date.getTime()) / 1000));
+    if (seconds < 60) return 'Active just now';
+    if (seconds < 3600) return `Active ${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `Active ${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `Active ${Math.floor(seconds / 86400)}d ago`;
+    return `Updated ${date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+    })}`;
+  }
+
+  trackCommunitySolution(index: number, solution: Solution): string {
+    return solution.solutionId || String(index);
+  }
+
+  private rankCommunitySolutions(solutions: Solution[]): Solution[] {
+    const unique = Array.from(
+      new Map(
+        solutions
+          .filter((item) => item.solutionId)
+          .map((item) => [item.solutionId, item])
+      ).values()
+    );
+    const scored = unique.sort((a, b) => {
+      const score = (solution: Solution) => {
+        const raw =
+          solution.feedUpdatedAt ||
+          solution.lastSubstantiveEditAt ||
+          solution.updatedAt;
+        const time = raw?.toMillis?.() || raw?.toDate?.()?.getTime?.() || 0;
+        const needsFirstResponse =
+          Number(solution.commentCount || solution.comments?.length || 0) === 0;
+        return time + (needsFirstResponse ? 6 * 60 * 60 * 1000 : 0);
+      };
+      return score(b) - score(a);
+    });
+
+    const output: Solution[] = [];
+    const remaining = [...scored];
+    while (remaining.length) {
+      const previousOwners = output
+        .slice(-2)
+        .map((item) => item.authorAccountId || item.authorEmail || '');
+      const index = remaining.findIndex(
+        (item) =>
+          !previousOwners.length ||
+          !previousOwners.every(
+            (owner) =>
+              owner === (item.authorAccountId || item.authorEmail || '')
+          )
+      );
+      output.push(remaining.splice(index >= 0 ? index : 0, 1)[0]);
+    }
+    return output;
+  }
+
+  private restoreCommunityScroll(): void {
+    const value = Number(
+      sessionStorage.getItem('communitySolutionsScroll') || 0
+    );
+    if (!value) return;
+    sessionStorage.removeItem('communitySolutionsScroll');
+    setTimeout(() => window.scrollTo({ top: value, behavior: 'auto' }), 0);
   }
   extractNumber(filename: string, prefix: string): number {
     const match = filename.match(new RegExp(`${prefix}-(\\d+)`)); // Extract number based on the prefix

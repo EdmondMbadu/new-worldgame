@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Evaluator, Solution } from 'src/app/models/solution';
@@ -15,7 +15,7 @@ import { TimeService } from 'src/app/services/time.service';
     styleUrl: './solution-preview.component.css',
     standalone: false
 })
-export class SolutionPreviewComponent implements OnInit {
+export class SolutionPreviewComponent implements OnInit, OnDestroy {
   solutionId: any = '';
   edited: string = '';
   displayEditSolution: boolean = false;
@@ -35,7 +35,7 @@ export class SolutionPreviewComponent implements OnInit {
   evaluationSummary: any = {};
   colors: any = {};
   etAl: string = '';
-  comments: any = {};
+  comments: any[] = [];
   commentUserProfilePicturePath: string[] = [];
   numberOfcomments: number = 0;
   commentTimeElapsed: string[] = [];
@@ -45,6 +45,14 @@ export class SolutionPreviewComponent implements OnInit {
   hoverTournament: boolean = false;
   evaluators: any[] = [];
   isLoading: boolean = false;
+  isLoadingSolution = true;
+  solutionAccessError = '';
+  commentSaving = false;
+  commentError = '';
+  commentSuccess = '';
+  returnTo = '/home';
+  private solutionSub?: Subscription;
+  private communityCommentsSub?: Subscription;
 
   hoverWinner: boolean = false;
   displayCongrats: boolean = false;
@@ -67,6 +75,8 @@ export class SolutionPreviewComponent implements OnInit {
   ) {}
   isLoggedIn: boolean = false;
   ngOnInit(): void {
+    this.returnTo =
+      this.activatedRoute.snapshot.queryParamMap.get('returnTo') || '/home';
     this.activatedRoute.paramMap.subscribe((params) => {
       this.solutionId = params.get('id');
       window.scroll(0, 0);
@@ -76,6 +86,11 @@ export class SolutionPreviewComponent implements OnInit {
     this.auth.getCurrentUserPromise().then((user) => {
       this.isLoggedIn = !!user;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.solutionSub?.unsubscribe();
+    this.communityCommentsSub?.unsubscribe();
   }
 
   async initializeComments() {
@@ -89,10 +104,8 @@ export class SolutionPreviewComponent implements OnInit {
       return;
     }
 
-    const userPromises = this.comments.map(async (comment: any) => {
-      this.commentTimeElapsed.push(
-        comment.date ? this.time.timeAgo(comment.date) : ''
-      );
+    const userPromises = this.comments.map(async (comment: any, index: number) => {
+      this.commentTimeElapsed[index] = this.commentTimeLabel(comment);
 
       if (!comment.authorId) {
         return null;
@@ -115,7 +128,31 @@ export class SolutionPreviewComponent implements OnInit {
         this.comments[index]
       );
       this.commentUserProfilePicturePath[index] =
-        this.getUserAvatarUrl(author);
+        this.getUserAvatarUrl(author, this.comments[index]);
+    });
+  }
+
+  private commentTimeLabel(comment: any): string {
+    const date =
+      comment?.createdAt?.toDate?.() ||
+      (Number(comment?.createdAtMs)
+        ? new Date(Number(comment.createdAtMs))
+        : comment?.date && String(comment.date).includes('T')
+        ? new Date(comment.date)
+        : null);
+    if (!date || Number.isNaN(date.getTime())) {
+      return comment?.date ? this.time.timeAgo(comment.date) : '';
+    }
+
+    const seconds = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+    if (seconds < 45) return 'Just now';
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
     });
   }
 
@@ -146,8 +183,13 @@ export class SolutionPreviewComponent implements OnInit {
     return 'NW';
   }
 
-  getUserAvatarUrl(user?: User | null): string {
-    return user?.profilePicture?.downloadURL || (user as any)?.profilePicPath || '';
+  getUserAvatarUrl(user?: User | null, comment?: any): string {
+    return (
+      user?.profilePicture?.downloadURL ||
+      (user as any)?.profilePicPath ||
+      comment?.authorAvatar ||
+      ''
+    );
   }
 
   getCommentAuthorRoute(user?: User | null): string[] | null {
@@ -177,9 +219,18 @@ export class SolutionPreviewComponent implements OnInit {
   }
 
   loadSolutionData(solutionId: string): void {
-    this.solution
+    this.isLoadingSolution = true;
+    this.solutionAccessError = '';
+    this.solutionSub = this.solution
       .getSolutionForNonAuthenticatedUser(solutionId)
-      .subscribe((data: any) => {
+      .subscribe({
+        next: (data: any) => {
+        if (!data?.[0]) {
+          this.isLoadingSolution = false;
+          this.solutionAccessError =
+            'This solution is unavailable or you no longer have access.';
+          return;
+        }
         this.currentSolution = data[0];
         if (this.currentSolution.authorEmail === this.auth.currentUser.email) {
           this.iscreatorOfThisSolution = true;
@@ -187,9 +238,13 @@ export class SolutionPreviewComponent implements OnInit {
         if (this.currentSolution.edited === 'true') {
           this.edited = ' (Edited)';
         }
-        this.timeElapsed = this.time.timeAgo(
-          this.currentSolution.submissionDate!
-        );
+        const activityDate =
+          this.currentSolution.submissionDate ||
+          this.currentSolution.creationDate ||
+          '';
+        this.timeElapsed = activityDate
+          ? this.time.timeAgo(activityDate)
+          : 'Recently active';
         this.evaluationSummary = this.data.mapEvaluationToNumeric(
           this.currentSolution.evaluationSummary!
         );
@@ -201,27 +256,28 @@ export class SolutionPreviewComponent implements OnInit {
           this.evaluators.push(ev);
           console.log('evaluators', this.evaluators);
         });
-        this.etAl =
-          Object.keys(this.currentSolution.participants!).length > 1
-            ? 'Et al'
-            : '';
-        this.comments = this.currentSolution.comments;
+        this.etAl = this.solutionMemberEmails().length > 1 ? 'Et al' : '';
+        this.comments = Array.isArray(this.currentSolution.comments)
+          ? [...this.currentSolution.comments]
+          : [];
         this.getMembers();
-        this.solution
-          .getAllSolutionsOfThisUser(this.currentSolution!.authorAccountId!)
-          .subscribe((data: any) => {
-            this.otherSolutions = data;
-          });
-        this.initializeComments();
-      });
+        this.watchCommunityComments();
+        void this.initializeComments();
+        this.isLoadingSolution = false;
+      },
+      error: (error) => {
+        console.error('Unable to open solution', error);
+        this.isLoadingSolution = false;
+        this.solutionAccessError =
+          'This solution is private, unavailable, or you no longer have access.';
+      },
+    });
   }
 
   getMembers() {
     this.teamMembers = [];
-    for (const key in this.currentSolution.participants) {
-      let participant = this.currentSolution.participants[key];
-      let email = Object.values(participant)[0];
-      if (email === this.auth.currentUser.email) {
+    for (const email of this.solutionMemberEmails()) {
+      if (email === String(this.auth.currentUser?.email || '').toLowerCase()) {
         this.isContributorOfThisSolution = true;
       }
 
@@ -236,7 +292,101 @@ export class SolutionPreviewComponent implements OnInit {
         }
       });
     }
-    console.log('list all the team members', this.teamMembers);
+  }
+
+  goBackToCommunity(): void {
+    void this.router.navigateByUrl(this.returnTo || '/home');
+  }
+
+  get isInDevelopment(): boolean {
+    return this.currentSolution.finished !== 'true';
+  }
+
+  get hasCompiledContent(): boolean {
+    return Boolean(
+      String(this.currentSolution.content || '').replace(/<[^>]*>/g, '').trim()
+    );
+  }
+
+  developmentAnswers(): Array<{ label: string; content: string }> {
+    return Object.entries(this.currentSolution.status || {})
+      .filter(([, value]) => String(value || '').trim())
+      .map(([key, value], index) => ({
+        label: this.humanizeAnswerKey(key, index),
+        content: String(value),
+      }));
+  }
+
+  private watchCommunityComments(): void {
+    this.communityCommentsSub?.unsubscribe();
+    this.communityCommentsSub = this.solution
+      .watchCommunityComments(this.solutionId)
+      .subscribe({
+        next: (communityComments) => {
+          const legacy = Array.isArray(this.currentSolution.comments)
+            ? this.currentSolution.comments
+            : [];
+          this.comments = Array.from(
+            new Map(
+              [...legacy, ...communityComments].map((item: any, index) => [
+                item.messageId ||
+                  `${item.authorId || 'legacy'}_${item.date || index}_${index}`,
+                item,
+              ])
+            ).values()
+          );
+          void this.initializeComments().then(() => this.scrollToLinkedComment());
+        },
+        error: (error) =>
+          console.error('Unable to load community comments', error),
+      });
+  }
+
+  private solutionMemberEmails(): string[] {
+    if (Array.isArray(this.currentSolution.teamMemberEmails)) {
+      return this.currentSolution.teamMemberEmails;
+    }
+    const values: any = this.currentSolution.participants;
+    const entries = Array.isArray(values)
+      ? values
+      : values && typeof values === 'object'
+      ? Object.values(values)
+      : [];
+    return entries
+      .map((entry: any) =>
+        String(
+          typeof entry === 'string'
+            ? entry
+            : entry?.name ||
+                entry?.email ||
+                Object.values(entry || {})[0] ||
+                ''
+        )
+          .trim()
+          .toLowerCase()
+      )
+      .filter(Boolean);
+  }
+
+  private humanizeAnswerKey(key: string, index: number): string {
+    const clean = String(key || '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .trim();
+    return clean
+      ? clean.replace(/\b\w/g, (letter) => letter.toUpperCase())
+      : `Development note ${index + 1}`;
+  }
+
+  private scrollToLinkedComment(): void {
+    const messageId =
+      this.activatedRoute.snapshot.queryParamMap.get('messageId');
+    if (!messageId) return;
+    setTimeout(() => {
+      document
+        .getElementById(`comment-${messageId}`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
   }
   onHoverImageTeam(index: number) {
     this.showPopUpTeam[index] = true;
@@ -387,54 +537,28 @@ export class SolutionPreviewComponent implements OnInit {
     });
   }
 
-  addComment() {
+  async addComment() {
     if (!this.auth.currentUser) {
       this.displayAddCommentPermission = true;
       return;
     }
-    if (this.comments) {
-      this.comments.push({
-        authorId: this.auth.currentUser.uid,
-        date: this.time.todaysDate(),
-        content: this.comment,
-        likes: '0',
-        dislikes: '0',
-      });
-    } else {
-      this.comments = [
-        {
-          authorId: this.auth.currentUser.uid,
-          date: this.time.todaysDate(),
-          content: this.comment,
-          likes: '0',
-          dislikes: '0',
-        },
-      ];
-    }
-    // Update time elapsed for the new comment directly
-    let newCommentDate = this.time.todaysDate(); // Ensure this is compatible with your timeAgo method
-    // Calculate time elapsed for the new comment
-    let timeElapsedForNewComment = this.time.timeAgo(newCommentDate);
-    this.commentTimeElapsed.push(timeElapsedForNewComment);
-    // Keep author metadata in sync so the new comment is named and clickable
-    this.commentAuthors.push(this.auth.currentUser);
-    this.commentUserNames.push(
-      this.getCommentAuthorName(this.auth.currentUser)
-    );
-    this.commentUserProfilePicturePath.push(
-      this.getUserAvatarUrl(this.auth.currentUser)
-    );
+    const content = String(this.comment || '').trim();
+    if (!content || this.commentSaving) return;
+
+    this.commentSaving = true;
+    this.commentError = '';
+    this.commentSuccess = '';
     try {
-      this.solution.addCommentToSolution(this.currentSolution, this.comments);
-      // .then(() => {
-      //   this.initializeComments();
-      // });
+      await this.solution.addCommunityComment(this.solutionId, content);
       this.comment = '';
-      this.sendEmailForCommentNotification();
-    } catch (error) {
-      alert('An error occured while submitting the comment. Try Again.');
-      console.log(error);
-      console.log('an error ocurred. try again.');
+      this.commentSuccess = 'Your comment was shared with the solution team.';
+      setTimeout(() => (this.commentSuccess = ''), 3500);
+    } catch (error: any) {
+      console.error('Unable to add community comment', error);
+      this.commentError =
+        error?.message || 'Your comment could not be shared. Please try again.';
+    } finally {
+      this.commentSaving = false;
     }
   }
   sendEmailForCommentNotification() {

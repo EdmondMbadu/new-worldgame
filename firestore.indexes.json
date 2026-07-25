@@ -61,6 +61,25 @@
         { "fieldPath": "unread", "order": "ASCENDING" },
         { "fieldPath": "sourceDocPath", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "solutions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "feedEligible", "order": "ASCENDING" },
+        { "fieldPath": "isPrivate", "order": "ASCENDING" },
+        { "fieldPath": "feedUpdatedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "solutions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "feedEligible", "order": "ASCENDING" },
+        { "fieldPath": "isPrivate", "order": "ASCENDING" },
+        { "fieldPath": "feedStatus", "order": "ASCENDING" },
+        { "fieldPath": "feedUpdatedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

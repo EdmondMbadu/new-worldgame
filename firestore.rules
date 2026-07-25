@@ -37,11 +37,69 @@ service cloud.firestore {
         && request.resource.data.subscribedAt == request.time;
     }
 
-    // Discover intentionally searches every collection named `solutions`.
-    // Collection-group queries need an explicit recursive match; otherwise
-    // the protected workshop-signup branch makes the whole query ambiguous.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function authEmail() {
+      return isSignedIn() && request.auth.token.email is string
+        ? request.auth.token.email
+        : '';
+    }
+
+    function canReadSolution(solution) {
+      return solution.get('statusForPublication', '') == 'approved'
+        || (
+          isSignedIn()
+          && (
+            solution.get('isPrivate', false) != true
+            || solution.get('teamMemberEmails', []).hasAny([authEmail()])
+            || isPlatformAdmin()
+          )
+        );
+    }
+
+    function changesProtectedVisibilityFields() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'isPrivate',
+        'communityVisibility',
+        'feedEligible',
+        'feedStatus',
+        'teamMemberEmails',
+        'solutionAdminEmails',
+        'visibilityUpdatedAt',
+        'visibilityUpdatedBy'
+      ]);
+    }
+
+    // Solution documents are community-readable only for authenticated
+    // members. Approved publication remains the separate, public pathway.
     match /{path=**}/solutions/{solutionId} {
-      allow read: if request.time < timestamp.date(2028, 11, 3);
+      allow read: if canReadSolution(resource.data);
+      allow create: if isSignedIn();
+      allow update: if isSignedIn()
+        && (
+          !changesProtectedVisibilityFields()
+          || isPlatformAdmin()
+          || resource.data.get('solutionAdminEmails', []).hasAny([authEmail()])
+        );
+      allow delete: if isPlatformAdmin()
+        || (
+          isSignedIn()
+          && (
+            resource.data.authorAccountId == request.auth.uid
+            || resource.data.get('solutionAdminEmails', []).hasAny([authEmail()])
+          )
+        );
+    }
+
+    match /solutions/{solutionId}/communityComments/{commentId} {
+      allow read: if canReadSolution(
+        get(/databases/$(database)/documents/solutions/$(solutionId)).data
+      );
+      // Comments are created by the authenticated callable function so the
+      // server can enforce privacy, count atomically, and notify the team.
+      allow create, update, delete: if false;
     }
 
     // School invitation lookup uses a collection-group query. Firestore
@@ -65,11 +123,13 @@ service cloud.firestore {
       // else all client requests to your database will be denied until you
       // update your rules.
       allow read: if request.time < timestamp.date(2028, 11, 3)
-        && topLevelCollection != 'gsl-workshop-announcement-signups';
+        && topLevelCollection != 'gsl-workshop-announcement-signups'
+        && topLevelCollection != 'solutions';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
-        && topLevelCollection != 'gsl-workshop-announcement-signups';
+        && topLevelCollection != 'gsl-workshop-announcement-signups'
+        && topLevelCollection != 'solutions';
     }
   }
 }

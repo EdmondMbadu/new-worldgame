@@ -1,6 +1,6 @@
 
 <!-- src/app/solutions/solutions.component.html -->
-<div class="min-h-screen px-3 pb-16 dark:bg-slate-900 sm:px-4" [attr.aria-busy]="isInitialLoad || isLoadingChallenges">
+<div class="min-h-screen px-3 pb-16 dark:bg-slate-900 sm:px-4" [attr.aria-busy]="isInitialLoad || isLoadingCommunitySolutions || (homeView === 'challenges' && isLoadingChallenges)">
   <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
     <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'"
                 [sideBarBig]="isSidebarOpen"
@@ -32,9 +32,188 @@
     </div>
     <!-- ───────────────────────────────────────────────────────────────────── -->
 
+    <main class="mx-auto max-w-7xl px-1 pb-4 pt-24 sm:px-3 sm:pt-28">
+      <header class="community-home-header">
+        <div class="community-home-header__copy">
+          <p class="community-eyebrow">Global Solutions Lab community</p>
+          <h1>Solutions worth building together</h1>
+          <p>
+            See what teams are developing, understand their thinking, and add
+            a useful comment that helps the work move forward.
+          </p>
+        </div>
+        <button type="button" class="community-start-button" (click)="startSolution()">
+          <span class="material-symbols-outlined" aria-hidden="true">add</span>
+          Start a solution
+        </button>
+      </header>
+
+      <nav class="community-view-switcher" aria-label="Home content">
+        <button
+          type="button"
+          (click)="selectHomeView('solutions')"
+          [class.community-view-switcher__active]="homeView === 'solutions'"
+          [attr.aria-current]="homeView === 'solutions' ? 'page' : null"
+        >
+          Community solutions
+        </button>
+        <button
+          type="button"
+          (click)="selectHomeView('challenges')"
+          [class.community-view-switcher__active]="homeView === 'challenges'"
+          [attr.aria-current]="homeView === 'challenges' ? 'page' : null"
+        >
+          Explore challenges
+        </button>
+      </nav>
+
+      <section *ngIf="homeView === 'solutions'" id="solutions" class="community-solutions-section">
+        <div class="community-feed-toolbar">
+          <div>
+            <h2>Community solutions</h2>
+            <p>Community-visible work from across the Lab.</p>
+          </div>
+          <div class="community-filter-group" aria-label="Filter solutions by status">
+            <button
+              type="button"
+              *ngFor="let filter of ['all', 'in-development', 'submitted']"
+              (click)="setCommunityFilter($any(filter))"
+              [class.community-filter-active]="communityFilter === filter"
+            >
+              {{
+                filter === 'all'
+                  ? 'All'
+                  : filter === 'in-development'
+                  ? 'In development'
+                  : 'Submitted'
+              }}
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="isLoadingCommunitySolutions" class="community-card-grid" aria-label="Loading solutions">
+          <div *ngFor="let _ of [0,1,2,3,4,5]" class="community-card community-card--skeleton">
+            <div class="skeleton-line skeleton-line--short"></div>
+            <div class="skeleton-line skeleton-line--title"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line skeleton-line--medium"></div>
+          </div>
+        </div>
+
+        <div *ngIf="communitySolutionsError && !isLoadingCommunitySolutions" class="community-state community-state--error">
+          <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
+          <div>
+            <h3>Solutions are taking longer than expected</h3>
+            <p>{{ communitySolutionsError }}</p>
+          </div>
+          <button type="button" (click)="loadCommunitySolutions(true)">Try again</button>
+        </div>
+
+        <div
+          *ngIf="!isLoadingCommunitySolutions && !communitySolutionsError && communitySolutions.length === 0"
+          class="community-state"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">forum</span>
+          <div>
+            <h3>No solutions in this view yet</h3>
+            <p>Try another status, or start a solution and invite the community into the work.</p>
+          </div>
+          <button type="button" (click)="setCommunityFilter('all')">Show all solutions</button>
+        </div>
+
+        <div
+          *ngIf="!isLoadingCommunitySolutions && communitySolutions.length"
+          class="community-card-grid"
+        >
+          <article
+            *ngFor="let item of communitySolutions; trackBy: trackCommunitySolution"
+            class="community-card"
+            (click)="openCommunitySolution(item)"
+            (keydown.enter)="openCommunitySolution(item)"
+            tabindex="0"
+          >
+            <div class="community-card__topline">
+              <span
+                class="community-status"
+                [class.community-status--submitted]="item.finished === 'true'"
+              >
+                <span class="community-status__dot"></span>
+                {{ item.finished === 'true' ? 'Submitted' : 'In development' }}
+              </span>
+              <span class="community-activity">{{ communityActivityLabel(item) }}</span>
+            </div>
+
+            <figure class="community-card__media">
+              <img
+                *ngIf="item.image; else communityImageFallback"
+                [src]="item.image"
+                [alt]="(item.title || 'Solution') + ' preview image'"
+                loading="lazy"
+                decoding="async"
+                (error)="handleCommunityImageError($event)"
+              />
+              <div *ngIf="item.image" class="community-card__media-fallback hidden" aria-hidden="true">
+                <span class="material-symbols-outlined">lightbulb</span>
+                <strong>{{ communityInitials(item) }}</strong>
+              </div>
+              <ng-template #communityImageFallback>
+                <div class="community-card__media-fallback" aria-hidden="true">
+                  <span class="material-symbols-outlined">lightbulb</span>
+                  <strong>{{ communityInitials(item) }}</strong>
+                </div>
+              </ng-template>
+            </figure>
+
+            <div class="community-card__identity">
+              <span class="community-avatar">{{ communityInitials(item) }}</span>
+              <span>
+                <strong>{{ item.authorName || 'Global Solutions Lab team' }}</strong>
+                <small>
+                  {{ communityMemberCount(item) }}
+                  {{ communityMemberCount(item) === 1 ? 'member' : 'members' }}
+                </small>
+              </span>
+            </div>
+
+            <h3>{{ item.title }}</h3>
+            <p class="community-card__excerpt">{{ communityExcerpt(item) }}</p>
+
+            <div class="community-progress" aria-label="Solution progress">
+              <span><i [style.width.%]="communityProgress(item)"></i></span>
+              <small>{{ communityProgress(item) }}% developed</small>
+            </div>
+
+            <footer>
+              <span class="community-comment-count">
+                <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
+                {{ item.commentCount || item.comments?.length || 0 }}
+                {{ (item.commentCount || item.comments?.length || 0) === 1 ? 'comment' : 'comments' }}
+              </span>
+              <button type="button" (click)="$event.stopPropagation(); openCommunitySolution(item)">
+                Read &amp; comment
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              </button>
+            </footer>
+          </article>
+        </div>
+
+        <div *ngIf="hasMoreCommunitySolutions && communitySolutions.length" class="community-load-more">
+          <button
+            type="button"
+            (click)="loadCommunitySolutions(false)"
+            [disabled]="isLoadingMoreCommunitySolutions"
+          >
+            <span *ngIf="isLoadingMoreCommunitySolutions" class="community-button-spinner"></span>
+            {{ isLoadingMoreCommunitySolutions ? 'Loading solutions…' : 'Show more solutions' }}
+          </button>
+        </div>
+      </section>
+    </main>
+
     <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="px-1 pt-24 pb-8 text-center sm:mt-10 sm:py-10">
+    <section *ngIf="homeView === 'challenges'" class="hero-section">
+      <div class="px-1 pb-6 pt-5 text-center sm:mt-0 sm:pb-8 sm:pt-6">
         <h1 class="text-3xl font-bold leading-tight text-gray-800 dark:text-white sm:text-4xl">
           {{ 'home.hero.title' | translate }}
         </h1>
@@ -47,7 +226,7 @@
       </div>
     </section>
 
-    <div class="mx-auto max-w-7xl">
+    <div *ngIf="homeView === 'challenges'" class="mx-auto max-w-7xl">
 
       <!-- Solutions Section -->
       <section id="solutions" class="scroll-mt-16 mt-4">

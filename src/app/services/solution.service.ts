@@ -5,6 +5,7 @@ import {
 } from '@angular/fire/compat/firestore';
 import {
   Broadcast,
+  Comment,
   Evaluation,
   EvaluationHistoryEntry,
   JoinRequest,
@@ -35,6 +36,20 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 type BroadcastStatus = 'active' | 'paused' | 'pending' | 'stopped';
+
+export type CommunitySolutionFilter =
+  | 'all'
+  | 'in-development'
+  | 'submitted';
+
+export interface CommunitySolutionPage {
+  solutions: Solution[];
+  cursor:
+    | firebase.firestore.QueryDocumentSnapshot
+    | { fallbackOffset: number }
+    | null;
+  hasMore: boolean;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -99,6 +114,7 @@ export class SolutionService {
       ...data,
       updatedAt: now,
       lastSubstantiveEditAt: now,
+      feedUpdatedAt: now,
     };
   }
 
@@ -178,6 +194,9 @@ export class SolutionService {
       image?: string; // Optional image field
       createdAt?: firebase.firestore.FieldValue;
       updatedAt?: firebase.firestore.FieldValue;
+      isPrivate?: boolean;
+      communityVisibility?: 'community';
+      feedUpdatedAt?: firebase.firestore.FieldValue;
     } = {
       solutionId: this.solutionId,
       title: title,
@@ -194,6 +213,9 @@ export class SolutionService {
       sdgs: sdgs,
       likes: [],
       numLike: '0',
+      isPrivate: false,
+      communityVisibility: 'community' as const,
+      feedUpdatedAt: this.serverTimestamp(),
     };
 
     // Only add the image property if it is defined and not empty
@@ -273,6 +295,9 @@ export class SolutionService {
       numLike: '0',
       numShare: '0',
       likes: [],
+      isPrivate: false,
+      communityVisibility: 'community' as const,
+      feedUpdatedAt: this.serverTimestamp(),
     });
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
@@ -304,10 +329,9 @@ export class SolutionService {
 
   getSolutionForNonAuthenticatedUser(solutionId: string) {
     return this.afs
-      .collectionGroup(`solutions`, (ref) =>
-        ref.where('solutionId', '==', solutionId)
-      )
-      .valueChanges();
+      .doc<Solution>(`solutions/${solutionId}`)
+      .valueChanges()
+      .pipe(map((solution) => (solution ? [solution] : [])));
   }
 
   addCommentToSolution(solution: Solution, comments: any) {
@@ -485,6 +509,148 @@ export class SolutionService {
 
   getAllSolutionsFromAllAccounts() {
     return this.afs.collection<Solution>(`solutions`).valueChanges();
+  }
+
+  async getCommunitySolutionsPage(
+    filter: CommunitySolutionFilter = 'all',
+    pageSize = 20,
+    cursor:
+      | firebase.firestore.QueryDocumentSnapshot
+      | { fallbackOffset: number }
+      | null = null
+  ): Promise<CommunitySolutionPage> {
+    if (cursor && 'fallbackOffset' in cursor) {
+      return this.getCommunitySolutionsFallback(
+        filter,
+        pageSize,
+        cursor.fallbackOffset
+      );
+    }
+
+    let query: firebase.firestore.Query<Solution> = this.afs
+      .collection<Solution>('solutions').ref
+      .where('feedEligible', '==', true)
+      .where('isPrivate', '==', false);
+
+    if (filter !== 'all') {
+      query = query.where('feedStatus', '==', filter);
+    }
+
+    query = query.orderBy('feedUpdatedAt', 'desc');
+    if (cursor) query = query.startAfter(cursor);
+
+    let snapshot: firebase.firestore.QuerySnapshot<Solution>;
+    try {
+      snapshot = await query.limit(pageSize + 1).get();
+    } catch (error: any) {
+      if (error?.code === 'failed-precondition' || error?.code === 9) {
+        console.info(
+          'Community feed index is still preparing; using the bounded compatibility query.'
+        );
+        return this.getCommunitySolutionsFallback(filter, pageSize, 0);
+      }
+      throw error;
+    }
+    const visibleDocs = snapshot.docs.slice(0, pageSize);
+
+    return {
+      solutions: visibleDocs.map((document) => {
+        const data = document.data() as Solution;
+        return {
+          ...data,
+          solutionId: data.solutionId || document.id,
+        };
+      }),
+      cursor: visibleDocs.length
+        ? (visibleDocs[
+            visibleDocs.length - 1
+          ] as firebase.firestore.QueryDocumentSnapshot)
+        : cursor,
+      hasMore: snapshot.docs.length > pageSize,
+    };
+  }
+
+  private async getCommunitySolutionsFallback(
+    filter: CommunitySolutionFilter,
+    pageSize: number,
+    offset: number
+  ): Promise<CommunitySolutionPage> {
+    const snapshot = await this.afs
+      .collection<Solution>('solutions').ref.where('isPrivate', '==', false)
+      .get();
+    const eligible = snapshot.docs
+      .map((document) => {
+        const data = document.data();
+        return {
+          ...data,
+          solutionId: data.solutionId || document.id,
+        };
+      })
+      .filter(
+        (solution) =>
+          solution.feedEligible === true &&
+          (filter === 'all' || solution.feedStatus === filter)
+      )
+      .sort(
+        (a, b) =>
+          this.solutionFeedMilliseconds(b) -
+          this.solutionFeedMilliseconds(a)
+      );
+    const solutions = eligible.slice(offset, offset + pageSize);
+    const nextOffset = offset + solutions.length;
+
+    return {
+      solutions,
+      cursor:
+        nextOffset < eligible.length ? { fallbackOffset: nextOffset } : null,
+      hasMore: nextOffset < eligible.length,
+    };
+  }
+
+  private solutionFeedMilliseconds(solution: Solution): number {
+    const value =
+      solution.feedUpdatedAt ||
+      solution.lastSubstantiveEditAt ||
+      solution.updatedAt ||
+      solution.submissionDate ||
+      solution.creationDate;
+    if (typeof value?.toMillis === 'function') return value.toMillis();
+    if (typeof value?.toDate === 'function') return value.toDate().getTime();
+    const parsed = value ? Date.parse(String(value)) : 0;
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+
+  watchCommunityComments(solutionId: string): Observable<Comment[]> {
+    if (!solutionId) return of([]);
+
+    return this.afs
+      .collection<Comment>(`solutions/${solutionId}/communityComments`, (ref) =>
+        ref.orderBy('createdAtMs', 'asc').limit(500)
+      )
+      .valueChanges({ idField: 'messageId' });
+  }
+
+  async addCommunityComment(
+    solutionId: string,
+    content: string
+  ): Promise<{ messageId: string }> {
+    const callable = this.fns.httpsCallable('addCommunitySolutionComment');
+    return firstValueFrom(
+      callable({
+        solutionId,
+        content: String(content || '').trim(),
+      })
+    );
+  }
+
+  async setCommunityVisibility(
+    solutionId: string,
+    visibility: 'community' | 'private'
+  ): Promise<{ visibility: 'community' | 'private'; feedEligible: boolean }> {
+    const callable = this.fns.httpsCallable(
+      'setSolutionCommunityVisibility'
+    );
+    return firstValueFrom(callable({ solutionId, visibility }));
   }
 
   /**

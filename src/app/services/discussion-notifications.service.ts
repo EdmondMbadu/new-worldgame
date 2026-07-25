@@ -25,6 +25,7 @@ export interface DiscussionMessageNotification {
   contextId: string;
   contextTitle: string;
   contextType: 'solution' | 'challenge';
+  notificationKind?: 'discussion-message' | 'community-comment';
   sourceDocPath: string;
   discussionPath: string;
   createdAt?: any;
@@ -137,6 +138,7 @@ export class DiscussionNotificationsService {
               contextId: params.contextId,
               contextTitle: params.contextTitle || 'Team discussion',
               contextType: params.contextType,
+              notificationKind: 'discussion-message',
               sourceDocPath: params.sourceDocPath,
               discussionPath: params.discussionPath,
               createdAt: now,

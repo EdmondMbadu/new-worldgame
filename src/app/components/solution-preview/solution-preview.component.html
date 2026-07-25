@@ -3,7 +3,20 @@
 
 
 
-<main class="nwg-shell mt-20 pb-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased ">
+<div *ngIf="isLoadingSolution" class="community-solution-state">
+    <span class="community-solution-loader"></span>
+    <h1>Opening the solution…</h1>
+    <p>Loading the latest work and discussion.</p>
+</div>
+
+<div *ngIf="!isLoadingSolution && solutionAccessError" class="community-solution-state community-solution-state--error">
+    <span class="material-symbols-outlined">lock</span>
+    <h1>This solution is not available</h1>
+    <p>{{ solutionAccessError }}</p>
+    <button type="button" (click)="goBackToCommunity()">Back to community solutions</button>
+</div>
+
+<main *ngIf="!isLoadingSolution && !solutionAccessError" class="nwg-shell mt-20 pb-16 lg:pb-24 bg-white dark:bg-gray-900 antialiased ">
     <div
 
     class="relative h-[260px] md:h-[440px] lg:h-[520px] bg-cover bg-center"
@@ -23,6 +36,10 @@
   </div>
     <div class="flex justify-between px-6 mx-auto max-w-screen-xl ">
         <article class="mx-auto w-full max-w-3xl pt-10 lg:pt-14">
+            <button type="button" class="community-return-link" (click)="goBackToCommunity()">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Back to community solutions
+            </button>
             <header class="mb-8 lg:mb-10 not-format">
            
                 <!-- <div class="flex flex-row mx-auto mb-4">
@@ -250,7 +267,33 @@
             <!-- <figure><img *ngIf="currentSolution.image" [src]="currentSolution.image" class="my-3" alt=""></figure> -->
            
 
-            <div class="nwg-article" [innerHTML]="currentSolution.content"></div>
+            <div *ngIf="hasCompiledContent" class="nwg-article" [innerHTML]="currentSolution.content"></div>
+
+            <section *ngIf="isInDevelopment && !hasCompiledContent" class="development-preview">
+                <div class="development-preview__heading">
+                    <span class="development-preview__badge">In development</span>
+                    <h2>A working solution, open to thoughtful input</h2>
+                    <p>
+                        This team is still developing the solution. The material below
+                        reflects its current direction and completed work.
+                    </p>
+                </div>
+
+                <article *ngIf="currentSolution.description">
+                    <p class="development-preview__label">Solution overview</p>
+                    <div class="nwg-article" [innerHTML]="currentSolution.description"></div>
+                </article>
+
+                <article *ngIf="currentSolution.strategyReview">
+                    <p class="development-preview__label">Strategy review</p>
+                    <div class="nwg-article" [innerHTML]="currentSolution.strategyReview"></div>
+                </article>
+
+                <article *ngFor="let answer of developmentAnswers()">
+                    <p class="development-preview__label">{{ answer.label }}</p>
+                    <div class="nwg-article" [innerHTML]="answer.content"></div>
+                </article>
+            </section>
 
             <div class="nwg-divider mt-10 mb-6"></div>
 
@@ -388,16 +431,25 @@
                         <label for="comment" class="sr-only">Your comment</label>
                         <textarea id="comment" rows="5"
                         [(ngModel)]="comment"
+                            [disabled]="commentSaving"
+                            maxlength="3000"
                             class="px-0 w-full text-base text-gray-900 border-0 focus:ring-0 dark:text-white dark:placeholder-gray-400 dark:bg-gray-800 resize-none"
-                            placeholder="Share your thoughts..." required></textarea>
+                            placeholder="What is useful, unclear, or worth exploring next?" required></textarea>
                     </div>
+                    <div class="community-comment-actions">
                     <button (click)="addComment()" type="submit"
+                        [disabled]="commentSaving || !comment.trim()"
                         class="inline-flex items-center py-2.5 px-5 text-sm font-semibold text-center text-white bg-teal-700 rounded-full focus:ring-4 focus:ring-teal-200 dark:focus:ring-teal-900 hover:bg-teal-800 transition-colors">
-                        Post comment
+                        <span *ngIf="commentSaving" class="community-solution-loader community-solution-loader--small"></span>
+                        {{ commentSaving ? 'Sharing…' : 'Post comment' }}
                     </button>
+                    <span>{{ comment.length }}/3000</span>
+                    </div>
+                    <p *ngIf="commentSuccess" class="community-comment-feedback community-comment-feedback--success">{{ commentSuccess }}</p>
+                    <p *ngIf="commentError" class="community-comment-feedback community-comment-feedback--error">{{ commentError }}</p>
                 </div>
             </section>
-            <article *ngFor="let comment of comments ; let i =index" class="nwg-comment p-5 mb-4 text-base bg-white dark:bg-gray-900">
+            <article *ngFor="let comment of comments ; let i =index" [id]="'comment-' + (comment.messageId || i)" class="nwg-comment p-5 mb-4 text-base bg-white dark:bg-gray-900">
                 <footer class="flex justify-between items-center mb-2">
                     <div class="flex items-center">
                         <div class="relative mr-3">

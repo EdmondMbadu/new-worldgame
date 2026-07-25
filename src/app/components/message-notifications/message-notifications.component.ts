@@ -199,7 +199,9 @@ export class MessageNotificationsComponent implements OnInit, OnDestroy {
       messageText: notification.messageText,
       contextTitle: notification.contextTitle,
       contextLabel:
-        notification.contextType === 'challenge'
+        notification.notificationKind === 'community-comment'
+          ? 'Solution comment'
+          : notification.contextType === 'challenge'
           ? 'Challenge discussion'
           : 'Solution discussion',
       createdAt: notification.createdAt,

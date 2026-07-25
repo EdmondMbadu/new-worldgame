@@ -63,6 +63,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isLeavingSolution = false;
   workspaceAccessMessage = '';
   workspaceAccessError = '';
+  showVisibilityConfirm = false;
+  pendingVisibility: 'community' | 'private' | null = null;
+  isSavingVisibility = false;
+  visibilityMessage = '';
+  visibilityError = '';
 
   // Invite team member modal (hybrid: client-side + server fallback)
   showInviteTeamMemberModal = false;
@@ -383,6 +388,65 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get canLeaveSolution(): boolean {
     return !this.isAdminOfSolution && this.isCurrentUserParticipant();
+  }
+
+  get isCommunityVisible(): boolean {
+    return this.currentSolution?.isPrivate !== true;
+  }
+
+  get canRestoreCommunityVisibility(): boolean {
+    return (
+      this.isAdminOfSolution ||
+      this.auth.currentUser?.admin === 'true' ||
+      this.auth.currentUser?.role === 'admin'
+    );
+  }
+
+  requestVisibilityChange(visibility: 'community' | 'private'): void {
+    if (
+      this.isSavingVisibility ||
+      (visibility === 'community' && !this.canRestoreCommunityVisibility)
+    ) {
+      return;
+    }
+    this.visibilityMessage = '';
+    this.visibilityError = '';
+    this.pendingVisibility = visibility;
+    this.showVisibilityConfirm = true;
+  }
+
+  cancelVisibilityChange(): void {
+    if (this.isSavingVisibility) return;
+    this.showVisibilityConfirm = false;
+    this.pendingVisibility = null;
+  }
+
+  async confirmVisibilityChange(): Promise<void> {
+    const solutionId = this.currentSolution?.solutionId || this.id;
+    const visibility = this.pendingVisibility;
+    if (!solutionId || !visibility || this.isSavingVisibility) return;
+
+    this.isSavingVisibility = true;
+    this.visibilityError = '';
+    this.visibilityMessage = '';
+    try {
+      await this.solution.setCommunityVisibility(solutionId, visibility);
+      this.currentSolution.isPrivate = visibility === 'private';
+      this.currentSolution.communityVisibility = visibility;
+      this.visibilityMessage =
+        visibility === 'private'
+          ? 'This solution is now private to the team.'
+          : 'This solution is now visible to the signed-in community.';
+      this.showVisibilityConfirm = false;
+      this.pendingVisibility = null;
+    } catch (error: any) {
+      console.error('Unable to update solution visibility', error);
+      this.visibilityError =
+        error?.message ||
+        'Visibility could not be updated. Please try again.';
+    } finally {
+      this.isSavingVisibility = false;
+    }
   }
 
   get broadcastStatus(): 'active' | 'paused' | 'stopped' | 'pending' {

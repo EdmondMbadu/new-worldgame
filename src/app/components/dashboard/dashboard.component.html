@@ -290,6 +290,78 @@
       </div>
     </div>
 
+    <section class="community-visibility-card mt-6 w-full max-w-4xl">
+      <div class="community-visibility-card__icon" [class.community-visibility-card__icon--private]="!isCommunityVisible">
+        <span class="material-symbols-outlined">
+          {{ isCommunityVisible ? "forum" : "lock" }}
+        </span>
+      </div>
+
+      <div class="community-visibility-card__body">
+        <div class="community-visibility-card__heading">
+          <div>
+            <p>Community visibility</p>
+            <h3>
+              {{ isCommunityVisible ? "Open to the GSL community" : "Private to this solution team" }}
+            </h3>
+          </div>
+          <span
+            class="community-visibility-badge"
+            [class.community-visibility-badge--private]="!isCommunityVisible"
+          >
+            <i></i>
+            {{ isCommunityVisible ? "Community" : "Private" }}
+          </span>
+        </div>
+
+        <p class="community-visibility-card__description">
+          {{
+            isCommunityVisible
+              ? "Signed-in Global Solutions Lab members can discover this solution, read the work, and leave comments for the team. It is not published to the public internet."
+              : "Only this solution's team can open the workspace and its comments. It will not appear in the community solutions feed."
+          }}
+        </p>
+
+        <div class="community-visibility-card__actions">
+          <button
+            *ngIf="isCommunityVisible"
+            type="button"
+            (click)="requestVisibilityChange('private')"
+            [disabled]="isSavingVisibility"
+            class="community-visibility-secondary"
+          >
+            <span class="material-symbols-outlined">lock</span>
+            Make private
+          </button>
+
+          <button
+            *ngIf="!isCommunityVisible && canRestoreCommunityVisibility"
+            type="button"
+            (click)="requestVisibilityChange('community')"
+            [disabled]="isSavingVisibility"
+            class="community-visibility-primary"
+          >
+            <span class="material-symbols-outlined">public</span>
+            Make visible to community
+          </button>
+
+          <p *ngIf="!isCommunityVisible && !canRestoreCommunityVisibility" class="community-visibility-card__locked">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            The solution owner or an admin can make it community-visible again.
+          </p>
+        </div>
+
+        <p *ngIf="visibilityMessage" class="community-visibility-feedback community-visibility-feedback--success">
+          <span class="material-symbols-outlined">check_circle</span>
+          {{ visibilityMessage }}
+        </p>
+        <p *ngIf="visibilityError" class="community-visibility-feedback community-visibility-feedback--error">
+          <span class="material-symbols-outlined">error</span>
+          {{ visibilityError }}
+        </p>
+      </div>
+    </section>
+
     <section
       *ngIf="isAdminOfSolution || canLeaveSolution"
       class="mt-6 w-full max-w-4xl rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-800 dark:bg-slate-900/70"
@@ -345,6 +417,70 @@
         {{ workspaceAccessMessage }}
       </p>
     </section>
+  </div>
+</div>
+
+<div *ngIf="showVisibilityConfirm" class="fixed inset-0 z-[10000]">
+  <div
+    class="absolute inset-0 bg-black/55 backdrop-blur-sm"
+    (click)="cancelVisibilityChange()"
+  ></div>
+  <div class="community-visibility-modal">
+    <div class="community-visibility-modal__icon">
+      <span class="material-symbols-outlined">
+        {{ pendingVisibility === "private" ? "lock" : "public" }}
+      </span>
+    </div>
+    <div>
+      <p class="community-visibility-modal__eyebrow">Community visibility</p>
+      <h2>
+        {{
+          pendingVisibility === "private"
+            ? "Make this solution private?"
+            : "Share this solution with the community?"
+        }}
+      </h2>
+      <p>
+        {{
+          pendingVisibility === "private"
+            ? "It will immediately leave the community feed. Existing comments remain safely attached and become visible only to the team."
+            : "Signed-in GSL members will be able to discover, read, and comment on meaningful content in this solution."
+        }}
+      </p>
+    </div>
+
+    <p *ngIf="visibilityError" class="community-visibility-feedback community-visibility-feedback--error">
+      {{ visibilityError }}
+    </p>
+
+    <div class="community-visibility-modal__actions">
+      <button
+        type="button"
+        (click)="cancelVisibilityChange()"
+        [disabled]="isSavingVisibility"
+        class="community-visibility-modal__cancel"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="confirmVisibilityChange()"
+        [disabled]="isSavingVisibility"
+        class="community-visibility-primary"
+      >
+        <svg *ngIf="isSavingVisibility" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+          <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+        </svg>
+        {{
+          isSavingVisibility
+            ? "Saving…"
+            : pendingVisibility === "private"
+            ? "Make private"
+            : "Share with community"
+        }}
+      </button>
+    </div>
   </div>
 </div>
 

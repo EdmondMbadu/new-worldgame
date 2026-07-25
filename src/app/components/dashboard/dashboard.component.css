@@ -1,0 +1,286 @@
+.community-visibility-card {
+  display: flex;
+  gap: 1rem;
+  border: 1px solid #dbe4ea;
+  border-radius: 1.1rem;
+  background:
+    radial-gradient(circle at 100% 0, rgba(20, 184, 166, 0.08), transparent 34%),
+    #fff;
+  padding: 1.25rem;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.045);
+}
+
+.community-visibility-card__icon,
+.community-visibility-modal__icon {
+  display: grid;
+  width: 2.8rem;
+  height: 2.8rem;
+  flex: none;
+  place-items: center;
+  border-radius: 0.85rem;
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+.community-visibility-card__icon--private {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.community-visibility-card__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.community-visibility-card__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.community-visibility-card__heading p,
+.community-visibility-modal__eyebrow {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.community-visibility-card__heading h3 {
+  margin: 0.3rem 0 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.community-visibility-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  background: #f0fdfa;
+  padding: 0.35rem 0.6rem;
+  color: #0f766e;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.community-visibility-badge i {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #14b8a6;
+}
+
+.community-visibility-badge--private {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.community-visibility-badge--private i {
+  background: #64748b;
+}
+
+.community-visibility-card__description {
+  max-width: 43rem;
+  margin: 0.8rem 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.65;
+}
+
+.community-visibility-card__actions {
+  margin-top: 1rem;
+}
+
+.community-visibility-primary,
+.community-visibility-secondary,
+.community-visibility-modal__cancel {
+  display: inline-flex;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.42rem;
+  border-radius: 0.72rem;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 780;
+  transition: all 140ms ease;
+}
+
+.community-visibility-primary {
+  background: #0f766e;
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(15, 118, 110, 0.18);
+}
+
+.community-visibility-primary:hover {
+  background: #115e59;
+  transform: translateY(-1px);
+}
+
+.community-visibility-secondary,
+.community-visibility-modal__cancel {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #475569;
+}
+
+.community-visibility-secondary:hover,
+.community-visibility-modal__cancel:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.community-visibility-primary:disabled,
+.community-visibility-secondary:disabled,
+.community-visibility-modal__cancel:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.community-visibility-primary .material-symbols-outlined,
+.community-visibility-secondary .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+.community-visibility-card__locked {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  margin: 0;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 680;
+}
+
+.community-visibility-card__locked .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+.community-visibility-feedback {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.8rem 0 0;
+  border-radius: 0.7rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.community-visibility-feedback .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+.community-visibility-feedback--success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.community-visibility-feedback--error {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.community-visibility-modal {
+  position: relative;
+  width: calc(100% - 2rem);
+  max-width: 31rem;
+  margin: 7rem auto 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.1rem;
+  background: #fff;
+  padding: 1.4rem;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+}
+
+.community-visibility-modal {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+}
+
+.community-visibility-modal h2 {
+  margin: 0.3rem 0 0;
+  color: #0f172a;
+  font-size: 1.15rem;
+  font-weight: 820;
+}
+
+.community-visibility-modal > div:nth-child(2) > p:last-child {
+  margin: 0.65rem 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.community-visibility-modal .community-visibility-feedback,
+.community-visibility-modal__actions {
+  grid-column: 1 / -1;
+}
+
+.community-visibility-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+:host-context(.dark) .community-visibility-card {
+  border-color: #273449;
+  background:
+    radial-gradient(circle at 100% 0, rgba(20, 184, 166, 0.1), transparent 34%),
+    #111c2e;
+}
+
+:host-context(.dark) .community-visibility-card__heading h3,
+:host-context(.dark) .community-visibility-modal h2 {
+  color: #f8fafc;
+}
+
+:host-context(.dark) .community-visibility-card__description {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .community-visibility-badge {
+  border-color: rgba(45, 212, 191, 0.35);
+  background: rgba(15, 118, 110, 0.18);
+  color: #5eead4;
+}
+
+:host-context(.dark) .community-visibility-badge--private {
+  border-color: #475569;
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+:host-context(.dark) .community-visibility-secondary,
+:host-context(.dark) .community-visibility-modal__cancel {
+  border-color: #475569;
+  background: #0f172a;
+  color: #cbd5e1;
+}
+
+:host-context(.dark) .community-visibility-modal {
+  background: #111827;
+}
+
+@media (max-width: 640px) {
+  .community-visibility-card {
+    align-items: flex-start;
+  }
+  .community-visibility-card__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .community-visibility-modal {
+    margin-top: 4rem;
+  }
+}

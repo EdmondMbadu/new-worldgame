@@ -10748,6 +10748,397 @@ export const commentNotificationEmail = functions.https.onCall(
   }
 );
 
+const COMMUNITY_COMMENT_MAX_LENGTH = 3000;
+
+const normalizeCommunityEmail = (value: unknown): string =>
+  String(value || '').trim().toLowerCase();
+
+const communityText = (value: unknown): string =>
+  String(value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const hasMeaningfulCommunityContent = (solution: any): boolean => {
+  const title = communityText(solution?.title);
+  const bodyLength = [
+    solution?.description,
+    solution?.content,
+    solution?.strategyReview,
+    ...Object.values(solution?.status || {}),
+  ].reduce((total, value) => total + communityText(value).length, 0);
+
+  return title.length >= 3 && bodyLength >= 40;
+};
+
+const communitySolutionEmails = (solution: any): string[] => {
+  const emails = new Set<string>();
+  const add = (value: any) => {
+    const email = normalizeCommunityEmail(
+      typeof value === 'string'
+        ? value
+        : value?.email ||
+            value?.name ||
+            value?.authorEmail ||
+            value?.address
+    );
+    if (emailRegex.test(email)) emails.add(email);
+  };
+
+  add(solution?.authorEmail);
+  [solution?.participants, solution?.participantsHolder].forEach((value) => {
+    if (Array.isArray(value)) value.forEach(add);
+    else if (value && typeof value === 'object') Object.values(value).forEach(add);
+  });
+  if (Array.isArray(solution?.chosenAdmins)) {
+    solution.chosenAdmins.forEach(add);
+  }
+
+  return Array.from(emails);
+};
+
+const isCommunityPlatformAdmin = async (uid: string): Promise<boolean> => {
+  const user = await admin.firestore().doc(`users/${uid}`).get();
+  const data = user.data() || {};
+  return data['admin'] === 'true' || data['admin'] === true || data['role'] === 'admin';
+};
+
+const isCommunitySolutionOwnerOrAdmin = (
+  solution: any,
+  uid: string,
+  email: string
+): boolean => {
+  if (
+    solution?.authorAccountId === uid ||
+    normalizeCommunityEmail(solution?.authorEmail) === email
+  ) {
+    return true;
+  }
+
+  return Array.isArray(solution?.chosenAdmins)
+    ? solution.chosenAdmins.some(
+        (entry: any) =>
+          entry?.authorAccountId === uid ||
+          normalizeCommunityEmail(entry?.authorEmail) === email
+      )
+    : false;
+};
+
+const isCommunitySolutionMember = (
+  solution: any,
+  uid: string,
+  email: string
+): boolean =>
+  isCommunitySolutionOwnerOrAdmin(solution, uid, email) ||
+  communitySolutionEmails(solution).includes(email);
+
+export const setSolutionCommunityVisibility = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const uid = String(context.auth?.uid || '');
+    const email = normalizeCommunityEmail(context.auth?.token?.email);
+    if (!uid || !email) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Sign in to change solution visibility.'
+      );
+    }
+
+    const solutionId = String(data?.solutionId || '').trim();
+    const visibility = String(data?.visibility || '').trim();
+    if (!solutionId || !['community', 'private'].includes(visibility)) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        'A valid solution and visibility are required.'
+      );
+    }
+
+    const db = admin.firestore();
+    const solutionRef = db.doc(`solutions/${solutionId}`);
+    const platformAdmin = await isCommunityPlatformAdmin(uid);
+
+    let feedEligible = false;
+    await db.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(solutionRef);
+      if (!snapshot.exists) {
+        throw new functions.https.HttpsError(
+          'not-found',
+          'Solution not found.'
+        );
+      }
+
+      const solution = snapshot.data() || {};
+      const isMember = isCommunitySolutionMember(solution, uid, email);
+      const canPublish =
+        platformAdmin ||
+        isCommunitySolutionOwnerOrAdmin(solution, uid, email);
+
+      if (!isMember && !platformAdmin) {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'Only solution team members can change visibility.'
+        );
+      }
+      if (visibility === 'community' && !canPublish) {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'Only the solution owner or an admin can make it community-visible.'
+        );
+      }
+
+      feedEligible =
+        visibility === 'community' && hasMeaningfulCommunityContent(solution);
+      transaction.set(
+        solutionRef,
+        {
+          isPrivate: visibility === 'private',
+          communityVisibility: visibility,
+          feedEligible,
+          feedStatus:
+            solution['finished'] === 'true' ? 'submitted' : 'in-development',
+          visibilityUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          visibilityUpdatedBy: uid,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
+
+    return { visibility, feedEligible };
+  }
+);
+
+export const addCommunitySolutionComment = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const uid = String(context.auth?.uid || '');
+    const email = normalizeCommunityEmail(context.auth?.token?.email);
+    if (!uid || !email) {
+      throw new functions.https.HttpsError(
+        'unauthenticated',
+        'Sign in to comment.'
+      );
+    }
+
+    const solutionId = String(data?.solutionId || '').trim();
+    const content = String(data?.content || '').trim();
+    if (!solutionId || !content || content.length > COMMUNITY_COMMENT_MAX_LENGTH) {
+      throw new functions.https.HttpsError(
+        'invalid-argument',
+        `Comments must be between 1 and ${COMMUNITY_COMMENT_MAX_LENGTH} characters.`
+      );
+    }
+
+    const db = admin.firestore();
+    const solutionRef = db.doc(`solutions/${solutionId}`);
+    const commentRef = solutionRef.collection('communityComments').doc();
+    const actorSnap = await db.doc(`users/${uid}`).get();
+    const actor = actorSnap.data() || {};
+    const senderName =
+      `${String(actor['firstName'] || '').trim()} ${String(
+        actor['lastName'] || ''
+      ).trim()}`.trim() ||
+      email;
+    const senderAvatar = String(
+      actor['profilePicture']?.downloadURL || actor['profilePicPath'] || ''
+    );
+    const actorIsPlatformAdmin =
+      actor['admin'] === 'true' ||
+      actor['admin'] === true ||
+      actor['role'] === 'admin';
+    const createdAtMs = Date.now();
+    let solution: any = {};
+
+    await db.runTransaction(async (transaction) => {
+      const solutionSnap = await transaction.get(solutionRef);
+      if (!solutionSnap.exists) {
+        throw new functions.https.HttpsError(
+          'not-found',
+          'Solution not found.'
+        );
+      }
+      solution = solutionSnap.data() || {};
+      if (
+        solution['isPrivate'] === true &&
+        !actorIsPlatformAdmin &&
+        !isCommunitySolutionMember(solution, uid, email)
+      ) {
+        throw new functions.https.HttpsError(
+          'permission-denied',
+          'This solution is private.'
+        );
+      }
+
+      transaction.create(commentRef, {
+        messageId: commentRef.id,
+        authorId: uid,
+        authorEmail: email,
+        authorName: senderName,
+        authorAvatar: senderAvatar,
+        content,
+        date: new Date(createdAtMs).toISOString(),
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAtMs,
+        likes: '0',
+        dislikes: '0',
+      });
+      transaction.set(
+        solutionRef,
+        {
+          commentCount: admin.firestore.FieldValue.increment(1),
+          feedUpdatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
+
+    const recipientEmails = communitySolutionEmails(solution).filter(
+      (recipient) => recipient !== email
+    );
+    const recipientUsers = new Map<string, { uid: string; email: string }>();
+    for (let index = 0; index < recipientEmails.length; index += 10) {
+      const chunk = recipientEmails.slice(index, index + 10);
+      const users = await db.collection('users').where('email', 'in', chunk).get();
+      users.forEach((document) => {
+        const recipientEmail = normalizeCommunityEmail(document.data()['email']);
+        if (recipientEmail && document.id !== uid) {
+          recipientUsers.set(document.id, {
+            uid: document.id,
+            email: recipientEmail,
+          });
+        }
+      });
+    }
+
+    const notificationBatch = db.batch();
+    recipientUsers.forEach((recipient) => {
+      const notificationId = `community_${solutionId}_${commentRef.id}_${recipient.uid}`;
+      const notificationRef = db.doc(
+        `users/${recipient.uid}/messageNotifications/${notificationId}`
+      );
+      const metaRef = db.doc(
+        `users/${recipient.uid}/notificationMeta/discussionNotifications`
+      );
+      notificationBatch.set(notificationRef, {
+        notificationId,
+        unread: true,
+        recipientUid: recipient.uid,
+        recipientEmail: recipient.email,
+        senderUid: uid,
+        senderName,
+        senderAvatar,
+        messageId: commentRef.id,
+        messageText: content.slice(0, 240),
+        contextId: solutionId,
+        contextTitle: String(solution['title'] || 'Solution'),
+        contextType: 'solution',
+        notificationKind: 'community-comment',
+        sourceDocPath: commentRef.path,
+        discussionPath: `/solution-preview/${solutionId}`,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        createdAtMs,
+        readAt: null,
+      });
+      notificationBatch.set(
+        metaRef,
+        {
+          unreadCount: admin.firestore.FieldValue.increment(1),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      );
+    });
+    if (recipientUsers.size) await notificationBatch.commit();
+
+    return { messageId: commentRef.id };
+  }
+);
+
+export const notifyCommunitySolutionComment = functions.firestore
+  .document('solutions/{solutionId}/communityComments/{commentId}')
+  .onCreate(async (snapshot, context) => {
+    const comment = snapshot.data() || {};
+    const solution = (
+      await admin.firestore().doc(`solutions/${context.params.solutionId}`).get()
+    ).data();
+    if (!solution) return;
+
+    const senderEmail = normalizeCommunityEmail(comment['authorEmail']);
+    const recipients = communitySolutionEmails(solution).filter(
+      (email) => email !== senderEmail
+    );
+    if (!recipients.length) return;
+
+    const path = `${APP_BASE_URL.replace(/\/$/, '')}/solution-preview/${
+      context.params.solutionId
+    }?messageId=${encodeURIComponent(context.params.commentId)}`;
+    const subject = `${comment['authorName'] || 'A community member'} commented on ${
+      solution['title'] || 'your Global Solutions Lab solution'
+    }`;
+
+    await Promise.allSettled(
+      recipients.map((recipient) => {
+        const message: any = {
+          to: recipient,
+          from: 'newworld@newworld-game.org',
+          templateId: TEMPLATE_ID_COMMENT,
+          dynamic_template_data: { subject, path },
+        };
+        return sgMail.send(message);
+      })
+    );
+  });
+
+export const maintainCommunitySolutionFeedMetadata = functions.firestore
+  .document('solutions/{solutionId}')
+  .onWrite(async (change) => {
+    if (!change.after.exists) return;
+    const solution = change.after.data() || {};
+    const isPrivate = solution['isPrivate'] === true;
+    const expected = {
+      isPrivate,
+      communityVisibility: isPrivate ? 'private' : 'community',
+      feedEligible: !isPrivate && hasMeaningfulCommunityContent(solution),
+      feedStatus:
+        solution['finished'] === 'true' ? 'submitted' : 'in-development',
+      teamMemberEmails: communitySolutionEmails(solution),
+      solutionAdminEmails: Array.from(
+        new Set(
+          [
+            normalizeCommunityEmail(solution['authorEmail']),
+            ...(Array.isArray(solution['chosenAdmins'])
+              ? solution['chosenAdmins'].map((entry: any) =>
+                  normalizeCommunityEmail(entry?.authorEmail)
+                )
+              : []),
+          ].filter((email) => emailRegex.test(email))
+        )
+      ),
+    };
+
+    const needsUpdate =
+      solution['isPrivate'] !== expected.isPrivate ||
+      solution['communityVisibility'] !== expected.communityVisibility ||
+      solution['feedEligible'] !== expected.feedEligible ||
+      solution['feedStatus'] !== expected.feedStatus ||
+      JSON.stringify(solution['teamMemberEmails'] || []) !==
+        JSON.stringify(expected.teamMemberEmails) ||
+      JSON.stringify(solution['solutionAdminEmails'] || []) !==
+        JSON.stringify(expected.solutionAdminEmails) ||
+      !solution['feedUpdatedAt'];
+    if (!needsUpdate) return;
+
+    await change.after.ref.set(
+      {
+        ...expected,
+        ...(!solution['feedUpdatedAt']
+          ? { feedUpdatedAt: admin.firestore.FieldValue.serverTimestamp() }
+          : {}),
+      },
+      { merge: true }
+    );
+  });
+
 /**
  * Send @mention notification emails for discussion messages
  * Handles both @everyone (sends to all participants) and @individual mentions
