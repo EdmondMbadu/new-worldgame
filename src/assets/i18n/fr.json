@@ -18,28 +18,87 @@
   "navbar": {
     "logoAlt": "Logo de Global Solutions Lab",
     "brand": "Global Solutions Lab",
-    "tagline": "Developing solutions for global and local problems.",
+    "tagline": "Développer des solutions aux problèmes mondiaux et locaux.",
     "theme": {
       "light": "Clair",
       "dark": "Sombre"
     },
     "login": "Se connecter",
     "home": "Accueil",
+    "about": "À propos",
+    "schools": "Établissements",
+    "communities": "Communautés",
+    "globalLab": "Laboratoire mondial",
+    "pricing": "Tarifs",
+    "contact": "Contact",
+    "getStarted": "Commencer",
     "startCustomChallenge": "Créer un défi personnalisé",
+    "startChallenge": "Créer un défi",
     "myWorkspace": "Mon espace de travail",
     "operatingManual": "Manuel d'utilisation",
     "evaluations": "Évaluations",
+    "pendingSolutions": "Solutions en cours",
+    "strategyEvaluations": "Évaluations stratégiques",
     "joinSolution": "Rejoindre une solution",
     "tournament": "Tournoi",
     "generalAssembly": "Assemblée générale",
     "solutionTour": "Visite des solutions GSL",
     "otherAis": "Parler à plusieurs IA",
+    "profile": "Profil",
+    "instructions": "Instructions",
+    "userManagement": "Gestion des utilisateurs",
+    "generateChallenge": "Générer une page de défi",
+    "logout": "Se déconnecter",
+    "searching": "Recherche…",
+    "messagesNotifications": "Messages et notifications",
+    "pendingInvitations": "Invitations en attente",
+    "toggleTheme": "Basculer entre les thèmes clair et sombre",
+    "openMenu": "Ouvrir le menu de navigation",
+    "dismissBanner": "Fermer la bannière",
+    "findRecruiting": "Trouver des solutions qui recherchent des collaborateurs",
+    "sidebarLabel": "Barre latérale",
+    "systemTheme": "Système",
+    "upcomingFeatures": "Voir les fonctionnalités à venir",
+    "close": "Fermer",
     "myChallengeSpaces": "Espaces de défi",
     "languageLabel": "Langue",
     "moreMenu": {
       "more": "Plus",
       "less": "Moins"
     }
+  },
+  "footer": {
+    "homeLabel": "Accueil de Global Solutions Lab",
+    "missionPrefix": "Global Solutions Lab est un programme de l’organisme à but non lucratif de recherche et d’éducation ",
+    "missionSuffix": ", dont la mission est de développer des outils qui rendent la résolution des problèmes mondiaux et locaux accessible au plus grand nombre. EarthGame est un organisme à but non lucratif 501(c)(3). Les dons sont déductibles des impôts aux États-Unis.",
+    "donate": "Faire un don",
+    "resources": {
+      "title": "Ressources",
+      "fullerMap": "Carte du projet Fuller",
+      "archive": "Archives photographiques de Global Solutions Lab",
+      "internship": "Stage",
+      "team": "Notre équipe"
+    },
+    "programs": {
+      "title": "Programmes",
+      "prepScheduler": "Planification de la préparation GSL 2026",
+      "features": "Fonctionnalités",
+      "howItWorks": "Comment ça marche",
+      "askBucky": "Demander à Bucky",
+      "schoolTournament": "Tournoi pour les établissements scolaires",
+      "universityTournament": "Tournoi pour les universités",
+      "tournamentInstructions": "Instructions du tournoi",
+      "askAnything": "Poser une question",
+      "feedback": "Commentaires sur Global Solutions Lab",
+      "solutionLibraries": "Bibliothèques de solutions"
+    },
+    "support": {
+      "title": "Assistance",
+      "privacy": "Politique de confidentialité",
+      "intellectualProperty": "Propriété intellectuelle"
+    },
+    "copyright": "© 2025 EarthGame. Tous droits réservés.",
+    "backToTop": "Retour en haut"
   },
   "otherAis": {
     "hero": {
@@ -197,6 +256,56 @@
     }
   },
   "home": {
+    "community": {
+      "eyebrow": "Communauté du Global Solutions Lab",
+      "title": "Des solutions qui méritent d’être construites ensemble",
+      "description": "Découvrez ce que les équipes développent, comprenez leur démarche et ajoutez un commentaire utile pour faire avancer leur travail.",
+      "startSolution": "Créer une solution",
+      "homeContentLabel": "Contenu de l’accueil",
+      "tabs": {
+        "solutions": "Solutions de la communauté",
+        "challenges": "Explorer les défis"
+      },
+      "sectionTitle": "Solutions de la communauté",
+      "sectionSubtitle": "Les travaux visibles par la communauté dans l’ensemble du Lab.",
+      "filterLabel": "Filtrer les solutions par statut",
+      "filters": {
+        "all": "Toutes",
+        "inDevelopment": "En développement",
+        "submitted": "Soumises"
+      },
+      "loadingLabel": "Chargement des solutions",
+      "error": {
+        "title": "Le chargement des solutions prend plus de temps que prévu",
+        "message": "Nous n’avons pas pu charger les solutions de la communauté. Veuillez réessayer.",
+        "retry": "Réessayer"
+      },
+      "empty": {
+        "title": "Aucune solution dans cette vue pour le moment",
+        "description": "Essayez un autre statut ou créez une solution et invitez la communauté à y contribuer.",
+        "showAll": "Afficher toutes les solutions"
+      },
+      "defaultSolutionTitle": "Solution",
+      "previewImage": "image d’aperçu",
+      "defaultTeamName": "Équipe du Global Solutions Lab",
+      "member": "membre",
+      "members": "membres",
+      "progressLabel": "Progression de la solution",
+      "developed": "Développée à {{percent}} %",
+      "comment": "commentaire",
+      "comments": "commentaires",
+      "readAndComment": "Lire et commenter",
+      "loadingMore": "Chargement des solutions…",
+      "showMore": "Afficher plus de solutions",
+      "activity": {
+        "recently": "Active récemment",
+        "justNow": "Active à l’instant",
+        "minutesAgo": "Active il y a {{count}} min",
+        "hoursAgo": "Active il y a {{count}} h",
+        "daysAgo": "Active il y a {{count}} j",
+        "updated": "Mise à jour le {{date}}"
+      }
+    },
     "loading": {
       "title": "Chargement des défis…",
       "subtitle": "Préparation de votre espace de travail"
@@ -386,6 +495,351 @@
     "finalCta": {
       "title": "Prêt à explorer ?",
       "subtitle": "Téléchargez un guide pour explorer GSL, inscrivez votre classe ou contactez-nous afin de parcourir ensemble la plateforme."
+    }
+  },
+  "landingUn": {
+    "cta": {
+      "scheduleDemo": "Planifier une démo",
+      "contact": "Nous contacter",
+      "startFree": "Commencer gratuitement",
+      "signUp": "S’inscrire",
+      "downloadGuide": "Télécharger le guide pour explorer Global Solutions Lab",
+      "exploreAi": "Découvrir tous les collègues IA"
+    },
+    "hero": {
+      "title": "Global Solutions Lab pour les Nations Unies",
+      "subtitle": "Ajoutez une nouvelle dimension à votre travail : un laboratoire d’innovation accompagné d’assistants de recherche experts, capables de travailler très rapidement, de répondre à vos questions en profondeur et de faire émerger des solutions novatrices aux enjeux majeurs sur lesquels vous travaillez."
+    },
+    "whatYouGet": {
+      "title": "Ce que vous offre Global Solutions Lab",
+      "titleLine1": "Ce que vous offre",
+      "titleLine2": "Global Solutions Lab",
+      "cards": {
+        "strategicPlanning": {
+          "title": "Résolution de problèmes de pointe",
+          "description": "Un processus de planification stratégique et de résolution de problèmes à la pointe."
+        },
+        "aiAssistants": {
+          "title": "Assistants IA",
+          "description": "Des assistants IA qui répondent rapidement à vos questions avec leurs sources, apportent de nouvelles perspectives et approfondissent votre travail."
+        },
+        "spectrumAi": {
+          "title": "Un éventail d’assistants IA",
+          "description": "Choisissez parmi un éventail d’assistants IA, d’une remarquable collection d’« Aînés » à une équipe internationale de chercheurs contemporains, chacun doté de compétences particulières."
+        },
+        "fullAccess": {
+          "title": "Accès complet aux fonctionnalités de Global Solutions Lab",
+          "description": "Accédez à toutes les fonctionnalités : IA, canal vidéo d’équipe, évaluation par les pairs, données mondiales, rapports sur l’état du monde, bibliothèques de solutions, et plus encore."
+        },
+        "collaboration": {
+          "title": "Outils de collaboration d’équipe",
+          "description": "Invitez des collègues du monde entier à rejoindre votre équipe et utilisez les espaces de discussion, les fichiers partagés et les échanges de commentaires intégrés à chaque projet."
+        },
+        "dashboard": {
+          "title": "Tableau de bord privé pour chaque projet",
+          "description": "Organisez chaque projet mené avec Global Solutions Lab dans un espace de travail dédié."
+        }
+      }
+    },
+    "steps": {
+      "badge": "EXEMPLE DE PARCOURS ÉTAPE PAR ÉTAPE",
+      "title": "Les trois premières étapes pour lancer votre laboratoire d’innovation assisté par l’IA",
+      "cards": {
+        "one": {
+          "label": "Étape 1",
+          "title": "Quel est le problème ?",
+          "description": "Quel problème voulons-nous traiter ? Pourquoi est-il important ? Quelle est son ampleur ? Où se manifeste-t-il ? Comment le mesurer ? Quelles en sont les causes profondes ?",
+          "aiPrompt": "Demandez au collègue IA Bucky de vous aider avec des réponses, des commentaires, des conseils et l’analyse des causes.",
+          "imageAlt": "Illustration de l’étape 1"
+        },
+        "two": {
+          "label": "Étape 2",
+          "title": "Définir l’avenir souhaité",
+          "description": "Quel est notre objectif ? Quel monde voulons-nous ? Comment imaginons-nous l’avenir ? Comment mesurerons-nous les progrès ?",
+          "aiPrompt": "Demandez au collègue IA Bucky de l’aide, des commentaires, des réponses, des conseils et ce qui pourrait manquer.",
+          "imageAlt": "Illustration de l’étape 2"
+        },
+        "three": {
+          "label": "Étape 3",
+          "title": "Tracer la voie à suivre",
+          "description": "Comment atteindre notre objectif et résoudre le problème ? Que faire, où, comment et quand ? Quelles technologies, politiques, programmes, partenariats et sources de financement faut-il tester puis déployer à grande échelle ?",
+          "aiPrompt": "Demandez aux collègues IA Bucky, Amina, Li, Sofia, Arjun, Elana, Tane ou Zane de l’aide, des commentaires, des réponses, des conseils et ce qui pourrait manquer.",
+          "imageAlt": "Illustration de l’étape 3"
+        }
+      }
+    },
+    "simple": {
+      "title": "AUSSI SIMPLE QUE…",
+      "items": {
+        "first": "Vous : explorez, testez et utilisez Global Solutions Lab gratuitement. Découvrez comment l’intégrer à votre travail.",
+        "second": "Inscrivez-vous — GRATUITEMENT.",
+        "third": "Choisissez un défi, formez une équipe si vous le souhaitez, progressez de l’étape 1 à l’étape 5 et transformez la recherche en impact. Oui, gratuitement. Et prenez plaisir à le faire."
+      }
+    },
+    "intro": {
+      "title": "Présentation de Global Solutions Lab",
+      "paragraph1": "Global Solutions Lab est une plateforme, un espace de travail enrichi par l’IA et un laboratoire d’innovation pour découvrir et développer des solutions à des problèmes réels — puis les mettre en œuvre.",
+      "paragraph2": "Son objectif est de renforcer l’impact réel de votre travail en offrant à votre organisation l’espace et les outils nécessaires pour élaborer des solutions aux enjeux dont vous avez la charge.",
+      "paragraph3": "Global Solutions Lab vous permet de développer des solutions aux problèmes mondiaux ou locaux et de déterminer les meilleures voies pour atteindre les ODD, grâce à la combinaison créative de l’intelligence artificielle et de l’intelligence humaine.",
+      "learnMore": "En savoir plus."
+    },
+    "included": {
+      "title": "",
+      "subtitle": "",
+      "cards": {
+        "fullAccess": {
+          "title": "Accès complet aux fonctionnalités de Global Solutions Lab",
+          "description": "Accédez à toutes les fonctionnalités, dont les IA, le canal vidéo d’équipe, l’évaluation par les pairs, les données mondiales, les rapports sur l’état du monde et les bibliothèques de solutions."
+        },
+        "dashboard": {
+          "title": "Processus guidé de conception stratégique",
+          "description": "Un processus guidé de conception stratégique dans une interface simple."
+        },
+        "ai": {
+          "title": "Assistants IA",
+          "description": "Sept jeunes avatars accompagnent la résolution de problèmes, ainsi que cinq sages aînés auxquels demander conseil."
+        },
+        "collaboration": {
+          "title": "Évaluation par les pairs",
+          "description": "Une évaluation par les pairs qui approfondit la compréhension tout en renforçant les solutions."
+        },
+        "tournament": {
+          "title": "Accès au tournoi Global Solutions Lab",
+          "description": "Faites passer vos projets pilotes à une reconnaissance nationale et mondiale grâce aux candidatures au tournoi."
+        },
+        "support": {
+          "title": "Accompagnement à la mise en œuvre",
+          "description": "Des conseils issus du processus de conception et des collègues IA pour favoriser l’adoption des projets dans le monde réel."
+        }
+      }
+    },
+    "benefits": {
+      "title": "",
+      "cards": {
+        "interdisciplinary": {
+          "title": "Compréhension approfondie",
+          "description": "Les participants ne se contentent pas d’étudier les problèmes : ils s’exercent à les résoudre et développent une compréhension approfondie, une culture mondiale, des compétences en travail d’équipe, des plans stratégiques et la confiance nécessaire pour devenir les architectes de l’avenir."
+        },
+        "data": {
+          "title": "Accès aux données et aux solutions",
+          "description": "Accédez à plus de 100 jeux de données mondiaux, 400 rapports sur l’état du monde et des bibliothèques de solutions pour obtenir des informations et des références en temps réel."
+        },
+        "impact": {
+          "title": "Impact concret",
+          "description": "Favorise l’émergence de citoyens du monde informés et engagés, prêts à agir avec confiance et clarté."
+        }
+      }
+    },
+    "ai": {
+      "title": "La parole à nos collègues IA",
+      "subtitle": "Propulsés par les derniers modèles d’IA et spécialement entraînés pour les professionnels qui travaillent sur les ODD."
+    },
+    "pricing": {
+      "classPlan": {
+        "badge": "COÛT POUR L’ONU : GRATUIT"
+      },
+      "schoolPlan": {
+        "badge": "COÛT DES OPTIONS PERSONNALISÉES POUR VOTRE USAGE SPÉCIFIQUE À L’ONU"
+      },
+      "note": "Commencez gratuitement et évoluez lorsque vous êtes prêt."
+    },
+    "finalCta": {
+      "title": "Prêt à explorer ?",
+      "subtitle": "Téléchargez le guide de découverte de Global Solutions Lab, inscrivez-vous et commencez votre travail, ou contactez-nous pour parcourir ensemble la plateforme."
+    }
+  },
+  "landingCommunity": {
+    "cta": {
+      "scheduleDemo": "Planifier une démo",
+      "contact": "Nous contacter",
+      "startFree": "Commencer gratuitement",
+      "signUp": "S’inscrire",
+      "downloadGuide": "Télécharger le guide pour explorer Global Solutions Lab",
+      "exploreAi": "Découvrir tous les collègues IA"
+    },
+    "hero": {
+      "title": "Global Solutions Lab pour votre communauté",
+      "subtitle": "Ajoutez une nouvelle dimension à votre communauté : un laboratoire d’innovation communautaire de pointe, accompagné de chercheurs IA experts qui travaillent très rapidement, répondent à vos questions avec une profondeur remarquable et font émerger des solutions novatrices aux problèmes majeurs sur lesquels vous travaillez."
+    },
+    "page": {
+      "hero": {
+        "title": "Résolution de problèmes communautaires",
+        "description": "Ajoutez une nouvelle dimension à votre communauté : un laboratoire d’innovation communautaire de pointe, accompagné de chercheurs IA experts qui travaillent très rapidement, répondent à vos questions avec une profondeur remarquable et font émerger des solutions novatrices aux problèmes majeurs de votre communauté.",
+        "tagline": "Découvrez ce que l’IA peut apporter à votre communauté. Utilisez la plateforme de résolution de problèmes communautaires de Global Solutions Lab, la nouvelle référence en la matière."
+      },
+      "overview": {
+        "title": "Ce que vous offre la plateforme communautaire Global Solutions Lab",
+        "cards": {
+          "research": {
+            "title": "Votre propre assistant de recherche à temps plein",
+            "description": "Un accompagnement IA dédié à la recherche continue et au développement de nouvelles perspectives."
+          },
+          "planning": {
+            "title": "Planification stratégique de pointe et développement de solutions novatrices",
+            "description": "Des méthodes structurées pour passer de la définition du problème à une stratégie réalisable."
+          },
+          "fastResearch": {
+            "title": "Des recherches rapides et complètes sur les sujets qui vous intéressent",
+            "description": "Une synthèse rapide des données, rapports et options concrètes."
+          },
+          "blueprint": {
+            "title": "Plan détaillé du problème et de la solution",
+            "description": "Une description détaillée du problème, de ses symptômes, causes, impacts, coûts et objectifs, des conséquences de l’inaction, des indicateurs de réussite, des options de solution et des tâches de mise en œuvre — avec les réponses aux questions quoi, qui, où, quand et comment pour votre communauté."
+          },
+          "libraries": {
+            "title": "Bibliothèques de solutions",
+            "description": "Découvrez comment d’autres communautés ont résolu des problèmes similaires."
+          },
+          "collaboration": {
+            "title": "Outils de collaboration d’équipe",
+            "description": "Coordonnez les personnes, les idées, la recherche, les tâches et la mise en œuvre au même endroit."
+          },
+          "dashboard": {
+            "title": "Tableau de bord privé pour votre communauté",
+            "description": "Un espace de travail sécurisé, centré sur vos priorités et votre contexte local."
+          },
+          "perspectives": {
+            "title": "Nouvelles perspectives, solutions, travail d’équipe et accompagnement",
+            "description": "Élargissez votre compréhension et renforcez l’alignement de l’équipe sur les travaux essentiels."
+          },
+          "briefs": {
+            "title": "Rapports de veille hebdomadaires",
+            "description": "Les nouvelles évolutions et possibilités de financement recensées par votre agent IA dédié."
+          },
+          "labAccess": {
+            "title": "Accès au Global Solutions Lab de juin 2026",
+            "description": "Développez des solutions à vos problèmes locaux avec des pairs du monde entier et l’appui d’experts."
+          }
+        }
+      },
+      "stepsTitle": "Les trois premières étapes de votre laboratoire d’innovation communautaire assisté par l’IA",
+      "simple": {
+        "title": "Aussi simple que…",
+        "schedulePrefix": "Vous : planifiez une démonstration de la plateforme de résolution de problèmes communautaires Global Solutions Lab",
+        "here": "ici",
+        "scheduleSuffix": "Découvrez comment l’utiliser dans votre travail. La démonstration permettra d’explorer et de tester la plateforme sur l’un des problèmes de votre communauté.",
+        "signup": "Inscrivez-vous.",
+        "third": "Choisissez un problème communautaire, commencez à l’étape 1 et progressez avec vos collègues humains et IA jusqu’à l’étape 5 afin de produire un impact lors de la mise en œuvre."
+      },
+      "intro": {
+        "title": "GLOBAL SOLUTIONS LAB, C’EST…",
+        "paragraph1": "Global Solutions Lab est un espace de travail enrichi par l’IA et un laboratoire d’innovation pour découvrir et développer des solutions à des problèmes réels — puis les mettre en œuvre.",
+        "paragraph2": "Son objectif est d’aider votre travail à produire un impact réel dans votre communauté et dans le monde, en offrant à votre organisation l’espace et les outils nécessaires pour développer des solutions aux enjeux qui vous tiennent à cœur.",
+        "paragraph3": "Global Solutions Lab vous permet de développer des solutions aux problèmes mondiaux ou locaux et de déterminer les meilleures voies pour les concrétiser.",
+        "paragraph4": "Tout cela est rendu possible par la combinaison créative de l’intelligence artificielle et de l’intelligence humaine."
+      },
+      "aiTitle": "Une partie de l’équipe IA de votre laboratoire d’innovation communautaire",
+      "exploreAiTeam": "Découvrir l’équipe IA",
+      "pricing": {
+        "title": "Tarifs",
+        "options": {
+          "one": {
+            "title": "Option 1 : 20 $/mois ou 220 $/an",
+            "description": "Comprend l’accès complet à la plateforme Global Solutions Lab, à toutes les fonctionnalités actuelles et à venir et aux collègues IA, ainsi qu’une démonstration, une formation et une participation gratuite au Global Solutions Lab 2026 pour développer une solution au problème le plus important de votre communauté."
+          },
+          "two": {
+            "title": "Option 2 : 100 $/mois ou 1 000 $/an",
+            "description": "Comprend l’accès complet à la plateforme, aux fonctionnalités et aux collègues IA, ainsi qu’une démonstration, une formation, une assistance à la demande, un accompagnement pour formuler les questions et requêtes IA, un agent IA personnalisé pour votre communauté et l’accès pour cinq collègues au maximum."
+          },
+          "three": {
+            "title": "Option 3 : 250 $/mois ou 3 000 $/an",
+            "description": "Comprend toutes les options précédentes, ainsi que la mise en place d’un tournoi de résolution de problèmes pour votre communauté ou les établissements locaux, une identité visuelle et des options personnalisées, et des séminaires avec l’équipe de Global Solutions Lab."
+          }
+        },
+        "sponsorshipOptions": "Options de parrainage",
+        "note": "Consultez les possibilités de parrainage pour savoir comment vous ou votre organisation pouvez participer au financement du tournoi Global Solutions Lab."
+      },
+      "sponsorship": {
+        "title": "Possibilités de parrainage",
+        "description": "Contactez-nous pour connaître les possibilités actuelles de parrainage liées au tournoi Global Solutions Lab et à la résolution de problèmes communautaires.",
+        "viewPage": "Voir la page de parrainage"
+      }
+    },
+    "whatYouGet": {
+      "title": "Ce que l’IA de Global Solutions Lab offre à votre communauté",
+      "cards": {
+        "strategicPlanning": {
+          "title": "Planification stratégique de pointe",
+          "description": "Un processus de planification stratégique et de résolution de problèmes à la pointe."
+        },
+        "aiAssistants": {
+          "title": "Assistants IA",
+          "description": "Des assistants IA qui répondent rapidement à vos questions avec leurs sources, apportent de nouvelles perspectives et approfondissent votre travail."
+        },
+        "spectrumAi": {
+          "title": "Un éventail d’assistants IA",
+          "description": "Choisissez parmi un éventail d’assistants IA, d’une remarquable collection d’« Aînés » à une équipe internationale de chercheurs contemporains, chacun doté de compétences particulières."
+        },
+        "fullAccess": {
+          "title": "Accès complet aux fonctionnalités de Global Solutions Lab",
+          "description": "Accédez à toutes les fonctionnalités : IA, canal vidéo d’équipe, évaluation par les pairs, données mondiales, rapports sur l’état du monde, bibliothèques de solutions, et plus encore."
+        },
+        "collaboration": {
+          "title": "Outils de collaboration d’équipe",
+          "description": "Invitez des collègues de votre communauté — ou du monde entier — à rejoindre votre équipe et utilisez les espaces de discussion, les fichiers partagés et les échanges de commentaires intégrés à chaque projet."
+        },
+        "dashboard": {
+          "title": "Tableau de bord privé pour chaque communauté",
+          "description": "Organisez chaque projet mené avec Global Solutions Lab dans un espace de travail dédié."
+        }
+      }
+    },
+    "steps": {
+      "badge": "EXEMPLE DE PARCOURS ÉTAPE PAR ÉTAPE",
+      "title": "Les trois premières étapes pour lancer votre laboratoire d’innovation communautaire assisté par l’IA",
+      "cards": {
+        "one": {
+          "label": "ÉTAPE 1",
+          "title": "Quel est le problème ?",
+          "description": "Quel problème voulons-nous traiter ? Pourquoi est-il important ? Quelle est son ampleur ? Où se manifeste-t-il ? Comment le mesurer ? Quelles en sont les causes profondes ?",
+          "aiPrompt": "Demandez à votre collègue IA Bucky de vous aider avec des réponses, des commentaires, des conseils et l’analyse des causes.",
+          "imageAlt": "Illustration de l’étape 1"
+        },
+        "two": {
+          "label": "ÉTAPE 2",
+          "title": "Définir l’avenir souhaité",
+          "description": "Quel est notre objectif ? Quelle communauté voulons-nous ? Comment imaginons-nous l’avenir ? Comment mesurerons-nous les progrès ?",
+          "aiPrompt": "Demandez au collègue IA Bucky de l’aide, des commentaires, des réponses, des conseils et ce qui pourrait manquer.",
+          "imageAlt": "Illustration de l’étape 2"
+        },
+        "three": {
+          "label": "ÉTAPE 3",
+          "title": "Tracer la voie à suivre",
+          "description": "Comment atteindre notre objectif et résoudre le problème ? Que faire, où, comment et quand ? Quelles technologies, politiques, programmes, partenariats et sources de financement faut-il tester puis mettre en œuvre ?",
+          "aiPrompt": "Demandez aux collègues IA Bucky, Amina, Li, Sofia, Arjun, Elana, Tane ou Zane de l’aide, des commentaires, des réponses, des conseils et ce qui pourrait manquer.",
+          "imageAlt": "Illustration de l’étape 3"
+        }
+      }
+    },
+    "simple": {
+      "title": "AUSSI SIMPLE QUE…",
+      "items": {
+        "first": "Vous : explorez, testez et utilisez Global Solutions Lab gratuitement. Découvrez comment l’intégrer à votre travail.",
+        "second": "Inscrivez-vous — GRATUITEMENT.",
+        "third": "Choisissez un défi, formez des équipes, progressez de l’étape 1 à l’étape 5 et transformez l’apprentissage en impact. Oui, gratuitement. Et prenez plaisir à le faire."
+      }
+    },
+    "intro": {
+      "title": "GLOBAL SOLUTIONS LAB, C’EST…",
+      "paragraph1": "Global Solutions Lab est une plateforme, un espace de travail enrichi par l’IA et un laboratoire d’innovation pour découvrir et développer des solutions à des problèmes réels — puis les mettre en œuvre.",
+      "paragraph2": "Son objectif est de renforcer l’impact réel de votre travail en offrant à votre organisation l’espace et les outils nécessaires pour élaborer des solutions aux enjeux dont vous avez la charge.",
+      "paragraph3": "Global Solutions Lab vous permet de développer des solutions aux problèmes mondiaux ou locaux et de déterminer les meilleures voies pour les concrétiser.",
+      "paragraph4": "Tout cela est rendu possible par la combinaison créative de l’intelligence artificielle et de l’intelligence humaine.",
+      "learnMore": "En savoir plus."
+    },
+    "ai": {
+      "title": "La parole à nos collègues IA",
+      "subtitle": "Propulsés par les derniers modèles d’IA et spécialement entraînés pour les responsables communautaires, les militants et les citoyens engagés."
+    },
+    "pricing": {
+      "title": "COÛTS",
+      "free": "Pour le moment, l’utilisation est gratuite pour votre communauté.",
+      "later": "Par la suite, si Global Solutions Lab répond aux besoins de votre communauté, contribuez à notre travail à la hauteur de la valeur que vous lui accordez.",
+      "customized": "Pour une version personnalisée, aux couleurs de votre communauté et adaptée à tous — des lycéens aux organisations communautaires, aux élus et à leurs équipes — contactez-nous."
+    },
+    "finalCta": {
+      "title": "Prêt à explorer ?",
+      "subtitle": "Téléchargez le guide de découverte de Global Solutions Lab, inscrivez-vous et commencez votre travail, ou contactez-nous pour parcourir ensemble la plateforme."
     }
   },
   "landingHome": {
@@ -1262,11 +1716,39 @@
     }
   },
   "challengeCard": {
+    "challengeAlt": "Défi",
     "descriptionLabel": "Description",
-    "startSolution": "Commencer la solution",
-    "goToSolution": "Aller a la solution",
+    "startSolution": "Créer une solution",
+    "goToSolution": "Accéder à la solution",
     "joinSolution": "Rejoindre la solution",
-    "preview": "Apercu"
+    "preview": "Aperçu",
+    "private": "Privée",
+    "open": "Ouverte",
+    "workspace": "Espace de travail de la solution",
+    "team": "Équipe",
+    "access": "Accès",
+    "details": "Détails",
+    "loading": "Chargement",
+    "requestAccess": "Demander l’accès",
+    "members": {
+      "loading": "Chargement des membres",
+      "one": "{{count}} membre",
+      "other": "{{count}} membres"
+    },
+    "alerts": {
+      "loginFirst": "Veuillez d’abord vous connecter.",
+      "noWorkspace": "Aucun espace de travail n’existe encore pour ce défi.",
+      "unableToOpen": "Impossible d’ouvrir l’espace de travail. Veuillez réessayer."
+    },
+    "privateModal": {
+      "badge": "Solution privée",
+      "title": "L’accès est restreint",
+      "thisSolution": "Cette solution",
+      "solutionIsPrivate": "{{title}} est privée.",
+      "description": "Contactez un administrateur de l’espace de travail pour être ajouté avant d’ouvrir cette solution. Une fois l’accès accordé, cette carte vous conduira au même espace de travail.",
+      "adminHint": "Demandez à un administrateur de cet espace de défi de vous inviter ou d’ajouter votre adresse e-mail à l’équipe de la solution.",
+      "gotIt": "Compris"
+    }
   },
   "startChallenge": {
     "readyTitle": "Pret a commencer ?",

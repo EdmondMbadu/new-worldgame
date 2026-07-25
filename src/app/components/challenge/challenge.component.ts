@@ -1,4 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
@@ -44,7 +45,8 @@ export class ChallengeComponent implements OnInit {
     private solutionService: SolutionService,
     public data: DataService,
     private router: Router,
-    private challenge: ChallengesService
+    private challenge: ChallengesService,
+    private translate: TranslateService
   ) {}
 
   openChallengeImage() {
@@ -97,7 +99,7 @@ export class ChallengeComponent implements OnInit {
     /* ---------- 0) Guard: user must be logged‑in ---------- */
     const email = this.auth.currentUser.email?.trim().toLowerCase();
     if (!email) {
-      alert('Please log in first.');
+      alert(this.translate.instant('challengeCard.alerts.loginFirst'));
       return;
     }
 
@@ -109,7 +111,7 @@ export class ChallengeComponent implements OnInit {
       console.log('the solution id', this.id);
 
       if (!solution) {
-        alert('No workspace exists for this challenge yet.');
+        alert(this.translate.instant('challengeCard.alerts.noWorkspace'));
         return;
       }
 
@@ -139,7 +141,7 @@ export class ChallengeComponent implements OnInit {
       this.router.navigate(['/dashboard', solution.solutionId]);
     } catch (err) {
       console.error('Error opening workspace:', err);
-      alert('Unable to open the workspace. Please try again.');
+      alert(this.translate.instant('challengeCard.alerts.unableToOpen'));
     }
   }
 
@@ -245,16 +247,16 @@ export class ChallengeComponent implements OnInit {
 
   get memberCountLabel(): string {
     if (this.isLoadingParticipantStatus && this.memberCountOverride == null) {
-      return 'Loading members';
+      return this.translate.instant('challengeCard.members.loading');
     }
 
     const count = this.memberCountOverride ?? this.memberCount;
 
     if (count === 1) {
-      return '1 member';
+      return this.translate.instant('challengeCard.members.one', { count });
     }
 
-    return `${count} members`;
+    return this.translate.instant('challengeCard.members.other', { count });
   }
 
   private normalizeParticipants(raw: any): { name: string }[] {

@@ -25,21 +25,80 @@
     },
     "login": "Log in",
     "home": "Home",
+    "about": "About",
+    "schools": "Schools",
+    "communities": "Communities",
+    "globalLab": "Global Lab",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "getStarted": "Get Started",
     "startCustomChallenge": "Start a Custom Challenge",
+    "startChallenge": "Start a Challenge",
     "myWorkspace": "My Workspace",
     "operatingManual": "Operating Manual",
     "evaluations": "Evaluations",
+    "pendingSolutions": "Pending Solutions",
+    "strategyEvaluations": "Strategy Evaluations",
     "joinSolution": "Join a Solution",
     "tournament": "Tournament",
     "generalAssembly": "General Assembly",
     "solutionTour": "Global Solutions Lab Solution Tour",
     "otherAis": "Talk to Multiple AIs",
+    "profile": "Profile",
+    "instructions": "Instructions",
+    "userManagement": "User Management",
+    "generateChallenge": "Generate Challenge Page",
+    "logout": "Log out",
+    "searching": "Searching…",
+    "messagesNotifications": "Messages and notifications",
+    "pendingInvitations": "Pending invitations",
+    "toggleTheme": "Toggle light and dark mode",
+    "openMenu": "Open navigation menu",
+    "dismissBanner": "Dismiss banner",
+    "findRecruiting": "Find solutions currently recruiting collaborators",
+    "sidebarLabel": "Sidebar",
+    "systemTheme": "System",
+    "upcomingFeatures": "See upcoming features",
+    "close": "Close",
     "myChallengeSpaces": "Challenge Spaces",
     "languageLabel": "Language",
     "moreMenu": {
       "more": "More",
       "less": "Less"
     }
+  },
+  "footer": {
+    "homeLabel": "Global Solutions Lab home",
+    "missionPrefix": "Global Solutions Lab is a program of the nonprofit research and education organization ",
+    "missionSuffix": "—whose mission is to develop tools that enable and democratize access to global and local problem-solving. EarthGame is a 501(c)(3) nonprofit organization. Donations are tax-deductible.",
+    "donate": "Donate",
+    "resources": {
+      "title": "Resources",
+      "fullerMap": "Fuller Project Map",
+      "archive": "Global Solutions Lab Archive Pictures",
+      "internship": "Internship",
+      "team": "Our Team"
+    },
+    "programs": {
+      "title": "Programs",
+      "prepScheduler": "GSL 2026 Prep Scheduler",
+      "features": "Features",
+      "howItWorks": "How It Works",
+      "askBucky": "Ask Bucky",
+      "schoolTournament": "Tournament for Schools",
+      "universityTournament": "Tournament for Universities",
+      "tournamentInstructions": "Tournament Instructions",
+      "askAnything": "Ask Anything",
+      "feedback": "Global Solutions Lab Feedback",
+      "solutionLibraries": "Solution Libraries"
+    },
+    "support": {
+      "title": "Support",
+      "privacy": "Privacy Policy",
+      "intellectualProperty": "Intellectual Property"
+    },
+    "copyright": "© 2025 EarthGame. All rights reserved.",
+    "backToTop": "Back to top"
   },
   "otherAis": {
     "hero": {
@@ -197,6 +256,56 @@
     }
   },
   "home": {
+    "community": {
+      "eyebrow": "Global Solutions Lab community",
+      "title": "Solutions worth building together",
+      "description": "See what teams are developing, understand their thinking, and add a useful comment that helps the work move forward.",
+      "startSolution": "Start a solution",
+      "homeContentLabel": "Home content",
+      "tabs": {
+        "solutions": "Community solutions",
+        "challenges": "Explore challenges"
+      },
+      "sectionTitle": "Community solutions",
+      "sectionSubtitle": "Community-visible work from across the Lab.",
+      "filterLabel": "Filter solutions by status",
+      "filters": {
+        "all": "All",
+        "inDevelopment": "In development",
+        "submitted": "Submitted"
+      },
+      "loadingLabel": "Loading solutions",
+      "error": {
+        "title": "Solutions are taking longer than expected",
+        "message": "We could not load community solutions. Please try again.",
+        "retry": "Try again"
+      },
+      "empty": {
+        "title": "No solutions in this view yet",
+        "description": "Try another status, or start a solution and invite the community into the work.",
+        "showAll": "Show all solutions"
+      },
+      "defaultSolutionTitle": "Solution",
+      "previewImage": "preview image",
+      "defaultTeamName": "Global Solutions Lab team",
+      "member": "member",
+      "members": "members",
+      "progressLabel": "Solution progress",
+      "developed": "{{percent}}% developed",
+      "comment": "comment",
+      "comments": "comments",
+      "readAndComment": "Read & comment",
+      "loadingMore": "Loading solutions…",
+      "showMore": "Show more solutions",
+      "activity": {
+        "recently": "Recently active",
+        "justNow": "Active just now",
+        "minutesAgo": "Active {{count}}m ago",
+        "hoursAgo": "Active {{count}}h ago",
+        "daysAgo": "Active {{count}}d ago",
+        "updated": "Updated {{date}}"
+      }
+    },
     "loading": {
       "title": "Loading challenges…",
       "subtitle": "Preparing your workspace"
@@ -551,6 +660,100 @@
     "hero": {
       "title": "Global Solutions Lab for Your Community",
       "subtitle": "Add a new dimension to your community— a state-of-the-art Community Innovation Lab fully staffed with expert AI researchers who work super-fast, answer your questions with surprising depth and breath, and lead to innovative solutions to the critical problems on which you're working."
+    },
+    "page": {
+      "hero": {
+        "title": "Community Problem Solving",
+        "description": "Add a new dimension to your community—a state-of-the-art Community Innovation Lab staffed with expert AI researchers who work super-fast, answer your questions with surprising depth and breadth, and lead to innovative solutions to your community’s critical problems.",
+        "tagline": "See what you can do with AI for your community. Use the Global Solutions Lab Community Problem Solving Platform—the new standard for community problem solving."
+      },
+      "overview": {
+        "title": "What you get with the Global Solutions Lab Community Platform",
+        "cards": {
+          "research": {
+            "title": "Your own full-time Research Assistant",
+            "description": "Dedicated AI support for continuous research and insight development."
+          },
+          "planning": {
+            "title": "State-of-the-art strategic planning and innovative solution development",
+            "description": "Structured methods to move from issue framing to implementable strategy."
+          },
+          "fastResearch": {
+            "title": "Fast, comprehensive research on the topics where you need information",
+            "description": "Rapid synthesis across data, reports, and practical options."
+          },
+          "blueprint": {
+            "title": "Detailed problem and solution blueprint",
+            "description": "A detailed description of the problem, its symptoms, causes, impacts, costs, goals, consequences of inaction, measures of success, solution options, and implementation tasks—along with the what, who, where, when, and how needed for your community’s unique solution."
+          },
+          "libraries": {
+            "title": "Solution Libraries",
+            "description": "See what other communities have done to solve similar problems."
+          },
+          "collaboration": {
+            "title": "Team Collaboration Tools",
+            "description": "Coordinate people, ideas, research, tasks, and implementation in one place."
+          },
+          "dashboard": {
+            "title": "Private Dashboard for Your Community",
+            "description": "A secure workspace focused on your priorities and local context."
+          },
+          "perspectives": {
+            "title": "New perspectives, solutions, teamwork, and support",
+            "description": "Get broader insight and stronger team alignment on critical work."
+          },
+          "briefs": {
+            "title": "Weekly Intelligence Reports",
+            "description": "Updates from your dedicated AI agent on new developments and funding opportunities."
+          },
+          "labAccess": {
+            "title": "Access to the June 2026 Global Solutions Lab",
+            "description": "Develop solutions to your local problems with global peers and expert support."
+          }
+        }
+      },
+      "stepsTitle": "First three moves in your AI-assisted Community Innovation Lab",
+      "simple": {
+        "title": "As simple as…",
+        "schedulePrefix": "You: Schedule your demo of the Global Solutions Lab Community Problem Solving platform",
+        "here": "here",
+        "scheduleSuffix": "See how it can be used in your work. The demo will explore, test, and use the platform on one of your community’s problems.",
+        "signup": "Sign up.",
+        "third": "Choose a community problem, begin at Step 1, and work with your AI and human colleagues through Step 5 to create impact during implementation."
+      },
+      "intro": {
+        "title": "GLOBAL SOLUTIONS LAB IS…",
+        "paragraph1": "Global Solutions Lab is an AI-empowered workspace and innovation lab for discovering and developing solutions to real-world problems—and getting those solutions implemented.",
+        "paragraph2": "Its goal is to help your work create real impact in your community and the world by giving your organization the space and tools to develop solutions to the issues you care about.",
+        "paragraph3": "Global Solutions Lab is where you develop solutions to global or local real-world problems and determine the best paths for achieving them.",
+        "paragraph4": "All made possible by the creative combination of AI and human intelligence."
+      },
+      "aiTitle": "Part of your Community Innovation Lab AI Team",
+      "exploreAiTeam": "Explore the AI Team",
+      "pricing": {
+        "title": "Costs",
+        "options": {
+          "one": {
+            "title": "Option 1: $20/month or $220 per year",
+            "description": "Includes complete access to the Global Solutions Lab platform, all current and upcoming features and AI colleagues, a demo and training, plus free participation in the 2026 Global Solutions Lab, where you will develop a solution to your community’s most important problem."
+          },
+          "two": {
+            "title": "Option 2: $100/month or $1,000 per year",
+            "description": "Includes complete platform access, all current and new features and AI colleagues, plus a demo, training, on-call Q&A about using the platform for your areas of focus, help developing AI questions and prompts, a custom AI agent for your community, and access for up to five colleagues."
+          },
+          "three": {
+            "title": "Option 3: $250/month or $3,000 per year",
+            "description": "Includes all previous options, plus help setting up a Community Problem Solving Tournament for your community or local schools, customized branding and options, and seminars with Global Solutions Lab staff on new features and opportunities."
+          }
+        },
+        "sponsorshipOptions": "Sponsorship Options",
+        "note": "See Sponsorship Opportunities for details on how you or your organization can participate in Global Solutions Lab Tournament funding opportunities."
+      },
+      "sponsorship": {
+        "title": "Sponsorship Opportunities",
+        "description": "Contact us for current sponsorship opportunities related to the Global Solutions Lab Tournament and community problem solving.",
+        "viewPage": "View Sponsorship Page"
+      }
     },
     "whatYouGet": {
       "title": "What Your Get With Global Solutions Lab's AI for Communities",
@@ -1513,11 +1716,39 @@
     }
   },
   "challengeCard": {
+    "challengeAlt": "Challenge",
     "descriptionLabel": "Description",
     "startSolution": "Start Solution",
     "goToSolution": "Go to Solution",
     "joinSolution": "Join Solution",
-    "preview": "Preview"
+    "preview": "Preview",
+    "private": "Private",
+    "open": "Open",
+    "workspace": "Solution workspace",
+    "team": "Team",
+    "access": "Access",
+    "details": "Details",
+    "loading": "Loading",
+    "requestAccess": "Request access",
+    "members": {
+      "loading": "Loading members",
+      "one": "{{count}} member",
+      "other": "{{count}} members"
+    },
+    "alerts": {
+      "loginFirst": "Please log in first.",
+      "noWorkspace": "No workspace exists for this challenge yet.",
+      "unableToOpen": "Unable to open the workspace. Please try again."
+    },
+    "privateModal": {
+      "badge": "Private solution",
+      "title": "Access is restricted",
+      "thisSolution": "This solution",
+      "solutionIsPrivate": "{{title}} is private.",
+      "description": "Reach out to a workspace admin to be added before opening this solution. Once an admin grants access, this card will take you to the same solution workspace.",
+      "adminHint": "Ask an admin from this challenge space to invite you or add your email to the solution team.",
+      "gotIt": "Got it"
+    }
   },
   "startChallenge": {
     "readyTitle": "Ready to Start?",

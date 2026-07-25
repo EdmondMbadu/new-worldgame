@@ -8,25 +8,23 @@
       <div class="grid gap-y-16 gap-x-12 lg:grid-cols-12">
         <!-- Brand / mission -->
         <div class="lg:col-span-5">
-          <a class="flex items-center gap-3 hover:opacity-90 transition" routerLink="/" aria-label="Global Solutions Lab home">
+          <a class="flex items-center gap-3 hover:opacity-90 transition" routerLink="/" [attr.aria-label]="'footer.homeLabel' | translate">
             <img src="../../../assets/img/gsl-logo.png"
-                 alt="Global Solutions Lab logo"
+                 [attr.alt]="'navbar.logoAlt' | translate"
                  class="h-12 w-12 rounded-xl shadow-lg ring-1 ring-white/10">
             <span class="flex min-w-0 flex-col">
               <span class="text-2xl font-extrabold bg-gradient-to-r from-sky-400 to-emerald-500 bg-clip-text text-transparent">
                 Global Solutions Lab
               </span>
               <span class="text-xs font-semibold tracking-wide text-slate-400">
-                Developing solutions for global and local problems.
+                {{ 'navbar.tagline' | translate }}
               </span>
             </span>
           </a>
 
           <p class="mt-6 text-sm leading-7 text-slate-400">
-            Global Solutions Lab is a program of the nonprofit research and education organization
-            <span class="font-semibold text-slate-200">EarthGame</span>—whose mission is to develop tools that enable and
-            democratize access to global and local problem-solving. EarthGame is a
-            <span class="font-semibold text-slate-200">501(c)(3)</span> nonprofit organization. Donations are tax-deductible.
+            {{ 'footer.missionPrefix' | translate }}
+            <span class="font-semibold text-slate-200">EarthGame</span>{{ 'footer.missionSuffix' | translate }}
           </p>
 
           <!-- Socials -->
@@ -90,7 +88,7 @@
                       text-white bg-gradient-to-r from-teal-500 via-teal-600 to-cyan-600
                       shadow-lg shadow-teal-500/30 hover:shadow-xl focus:outline-none focus:ring-4
                       focus:ring-teal-300/60 transition">
-              Donate
+              {{ 'footer.donate' | translate }}
               <svg class="h-5 w-5 -rotate-45" viewBox="0 0 24 24" fill="none"
                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
@@ -103,42 +101,42 @@
         <div class="lg:col-span-7">
           <div class="grid grid-cols-2 gap-10 sm:grid-cols-3">
             <div>
-              <h3 class="text-sm font-semibold text-slate-200">Resources</h3>
+              <h3 class="text-sm font-semibold text-slate-200">{{ 'footer.resources.title' | translate }}</h3>
               <ul class="mt-5 space-y-3 text-sm">
-                <li><a routerLink="/get-started" class="hover:text-teal-300 transition">Get Started</a></li>
-                <li><a routerLink="/about" class="hover:text-teal-300 transition">About</a></li>
-                <li><a routerLink="/operating-manual" class="hover:text-teal-300 transition">Operating Manual</a></li>
-                <li><a routerLink="/dymaxion" class="hover:text-teal-300 transition">Fuller Project Map</a></li>
-                <li><a href="https://buy.stripe.com/8wM5lR1IK2og8r6000" target="_blank" class="hover:text-teal-300 transition">Donate</a></li>
-                <li><a routerLink="/archive-pictures" class="hover:text-teal-300 transition">Global Solutions Lab Archive Pictures</a></li>
-                <li><a routerLink="/careers" class="hover:text-teal-300 transition">Internship</a></li>
-                <li><a routerLink="/our-team" class="hover:text-teal-300 transition">Our Team</a></li>
+                <li><a routerLink="/get-started" class="hover:text-teal-300 transition">{{ 'navbar.getStarted' | translate }}</a></li>
+                <li><a routerLink="/about" class="hover:text-teal-300 transition">{{ 'navbar.about' | translate }}</a></li>
+                <li><a routerLink="/operating-manual" class="hover:text-teal-300 transition">{{ 'navbar.operatingManual' | translate }}</a></li>
+                <li><a routerLink="/dymaxion" class="hover:text-teal-300 transition">{{ 'footer.resources.fullerMap' | translate }}</a></li>
+                <li><a href="https://buy.stripe.com/8wM5lR1IK2og8r6000" target="_blank" class="hover:text-teal-300 transition">{{ 'footer.donate' | translate }}</a></li>
+                <li><a routerLink="/archive-pictures" class="hover:text-teal-300 transition">{{ 'footer.resources.archive' | translate }}</a></li>
+                <li><a routerLink="/careers" class="hover:text-teal-300 transition">{{ 'footer.resources.internship' | translate }}</a></li>
+                <li><a routerLink="/our-team" class="hover:text-teal-300 transition">{{ 'footer.resources.team' | translate }}</a></li>
               </ul>
             </div>
 
             <div>
-              <h3 class="text-sm font-semibold text-slate-200">Programs</h3>
+              <h3 class="text-sm font-semibold text-slate-200">{{ 'footer.programs.title' | translate }}</h3>
               <ul class="mt-5 space-y-3 text-sm">
-                <li><a routerLink="/pricing" class="hover:text-teal-300 transition">Pricing</a></li>
-                <li><a routerLink="/gsl2026-prep" class="hover:text-teal-300 transition">GSL 2026 Prep Scheduler</a></li>
-                <li><a routerLink="/blogs/features" class="hover:text-teal-300 transition">Features</a></li>
-                <li><a routerLink="/blogs/nwg-steps" class="hover:text-teal-300 transition">How It Works</a></li>
-                <li><a routerLink="/ask-bucky" class="hover:text-teal-300 transition">Ask Bucky</a></li>
-                <li><a routerLink="/tournament-landing" class="hover:text-teal-300 transition">Tournament for Schools</a></li>
-                                <li><a routerLink="/tournament-university" class="hover:text-teal-300 transition">Tournament for Universities</a></li>
-                <li><a routerLink="/tournament-instructions" class="hover:text-teal-300 transition">Tournament Instructions</a></li>
-                <li><a routerLink="/ask-anything" class="hover:text-teal-300 transition">Ask Anything</a></li>
-                <li><a routerLink="/ask-feedback" class="hover:text-teal-300 transition">Global Solutions Lab Feedback</a></li>
-                <li><a routerLink="/blogs/solution-libraries" class="hover:text-teal-300 transition">Solution Libraries</a></li>
+                <li><a routerLink="/pricing" class="hover:text-teal-300 transition">{{ 'navbar.pricing' | translate }}</a></li>
+                <li><a routerLink="/gsl2026-prep" class="hover:text-teal-300 transition">{{ 'footer.programs.prepScheduler' | translate }}</a></li>
+                <li><a routerLink="/blogs/features" class="hover:text-teal-300 transition">{{ 'footer.programs.features' | translate }}</a></li>
+                <li><a routerLink="/blogs/nwg-steps" class="hover:text-teal-300 transition">{{ 'footer.programs.howItWorks' | translate }}</a></li>
+                <li><a routerLink="/ask-bucky" class="hover:text-teal-300 transition">{{ 'footer.programs.askBucky' | translate }}</a></li>
+                <li><a routerLink="/tournament-landing" class="hover:text-teal-300 transition">{{ 'footer.programs.schoolTournament' | translate }}</a></li>
+                                <li><a routerLink="/tournament-university" class="hover:text-teal-300 transition">{{ 'footer.programs.universityTournament' | translate }}</a></li>
+                <li><a routerLink="/tournament-instructions" class="hover:text-teal-300 transition">{{ 'footer.programs.tournamentInstructions' | translate }}</a></li>
+                <li><a routerLink="/ask-anything" class="hover:text-teal-300 transition">{{ 'footer.programs.askAnything' | translate }}</a></li>
+                <li><a routerLink="/ask-feedback" class="hover:text-teal-300 transition">{{ 'footer.programs.feedback' | translate }}</a></li>
+                <li><a routerLink="/blogs/solution-libraries" class="hover:text-teal-300 transition">{{ 'footer.programs.solutionLibraries' | translate }}</a></li>
               </ul>
             </div>
 
             <div>
-              <h3 class="text-sm font-semibold text-slate-200">Support</h3>
+              <h3 class="text-sm font-semibold text-slate-200">{{ 'footer.support.title' | translate }}</h3>
               <ul class="mt-5 space-y-3 text-sm">
-                <li><a routerLink="/contact" class="hover:text-teal-300 transition">Contact Us</a></li>
-                <li><a routerLink="/privacy" class="hover:text-teal-300 transition">Privacy Policy</a></li>
-                <li><a routerLink="/intellectual-property" class="hover:text-teal-300 transition">Intellectual Property</a></li>
+                <li><a routerLink="/contact" class="hover:text-teal-300 transition">{{ 'landingCommunity.cta.contact' | translate }}</a></li>
+                <li><a routerLink="/privacy" class="hover:text-teal-300 transition">{{ 'footer.support.privacy' | translate }}</a></li>
+                <li><a routerLink="/intellectual-property" class="hover:text-teal-300 transition">{{ 'footer.support.intellectualProperty' | translate }}</a></li>
               </ul>
             </div>
           </div>
@@ -147,9 +145,9 @@
 
       <!-- bottom bar -->
       <div class="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 md:flex-row">
-        <p class="text-xs text-slate-400">© 2025 EarthGame. All rights reserved.</p>
-        <a href="#top" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-teal-300 transition" aria-label="Back to top">
-          Back to top
+        <p class="text-xs text-slate-400">{{ 'footer.copyright' | translate }}</p>
+        <a href="#top" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-teal-300 transition" [attr.aria-label]="'footer.backToTop' | translate">
+          {{ 'footer.backToTop' | translate }}
           <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>

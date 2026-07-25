@@ -5,7 +5,7 @@
     <div class="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
       <img
         [src]="image || 'assets/img/generic.webp'"
-        [attr.alt]="title || 'Challenge'"
+        [attr.alt]="title || ('challengeCard.challengeAlt' | translate)"
         class="absolute inset-0 h-full w-full transition duration-300 group-hover:scale-[1.03]"
         [ngClass]="fit === 'contain' ? 'object-contain p-3' : 'object-cover'"
         loading="lazy"
@@ -48,13 +48,13 @@
               d="M9 12l2 2 4-4m5 2a8 8 0 11-16 0 8 8 0 0116 0z"
             ></path>
           </svg>
-          {{ isPrivateSolution ? 'Private' : 'Open' }}
+          {{ (isPrivateSolution ? 'challengeCard.private' : 'challengeCard.open') | translate }}
         </span>
       </div>
 
       <div class="absolute bottom-3 left-3 right-3">
         <p class="text-xs font-semibold uppercase tracking-[0.14em] text-teal-100">
-          Solution workspace
+          {{ 'challengeCard.workspace' | translate }}
         </p>
       </div>
     </div>
@@ -83,7 +83,7 @@
     >
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Team
+          {{ 'challengeCard.team' | translate }}
         </p>
         <p class="mt-1 font-semibold text-slate-800 dark:text-slate-100">
           {{ memberCountLabel }}
@@ -91,10 +91,10 @@
       </div>
       <div>
         <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Access
+          {{ 'challengeCard.access' | translate }}
         </p>
         <p class="mt-1 font-semibold" [ngClass]="isPrivateSolution ? 'text-slate-700 dark:text-slate-200' : 'text-emerald-700 dark:text-emerald-300'">
-          {{ isPrivateSolution ? 'Private' : 'Open' }}
+          {{ (isPrivateSolution ? 'challengeCard.private' : 'challengeCard.open') | translate }}
         </p>
       </div>
     </div>
@@ -118,7 +118,7 @@
           <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
           </svg>
-          Details
+          {{ 'challengeCard.details' | translate }}
         </button>
 
         <div
@@ -129,7 +129,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Loading
+          {{ 'challengeCard.loading' | translate }}
         </div>
 
         <button
@@ -153,7 +153,7 @@
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
             </svg>
-            {{ isPrivateSolution ? 'Request access' : ('challengeCard.joinSolution' | translate) }}
+            {{ (isPrivateSolution ? 'challengeCard.requestAccess' : 'challengeCard.joinSolution') | translate }}
           </button>
           <button
             (click)="previewSolution()"
@@ -188,10 +188,10 @@
         </div>
         <div>
           <p class="text-xs font-semibold uppercase tracking-[0.2em] text-teal-100">
-            Private solution
+            {{ 'challengeCard.privateModal.badge' | translate }}
           </p>
           <h3 class="mt-1 text-xl font-bold leading-tight">
-            Access is restricted
+            {{ 'challengeCard.privateModal.title' | translate }}
           </h3>
         </div>
       </div>
@@ -199,19 +199,16 @@
 
     <div class="px-6 py-6">
       <p class="text-base font-semibold text-slate-900 dark:text-white">
-        {{ title || 'This solution' }} is private.
+        {{ 'challengeCard.privateModal.solutionIsPrivate' | translate: { title: title || ('challengeCard.privateModal.thisSolution' | translate) } }}
       </p>
       <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-        Reach out to a workspace admin to be added before opening this solution.
-        Once an admin grants access, this card will take you to the same
-        solution workspace.
+        {{ 'challengeCard.privateModal.description' | translate }}
       </p>
 
       <div
         class="mt-5 rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 text-sm text-teal-900 dark:border-teal-800/60 dark:bg-teal-950/30 dark:text-teal-100"
       >
-        Ask an admin from this challenge space to invite you or add your email
-        to the solution team.
+        {{ 'challengeCard.privateModal.adminHint' | translate }}
       </div>
 
       <div class="mt-6 flex justify-end">
@@ -220,7 +217,7 @@
           (click)="closePrivateSolutionModal()"
           class="rounded-lg bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800"
         >
-          Got it
+          {{ 'challengeCard.privateModal.gotIt' | translate }}
         </button>
       </div>
     </div>

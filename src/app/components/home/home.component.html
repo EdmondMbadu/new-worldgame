@@ -35,27 +35,26 @@
     <main class="mx-auto max-w-7xl px-1 pb-4 pt-24 sm:px-3 sm:pt-28">
       <header class="community-home-header">
         <div class="community-home-header__copy">
-          <p class="community-eyebrow">Global Solutions Lab community</p>
-          <h1>Solutions worth building together</h1>
+          <p class="community-eyebrow">{{ 'home.community.eyebrow' | translate }}</p>
+          <h1>{{ 'home.community.title' | translate }}</h1>
           <p>
-            See what teams are developing, understand their thinking, and add
-            a useful comment that helps the work move forward.
+            {{ 'home.community.description' | translate }}
           </p>
         </div>
         <button type="button" class="community-start-button" (click)="startSolution()">
           <span class="material-symbols-outlined" aria-hidden="true">add</span>
-          Start a solution
+          {{ 'home.community.startSolution' | translate }}
         </button>
       </header>
 
-      <nav class="community-view-switcher" aria-label="Home content">
+      <nav class="community-view-switcher" [attr.aria-label]="'home.community.homeContentLabel' | translate">
         <button
           type="button"
           (click)="selectHomeView('solutions')"
           [class.community-view-switcher__active]="homeView === 'solutions'"
           [attr.aria-current]="homeView === 'solutions' ? 'page' : null"
         >
-          Community solutions
+          {{ 'home.community.tabs.solutions' | translate }}
         </button>
         <button
           type="button"
@@ -63,35 +62,35 @@
           [class.community-view-switcher__active]="homeView === 'challenges'"
           [attr.aria-current]="homeView === 'challenges' ? 'page' : null"
         >
-          Explore challenges
+          {{ 'home.community.tabs.challenges' | translate }}
         </button>
       </nav>
 
       <section *ngIf="homeView === 'solutions'" id="solutions" class="community-solutions-section">
         <div class="community-feed-toolbar">
           <div>
-            <h2>Community solutions</h2>
-            <p>Community-visible work from across the Lab.</p>
+            <h2>{{ 'home.community.sectionTitle' | translate }}</h2>
+            <p>{{ 'home.community.sectionSubtitle' | translate }}</p>
           </div>
-          <div class="community-filter-group" aria-label="Filter solutions by status">
+          <div class="community-filter-group" [attr.aria-label]="'home.community.filterLabel' | translate">
             <button
               type="button"
               *ngFor="let filter of ['all', 'in-development', 'submitted']"
               (click)="setCommunityFilter($any(filter))"
               [class.community-filter-active]="communityFilter === filter"
             >
-              {{
+              {{ (
                 filter === 'all'
-                  ? 'All'
+                  ? 'home.community.filters.all'
                   : filter === 'in-development'
-                  ? 'In development'
-                  : 'Submitted'
-              }}
+                  ? 'home.community.filters.inDevelopment'
+                  : 'home.community.filters.submitted'
+              ) | translate }}
             </button>
           </div>
         </div>
 
-        <div *ngIf="isLoadingCommunitySolutions" class="community-card-grid" aria-label="Loading solutions">
+        <div *ngIf="isLoadingCommunitySolutions" class="community-card-grid" [attr.aria-label]="'home.community.loadingLabel' | translate">
           <div *ngFor="let _ of [0,1,2,3,4,5]" class="community-card community-card--skeleton">
             <div class="skeleton-line skeleton-line--short"></div>
             <div class="skeleton-line skeleton-line--title"></div>
@@ -104,10 +103,10 @@
         <div *ngIf="communitySolutionsError && !isLoadingCommunitySolutions" class="community-state community-state--error">
           <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
           <div>
-            <h3>Solutions are taking longer than expected</h3>
-            <p>{{ communitySolutionsError }}</p>
+            <h3>{{ 'home.community.error.title' | translate }}</h3>
+            <p>{{ communitySolutionsError | translate }}</p>
           </div>
-          <button type="button" (click)="loadCommunitySolutions(true)">Try again</button>
+          <button type="button" (click)="loadCommunitySolutions(true)">{{ 'home.community.error.retry' | translate }}</button>
         </div>
 
         <div
@@ -116,10 +115,10 @@
         >
           <span class="material-symbols-outlined" aria-hidden="true">forum</span>
           <div>
-            <h3>No solutions in this view yet</h3>
-            <p>Try another status, or start a solution and invite the community into the work.</p>
+            <h3>{{ 'home.community.empty.title' | translate }}</h3>
+            <p>{{ 'home.community.empty.description' | translate }}</p>
           </div>
-          <button type="button" (click)="setCommunityFilter('all')">Show all solutions</button>
+          <button type="button" (click)="setCommunityFilter('all')">{{ 'home.community.empty.showAll' | translate }}</button>
         </div>
 
         <div
@@ -139,7 +138,7 @@
                 [class.community-status--submitted]="item.finished === 'true'"
               >
                 <span class="community-status__dot"></span>
-                {{ item.finished === 'true' ? 'Submitted' : 'In development' }}
+                {{ (item.finished === 'true' ? 'home.community.filters.submitted' : 'home.community.filters.inDevelopment') | translate }}
               </span>
               <span class="community-activity">{{ communityActivityLabel(item) }}</span>
             </div>
@@ -148,7 +147,7 @@
               <img
                 *ngIf="item.image; else communityImageFallback"
                 [src]="item.image"
-                [alt]="(item.title || 'Solution') + ' preview image'"
+                [alt]="(item.title || ('home.community.defaultSolutionTitle' | translate)) + ' — ' + ('home.community.previewImage' | translate)"
                 loading="lazy"
                 decoding="async"
                 (error)="handleCommunityImageError($event)"
@@ -168,10 +167,10 @@
             <div class="community-card__identity">
               <span class="community-avatar">{{ communityInitials(item) }}</span>
               <span>
-                <strong>{{ item.authorName || 'Global Solutions Lab team' }}</strong>
+                <strong>{{ item.authorName || ('home.community.defaultTeamName' | translate) }}</strong>
                 <small>
                   {{ communityMemberCount(item) }}
-                  {{ communityMemberCount(item) === 1 ? 'member' : 'members' }}
+                  {{ (communityMemberCount(item) === 1 ? 'home.community.member' : 'home.community.members') | translate }}
                 </small>
               </span>
             </div>
@@ -179,19 +178,19 @@
             <h3>{{ item.title }}</h3>
             <p class="community-card__excerpt">{{ communityExcerpt(item) }}</p>
 
-            <div class="community-progress" aria-label="Solution progress">
+            <div class="community-progress" [attr.aria-label]="'home.community.progressLabel' | translate">
               <span><i [style.width.%]="communityProgress(item)"></i></span>
-              <small>{{ communityProgress(item) }}% developed</small>
+              <small>{{ 'home.community.developed' | translate: { percent: communityProgress(item) } }}</small>
             </div>
 
             <footer>
               <span class="community-comment-count">
                 <span class="material-symbols-outlined" aria-hidden="true">chat_bubble</span>
                 {{ item.commentCount || item.comments?.length || 0 }}
-                {{ (item.commentCount || item.comments?.length || 0) === 1 ? 'comment' : 'comments' }}
+                {{ ((item.commentCount || item.comments?.length || 0) === 1 ? 'home.community.comment' : 'home.community.comments') | translate }}
               </span>
               <button type="button" (click)="$event.stopPropagation(); openCommunitySolution(item)">
-                Read &amp; comment
+                {{ 'home.community.readAndComment' | translate }}
                 <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
               </button>
             </footer>
@@ -205,7 +204,7 @@
             [disabled]="isLoadingMoreCommunitySolutions"
           >
             <span *ngIf="isLoadingMoreCommunitySolutions" class="community-button-spinner"></span>
-            {{ isLoadingMoreCommunitySolutions ? 'Loading solutions…' : 'Show more solutions' }}
+            {{ (isLoadingMoreCommunitySolutions ? 'home.community.loadingMore' : 'home.community.showMore') | translate }}
           </button>
         </div>
       </section>

@@ -324,7 +324,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Unable to load community solutions', error);
       this.communitySolutionsError =
-        'We could not load community solutions. Please try again.';
+        'home.community.error.message';
     } finally {
       this.isLoadingCommunitySolutions = false;
       this.isLoadingMoreCommunitySolutions = false;
@@ -421,16 +421,38 @@ export class HomeComponent implements OnInit, OnDestroy {
       solution.submissionDate ||
       solution.creationDate;
     const date = raw?.toDate?.() || (raw ? new Date(raw) : null);
-    if (!date || Number.isNaN(date.getTime())) return 'Recently active';
+    if (!date || Number.isNaN(date.getTime())) {
+      return this.translate.instant('home.community.activity.recently');
+    }
     const seconds = Math.max(1, Math.floor((Date.now() - date.getTime()) / 1000));
-    if (seconds < 60) return 'Active just now';
-    if (seconds < 3600) return `Active ${Math.floor(seconds / 60)}m ago`;
-    if (seconds < 86400) return `Active ${Math.floor(seconds / 3600)}h ago`;
-    if (seconds < 604800) return `Active ${Math.floor(seconds / 86400)}d ago`;
-    return `Updated ${date.toLocaleDateString('en-US', {
+    if (seconds < 60) {
+      return this.translate.instant('home.community.activity.justNow');
+    }
+    if (seconds < 3600) {
+      return this.translate.instant('home.community.activity.minutesAgo', {
+        count: Math.floor(seconds / 60),
+      });
+    }
+    if (seconds < 86400) {
+      return this.translate.instant('home.community.activity.hoursAgo', {
+        count: Math.floor(seconds / 3600),
+      });
+    }
+    if (seconds < 604800) {
+      return this.translate.instant('home.community.activity.daysAgo', {
+        count: Math.floor(seconds / 86400),
+      });
+    }
+    const formattedDate = date.toLocaleDateString(
+      this.shouldUseFrenchTitles() ? 'fr-FR' : 'en-US',
+      {
       month: 'short',
       day: 'numeric',
-    })}`;
+      }
+    );
+    return this.translate.instant('home.community.activity.updated', {
+      date: formattedDate,
+    });
   }
 
   trackCommunitySolution(index: number, solution: Solution): string {

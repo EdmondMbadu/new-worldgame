@@ -37,5 +37,9 @@ export class LandingCommunityComponent implements OnInit {
   trackByIndex(index: number): number {
     return index;
   }
-}
 
+  avatarIntroKey(ai: AIOption): string {
+    const slug = ai.slug === 'dr-logos' ? 'logos' : ai.slug;
+    return `otherAis.avatars.${slug}.intro`;
+  }
+}
