@@ -3137,20 +3137,31 @@ const buildAIInsightsEmailFromCache = (
   const videoSummaryUrl = safeHttpUrl(data.videoSummaryUrl);
   const videoSummarySection = videoSummaryUrl
     ? `
-              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0 0;background-color:#f5f3ff;border:1px solid #ddd6fe;border-radius:16px;">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0;background-color:#111827;border:1px solid #1f2937;border-radius:18px;">
                 <tr>
-                  <td style="padding:20px 18px 18px;">
-                    <p style="margin:0 0 6px;font-size:12px;color:#6d28d9;text-transform:uppercase;letter-spacing:1px;font-weight:700;">
-                      Weekly video summary
+                  <td style="padding:24px 22px 22px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                      <tr>
+                        <td width="66" style="width:66px;vertical-align:middle;padding-right:16px;">
+                          <a href="${videoSummaryUrl}" aria-label="Watch this week's intelligence brief" style="display:inline-block;width:58px;height:58px;background-color:#14b8a6;border-radius:50%;color:#062f2b;text-align:center;text-decoration:none;font-size:24px;line-height:58px;font-weight:700;">
+                            <span style="padding-left:3px;">&#9654;</span>
+                          </a>
+                        </td>
+                        <td style="vertical-align:middle;">
+                          <p style="margin:0 0 6px;font-size:11px;color:#5eead4;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;">
+                            Featured video briefing
+                          </p>
+                          <p style="margin:0;font-size:22px;line-height:1.3;font-weight:600;font-family:Georgia,'Times New Roman',serif;">
+                            <a href="${videoSummaryUrl}" style="color:#ffffff;text-decoration:none;">Watch this week's intelligence brief</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                    <p style="margin:18px 0 18px;font-size:14px;line-height:1.65;color:#cbd5e1;">
+                      Start here for a concise video overview of this week's most useful Global Solutions Lab news and opportunities.
                     </p>
-                    <p style="margin:0 0 8px;font-size:20px;line-height:1.35;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">
-                      Watch the week in brief
-                    </p>
-                    <p style="margin:0 0 14px;font-size:14px;line-height:1.65;color:#4b5563;">
-                      Get a quick video overview of this week's Global Solutions Lab news and intelligence.
-                    </p>
-                    <a href="${videoSummaryUrl}" style="display:inline-block;background-color:#6d28d9;color:#ffffff;text-decoration:none;padding:12px 18px;font-size:14px;font-weight:700;border-radius:10px;">
-                      &#9654;&nbsp; Watch Video Summary
+                    <a href="${videoSummaryUrl}" style="display:inline-block;background-color:#14b8a6;color:#062f2b;text-decoration:none;padding:13px 20px;font-size:14px;font-weight:800;border-radius:10px;">
+                      Watch the briefing&nbsp;&nbsp;&#8594;
                     </a>
                   </td>
                 </tr>
@@ -3394,6 +3405,7 @@ const buildAIInsightsEmailFromCache = (
               <p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;">
                 Dear ${userFirstName || 'there'},
               </p>
+              ${videoSummarySection}
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 Welcome to this week's Global Solutions Lab Intelligence Brief - and thank you for being part of Global Solutions Lab.
               </p>
@@ -3409,7 +3421,6 @@ const buildAIInsightsEmailFromCache = (
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 <a href="https://newworld-game.org/email-feedback" style="color:#2563eb;text-decoration:underline;">We'd also appreciate your feedback</a> as we improve this experience.
               </p>
-              ${videoSummarySection}
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0 0;background-color:#eff6ff;border:1px solid #bfdbfe;border-radius:16px;">
                 <tr>
                   <td style="padding:18px 18px 16px;">
