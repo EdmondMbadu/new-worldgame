@@ -82,6 +82,9 @@ export class Solution {
   updatedAt?: any;
   createdAt?: any;
   lastSubstantiveEditAt?: any;
+  stepsUpdatedAt?: any;
+  draftUpdatedAt?: any;
+  publishedContentUpdatedAt?: any;
 }
 
 export interface SolutionRecruitmentProfile {

@@ -267,31 +267,156 @@
             <!-- <figure><img *ngIf="currentSolution.image" [src]="currentSolution.image" class="my-3" alt=""></figure> -->
            
 
-            <div *ngIf="hasCompiledContent" class="nwg-article" [innerHTML]="currentSolution.content"></div>
-
-            <section *ngIf="isInDevelopment && !hasCompiledContent" class="development-preview">
-                <div class="development-preview__heading">
-                    <span class="development-preview__badge">In development</span>
-                    <h2>A working solution, open to thoughtful input</h2>
-                    <p>
-                        This team is still developing the solution. The material below
-                        reflects its current direction and completed work.
-                    </p>
+            <section *ngIf="hasAnyPreviewContent" class="solution-content-explorer">
+                <div class="solution-content-explorer__heading">
+                    <div>
+                        <span
+                            class="solution-content-explorer__status"
+                            [class.solution-content-explorer__status--submitted]="!isInDevelopment"
+                        >
+                            <span class="solution-content-explorer__status-dot"></span>
+                            {{ isInDevelopment ? 'In development' : 'Submitted solution' }}
+                        </span>
+                        <h2>
+                            {{
+                                isInDevelopment
+                                    ? 'A working solution, open to thoughtful input'
+                                    : 'Explore the solution'
+                            }}
+                        </h2>
+                        <p>
+                            {{
+                                isInDevelopment
+                                    ? 'Read the team’s latest work or switch to its edited narrative before adding a comment.'
+                                    : 'Read the published solution or explore the development work behind it.'
+                            }}
+                        </p>
+                    </div>
+                    <span class="solution-content-explorer__source">
+                        <span class="material-symbols-outlined" aria-hidden="true">sync</span>
+                        {{ activePreviewView === 'latest' ? 'Live team work' : activePreviewView === 'draft' ? 'Editable draft' : 'Saved publication' }}
+                    </span>
                 </div>
 
-                <article *ngIf="currentSolution.description">
-                    <p class="development-preview__label">Solution overview</p>
+                <nav
+                    *ngIf="previewViewCount > 1"
+                    class="solution-content-tabs"
+                    aria-label="Choose solution content"
+                >
+                    <button
+                        *ngIf="hasLatestWork"
+                        type="button"
+                        (click)="selectPreviewView('latest')"
+                        [class.solution-content-tabs__active]="activePreviewView === 'latest'"
+                        [attr.aria-pressed]="activePreviewView === 'latest'"
+                    >
+                        <span class="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
+                        Latest work
+                    </button>
+                    <button
+                        *ngIf="hasTeamDraft"
+                        type="button"
+                        (click)="selectPreviewView('draft')"
+                        [class.solution-content-tabs__active]="activePreviewView === 'draft'"
+                        [attr.aria-pressed]="activePreviewView === 'draft'"
+                    >
+                        <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
+                        Team draft
+                        <span *ngIf="isDraftBehindSteps" class="solution-content-tabs__update-dot" aria-label="Newer team work is available"></span>
+                    </button>
+                    <button
+                        *ngIf="hasCompiledContent"
+                        type="button"
+                        (click)="selectPreviewView('published')"
+                        [class.solution-content-tabs__active]="activePreviewView === 'published'"
+                        [attr.aria-pressed]="activePreviewView === 'published'"
+                    >
+                        <span class="material-symbols-outlined" aria-hidden="true">article</span>
+                        Published version
+                    </button>
+                </nav>
+
+                <div *ngIf="activePreviewView === 'latest' && hasLatestWork" class="solution-latest-work">
+                    <div class="solution-content-note">
+                        <span class="material-symbols-outlined" aria-hidden="true">update</span>
+                        <p>
+                            <strong>The team’s most current work</strong>
+                            This view comes directly from its saved work across Steps 1–4.
+                        </p>
+                    </div>
+
+                    <article *ngIf="currentSolution.description" class="solution-overview-card">
+                        <p class="solution-content-label">Solution overview</p>
+                        <div class="nwg-article" [innerHTML]="currentSolution.description"></div>
+                    </article>
+
+                    <article
+                        *ngFor="let section of developmentSections; trackBy: trackDevelopmentSection"
+                        class="solution-step-section"
+                    >
+                        <header class="solution-step-section__header">
+                            <span class="solution-step-section__icon material-symbols-outlined" aria-hidden="true">
+                                {{ section.icon }}
+                            </span>
+                            <div>
+                                <span class="solution-step-section__eyebrow">Step {{ section.step }}</span>
+                                <h3>{{ section.title }}</h3>
+                                <p>{{ section.description }}</p>
+                            </div>
+                            <span class="solution-step-section__count">
+                                {{ section.answers.length }} of {{ section.total }} answered
+                            </span>
+                        </header>
+
+                        <div class="solution-step-section__answers">
+                            <section
+                                *ngFor="let answer of section.answers; trackBy: trackDevelopmentAnswer"
+                                class="solution-step-answer"
+                            >
+                                <h4>{{ answer.label }}</h4>
+                                <div class="nwg-article" [innerHTML]="answer.content"></div>
+                            </section>
+                        </div>
+                    </article>
+                </div>
+
+                <div *ngIf="activePreviewView === 'draft' && hasTeamDraft" class="solution-narrative-view">
+                    <div *ngIf="isDraftBehindSteps" class="solution-freshness-note">
+                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                        <p>
+                            <strong>Newer development work is available.</strong>
+                            The team has updated Steps 1–4 since this narrative was last refreshed.
+                            Choose “Latest work” to read the newest material.
+                        </p>
+                    </div>
+                    <div class="solution-narrative-view__paper">
+                        <p class="solution-content-label">Team draft</p>
+                        <div class="nwg-article" [innerHTML]="currentSolution.strategyReview"></div>
+                    </div>
+                </div>
+
+                <div *ngIf="activePreviewView === 'published' && hasCompiledContent" class="solution-narrative-view">
+                    <div *ngIf="isPublishedSnapshotBehind" class="solution-freshness-note">
+                        <span class="material-symbols-outlined" aria-hidden="true">info</span>
+                        <p>
+                            <strong>This saved preview is not the team’s newest work.</strong>
+                            Choose “Latest work” to see changes made since this version was created.
+                        </p>
+                    </div>
+                    <div class="solution-narrative-view__paper">
+                        <p class="solution-content-label">
+                            {{ isInDevelopment ? 'Saved preview' : 'Published solution' }}
+                        </p>
+                        <div class="nwg-article" [innerHTML]="currentSolution.content"></div>
+                    </div>
+                </div>
+
+                <article
+                    *ngIf="!hasLatestWork && !hasTeamDraft && !hasCompiledContent && currentSolution.description"
+                    class="solution-overview-card"
+                >
+                    <p class="solution-content-label">Solution overview</p>
                     <div class="nwg-article" [innerHTML]="currentSolution.description"></div>
-                </article>
-
-                <article *ngIf="currentSolution.strategyReview">
-                    <p class="development-preview__label">Strategy review</p>
-                    <div class="nwg-article" [innerHTML]="currentSolution.strategyReview"></div>
-                </article>
-
-                <article *ngFor="let answer of developmentAnswers()">
-                    <p class="development-preview__label">{{ answer.label }}</p>
-                    <div class="nwg-article" [innerHTML]="answer.content"></div>
                 </article>
             </section>
 

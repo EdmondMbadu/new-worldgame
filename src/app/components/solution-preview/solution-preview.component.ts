@@ -9,6 +9,90 @@ import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
+type SolutionPreviewContentView = 'latest' | 'draft' | 'published';
+
+interface SolutionPreviewAnswer {
+  key: string;
+  label: string;
+  content: string;
+}
+
+interface SolutionPreviewSection {
+  step: number;
+  title: string;
+  description: string;
+  icon: string;
+  total: number;
+  answers: SolutionPreviewAnswer[];
+}
+
+const SOLUTION_STEP_SECTIONS: Array<
+  Omit<SolutionPreviewSection, 'answers' | 'total'> & {
+    questions: Array<{ key: string; label: string }>;
+  }
+> = [
+  {
+    step: 1,
+    title: 'Understanding the problem',
+    description: 'The challenge, its causes, its scale, and why action matters.',
+    icon: 'search_insights',
+    questions: [
+      { key: 'S1-A', label: 'The problem and why it matters' },
+      { key: 'S1-B', label: 'Symptoms, causes, systems, and major actors' },
+      { key: 'S1-C', label: 'People and places affected' },
+      { key: 'S1-D', label: 'Consequences if nothing changes' },
+    ],
+  },
+  {
+    step: 2,
+    title: 'Defining the preferred future',
+    description: 'The outcome the team wants to create and how success will be recognized.',
+    icon: 'flag',
+    questions: [
+      { key: 'S2-A', label: 'The preferred future and overall goal' },
+      { key: 'S2-B', label: 'Measures of success' },
+    ],
+  },
+  {
+    step: 3,
+    title: 'Designing the solution',
+    description: 'The proposed approach, enabling resources, and opportunities for impact.',
+    icon: 'lightbulb',
+    questions: [
+      { key: 'S3-A', label: 'The proposed solution and its leverage points' },
+      { key: 'S3-B', label: 'Technology, programs, and policies required' },
+      { key: 'S3-C', label: 'Resources and community support' },
+      { key: 'S3-D', label: 'Business opportunity' },
+      {
+        key: 'S3-E',
+        label: 'Circular, regenerative, and equitable design',
+      },
+    ],
+  },
+  {
+    step: 4,
+    title: 'Planning implementation',
+    description: 'Costs, partners, funding, actions, and the results expected from implementation.',
+    icon: 'account_tree',
+    questions: [
+      { key: 'S4-A', label: 'Proof-of-concept cost' },
+      { key: 'S4-B', label: 'Cost to implement at scale' },
+      { key: 'S4-C', label: 'Funding and investment strategy' },
+      { key: 'S4-D', label: 'Implementation partners and location' },
+      { key: 'S4-E', label: 'Actions for the next 6–12 months' },
+      { key: 'S4-F', label: 'Detailed implementation model' },
+      { key: 'S4-G', label: 'Expected local results' },
+      { key: 'S4-H', label: 'Expected global results' },
+      { key: 'S4-I', label: 'Path to the preferred future' },
+      { key: 'S4-J', label: 'Environmental impact' },
+      { key: 'S4-K', label: 'Best funding sources' },
+      { key: 'S4-L', label: 'Equity and social justice' },
+      { key: 'S4-M', label: 'How $10,000 would advance the work' },
+      { key: 'S4-N', label: 'What the team can do now' },
+    ],
+  },
+];
+
 @Component({
     selector: 'app-solution-preview',
     templateUrl: './solution-preview.component.html',
@@ -51,6 +135,9 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   commentError = '';
   commentSuccess = '';
   returnTo = '/home';
+  activePreviewView: SolutionPreviewContentView = 'latest';
+  developmentSections: SolutionPreviewSection[] = [];
+  private previewViewSolutionId = '';
   private solutionSub?: Subscription;
   private communityCommentsSub?: Subscription;
 
@@ -232,6 +319,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
           return;
         }
         this.currentSolution = data[0];
+        this.refreshPreviewContentModel();
         if (this.currentSolution.authorEmail === this.auth.currentUser.email) {
           this.iscreatorOfThisSolution = true;
         }
@@ -303,18 +391,70 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   }
 
   get hasCompiledContent(): boolean {
-    return Boolean(
-      String(this.currentSolution.content || '').replace(/<[^>]*>/g, '').trim()
+    return this.hasMeaningfulContent(this.currentSolution.content);
+  }
+
+  get hasLatestWork(): boolean {
+    return this.developmentSections.length > 0;
+  }
+
+  get hasTeamDraft(): boolean {
+    return this.hasMeaningfulContent(this.currentSolution.strategyReview);
+  }
+
+  get hasAnyPreviewContent(): boolean {
+    return (
+      this.hasLatestWork ||
+      this.hasTeamDraft ||
+      this.hasCompiledContent ||
+      this.hasMeaningfulContent(this.currentSolution.description)
     );
   }
 
-  developmentAnswers(): Array<{ label: string; content: string }> {
-    return Object.entries(this.currentSolution.status || {})
-      .filter(([, value]) => String(value || '').trim())
-      .map(([key, value], index) => ({
-        label: this.humanizeAnswerKey(key, index),
-        content: String(value),
-      }));
+  get previewViewCount(): number {
+    return [
+      this.hasLatestWork,
+      this.hasTeamDraft,
+      this.hasCompiledContent,
+    ].filter(Boolean).length;
+  }
+
+  get isDraftBehindSteps(): boolean {
+    const stepsUpdatedAt = this.timestampMillis(
+      this.currentSolution.stepsUpdatedAt
+    );
+    const draftUpdatedAt = this.timestampMillis(
+      this.currentSolution.draftUpdatedAt
+    );
+    return (
+      stepsUpdatedAt > 0 &&
+      draftUpdatedAt > 0 &&
+      stepsUpdatedAt > draftUpdatedAt
+    );
+  }
+
+  get isPublishedSnapshotBehind(): boolean {
+    if (!this.isInDevelopment) return false;
+
+    const publishedAt = this.timestampMillis(
+      this.currentSolution.publishedContentUpdatedAt
+    );
+    const latestSourceAt = Math.max(
+      this.timestampMillis(this.currentSolution.stepsUpdatedAt),
+      this.timestampMillis(this.currentSolution.draftUpdatedAt)
+    );
+    return publishedAt > 0 && latestSourceAt > publishedAt;
+  }
+
+  selectPreviewView(view: SolutionPreviewContentView): void {
+    if (
+      (view === 'latest' && !this.hasLatestWork) ||
+      (view === 'draft' && !this.hasTeamDraft) ||
+      (view === 'published' && !this.hasCompiledContent)
+    ) {
+      return;
+    }
+    this.activePreviewView = view;
   }
 
   private watchCommunityComments(): void {
@@ -368,14 +508,88 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
       .filter(Boolean);
   }
 
-  private humanizeAnswerKey(key: string, index: number): string {
-    const clean = String(key || '')
-      .replace(/[_-]+/g, ' ')
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
-      .trim();
-    return clean
-      ? clean.replace(/\b\w/g, (letter) => letter.toUpperCase())
-      : `Development note ${index + 1}`;
+  trackDevelopmentSection(
+    _index: number,
+    section: SolutionPreviewSection
+  ): number {
+    return section.step;
+  }
+
+  trackDevelopmentAnswer(
+    _index: number,
+    answer: SolutionPreviewAnswer
+  ): string {
+    return answer.key;
+  }
+
+  private refreshPreviewContentModel(): void {
+    const status = this.currentSolution.status || {};
+    this.developmentSections = SOLUTION_STEP_SECTIONS.map((section) => ({
+      step: section.step,
+      title: section.title,
+      description: section.description,
+      icon: section.icon,
+      total: section.questions.length,
+      answers: section.questions
+        .map((question) => ({
+          key: question.key,
+          label: question.label,
+          content: String(status[question.key] || ''),
+        }))
+        .filter((answer) => this.hasMeaningfulContent(answer.content)),
+    })).filter((section) => section.answers.length > 0);
+
+    const solutionKey = String(
+      this.currentSolution.solutionId || this.solutionId || ''
+    );
+    if (this.previewViewSolutionId !== solutionKey) {
+      this.previewViewSolutionId = solutionKey;
+      this.activePreviewView = this.defaultPreviewView();
+      return;
+    }
+
+    if (
+      (this.activePreviewView === 'latest' && !this.hasLatestWork) ||
+      (this.activePreviewView === 'draft' && !this.hasTeamDraft) ||
+      (this.activePreviewView === 'published' && !this.hasCompiledContent)
+    ) {
+      this.activePreviewView = this.defaultPreviewView();
+    }
+  }
+
+  private defaultPreviewView(): SolutionPreviewContentView {
+    if (!this.isInDevelopment && this.hasCompiledContent) {
+      return 'published';
+    }
+    if (this.hasLatestWork) {
+      return 'latest';
+    }
+    if (this.hasTeamDraft) {
+      return 'draft';
+    }
+    return 'published';
+  }
+
+  private hasMeaningfulContent(value: unknown): boolean {
+    const raw = String(value || '');
+    if (/<(?:img|video|audio|iframe|table)\b/i.test(raw)) {
+      return true;
+    }
+    return raw
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .replace(/\u00a0/g, ' ')
+      .trim().length > 0;
+  }
+
+  private timestampMillis(value: any): number {
+    const direct = value?.toMillis?.();
+    if (Number.isFinite(direct)) return Number(direct);
+
+    const date = value?.toDate?.() || (value ? new Date(value) : null);
+    const millis = date?.getTime?.();
+    return Number.isFinite(millis) ? Number(millis) : 0;
   }
 
   private scrollToLinkedComment(): void {
@@ -733,9 +947,9 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     hrElement.style.margin = '20px 0';
     container.appendChild(hrElement);
 
-    // -- (E) Add the existing solution content --
+    // -- (E) Add the content currently selected in the preview --
     const contentDiv = document.createElement('div');
-    contentDiv.innerHTML = this.currentSolution.content!;
+    contentDiv.innerHTML = this.activePreviewContentForExport();
     container.appendChild(contentDiv);
 
     // -- Add the container to the DOM (off-screen) for rendering --
@@ -833,6 +1047,49 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
 
     // Or directly save:
     // pdf.save(`${this.currentSolution.title}.pdf`);
+  }
+
+  private activePreviewContentForExport(): string {
+    if (this.activePreviewView === 'draft' && this.hasTeamDraft) {
+      return String(this.currentSolution.strategyReview || '');
+    }
+
+    if (this.activePreviewView === 'published' && this.hasCompiledContent) {
+      return String(this.currentSolution.content || '');
+    }
+
+    if (this.hasLatestWork) {
+      const overview = this.hasMeaningfulContent(
+        this.currentSolution.description
+      )
+        ? `<section><h2>Solution overview</h2>${this.currentSolution.description}</section>`
+        : '';
+      const steps = this.developmentSections
+        .map(
+          (section) => `
+            <section>
+              <h2>Step ${section.step}: ${section.title}</h2>
+              ${section.answers
+                .map(
+                  (answer) => `
+                    <h3>${answer.label}</h3>
+                    ${answer.content}
+                  `
+                )
+                .join('')}
+            </section>
+          `
+        )
+        .join('');
+      return `${overview}${steps}`;
+    }
+
+    return String(
+      this.currentSolution.content ||
+        this.currentSolution.strategyReview ||
+        this.currentSolution.description ||
+        ''
+    );
   }
 
   getAvatarColor(uid: string): string {

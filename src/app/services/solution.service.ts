@@ -108,10 +108,17 @@ export class SolutionService {
     };
   }
 
-  private withSolutionSubstantiveEditAt<T extends Record<string, any>>(data: T) {
+  private withSolutionSubstantiveEditAt<T extends Record<string, any>>(
+    data: T,
+    sourceTimestampField?:
+      | 'stepsUpdatedAt'
+      | 'draftUpdatedAt'
+      | 'publishedContentUpdatedAt'
+  ) {
     const now = this.serverTimestamp();
     return {
       ...data,
+      ...(sourceTimestampField ? { [sourceTimestampField]: now } : {}),
       updatedAt: now,
       lastSubstantiveEditAt: now,
       feedUpdatedAt: now,
@@ -126,6 +133,25 @@ export class SolutionService {
       key === 'strategyReview' ||
       key.startsWith('status.')
     );
+  }
+
+  private sourceTimestampFieldForKeys(
+    keys: string[]
+  ):
+    | 'stepsUpdatedAt'
+    | 'draftUpdatedAt'
+    | 'publishedContentUpdatedAt'
+    | undefined {
+    if (keys.some((key) => key === 'status' || key.startsWith('status.'))) {
+      return 'stepsUpdatedAt';
+    }
+    if (keys.includes('strategyReview')) {
+      return 'draftUpdatedAt';
+    }
+    if (keys.includes('content')) {
+      return 'publishedContentUpdatedAt';
+    }
+    return undefined;
   }
 
   private withSolutionCreatedAndUpdatedAt<T extends Record<string, any>>(
@@ -862,7 +888,10 @@ export class SolutionService {
     }
     return solutionRef.set(
       hasSubstantiveEdit
-        ? this.withSolutionSubstantiveEditAt(data)
+        ? this.withSolutionSubstantiveEditAt(
+            data,
+            this.sourceTimestampFieldForKeys([key])
+          )
         : this.withSolutionUpdatedAt(data),
       { merge: true }
     );
@@ -883,7 +912,10 @@ export class SolutionService {
     }
     return solutionRef.set(
       hasSubstantiveEdit
-        ? this.withSolutionSubstantiveEditAt(values)
+        ? this.withSolutionSubstantiveEditAt(
+            values,
+            this.sourceTimestampFieldForKeys(Object.keys(values))
+          )
         : this.withSolutionUpdatedAt(values),
       { merge: true }
     );
@@ -934,9 +966,12 @@ export class SolutionService {
 
   saveSolutionStrategyReview(solutionId: string, review: string) {
     // console.log('saving solution strategy review', review);
-    const data = this.withSolutionSubstantiveEditAt({
-      strategyReview: review,
-    });
+    const data = this.withSolutionSubstantiveEditAt(
+      {
+        strategyReview: review,
+      },
+      'draftUpdatedAt'
+    );
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -945,9 +980,12 @@ export class SolutionService {
     });
   }
   saveSolutionStatus(solutionId: string, status: any) {
-    const data = this.withSolutionSubstantiveEditAt({
-      status: status,
-    });
+    const data = this.withSolutionSubstantiveEditAt(
+      {
+        status: status,
+      },
+      'stepsUpdatedAt'
+    );
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
@@ -969,10 +1007,13 @@ export class SolutionService {
     return solutionRef.set(data, { merge: true });
   }
   submitPreviewSolution(solutionId: string, content: string) {
-    const data = this.withSolutionSubstantiveEditAt({
-      content: content,
-      preview: 'true',
-    });
+    const data = this.withSolutionSubstantiveEditAt(
+      {
+        content: content,
+        preview: 'true',
+      },
+      'publishedContentUpdatedAt'
+    );
     const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
       `solutions/${solutionId}`
     );
