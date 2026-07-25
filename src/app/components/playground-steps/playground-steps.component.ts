@@ -1689,40 +1689,51 @@ STYLE REQUIREMENTS:
     );
   }
 
-  get teamTypingLabel(): string {
+  get teamTypingSubjectLabel(): string {
     if (!this.typingTeamMembers.length) return '';
     if (this.typingTeamMembers.length === 1) {
       const member = this.typingTeamMembers[0];
       const displayName = member.displayName.trim();
       const shortName = displayName.split(/\s+/)[0] || displayName;
-      const isCurrentUser = this.isCurrentTypingPresence(member);
-      const subject = isCurrentUser
+      return this.isCurrentTypingPresence(member)
         ? this.currentLanguage === 'fr'
           ? 'Vous'
           : 'You'
         : shortName;
+    }
+    return this.currentLanguage === 'fr'
+      ? `${this.typingTeamMembers.length} coéquipiers`
+      : `${this.typingTeamMembers.length} teammates`;
+  }
+
+  get teamTypingActivityLabel(): string {
+    if (!this.typingTeamMembers.length) return '';
+    if (this.typingTeamMembers.length === 1) {
+      const member = this.typingTeamMembers[0];
+      const isCurrentUser = this.isCurrentTypingPresence(member);
       if (member.activity === 'solution') {
+        const location = this.compactTypingLocation(member.locationLabel);
         return this.currentLanguage === 'fr'
-          ? `${subject} ${isCurrentUser ? 'répondez' : 'répond'} · ${member.locationLabel || 'une question'}…`
-          : `${subject} ${isCurrentUser ? 'are' : 'is'} answering · ${member.locationLabel || 'a question'}…`;
+          ? `${isCurrentUser ? 'répondez' : 'répond'} ${location}`
+          : `answering ${location}`;
       }
       return this.currentLanguage === 'fr'
-        ? `${subject} ${isCurrentUser ? 'écrivez' : 'écrit'} dans la discussion…`
-        : `${subject} ${isCurrentUser ? 'are' : 'is'} typing in Team Discussion…`;
+        ? `${isCurrentUser ? 'écrivez' : 'écrit'} dans la discussion`
+        : 'typing in discussion';
     }
     if (this.hasOnlyAnsweringActivity) {
       return this.currentLanguage === 'fr'
-        ? `${this.typingTeamMembers.length} personnes répondent…`
-        : `${this.typingTeamMembers.length} people are answering…`;
+        ? 'répondent maintenant'
+        : 'answering now';
     }
     if (!this.answeringTeamMembers.length) {
       return this.currentLanguage === 'fr'
-        ? `${this.typingTeamMembers.length} personnes écrivent dans la discussion…`
-        : `${this.typingTeamMembers.length} people in Team Discussion…`;
+        ? 'écrivent dans la discussion'
+        : 'typing in discussion';
     }
     return this.currentLanguage === 'fr'
-      ? `${this.typingTeamMembers.length} coéquipiers sont actifs…`
-      : `${this.typingTeamMembers.length} teammates are active…`;
+      ? 'sont actifs maintenant'
+      : 'active now';
   }
 
   get teamTypingAriaLabel(): string {
@@ -1792,6 +1803,14 @@ STYLE REQUIREMENTS:
     return this.currentLanguage === 'fr'
       ? `${name}${isCurrentUser ? 'écrivez' : 'écrit'} dans la discussion`
       : `${name}typing in Team Discussion`;
+  }
+
+  private compactTypingLocation(locationLabel?: string): string {
+    const fallback =
+      this.currentLanguage === 'fr' ? 'sur une question' : 'a question';
+    return String(locationLabel || fallback)
+      .replace(/\bQuestion\s+(\d+)/i, 'Q$1')
+      .replace(/\s*·\s*/g, ' · ');
   }
 
   toggleTeamMembersList(): void {

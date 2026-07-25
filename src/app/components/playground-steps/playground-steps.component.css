@@ -650,7 +650,6 @@
   max-width: 100%;
   overflow: hidden;
   color: #0f766e;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
