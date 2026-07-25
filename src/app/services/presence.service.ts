@@ -6,6 +6,7 @@ import {
   distinctUntilChanged,
   map,
   of,
+  Subject,
 } from 'rxjs';
 import { environment } from 'environments/environments';
 
@@ -18,6 +19,8 @@ export interface TypingPresence {
   uid: string;
   displayName: string;
   avatarUrl?: string;
+  activity: 'discussion' | 'solution';
+  locationLabel?: string;
   updatedAt: number;
 }
 
@@ -35,6 +38,11 @@ export class PresenceService {
   private readonly activeFallbackWindowMs = 10 * 60 * 1000;
   private readonly typingFreshnessWindowMs = 6_000;
   private readonly typingDisconnectKeys = new Set<string>();
+  private readonly localTypingStates = new Map<
+    string,
+    Map<string, TypingPresence>
+  >();
+  private readonly localTypingChanged = new Subject<void>();
 
   setCurrentUser(uid: string | null): void {
     if (uid === this.activeUid) return;
@@ -90,11 +98,29 @@ export class PresenceService {
     contextId: string,
     uid: string,
     displayName: string,
-    avatarUrl?: string
+    avatarUrl?: string,
+    activity: TypingPresence['activity'] = 'discussion',
+    locationLabel?: string
   ): Promise<void> {
     const contextKey = this.normalizeContextKey(contextId);
     const userKey = String(uid || '').trim();
     if (!contextKey || !userKey) return;
+
+    const localState: TypingPresence = {
+      uid: userKey,
+      displayName: String(displayName || 'Team member').trim().slice(0, 80),
+      avatarUrl: String(avatarUrl || '').trim().slice(0, 500) || undefined,
+      activity,
+      locationLabel:
+        String(locationLabel || '').trim().slice(0, 100) || undefined,
+      updatedAt: Date.now(),
+    };
+    const contextTyping =
+      this.localTypingStates.get(contextKey) ||
+      new Map<string, TypingPresence>();
+    contextTyping.set(userKey, localState);
+    this.localTypingStates.set(contextKey, contextTyping);
+    this.localTypingChanged.next();
 
     try {
       const api = await this.getDatabaseApi();
@@ -110,6 +136,8 @@ export class PresenceService {
       await api.set(typingRef, {
         displayName: String(displayName || 'Team member').trim().slice(0, 80),
         avatarUrl: String(avatarUrl || '').trim().slice(0, 500),
+        activity,
+        locationLabel: String(locationLabel || '').trim().slice(0, 100),
         updatedAt: api.serverTimestamp(),
       });
     } catch (error) {
@@ -121,6 +149,14 @@ export class PresenceService {
     const contextKey = this.normalizeContextKey(contextId);
     const userKey = String(uid || '').trim();
     if (!contextKey || !userKey) return;
+
+    const contextTyping = this.localTypingStates.get(contextKey);
+    if (contextTyping?.delete(userKey)) {
+      if (!contextTyping.size) {
+        this.localTypingStates.delete(contextKey);
+      }
+      this.localTypingChanged.next();
+    }
 
     try {
       const api = await this.getDatabaseApi();
@@ -143,11 +179,23 @@ export class PresenceService {
 
       const emitFreshTypingUsers = () => {
         const now = Date.now();
-        const users = Object.entries(rawTypingState)
-          .map(([uid, state]) => ({
+        const combinedTypingState: Record<string, any> = {
+          ...rawTypingState,
+        };
+        this.localTypingStates
+          .get(contextKey)
+          ?.forEach((state, uid) => {
+            combinedTypingState[uid] = state;
+          });
+        const users = Object.entries(combinedTypingState)
+          .map(([uid, state]): TypingPresence => ({
             uid,
             displayName: String(state?.displayName || 'Team member'),
             avatarUrl: String(state?.avatarUrl || '') || undefined,
+            activity:
+              state?.activity === 'solution' ? 'solution' : 'discussion',
+            locationLabel:
+              String(state?.locationLabel || '').trim() || undefined,
             updatedAt: Number(state?.updatedAt || 0),
           }))
           .filter(
@@ -157,7 +205,10 @@ export class PresenceService {
           )
           .sort((a, b) => a.displayName.localeCompare(b.displayName));
         const signature = users
-          .map((user) => `${user.uid}:${user.updatedAt}`)
+          .map(
+            (user) =>
+              `${user.uid}:${user.updatedAt}:${user.activity}:${user.locationLabel || ''}`
+          )
           .join('|');
         if (signature === lastSignature) return;
         lastSignature = signature;
@@ -165,6 +216,9 @@ export class PresenceService {
       };
 
       const expiryTimer = window.setInterval(emitFreshTypingUsers, 1_000);
+      const localTypingSub = this.localTypingChanged.subscribe(() =>
+        emitFreshTypingUsers()
+      );
 
       Promise.all([this.getDatabaseApi(), this.getDatabase()])
         .then(([api, database]) => {
@@ -184,6 +238,7 @@ export class PresenceService {
       return () => {
         cancelled = true;
         window.clearInterval(expiryTimer);
+        localTypingSub.unsubscribe();
         unsubscribe?.();
       };
     }).pipe(

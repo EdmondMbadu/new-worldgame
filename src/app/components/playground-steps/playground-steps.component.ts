@@ -155,6 +155,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   showPopUpEvaluators: boolean[] = [];
   showTeamPresencePanel = false;
   showTeamDiscussionPreview = false;
+  showTeamMembersList = true;
   onlineTeamUids = new Set<string>();
   visibleTeamMembers: User[] = [];
   onlineTeamCount = 0;
@@ -1665,46 +1666,153 @@ STYLE REQUIREMENTS:
     );
   }
 
+  isTeamMemberAnswering(user: User): boolean {
+    return this.getTeamMemberTypingPresence(user)?.activity === 'solution';
+  }
+
+  get discussionTypingTeamMembers(): TypingPresence[] {
+    return this.typingTeamMembers.filter(
+      (typingUser) => typingUser.activity === 'discussion'
+    );
+  }
+
+  get answeringTeamMembers(): TypingPresence[] {
+    return this.typingTeamMembers.filter(
+      (typingUser) => typingUser.activity === 'solution'
+    );
+  }
+
+  get hasOnlyAnsweringActivity(): boolean {
+    return (
+      this.answeringTeamMembers.length > 0 &&
+      this.discussionTypingTeamMembers.length === 0
+    );
+  }
+
   get teamTypingLabel(): string {
     if (!this.typingTeamMembers.length) return '';
     if (this.typingTeamMembers.length === 1) {
-      const displayName = this.typingTeamMembers[0].displayName.trim();
+      const member = this.typingTeamMembers[0];
+      const displayName = member.displayName.trim();
+      const shortName = displayName.split(/\s+/)[0] || displayName;
+      const isCurrentUser = this.isCurrentTypingPresence(member);
+      const subject = isCurrentUser
+        ? this.currentLanguage === 'fr'
+          ? 'Vous'
+          : 'You'
+        : shortName;
+      if (member.activity === 'solution') {
+        return this.currentLanguage === 'fr'
+          ? `${subject} ${isCurrentUser ? 'répondez' : 'répond'} · ${member.locationLabel || 'une question'}…`
+          : `${subject} ${isCurrentUser ? 'are' : 'is'} answering · ${member.locationLabel || 'a question'}…`;
+      }
+      return this.currentLanguage === 'fr'
+        ? `${subject} ${isCurrentUser ? 'écrivez' : 'écrit'} dans la discussion…`
+        : `${subject} ${isCurrentUser ? 'are' : 'is'} typing in Team Discussion…`;
+    }
+    if (this.hasOnlyAnsweringActivity) {
+      return this.currentLanguage === 'fr'
+        ? `${this.typingTeamMembers.length} personnes répondent…`
+        : `${this.typingTeamMembers.length} people are answering…`;
+    }
+    if (!this.answeringTeamMembers.length) {
+      return this.currentLanguage === 'fr'
+        ? `${this.typingTeamMembers.length} personnes écrivent dans la discussion…`
+        : `${this.typingTeamMembers.length} people in Team Discussion…`;
+    }
+    return this.currentLanguage === 'fr'
+      ? `${this.typingTeamMembers.length} coéquipiers sont actifs…`
+      : `${this.typingTeamMembers.length} teammates are active…`;
+  }
+
+  get teamTypingAriaLabel(): string {
+    const descriptions = this.typingTeamMembers.map((member) =>
+      this.getTypingPresenceLabel(member, false)
+    );
+    return descriptions.join(
+      this.currentLanguage === 'fr' ? ' ; ' : '; '
+    );
+  }
+
+  get discussionTypingLabel(): string {
+    const members = this.discussionTypingTeamMembers;
+    if (!members.length) return '';
+    if (members.length === 1) {
+      const displayName = members[0].displayName.trim();
       const shortName = displayName.split(/\s+/)[0] || displayName;
       return this.currentLanguage === 'fr'
         ? `${shortName} écrit…`
         : `${shortName} is typing…`;
     }
     return this.currentLanguage === 'fr'
-      ? `${this.typingTeamMembers.length} personnes écrivent…`
-      : `${this.typingTeamMembers.length} people are typing…`;
+      ? `${members.length} personnes écrivent…`
+      : `${members.length} people are typing…`;
   }
 
-  get teamTypingAriaLabel(): string {
-    const names = this.typingTeamMembers.map((member) =>
-      member.displayName.trim()
+  get discussionTypingAriaLabel(): string {
+    return this.discussionTypingTeamMembers
+      .map((member) => this.getTypingPresenceLabel(member, false))
+      .join(this.currentLanguage === 'fr' ? ' ; ' : '; ');
+  }
+
+  getTeamMemberTypingLabel(user: User): string {
+    const typingPresence = this.getTeamMemberTypingPresence(user);
+    return typingPresence
+      ? this.getTypingPresenceLabel(typingPresence, true)
+      : '';
+  }
+
+  private getTeamMemberTypingPresence(user: User): TypingPresence | undefined {
+    if (!user.uid) return undefined;
+    return this.typingTeamMembers.find(
+      (typingUser) => typingUser.uid === user.uid
     );
-    if (!names.length) return '';
-    if (names.length === 1) {
+  }
+
+  private getTypingPresenceLabel(
+    member: TypingPresence,
+    compact: boolean
+  ): string {
+    const isCurrentUser = this.isCurrentTypingPresence(member);
+    const name = compact
+      ? ''
+      : isCurrentUser
+        ? this.currentLanguage === 'fr'
+          ? 'Vous '
+          : 'You are '
+        : `${member.displayName.trim()} `;
+    if (member.activity === 'solution') {
+      const location =
+        member.locationLabel ||
+        (this.currentLanguage === 'fr' ? 'une question' : 'a question');
       return this.currentLanguage === 'fr'
-        ? `${names[0]} écrit`
-        : `${names[0]} is typing`;
+        ? `${name}${isCurrentUser ? 'répondez' : 'répond'} · ${location}`
+        : `${name}answering · ${location}`;
     }
     return this.currentLanguage === 'fr'
-      ? `${names.join(', ')} écrivent`
-      : `${names.join(', ')} are typing`;
+      ? `${name}${isCurrentUser ? 'écrivez' : 'écrit'} dans la discussion`
+      : `${name}typing in Team Discussion`;
+  }
+
+  toggleTeamMembersList(): void {
+    this.showTeamMembersList = !this.showTeamMembersList;
+  }
+
+  private isCurrentTypingPresence(member: TypingPresence): boolean {
+    const currentUid =
+      this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    return !!currentUid && member.uid === currentUid;
   }
 
   private watchTeamTyping(): void {
     if (!this.id) return;
-    const currentUid =
-      this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
     this.teamTypingSub?.unsubscribe();
     this.teamTypingSub = this.presence
       .watchTypingUsers$(`solution-${this.id}`)
       .subscribe((typingUsers) => {
-        this.typingTeamMembers = typingUsers.filter(
-          (typingUser) => typingUser.uid !== currentUid
-        );
+        this.ngZone.run(() => {
+          this.typingTeamMembers = typingUsers;
+        });
       });
   }
 

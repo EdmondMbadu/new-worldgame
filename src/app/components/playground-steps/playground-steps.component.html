@@ -66,9 +66,13 @@
               <span
                 class="team-presence-trigger__status"
                 [class.team-presence-trigger__status--typing]="typingTeamMembers.length"
+                [class.team-presence-trigger__status--answering]="hasOnlyAnsweringActivity"
               >
                 <ng-container *ngIf="typingTeamMembers.length; else teamOnlineStatus">
-                  <span class="team-typing-dots" aria-hidden="true">
+                  <span
+                    class="team-typing-dots"
+                    [class.team-typing-dots--answering]="hasOnlyAnsweringActivity"
+                    aria-hidden="true">
                     <span></span><span></span><span></span>
                   </span>
                   {{ teamTypingLabel }}
@@ -179,8 +183,8 @@
                       {{ currentLanguage === 'fr' ? "Discussion d'équipe" : 'Team discussion' }}
                     </span>
                     <span class="block truncate text-[10px] font-medium text-teal-700 dark:text-teal-300">
-                      <ng-container *ngIf="typingTeamMembers.length; else latestDiscussionSummary">
-                        {{ teamTypingLabel }}
+                      <ng-container *ngIf="discussionTypingTeamMembers.length; else latestDiscussionSummary">
+                        {{ discussionTypingLabel }}
                       </ng-container>
                       <ng-template #latestDiscussionSummary>
                         <ng-container *ngIf="latestDiscussionMessage; else emptyDiscussionSummary">
@@ -222,21 +226,21 @@
                 [attr.aria-hidden]="!showTeamDiscussionPreview"
                 [attr.inert]="showTeamDiscussionPreview ? null : ''">
                 <div
-                  *ngIf="typingTeamMembers.length"
+                  *ngIf="discussionTypingTeamMembers.length"
                   class="team-discussion-typing"
                   aria-live="polite"
-                  [attr.aria-label]="teamTypingAriaLabel"
+                  [attr.aria-label]="discussionTypingAriaLabel"
                 >
                   <span class="team-discussion-typing__avatars" aria-hidden="true">
                     <span
-                      *ngFor="let typingMember of typingTeamMembers | slice:0:3"
+                      *ngFor="let typingMember of discussionTypingTeamMembers | slice:0:3"
                       class="team-discussion-typing__avatar"
                     >
                       <img *ngIf="typingMember.avatarUrl; else typingMemberInitial" [src]="typingMember.avatarUrl" alt="" />
                       <ng-template #typingMemberInitial>{{ typingMember.displayName.charAt(0) }}</ng-template>
                     </span>
                   </span>
-                  <span>{{ teamTypingLabel }}</span>
+                  <span>{{ discussionTypingLabel }}</span>
                   <span class="team-typing-dots" aria-hidden="true">
                     <span></span><span></span><span></span>
                   </span>
@@ -285,88 +289,120 @@
               </div>
             </div>
 
-            <div class="mx-4 mt-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-              <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
-              <span>{{ currentLanguage === 'fr' ? 'Membres' : 'Members' }}</span>
-              <span class="h-px flex-1 bg-slate-200 dark:bg-slate-700"></span>
-            </div>
-
-            <div *ngIf="teamMembers.length; else emptyTeam" class="team-presence-panel__list">
-              <a
-                *ngFor="let member of teamMembers"
-                class="team-member-row"
-                [class.team-member-row--disabled]="!member.uid"
-                [routerLink]="getTeamMemberRoute(member)"
-                [attr.aria-label]="getTeamMemberName(member) + ', ' + (isTeamMemberTyping(member) ? (currentLanguage === 'fr' ? 'écrit' : 'typing') : getTeamMemberPresenceLabel(member))">
-                <span
-                  class="team-avatar team-avatar--large"
-                  [class.team-avatar--online]="isTeamMemberOnline(member)">
-                  <img
-                    *ngIf="member.profilePicture?.downloadURL as memberAvatar; else memberInitials"
-                    [src]="memberAvatar"
-                    [alt]="getTeamMemberName(member)"
-                    class="team-avatar__image" />
-                  <ng-template #memberInitials>
-                    <span
-                      class="team-avatar__initials"
-                      [style.background-color]="getTeamAvatarColor(member)">
-                      {{ getInitials(member.firstName, member.lastName, member.email) }}
-                    </span>
-                  </ng-template>
-                  <span
-                    *ngIf="isTeamMemberOnline(member)"
-                    class="team-avatar__presence"
+            <section class="team-members-section">
+              <button
+                type="button"
+                class="team-members-section__trigger"
+                (click)="toggleTeamMembersList()"
+                [attr.aria-expanded]="showTeamMembersList"
+                aria-controls="team-members-list">
+                <span class="team-members-section__label">
+                  {{ currentLanguage === 'fr' ? 'Membres' : 'Members' }}
+                  <span class="team-members-section__count">{{ teamMembers.length }}</span>
+                </span>
+                <span class="team-members-section__hint">
+                  {{ showTeamMembersList
+                    ? (currentLanguage === 'fr' ? 'Réduire' : 'Collapse')
+                    : (currentLanguage === 'fr' ? 'Afficher' : 'Show') }}
+                  <svg
+                    class="team-members-section__chevron"
+                    [class.team-members-section__chevron--open]="showTeamMembersList"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
                     aria-hidden="true">
-                  </span>
-                </span>
-
-                <span class="team-member-row__identity">
-                  <span class="team-member-row__name">
-                    {{ getTeamMemberName(member) }}
-                    <span
-                      *ngIf="member.uid && member.uid === auth.currentUser?.uid"
-                      class="team-member-row__you">
-                      {{ currentLanguage === 'fr' ? 'Vous' : 'You' }}
-                    </span>
-                  </span>
-                  <span class="team-member-row__role">{{ getTeamMemberRole(member) }}</span>
-                  <span *ngIf="member.profileCredential || member.location" class="team-member-row__detail">
-                    {{ member.profileCredential || member.location }}
-                  </span>
-                  <span *ngIf="!member.profileCredential && !member.location && member.email" class="team-member-row__detail">
-                    {{ member.email }}
-                  </span>
-                </span>
-
-                <span
-                  class="team-member-row__presence"
-                  [class.team-member-row__presence--online]="isTeamMemberOnline(member)"
-                  [class.team-member-row__presence--typing]="isTeamMemberTyping(member)"
-                  [class.team-member-row__presence--invited]="!member.uid">
-                  <ng-container *ngIf="isTeamMemberTyping(member); else memberPresence">
-                    <span class="team-typing-dots team-typing-dots--small" aria-hidden="true">
-                      <span></span><span></span><span></span>
-                    </span>
-                    {{ currentLanguage === 'fr' ? 'Écrit…' : 'Typing…' }}
-                  </ng-container>
-                  <ng-template #memberPresence>
-                    <span class="team-member-row__presence-dot" aria-hidden="true"></span>
-                    {{ getTeamMemberPresenceLabel(member) }}
-                  </ng-template>
-                </span>
-              </a>
-            </div>
-
-            <ng-template #emptyTeam>
-              <div class="team-presence-panel__empty">
-                <span class="team-presence-panel__empty-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.1 9.1 0 003.74-.48 3 3 0 00-4.68-2.72M18 18.72v-.01c0-1.1-.28-2.14-.77-3.04M18 18.72a18.1 18.1 0 01-6 .99c-2.1 0-4.12-.35-6-.99m0 0a9.1 9.1 0 01-3.74-.48 3 3 0 014.68-2.72M6 18.72v-.01c0-1.1.28-2.14.77-3.04m10.46 0a5.25 5.25 0 00-10.46 0M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                    <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.16l3.71-3.93a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
                   </svg>
                 </span>
-                <p>{{ currentLanguage === 'fr' ? "Aucun membre n'a encore été ajouté." : 'No team members have been added yet.' }}</p>
+              </button>
+
+              <div
+                id="team-members-list"
+                class="team-members-section__content"
+                [class.team-members-section__content--open]="showTeamMembersList"
+                [attr.aria-hidden]="!showTeamMembersList"
+                [attr.inert]="showTeamMembersList ? null : ''">
+                <div *ngIf="teamMembers.length; else emptyTeam" class="team-presence-panel__list">
+                  <a
+                    *ngFor="let member of teamMembers"
+                    class="team-member-row"
+                    [class.team-member-row--disabled]="!member.uid"
+                    [routerLink]="getTeamMemberRoute(member)"
+                    [attr.aria-label]="getTeamMemberName(member) + ', ' + (isTeamMemberTyping(member) ? getTeamMemberTypingLabel(member) : getTeamMemberPresenceLabel(member))">
+                    <span
+                      class="team-avatar team-avatar--large"
+                      [class.team-avatar--online]="isTeamMemberOnline(member)">
+                      <img
+                        *ngIf="member.profilePicture?.downloadURL as memberAvatar; else memberInitials"
+                        [src]="memberAvatar"
+                        [alt]="getTeamMemberName(member)"
+                        class="team-avatar__image" />
+                      <ng-template #memberInitials>
+                        <span
+                          class="team-avatar__initials"
+                          [style.background-color]="getTeamAvatarColor(member)">
+                          {{ getInitials(member.firstName, member.lastName, member.email) }}
+                        </span>
+                      </ng-template>
+                      <span
+                        *ngIf="isTeamMemberOnline(member)"
+                        class="team-avatar__presence"
+                        aria-hidden="true">
+                      </span>
+                    </span>
+
+                    <span class="team-member-row__identity">
+                      <span class="team-member-row__name">
+                        {{ getTeamMemberName(member) }}
+                        <span
+                          *ngIf="member.uid && member.uid === auth.currentUser?.uid"
+                          class="team-member-row__you">
+                          {{ currentLanguage === 'fr' ? 'Vous' : 'You' }}
+                        </span>
+                      </span>
+                      <span class="team-member-row__role">{{ getTeamMemberRole(member) }}</span>
+                      <span *ngIf="member.profileCredential || member.location" class="team-member-row__detail">
+                        {{ member.profileCredential || member.location }}
+                      </span>
+                      <span *ngIf="!member.profileCredential && !member.location && member.email" class="team-member-row__detail">
+                        {{ member.email }}
+                      </span>
+                    </span>
+
+                    <span
+                      class="team-member-row__presence"
+                      [class.team-member-row__presence--online]="isTeamMemberOnline(member)"
+                      [class.team-member-row__presence--typing]="isTeamMemberTyping(member)"
+                      [class.team-member-row__presence--answering]="isTeamMemberAnswering(member)"
+                      [class.team-member-row__presence--invited]="!member.uid">
+                      <ng-container *ngIf="isTeamMemberTyping(member); else memberPresence">
+                        <span
+                          class="team-typing-dots team-typing-dots--small"
+                          [class.team-typing-dots--answering]="isTeamMemberAnswering(member)"
+                          aria-hidden="true">
+                          <span></span><span></span><span></span>
+                        </span>
+                        {{ getTeamMemberTypingLabel(member) }}
+                      </ng-container>
+                      <ng-template #memberPresence>
+                        <span class="team-member-row__presence-dot" aria-hidden="true"></span>
+                        {{ getTeamMemberPresenceLabel(member) }}
+                      </ng-template>
+                    </span>
+                  </a>
+                </div>
+
+                <ng-template #emptyTeam>
+                  <div class="team-presence-panel__empty">
+                    <span class="team-presence-panel__empty-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.1 9.1 0 003.74-.48 3 3 0 00-4.68-2.72M18 18.72v-.01c0-1.1-.28-2.14-.77-3.04M18 18.72a18.1 18.1 0 01-6 .99c-2.1 0-4.12-.35-6-.99m0 0a9.1 9.1 0 01-3.74-.48 3 3 0 014.68-2.72M6 18.72v-.01c0-1.1.28-2.14.77-3.04m10.46 0a5.25 5.25 0 00-10.46 0M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                      </svg>
+                    </span>
+                    <p>{{ currentLanguage === 'fr' ? "Aucun membre n'a encore été ajouté." : 'No team members have been added yet.' }}</p>
+                  </div>
+                </ng-template>
               </div>
-            </ng-template>
+            </section>
 
             <footer class="team-presence-panel__footer">
               <span class="team-presence-panel__footer-dot" aria-hidden="true"></span>

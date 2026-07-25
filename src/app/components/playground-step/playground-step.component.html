@@ -367,7 +367,7 @@
                 
                 
                     
-                    (ready)="onReady($event)"
+                    (ready)="onReady($event, i)"
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                     [(ngModel)]="staticContentArray[i]"
                 
@@ -388,7 +388,7 @@
                 
                 
                     
-                    (ready)="onReady($event)"
+                    (ready)="onReady($event, i)"
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                     [(ngModel)]="strategyReview"
                     
@@ -409,7 +409,7 @@
                 
                 
                     
-                    (ready)="onReady($event)"
+                    (ready)="onReady($event, i)"
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                     *ngIf="!strategyReviewSelected"
                     [disabled]="isStrategyReviewStep && !strategyReviewSelected"

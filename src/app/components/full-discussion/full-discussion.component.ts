@@ -1336,7 +1336,9 @@ Please choose a file under 5 MB.`);
       .watchTypingUsers$(contextId)
       .subscribe((typingUsers) => {
         this.typingParticipants = typingUsers.filter(
-          (typingUser) => typingUser.uid !== currentUid
+          (typingUser) =>
+            typingUser.uid !== currentUid &&
+            typingUser.activity === 'discussion'
         );
       });
   }
@@ -1365,7 +1367,9 @@ Please choose a file under 5 MB.`);
         contextId,
         uid,
         displayName,
-        this.profilePic
+        this.profilePic,
+        'discussion',
+        'Team discussion'
       );
     }
 

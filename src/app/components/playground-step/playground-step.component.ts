@@ -28,6 +28,7 @@ import { ActivityService } from 'src/app/services/activity.service';
 import { DataService } from 'src/app/services/data.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
+import { PresenceService } from 'src/app/services/presence.service';
 
 type StepSupportedLanguage = 'en' | 'fr';
 
@@ -138,7 +139,8 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
     private dataService: DataService,
     private languageService: LanguageService,
     private cdRef: ChangeDetectorRef,
-    private activity: ActivityService
+    private activity: ActivityService,
+    private presence: PresenceService
   ) {}
   aiOptions = [
     {
@@ -220,6 +222,9 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   private lastLocalEditTime: number = 0;
   private readonly TYPING_COOLDOWN_MS = 3000; // Don't update from remote if user typed within 3 seconds
   private isReceivingRemoteUpdate = false;
+  private answerTypingStopTimeout?: ReturnType<typeof setTimeout>;
+  private lastAnswerTypingWriteAt = 0;
+  private lastAnswerTypingLocation = '';
   ngOnInit() {
     window.scrollTo(0, 0);
     if (this.solutionId) {
@@ -352,7 +357,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   dataInitialized = false; // New flag for ensuring data is loaded
   public Editor: any = Editor;
   private saveTimeout: any;
-  public onReady(editor: any) {
+  public onReady(editor: any, questionIndex = 0) {
     // e.g. solutionId comes from the route or @Input()
 
     const solutionId = this.solutionId; // already have it
@@ -369,6 +374,9 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       if (!this.isReceivingRemoteUpdate) {
         this.lastLocalEditTime = Date.now();
         this.activity.beat();
+        if (editor.editing?.view?.document?.isFocused) {
+          this.registerAnswerTypingActivity(questionIndex);
+        }
       }
       
       // console.log('Content changed:', editor.getData());
@@ -383,6 +391,9 @@ complex social issues like poverty (SDG 1) and inequality (SDG
           this.saveSolutionStatusDirectly();
         }
       }, 2000);
+    });
+    editor.editing?.view?.document?.on('blur', () => {
+      this.stopAnswerTyping();
     });
   }
   
@@ -1148,7 +1159,66 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.langSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     clearTimeout(this.saveTimeout);
+    this.stopAnswerTyping();
     this.activity.stopEditing();
+  }
+
+  private registerAnswerTypingActivity(questionIndex: number): void {
+    const uid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (!this.solutionId || !uid) return;
+
+    const locationLabel =
+      `${this.currentLanguage === 'fr' ? 'Étape' : 'Step'} ${
+        this.stepNumber + 1
+      } · Question ${questionIndex + 1}`;
+    const now = Date.now();
+    if (
+      locationLabel !== this.lastAnswerTypingLocation ||
+      now - this.lastAnswerTypingWriteAt >= 900
+    ) {
+      this.lastAnswerTypingWriteAt = now;
+      this.lastAnswerTypingLocation = locationLabel;
+      const displayName =
+        [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
+          .filter(Boolean)
+          .join(' ')
+          .trim() ||
+        this.auth.currentUser?.email ||
+        'Team member';
+      const avatarUrl =
+        this.auth.currentUser?.profilePicture?.downloadURL || '';
+
+      void this.presence.setTyping(
+        `solution-${this.solutionId}`,
+        uid,
+        displayName,
+        avatarUrl,
+        'solution',
+        locationLabel
+      );
+    }
+
+    if (this.answerTypingStopTimeout) {
+      clearTimeout(this.answerTypingStopTimeout);
+    }
+    this.answerTypingStopTimeout = setTimeout(
+      () => this.stopAnswerTyping(),
+      2_800
+    );
+  }
+
+  private stopAnswerTyping(): void {
+    if (this.answerTypingStopTimeout) {
+      clearTimeout(this.answerTypingStopTimeout);
+      this.answerTypingStopTimeout = undefined;
+    }
+    this.lastAnswerTypingWriteAt = 0;
+    this.lastAnswerTypingLocation = '';
+
+    const uid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
+    if (this.solutionId && uid) {
+      void this.presence.clearTyping(`solution-${this.solutionId}`, uid);
+    }
   }
 
   private initializeLanguageSupport() {

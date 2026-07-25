@@ -648,6 +648,10 @@
   white-space: nowrap;
 }
 
+.team-presence-trigger__status--answering {
+  color: #4f46e5;
+}
+
 .team-typing-dots {
   display: inline-flex;
   flex: 0 0 auto;
@@ -661,6 +665,10 @@
   border-radius: 9999px;
   background: #0d9488;
   animation: teamTypingDot 1s ease-in-out infinite;
+}
+
+.team-typing-dots--answering > span {
+  background: #6366f1;
 }
 
 .team-typing-dots > span:nth-child(2) {
@@ -941,6 +949,64 @@
   letter-spacing: 0.01em;
 }
 
+.team-members-section {
+  margin: 0.7rem 0.75rem 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.8rem;
+}
+
+.team-members-section__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.62rem 0.72rem;
+  color: #475569;
+  background: #f8fafc;
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
+.team-members-section__label,
+.team-members-section__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.team-members-section__count {
+  border-radius: 9999px;
+  padding: 0.08rem 0.38rem;
+  color: #0f766e;
+  background: #ccfbf1;
+  font-size: 0.6rem;
+}
+
+.team-members-section__hint {
+  color: #94a3b8;
+}
+
+.team-members-section__chevron {
+  width: 0.85rem;
+  height: 0.85rem;
+}
+
+.team-members-section__chevron--open {
+  transform: rotate(180deg);
+}
+
+.team-members-section__content {
+  max-height: 0;
+  overflow: hidden;
+}
+
+.team-members-section__content--open {
+  max-height: min(17rem, 38vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 .team-presence-panel__list {
   display: block;
   min-height: auto;
@@ -1058,6 +1124,11 @@
   background: #ccfbf1;
 }
 
+.team-member-row__presence--answering {
+  color: #4338ca;
+  background: #e0e7ff;
+}
+
 .team-member-row__presence--invited {
   background: #fffbeb;
   color: #b45309;
@@ -1139,6 +1210,10 @@
   color: #5eead4;
 }
 
+:host-context(.dark) .team-presence-trigger__status--answering {
+  color: #a5b4fc;
+}
+
 :host-context(.dark) .team-avatar--small,
 :host-context(.dark) .team-avatar--more,
 :host-context(.dark) .team-avatar__presence {
@@ -1209,6 +1284,20 @@
 :host-context(.dark) .team-member-row__presence--typing {
   color: #5eead4;
   background: rgb(19 78 74 / 0.72);
+}
+
+:host-context(.dark) .team-member-row__presence--answering {
+  color: #c7d2fe;
+  background: rgb(49 46 129 / 0.56);
+}
+
+:host-context(.dark) .team-members-section {
+  border-color: #334155;
+}
+
+:host-context(.dark) .team-members-section__trigger {
+  color: #cbd5e1;
+  background: #1e293b;
 }
 
 :host-context(.dark) .team-member-row__presence--invited {

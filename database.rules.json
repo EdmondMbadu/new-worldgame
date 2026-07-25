@@ -30,6 +30,12 @@
           "avatarUrl": {
             ".validate": "newData.isString() && newData.val().length <= 500"
           },
+          "activity": {
+            ".validate": "newData.isString() && (newData.val() == 'discussion' || newData.val() == 'solution')"
+          },
+          "locationLabel": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
           "updatedAt": {
             ".validate": "newData.isNumber()"
           },
