@@ -198,6 +198,11 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     private translate: TranslateService
   ) {}
   isLoggedIn: boolean = false;
+
+  get isGuest(): boolean {
+    return !this.isLoggedIn;
+  }
+
   ngOnInit(): void {
     this.languageSub = this.translate.onLangChange.subscribe(() => {
       if (this.currentSolution?.solutionId) {
@@ -206,14 +211,12 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     });
     this.returnTo =
       this.activatedRoute.snapshot.queryParamMap.get('returnTo') || '/home';
-    this.activatedRoute.paramMap.subscribe((params) => {
+    this.activatedRoute.paramMap.subscribe(async (params) => {
       this.solutionId = params.get('id');
       window.scroll(0, 0);
-
+      const user = await this.auth.getCurrentUserPromise();
+      this.isLoggedIn = !!user?.uid;
       this.loadSolutionData(this.solutionId);
-    });
-    this.auth.getCurrentUserPromise().then((user) => {
-      this.isLoggedIn = !!user;
     });
   }
 
@@ -235,6 +238,17 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     this.commentAuthors = [];
 
     if (!this.comments || this.comments.length === 0) {
+      return;
+    }
+
+    if (!this.isLoggedIn) {
+      this.comments.forEach((comment: any, index: number) => {
+        this.commentTimeElapsed[index] = this.commentTimeLabel(comment);
+        this.commentAuthors[index] = null;
+        this.commentUserNames[index] = this.getCommentAuthorName(null, comment);
+        this.commentUserProfilePicturePath[index] =
+          this.getUserAvatarUrl(null, comment);
+      });
       return;
     }
 
@@ -359,52 +373,29 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     this.solutionOriginalKeys.clear();
     this.commentTranslationStates.clear();
     this.solutionTranslationErrorKey = '';
+    this.iscreatorOfThisSolution = false;
+    this.isContributorOfThisSolution = false;
+    this.teamMembers = [];
+    this.evaluators = [];
+    this.comments = [];
+
+    if (!this.isLoggedIn) {
+      void this.loadPublicSolutionData(solutionId);
+      return;
+    }
+
     this.solutionSub = this.solution
       .getSolutionForNonAuthenticatedUser(solutionId)
       .subscribe({
         next: (data: any) => {
-        if (!data?.[0]) {
-          this.isLoadingSolution = false;
-          this.solutionAccessError =
-            'This solution is unavailable or you no longer have access.';
-          return;
-        }
-        this.currentSolution = data[0];
-        this.refreshPreviewContentModel();
-        if (this.currentSolution.authorEmail === this.auth.currentUser.email) {
-          this.iscreatorOfThisSolution = true;
-        }
-        if (this.currentSolution.edited === 'true') {
-          this.edited = ' (Edited)';
-        }
-        const activityDate =
-          this.currentSolution.submissionDate ||
-          this.currentSolution.creationDate ||
-          '';
-        this.timeElapsed = activityDate
-          ? this.time.timeAgo(activityDate)
-          : 'Recently active';
-        this.evaluationSummary = this.data.mapEvaluationToNumeric(
-          this.currentSolution.evaluationSummary!
-        );
-        this.colors = this.data.mapEvaluationToColors(
-          this.currentSolution.evaluationSummary!
-        );
-        // fill the evaluator class
-        this.currentSolution.evaluators?.forEach((ev: any) => {
-          this.evaluators.push(ev);
-          console.log('evaluators', this.evaluators);
-        });
-        this.etAl = this.solutionMemberEmails().length > 1 ? 'Et al' : '';
-        this.comments = Array.isArray(this.currentSolution.comments)
-          ? [...this.currentSolution.comments]
-          : [];
-        this.getMembers();
-        this.watchCommunityComments();
-        void this.initializeComments();
-        this.isLoadingSolution = false;
-        this.setupDiscussionObserver();
-      },
+          if (!data?.[0]) {
+            this.isLoadingSolution = false;
+            this.solutionAccessError =
+              'This solution is unavailable or you no longer have access.';
+            return;
+          }
+          this.applyLoadedSolution(data[0], false);
+        },
       error: (error) => {
         console.error('Unable to open solution', error);
         this.isLoadingSolution = false;
@@ -412,6 +403,100 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
           'This solution is private, unavailable, or you no longer have access.';
       },
     });
+  }
+
+  private async loadPublicSolutionData(solutionId: string): Promise<void> {
+    try {
+      const solution =
+        await this.solution.getPublicCommunitySolutionPreview(solutionId);
+      if (!solution) {
+        this.solutionAccessError = 'This community solution is not available.';
+        this.isLoadingSolution = false;
+        return;
+      }
+      this.applyLoadedSolution(solution, true);
+    } catch (error) {
+      console.error('Unable to open public community solution', error);
+      this.isLoadingSolution = false;
+      this.solutionAccessError =
+        'This community solution is private or no longer available.';
+    }
+  }
+
+  private applyLoadedSolution(
+    loadedSolution: Solution,
+    publicGuestView: boolean
+  ): void {
+    this.currentSolution = loadedSolution;
+    this.refreshPreviewContentModel();
+    if (
+      !publicGuestView &&
+      this.currentSolution.authorEmail === this.auth.currentUser?.email
+    ) {
+      this.iscreatorOfThisSolution = true;
+    }
+    this.edited = this.currentSolution.edited === 'true' ? ' (Edited)' : '';
+    const activityDate =
+      this.currentSolution.submissionDate ||
+      this.currentSolution.creationDate ||
+      '';
+    this.timeElapsed = activityDate
+      ? this.time.timeAgo(activityDate)
+      : 'Recently active';
+    this.evaluationSummary = this.data.mapEvaluationToNumeric(
+      this.currentSolution.evaluationSummary || {}
+    );
+    this.colors = this.data.mapEvaluationToColors(
+      this.currentSolution.evaluationSummary || {}
+    );
+    this.currentSolution.evaluators?.forEach((evaluator: any) => {
+      this.evaluators.push(evaluator);
+    });
+    const memberCount = publicGuestView
+      ? Number(this.currentSolution.publicMemberCount || 1)
+      : this.solutionMemberEmails().length;
+    this.etAl = memberCount > 1 ? 'Et al' : '';
+    this.comments = Array.isArray(this.currentSolution.comments)
+      ? [...this.currentSolution.comments]
+      : [];
+
+    if (!publicGuestView) {
+      this.getMembers();
+      this.watchCommunityComments();
+    }
+    void this.initializeComments();
+    this.isLoadingSolution = false;
+    this.setupDiscussionObserver();
+
+    if (
+      this.activatedRoute.snapshot.queryParamMap.get('focus') === 'discussion'
+    ) {
+      setTimeout(() => this.scrollToDiscussion(), 0);
+    }
+  }
+
+  private redirectToLogin(focusDiscussion = false): void {
+    const tree = this.router.parseUrl(this.router.url);
+    if (focusDiscussion) {
+      tree.queryParams = {
+        ...tree.queryParams,
+        focus: 'discussion',
+      };
+    }
+    const redirectTo = this.router.serializeUrl(tree);
+    this.auth.setRedirectUrl(redirectTo);
+    sessionStorage.setItem('redirectTo', redirectTo);
+    void this.router.navigate(['/login'], {
+      queryParams: { redirectTo },
+    });
+  }
+
+  signInToComment(): void {
+    this.redirectToLogin(true);
+  }
+
+  signInToTranslate(): void {
+    this.redirectToLogin(false);
   }
 
   getMembers() {
@@ -975,6 +1060,10 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   }
 
   addLike() {
+    if (!this.auth.currentUser?.uid) {
+      this.redirectToLogin(false);
+      return;
+    }
     this.currentSolution.likes =
       typeof this.currentSolution.likes === 'string' ||
       this.currentSolution.likes === undefined
@@ -1091,8 +1180,8 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   }
 
   async addComment() {
-    if (!this.auth.currentUser) {
-      this.displayAddCommentPermission = true;
+    if (!this.auth.currentUser?.uid) {
+      this.signInToComment();
       return;
     }
     const content = String(this.comment || '').trim();

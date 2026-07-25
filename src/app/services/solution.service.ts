@@ -47,6 +47,7 @@ export interface CommunitySolutionPage {
   cursor:
     | firebase.firestore.QueryDocumentSnapshot
     | { fallbackOffset: number }
+    | { publicUpdatedAtMs: number }
     | null;
   hasMore: boolean;
 }
@@ -543,57 +544,85 @@ export class SolutionService {
     cursor:
       | firebase.firestore.QueryDocumentSnapshot
       | { fallbackOffset: number }
+      | { publicUpdatedAtMs: number }
       | null = null
   ): Promise<CommunitySolutionPage> {
-    if (cursor && 'fallbackOffset' in cursor) {
-      return this.getCommunitySolutionsFallback(
-        filter,
-        pageSize,
-        cursor.fallbackOffset
+    try {
+      let query: firebase.firestore.Query = this.afs.collection<Solution>(
+        'publicCommunitySolutions'
+      ).ref;
+      if (filter !== 'all') {
+        query = query.where('feedStatus', '==', filter);
+      }
+      query = query.orderBy('feedUpdatedAtMs', 'desc');
+      if (cursor && typeof (cursor as any).data === 'function') {
+        query = query.startAfter(
+          cursor as firebase.firestore.QueryDocumentSnapshot
+        );
+      }
+
+      const snapshot = await query.limit(pageSize + 1).get();
+      const visibleDocuments = snapshot.docs.slice(0, pageSize);
+      return {
+        solutions: visibleDocuments.map((document) => {
+          const solution = document.data() as Solution;
+          return {
+            ...solution,
+            solutionId: solution.solutionId || document.id,
+            feedUpdatedAt: Number((solution as any).feedUpdatedAtMs || 0),
+          };
+        }),
+        cursor:
+          visibleDocuments.length > 0
+            ? visibleDocuments[visibleDocuments.length - 1]
+            : null,
+        hasMore: snapshot.docs.length > pageSize,
+      };
+    } catch (error) {
+      // Keep a server-sanitized fallback for transient Firestore/index errors.
+      // It is not the normal hot path and therefore does not slow successful
+      // home loads.
+      console.warn(
+        'Public community projection unavailable; using server fallback.',
+        error
       );
     }
 
-    let query: firebase.firestore.Query<Solution> = this.afs
-      .collection<Solution>('solutions').ref
-      .where('feedEligible', '==', true)
-      .where('isPrivate', '==', false);
-
-    if (filter !== 'all') {
-      query = query.where('feedStatus', '==', filter);
-    }
-
-    query = query.orderBy('feedUpdatedAt', 'desc');
-    if (cursor) query = query.startAfter(cursor);
-
-    let snapshot: firebase.firestore.QuerySnapshot<Solution>;
-    try {
-      snapshot = await query.limit(pageSize + 1).get();
-    } catch (error: any) {
-      if (error?.code === 'failed-precondition' || error?.code === 9) {
-        console.info(
-          'Community feed index is still preparing; using the bounded compatibility query.'
-        );
-        return this.getCommunitySolutionsFallback(filter, pageSize, 0);
-      }
-      throw error;
-    }
-    const visibleDocs = snapshot.docs.slice(0, pageSize);
+    const callable = this.fns.httpsCallable('getPublicCommunitySolutions');
+    const publicCursor =
+      cursor && 'publicUpdatedAtMs' in cursor
+        ? cursor
+        : null;
+    const response: any = await firstValueFrom(
+      callable({
+        filter,
+        pageSize,
+        cursorUpdatedAtMs: publicCursor?.publicUpdatedAtMs || null,
+      })
+    );
+    const solutions = Array.isArray(response?.solutions)
+      ? response.solutions.map((solution: any) => ({
+          ...solution,
+          feedUpdatedAt: Number(solution?.feedUpdatedAtMs || 0),
+        }))
+      : [];
+    const cursorUpdatedAtMs = Number(response?.cursorUpdatedAtMs || 0);
 
     return {
-      solutions: visibleDocs.map((document) => {
-        const data = document.data() as Solution;
-        return {
-          ...data,
-          solutionId: data.solutionId || document.id,
-        };
-      }),
-      cursor: visibleDocs.length
-        ? (visibleDocs[
-            visibleDocs.length - 1
-          ] as firebase.firestore.QueryDocumentSnapshot)
-        : cursor,
-      hasMore: snapshot.docs.length > pageSize,
+      solutions,
+      cursor: cursorUpdatedAtMs
+        ? { publicUpdatedAtMs: cursorUpdatedAtMs }
+        : null,
+      hasMore: response?.hasMore === true,
     };
+  }
+
+  async getPublicCommunitySolutionPreview(
+    solutionId: string
+  ): Promise<Solution | null> {
+    const callable = this.fns.httpsCallable('getPublicCommunitySolution');
+    const response: any = await firstValueFrom(callable({ solutionId }));
+    return response?.solution ? (response.solution as Solution) : null;
   }
 
   private async getCommunitySolutionsFallback(

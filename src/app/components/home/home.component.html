@@ -1,7 +1,7 @@
 
 <!-- src/app/solutions/solutions.component.html -->
 <div class="min-h-screen px-3 pb-16 dark:bg-slate-900 sm:px-4" [attr.aria-busy]="isInitialLoad || isLoadingCommunitySolutions || (homeView === 'challenges' && isLoadingChallenges)">
-  <div [ngClass]="{'lg:ml-64': isSidebarOpen, 'lg:ml-0': !isSidebarOpen}">
+  <div [ngClass]="{'lg:ml-64': !isGuest && isSidebarOpen, 'lg:ml-0': isGuest || !isSidebarOpen}">
     <app-navbar [hoveredHomePath]="'bg-gray-100 dark:bg-gray-700'"
                 [sideBarBig]="isSidebarOpen"
                 [email]="this.auth.currentUser?.email || ''"
@@ -43,7 +43,11 @@
         </div>
         <button type="button" class="community-start-button" (click)="startSolution()">
           <span class="material-symbols-outlined" aria-hidden="true">add</span>
-          {{ 'home.community.startSolution' | translate }}
+          {{
+            (isGuest
+              ? 'home.community.signInToStart'
+              : 'home.community.startSolution') | translate
+          }}
         </button>
       </header>
 
@@ -315,7 +319,7 @@
   </div>
 </div>
 
-  <app-chatbot></app-chatbot>
+  <app-chatbot *ngIf="!isGuest"></app-chatbot>
 
 
 

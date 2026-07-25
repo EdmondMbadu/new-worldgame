@@ -102,6 +102,13 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // Deliberately minimal, server-maintained card data for the public home
+    // feed. Full solution documents remain protected by the rules above.
+    match /publicCommunitySolutions/{solutionId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
     // School invitation lookup uses a collection-group query. Firestore
     // requires an explicit collection-group match so the query can prove that
     // every possible result belongs to the signed-in invitee.
@@ -124,12 +131,14 @@ service cloud.firestore {
       // update your rules.
       allow read: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'gsl-workshop-announcement-signups'
-        && topLevelCollection != 'solutions';
+        && topLevelCollection != 'solutions'
+        && topLevelCollection != 'publicCommunitySolutions';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
         && topLevelCollection != 'gsl-workshop-announcement-signups'
-        && topLevelCollection != 'solutions';
+        && topLevelCollection != 'solutions'
+        && topLevelCollection != 'publicCommunitySolutions';
     }
   }
 }

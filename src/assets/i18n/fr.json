@@ -261,6 +261,7 @@
       "title": "Des solutions qui méritent d’être construites ensemble",
       "description": "Découvrez ce que les équipes développent, comprenez leur démarche et ajoutez un commentaire utile pour faire avancer leur travail.",
       "startSolution": "Créer une solution",
+      "signInToStart": "Se connecter pour commencer",
       "homeContentLabel": "Contenu de l’accueil",
       "tabs": {
         "solutions": "Solutions de la communauté",
@@ -1716,6 +1717,31 @@
     }
   },
   "solutionPreview": {
+    "public": {
+      "opening": "Ouverture de la solution…",
+      "loadingDescription": "Chargement des travaux récents et de la discussion.",
+      "unavailable": "Cette solution n’est pas disponible",
+      "backToCommunity": "Retour aux solutions de la communauté",
+      "returnToSolution": "Revenir à la solution",
+      "jumpToDiscussion": "Aller à la discussion",
+      "backToSolution": "Retour à la solution",
+      "joinDiscussion": "Rejoindre la discussion",
+      "comment": "commentaire",
+      "comments": "commentaires",
+      "solutionTeam": "Équipe de la solution",
+      "member": "membre",
+      "members": "membres",
+      "discussion": "Discussion ({{count}})"
+    },
+    "guest": {
+      "signIn": "Se connecter",
+      "translateTitle": "Vous souhaitez lire ceci dans une autre langue ?",
+      "translateDescription": "Connectez-vous pour utiliser le service de traduction mis en cache.",
+      "commentTitle": "Rejoignez la discussion",
+      "commentDescription": "Connectez-vous pour partager un commentaire constructif avec l’équipe.",
+      "signInToComment": "Se connecter pour commenter",
+      "recentCommentsOnly": "Affichage des commentaires publics les plus récents."
+    },
     "translation": {
       "languages": {
         "en": "anglais",

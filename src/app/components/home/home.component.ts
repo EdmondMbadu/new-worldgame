@@ -71,6 +71,10 @@ export class HomeComponent implements OnInit, OnDestroy {
   private initialStart = performance.now();
   private languageSub?: Subscription;
 
+  get isGuest(): boolean {
+    return !this.auth.currentUser?.uid;
+  }
+
   updateChallenges(): void {
     const categoryData = this.challenges[this.activeCategory];
     if (!categoryData) {
@@ -347,6 +351,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   startSolution(): void {
+    if (this.isGuest) {
+      const redirectTo = '/create-solution';
+      this.auth.setRedirectUrl(redirectTo);
+      sessionStorage.setItem('redirectTo', redirectTo);
+      void this.router.navigate(['/login'], {
+        queryParams: { redirectTo },
+      });
+      return;
+    }
     void this.router.navigate(['/create-solution']);
   }
 
@@ -366,6 +379,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   communityProgress(solution: Solution): number {
+    if (Number.isFinite(Number(solution.publicProgress))) {
+      return Number(solution.publicProgress);
+    }
     if (solution.finished === 'true') return 100;
     const answers = Object.values(solution.status || {}).filter(
       (value) => String(value || '').replace(/<[^>]*>/g, '').trim().length > 15
@@ -381,6 +397,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   communityMemberCount(solution: Solution): number {
+    if (Number.isFinite(Number(solution.publicMemberCount))) {
+      return Math.max(1, Number(solution.publicMemberCount));
+    }
     if (Array.isArray(solution.teamMemberEmails)) {
       return Math.max(1, solution.teamMemberEmails.length);
     }

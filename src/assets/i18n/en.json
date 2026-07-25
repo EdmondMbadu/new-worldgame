@@ -261,6 +261,7 @@
       "title": "Solutions worth building together",
       "description": "See what teams are developing, understand their thinking, and add a useful comment that helps the work move forward.",
       "startSolution": "Start a solution",
+      "signInToStart": "Sign in to start",
       "homeContentLabel": "Home content",
       "tabs": {
         "solutions": "Community solutions",
@@ -1716,6 +1717,31 @@
     }
   },
   "solutionPreview": {
+    "public": {
+      "opening": "Opening the solution…",
+      "loadingDescription": "Loading the latest work and discussion.",
+      "unavailable": "This solution is not available",
+      "backToCommunity": "Back to community solutions",
+      "returnToSolution": "Return to the solution",
+      "jumpToDiscussion": "Jump to the discussion",
+      "backToSolution": "Back to solution",
+      "joinDiscussion": "Join the discussion",
+      "comment": "comment",
+      "comments": "comments",
+      "solutionTeam": "Solution team",
+      "member": "member",
+      "members": "members",
+      "discussion": "Discussion ({{count}})"
+    },
+    "guest": {
+      "signIn": "Sign in",
+      "translateTitle": "Want to read this in another language?",
+      "translateDescription": "Sign in to use the cached translation service.",
+      "commentTitle": "Join the discussion",
+      "commentDescription": "Sign in to share a thoughtful comment with this solution team.",
+      "signInToComment": "Sign in to comment",
+      "recentCommentsOnly": "Showing the most recent public comments."
+    },
     "translation": {
       "languages": {
         "en": "English",

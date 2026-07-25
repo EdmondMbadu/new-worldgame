@@ -80,6 +80,14 @@
         { "fieldPath": "feedStatus", "order": "ASCENDING" },
         { "fieldPath": "feedUpdatedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "publicCommunitySolutions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "feedStatus", "order": "ASCENDING" },
+        { "fieldPath": "feedUpdatedAtMs", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

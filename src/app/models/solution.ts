@@ -53,6 +53,9 @@ export class Solution {
   feedStatus?: 'in-development' | 'submitted';
   feedUpdatedAt?: any;
   commentCount?: number;
+  publicMemberCount?: number;
+  publicProgress?: number;
+  hasMoreComments?: boolean;
   teamMemberEmails?: string[];
   solutionAdminEmails?: string[];
   category?: string;

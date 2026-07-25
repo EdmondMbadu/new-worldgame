@@ -297,9 +297,9 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     private translate: TranslateService,
     private chatSession: ChatSessionService
   ) {
-    this.user = this.auth.currentUser;
+    this.user = this.auth.currentUser || {};
     this.selectedAi = this.getInitialAiSelection();
-    this.collectionPath = `users/${this.auth.currentUser.uid}/${this.selectedAi.collectionKey}`;
+    this.collectionPath = this.chatCollectionPath(this.selectedAi);
     this.updateIntroMessage();
   }
 
@@ -405,7 +405,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     this.closeIntroVideo();
     this.watchSelectedAiIntroVideo();
     this.persistAiSelection(ai);
-    this.collectionPath = `users/${this.auth.currentUser.uid}/${ai.collectionKey}`;
+    this.collectionPath = this.chatCollectionPath(ai);
     this.updateIntroMessage();
     this.responses = [];
     this.currentSessionId = null;
@@ -739,6 +739,11 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     } catch {
       // Ignore storage failures (e.g., blocked storage)
     }
+  }
+
+  private chatCollectionPath(ai: AiAvatar): string {
+    const uid = this.auth?.currentUser?.uid;
+    return uid ? `users/${uid}/${ai.collectionKey}` : '';
   }
 
   openFullPage(): void {
@@ -1134,6 +1139,15 @@ export class ChatbotComponent implements OnInit, OnDestroy {
     if (!trimmed && !this.previews.length) return;
 
     const uid = this.auth.currentUser?.uid;
+    if (!uid) {
+      this.router.navigate(['/login'], {
+        queryParams: { returnUrl: this.router.url },
+      });
+      return;
+    }
+    // Auth can finish restoring after this component is constructed on a hard
+    // refresh. Rebuild the path from the now-confirmed user before any write.
+    this.collectionPath = `users/${uid}/${this.selectedAi.collectionKey}`;
     
     // Create a new session if we don't have one
     if (!this.currentSessionId && uid && trimmed) {
@@ -1501,6 +1515,9 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   }
 
   async deleteAllDocuments(): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    this.collectionPath = `users/${uid}/${this.selectedAi.collectionKey}`;
     const batch = this.afs.firestore.batch();
     const snapshot = await this.afs.collection(this.collectionPath).ref.get();
     snapshot.forEach((doc) => {

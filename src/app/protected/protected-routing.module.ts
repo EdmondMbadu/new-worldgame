@@ -49,7 +49,7 @@ import { ChallengeSpacesComponent } from '../components/challenge-spaces/challen
 const routes: Routes = [
   { path: 'game', component: GameComponent },
   { path: 'mini-game', component: MiniGameComponent },
-  { path: 'home', component: HomeComponent, canActivate: [AuthGuard] },
+  { path: 'home', component: HomeComponent },
   { path: 'discover', component: DiscoverComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   {
@@ -82,7 +82,6 @@ const routes: Routes = [
   {
     path: 'solution-preview/:id',
     component: SolutionPreviewComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'full-discussion/:id',
