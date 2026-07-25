@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -137,6 +137,10 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   returnTo = '/home';
   activePreviewView: SolutionPreviewContentView = 'latest';
   developmentSections: SolutionPreviewSection[] = [];
+  isDiscussionInView = false;
+  private commentReturnScrollY = 0;
+  private discussionObserver?: IntersectionObserver;
+  private discussionObserverSetupTimer?: ReturnType<typeof setTimeout>;
   private previewViewSolutionId = '';
   private solutionSub?: Subscription;
   private communityCommentsSub?: Subscription;
@@ -158,7 +162,8 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     private time: TimeService,
     public data: DataService,
     public router: Router,
-    private fns: AngularFireFunctions
+    private fns: AngularFireFunctions,
+    private ngZone: NgZone
   ) {}
   isLoggedIn: boolean = false;
   ngOnInit(): void {
@@ -178,6 +183,10 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.solutionSub?.unsubscribe();
     this.communityCommentsSub?.unsubscribe();
+    this.discussionObserver?.disconnect();
+    if (this.discussionObserverSetupTimer) {
+      clearTimeout(this.discussionObserverSetupTimer);
+    }
   }
 
   async initializeComments() {
@@ -352,6 +361,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
         this.watchCommunityComments();
         void this.initializeComments();
         this.isLoadingSolution = false;
+        this.setupDiscussionObserver();
       },
       error: (error) => {
         console.error('Unable to open solution', error);
@@ -384,6 +394,34 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
 
   goBackToCommunity(): void {
     void this.router.navigateByUrl(this.returnTo || '/home');
+  }
+
+  scrollToDiscussion(): void {
+    const discussion = document.getElementById('solution-discussion');
+    if (!discussion) return;
+
+    this.commentReturnScrollY = window.scrollY || 0;
+    discussion.scrollIntoView({
+      behavior: this.preferredScrollBehavior(),
+      block: 'start',
+    });
+  }
+
+  scrollBackToSolution(): void {
+    if (this.commentReturnScrollY > 0) {
+      window.scrollTo({
+        top: this.commentReturnScrollY,
+        behavior: this.preferredScrollBehavior(),
+      });
+      return;
+    }
+
+    document
+      .getElementById('solution-reading-start')
+      ?.scrollIntoView({
+        behavior: this.preferredScrollBehavior(),
+        block: 'start',
+      });
   }
 
   get isInDevelopment(): boolean {
@@ -590,6 +628,37 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     const date = value?.toDate?.() || (value ? new Date(value) : null);
     const millis = date?.getTime?.();
     return Number.isFinite(millis) ? Number(millis) : 0;
+  }
+
+  private preferredScrollBehavior(): ScrollBehavior {
+    return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      ? 'auto'
+      : 'smooth';
+  }
+
+  private setupDiscussionObserver(): void {
+    this.discussionObserver?.disconnect();
+    if (this.discussionObserverSetupTimer) {
+      clearTimeout(this.discussionObserverSetupTimer);
+    }
+
+    this.discussionObserverSetupTimer = setTimeout(() => {
+      const discussion = document.getElementById('solution-discussion');
+      if (!discussion || typeof IntersectionObserver === 'undefined') return;
+
+      this.discussionObserver = new IntersectionObserver(
+        ([entry]) => {
+          this.ngZone.run(() => {
+            this.isDiscussionInView = Boolean(entry?.isIntersecting);
+          });
+        },
+        {
+          rootMargin: '-15% 0px -45% 0px',
+          threshold: 0.01,
+        }
+      );
+      this.discussionObserver.observe(discussion);
+    }, 0);
   }
 
   private scrollToLinkedComment(): void {

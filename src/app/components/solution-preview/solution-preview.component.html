@@ -34,8 +34,31 @@
       </div>
     </div>
   </div>
+
+    <button
+        type="button"
+        class="solution-comment-jump"
+        [class.solution-comment-jump--return]="isDiscussionInView"
+        (click)="isDiscussionInView ? scrollBackToSolution() : scrollToDiscussion()"
+        [attr.aria-label]="isDiscussionInView ? 'Return to the solution' : 'Jump to the discussion'"
+    >
+        <span class="solution-comment-jump__icon material-symbols-outlined" aria-hidden="true">
+            {{ isDiscussionInView ? 'arrow_upward' : 'chat_bubble' }}
+        </span>
+        <span class="solution-comment-jump__copy">
+            <strong>{{ isDiscussionInView ? 'Back to solution' : 'Join the discussion' }}</strong>
+            <small *ngIf="!isDiscussionInView">
+                {{ comments.length || 0 }}
+                {{ (comments.length || 0) === 1 ? 'comment' : 'comments' }}
+            </small>
+        </span>
+        <span *ngIf="!isDiscussionInView" class="solution-comment-jump__arrow material-symbols-outlined" aria-hidden="true">
+            south
+        </span>
+    </button>
+
     <div class="flex justify-between px-6 mx-auto max-w-screen-xl ">
-        <article class="mx-auto w-full max-w-3xl pt-10 lg:pt-14">
+        <article id="solution-reading-start" class="mx-auto w-full max-w-3xl pt-10 lg:pt-14">
             <button type="button" class="community-return-link" (click)="goBackToCommunity()">
                 <span class="material-symbols-outlined">arrow_back</span>
                 Back to community solutions
@@ -546,6 +569,7 @@
 
             <div class="nwg-divider my-10"></div>
 
+            <div id="solution-discussion" class="solution-discussion-region">
             <section class="mt-6 not-format">
                 <div class="flex justify-between items-center mb-6">
                     <h2  *ngIf="comments"class="text-2xl font-bold text-gray-900 dark:text-white" style="font-family:'Instrument Serif',serif;">Discussion ({{comments.length}})</h2>
@@ -695,6 +719,7 @@
                 <p class ="text-gray-700 dark:text-gray-300 leading-relaxed">{{comment.content}}</p>
 
             </article>
+            </div>
             <!-- <div class="flex justify-center items-center space-x-4 my-8">
                
                 <button 

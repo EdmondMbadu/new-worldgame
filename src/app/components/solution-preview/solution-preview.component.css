@@ -458,6 +458,98 @@
   font-size: 1rem;
 }
 
+.solution-comment-jump {
+  position: fixed;
+  z-index: 35;
+  top: 52%;
+  right: max(1rem, calc((100vw - 80rem) / 2 + 1rem));
+  display: flex;
+  min-height: 3.2rem;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid rgba(15, 118, 110, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.55rem 0.65rem 0.55rem 0.58rem;
+  color: #0f766e;
+  box-shadow:
+    0 14px 35px rgba(15, 23, 42, 0.13),
+    0 2px 8px rgba(15, 118, 110, 0.08);
+  backdrop-filter: blur(12px);
+  transform: translateY(-50%);
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.solution-comment-jump:hover {
+  border-color: rgba(15, 118, 110, 0.5);
+  background: #fff;
+  box-shadow:
+    0 18px 42px rgba(15, 23, 42, 0.16),
+    0 3px 10px rgba(15, 118, 110, 0.12);
+  transform: translateY(calc(-50% - 2px));
+}
+
+.solution-comment-jump:focus-visible {
+  outline: 3px solid rgba(20, 184, 166, 0.3);
+  outline-offset: 3px;
+}
+
+.solution-comment-jump__icon {
+  display: grid;
+  width: 2.15rem;
+  height: 2.15rem;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: #0f766e;
+  color: #fff;
+  font-size: 1.05rem;
+}
+
+.solution-comment-jump__copy {
+  display: grid;
+  min-width: 0;
+  text-align: left;
+}
+
+.solution-comment-jump__copy strong {
+  font-size: 0.75rem;
+  font-weight: 820;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.solution-comment-jump__copy small {
+  margin-top: 0.15rem;
+  color: #64748b;
+  font-size: 0.63rem;
+  font-weight: 680;
+  line-height: 1.1;
+}
+
+.solution-comment-jump__arrow {
+  margin-right: 0.15rem;
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.solution-comment-jump--return {
+  border-color: rgba(71, 85, 105, 0.2);
+  color: #334155;
+}
+
+.solution-comment-jump--return .solution-comment-jump__icon {
+  background: #334155;
+}
+
+.solution-discussion-region {
+  scroll-margin-top: 6rem;
+}
+
 .solution-content-explorer {
   display: grid;
   gap: 1.1rem;
@@ -831,6 +923,34 @@
 :host-context(.dark) .community-return-link { color: #94a3b8; }
 :host-context(.dark) .community-return-link:hover { color: #5eead4; }
 
+:host-context(.dark) .solution-comment-jump {
+  border-color: rgba(94, 234, 212, 0.24);
+  background: rgba(17, 24, 39, 0.94);
+  color: #5eead4;
+  box-shadow:
+    0 14px 35px rgba(0, 0, 0, 0.35),
+    0 2px 8px rgba(20, 184, 166, 0.1);
+}
+
+:host-context(.dark) .solution-comment-jump:hover {
+  border-color: rgba(94, 234, 212, 0.48);
+  background: #111827;
+}
+
+:host-context(.dark) .solution-comment-jump__copy small,
+:host-context(.dark) .solution-comment-jump__arrow {
+  color: #94a3b8;
+}
+
+:host-context(.dark) .solution-comment-jump--return {
+  color: #e2e8f0;
+}
+
+:host-context(.dark) .solution-comment-jump--return
+  .solution-comment-jump__icon {
+  background: #475569;
+}
+
 :host-context(.dark) .solution-content-explorer__heading,
 :host-context(.dark) .solution-overview-card,
 :host-context(.dark) .solution-step-section,
@@ -898,9 +1018,54 @@
 
 @media (prefers-reduced-motion: reduce) {
   .community-solution-loader { animation-duration: 1.5s; }
+
+  .solution-comment-jump {
+    transition: none;
+  }
+}
+
+@media (max-width: 1180px) and (min-width: 641px) {
+  .solution-comment-jump {
+    width: 3.2rem;
+    justify-content: center;
+    padding: 0.5rem;
+  }
+
+  .solution-comment-jump__copy,
+  .solution-comment-jump__arrow {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
+  .solution-comment-jump {
+    top: auto;
+    right: auto;
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    left: 50%;
+    min-height: 3rem;
+    max-width: calc(100vw - 2rem);
+    padding: 0.48rem 0.7rem 0.48rem 0.5rem;
+    transform: translateX(-50%);
+  }
+
+  .solution-comment-jump:hover {
+    transform: translateX(-50%) translateY(-2px);
+  }
+
+  .solution-comment-jump__icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .solution-comment-jump__copy {
+    display: grid;
+  }
+
+  .solution-comment-jump__arrow {
+    display: inline-block;
+  }
+
   .solution-content-explorer__heading {
     align-items: stretch;
     flex-direction: column;
