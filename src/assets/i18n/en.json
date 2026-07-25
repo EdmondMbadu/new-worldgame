@@ -2,7 +2,13 @@
   "app": {
     "language": {
       "english": "English",
-      "french": "French"
+      "french": "French",
+      "label": "Language",
+      "chooseTitle": "Choose your language",
+      "chooseDescription": "Select the language you want to use across Global Solutions Lab.",
+      "current": "Current",
+      "close": "Close language selector",
+      "savedNote": "Your language preference is saved on this device."
     },
     "loading": {
       "title": "Loading…",

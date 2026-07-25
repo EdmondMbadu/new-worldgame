@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  HostListener,
   Input,
   OnDestroy,
   OnInit,
@@ -94,7 +95,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   unreadDirectMessageCount = 0;
   languageOptions: { code: string; labelKey: string }[] = [];
   currentLanguage = 'en';
-  showLanguageDropdown = false;
+  showLanguageDialog = false;
   readonly canShowLanguageSwitcher = environment.enableLanguageSwitcher;
   private readonly destroy$ = new Subject<void>();
   private dmNotificationAudio?: HTMLAudioElement;
@@ -588,8 +589,29 @@ export class NavbarComponent implements OnInit, OnDestroy {
     });
   }
 
-  changeLanguage(language: string) {
+  openLanguageDialog(): void {
+    this.closePublicMobileMenu();
+    this.displayHamburgerHomeMenu = true;
+    this.displayHamburgerHomeMenuClose = false;
+    this.showLanguageDialog = true;
+  }
+
+  closeLanguageDialog(): void {
+    this.showLanguageDialog = false;
+  }
+
+  selectLanguage(language: string): void {
     this.languageService.use(language);
+    this.closeLanguageDialog();
+  }
+
+  getLanguageDisplayName(language: string): string {
+    return language === 'fr' ? 'Français' : 'English (US)';
+  }
+
+  @HostListener('document:keydown.escape')
+  closeLanguageDialogOnEscape(): void {
+    this.closeLanguageDialog();
   }
 
   isActiveLanguage(language: string): boolean {

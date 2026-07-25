@@ -2,7 +2,13 @@
   "app": {
     "language": {
       "english": "Anglais",
-      "french": "Français"
+      "french": "Français",
+      "label": "Langue",
+      "chooseTitle": "Choisissez votre langue",
+      "chooseDescription": "Sélectionnez la langue à utiliser dans Global Solutions Lab.",
+      "current": "Actuelle",
+      "close": "Fermer le sélecteur de langue",
+      "savedNote": "Votre préférence linguistique est enregistrée sur cet appareil."
     },
     "loading": {
       "title": "Chargement…",
