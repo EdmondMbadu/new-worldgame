@@ -1,4 +1,5 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +11,22 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 
 type SolutionPreviewContentView = 'latest' | 'draft' | 'published';
+type ContentTranslationLanguage = 'en' | 'fr';
+
+interface CommunityContentTranslation {
+  translations: Record<string, string>;
+  sourceLanguage: string;
+  targetLanguage: ContentTranslationLanguage;
+  alreadyInTargetLanguage: boolean;
+  cacheHit: boolean;
+}
+
+interface CommentTranslationState {
+  loading: boolean;
+  showOriginal: boolean;
+  errorKey: string;
+  result?: CommunityContentTranslation;
+}
 
 interface SolutionPreviewAnswer {
   key: string;
@@ -27,68 +44,70 @@ interface SolutionPreviewSection {
 }
 
 const SOLUTION_STEP_SECTIONS: Array<
-  Omit<SolutionPreviewSection, 'answers' | 'total'> & {
-    questions: Array<{ key: string; label: string }>;
+  Omit<SolutionPreviewSection, 'answers' | 'total' | 'title' | 'description'> & {
+    titleKey: string;
+    descriptionKey: string;
+    questions: Array<{ key: string; labelKey: string }>;
   }
 > = [
   {
     step: 1,
-    title: 'Understanding the problem',
-    description: 'The challenge, its causes, its scale, and why action matters.',
+    titleKey: 'solutionPreview.steps.step1.title',
+    descriptionKey: 'solutionPreview.steps.step1.description',
     icon: 'search_insights',
     questions: [
-      { key: 'S1-A', label: 'The problem and why it matters' },
-      { key: 'S1-B', label: 'Symptoms, causes, systems, and major actors' },
-      { key: 'S1-C', label: 'People and places affected' },
-      { key: 'S1-D', label: 'Consequences if nothing changes' },
+      { key: 'S1-A', labelKey: 'solutionPreview.steps.questions.S1-A' },
+      { key: 'S1-B', labelKey: 'solutionPreview.steps.questions.S1-B' },
+      { key: 'S1-C', labelKey: 'solutionPreview.steps.questions.S1-C' },
+      { key: 'S1-D', labelKey: 'solutionPreview.steps.questions.S1-D' },
     ],
   },
   {
     step: 2,
-    title: 'Defining the preferred future',
-    description: 'The outcome the team wants to create and how success will be recognized.',
+    titleKey: 'solutionPreview.steps.step2.title',
+    descriptionKey: 'solutionPreview.steps.step2.description',
     icon: 'flag',
     questions: [
-      { key: 'S2-A', label: 'The preferred future and overall goal' },
-      { key: 'S2-B', label: 'Measures of success' },
+      { key: 'S2-A', labelKey: 'solutionPreview.steps.questions.S2-A' },
+      { key: 'S2-B', labelKey: 'solutionPreview.steps.questions.S2-B' },
     ],
   },
   {
     step: 3,
-    title: 'Designing the solution',
-    description: 'The proposed approach, enabling resources, and opportunities for impact.',
+    titleKey: 'solutionPreview.steps.step3.title',
+    descriptionKey: 'solutionPreview.steps.step3.description',
     icon: 'lightbulb',
     questions: [
-      { key: 'S3-A', label: 'The proposed solution and its leverage points' },
-      { key: 'S3-B', label: 'Technology, programs, and policies required' },
-      { key: 'S3-C', label: 'Resources and community support' },
-      { key: 'S3-D', label: 'Business opportunity' },
+      { key: 'S3-A', labelKey: 'solutionPreview.steps.questions.S3-A' },
+      { key: 'S3-B', labelKey: 'solutionPreview.steps.questions.S3-B' },
+      { key: 'S3-C', labelKey: 'solutionPreview.steps.questions.S3-C' },
+      { key: 'S3-D', labelKey: 'solutionPreview.steps.questions.S3-D' },
       {
         key: 'S3-E',
-        label: 'Circular, regenerative, and equitable design',
+        labelKey: 'solutionPreview.steps.questions.S3-E',
       },
     ],
   },
   {
     step: 4,
-    title: 'Planning implementation',
-    description: 'Costs, partners, funding, actions, and the results expected from implementation.',
+    titleKey: 'solutionPreview.steps.step4.title',
+    descriptionKey: 'solutionPreview.steps.step4.description',
     icon: 'account_tree',
     questions: [
-      { key: 'S4-A', label: 'Proof-of-concept cost' },
-      { key: 'S4-B', label: 'Cost to implement at scale' },
-      { key: 'S4-C', label: 'Funding and investment strategy' },
-      { key: 'S4-D', label: 'Implementation partners and location' },
-      { key: 'S4-E', label: 'Actions for the next 6–12 months' },
-      { key: 'S4-F', label: 'Detailed implementation model' },
-      { key: 'S4-G', label: 'Expected local results' },
-      { key: 'S4-H', label: 'Expected global results' },
-      { key: 'S4-I', label: 'Path to the preferred future' },
-      { key: 'S4-J', label: 'Environmental impact' },
-      { key: 'S4-K', label: 'Best funding sources' },
-      { key: 'S4-L', label: 'Equity and social justice' },
-      { key: 'S4-M', label: 'How $10,000 would advance the work' },
-      { key: 'S4-N', label: 'What the team can do now' },
+      { key: 'S4-A', labelKey: 'solutionPreview.steps.questions.S4-A' },
+      { key: 'S4-B', labelKey: 'solutionPreview.steps.questions.S4-B' },
+      { key: 'S4-C', labelKey: 'solutionPreview.steps.questions.S4-C' },
+      { key: 'S4-D', labelKey: 'solutionPreview.steps.questions.S4-D' },
+      { key: 'S4-E', labelKey: 'solutionPreview.steps.questions.S4-E' },
+      { key: 'S4-F', labelKey: 'solutionPreview.steps.questions.S4-F' },
+      { key: 'S4-G', labelKey: 'solutionPreview.steps.questions.S4-G' },
+      { key: 'S4-H', labelKey: 'solutionPreview.steps.questions.S4-H' },
+      { key: 'S4-I', labelKey: 'solutionPreview.steps.questions.S4-I' },
+      { key: 'S4-J', labelKey: 'solutionPreview.steps.questions.S4-J' },
+      { key: 'S4-K', labelKey: 'solutionPreview.steps.questions.S4-K' },
+      { key: 'S4-L', labelKey: 'solutionPreview.steps.questions.S4-L' },
+      { key: 'S4-M', labelKey: 'solutionPreview.steps.questions.S4-M' },
+      { key: 'S4-N', labelKey: 'solutionPreview.steps.questions.S4-N' },
     ],
   },
 ];
@@ -137,6 +156,17 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   returnTo = '/home';
   activePreviewView: SolutionPreviewContentView = 'latest';
   developmentSections: SolutionPreviewSection[] = [];
+  solutionTranslationLoading = false;
+  solutionTranslationErrorKey = '';
+  private solutionTranslations = new Map<
+    string,
+    CommunityContentTranslation
+  >();
+  private solutionOriginalKeys = new Set<string>();
+  private commentTranslationStates = new Map<
+    string,
+    CommentTranslationState
+  >();
   isDiscussionInView = false;
   private commentReturnScrollY = 0;
   private discussionObserver?: IntersectionObserver;
@@ -144,6 +174,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   private previewViewSolutionId = '';
   private solutionSub?: Subscription;
   private communityCommentsSub?: Subscription;
+  private languageSub?: Subscription;
 
   hoverWinner: boolean = false;
   displayCongrats: boolean = false;
@@ -163,10 +194,16 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     public data: DataService,
     public router: Router,
     private fns: AngularFireFunctions,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private translate: TranslateService
   ) {}
   isLoggedIn: boolean = false;
   ngOnInit(): void {
+    this.languageSub = this.translate.onLangChange.subscribe(() => {
+      if (this.currentSolution?.solutionId) {
+        this.refreshPreviewContentModel();
+      }
+    });
     this.returnTo =
       this.activatedRoute.snapshot.queryParamMap.get('returnTo') || '/home';
     this.activatedRoute.paramMap.subscribe((params) => {
@@ -183,6 +220,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.solutionSub?.unsubscribe();
     this.communityCommentsSub?.unsubscribe();
+    this.languageSub?.unsubscribe();
     this.discussionObserver?.disconnect();
     if (this.discussionObserverSetupTimer) {
       clearTimeout(this.discussionObserverSetupTimer);
@@ -317,6 +355,10 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   loadSolutionData(solutionId: string): void {
     this.isLoadingSolution = true;
     this.solutionAccessError = '';
+    this.solutionTranslations.clear();
+    this.solutionOriginalKeys.clear();
+    this.commentTranslationStates.clear();
+    this.solutionTranslationErrorKey = '';
     this.solutionSub = this.solution
       .getSolutionForNonAuthenticatedUser(solutionId)
       .subscribe({
@@ -493,6 +535,234 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
       return;
     }
     this.activePreviewView = view;
+    this.solutionTranslationErrorKey = '';
+  }
+
+  get contentTargetLanguage(): ContentTranslationLanguage {
+    const language = String(
+      this.translate.currentLang || this.translate.defaultLang || 'en'
+    ).toLowerCase();
+    return language.startsWith('fr') ? 'fr' : 'en';
+  }
+
+  get contentTargetLanguageName(): string {
+    return this.translate.instant(
+      `solutionPreview.translation.languages.${this.contentTargetLanguage}`
+    );
+  }
+
+  get activeSolutionTranslation(): CommunityContentTranslation | undefined {
+    return this.solutionTranslations.get(this.activeSolutionTranslationKey);
+  }
+
+  get isShowingSolutionTranslation(): boolean {
+    const result = this.activeSolutionTranslation;
+    return (
+      !!result &&
+      !result.alreadyInTargetLanguage &&
+      !this.solutionOriginalKeys.has(this.activeSolutionTranslationKey)
+    );
+  }
+
+  get isSolutionAlreadyInTargetLanguage(): boolean {
+    return !!this.activeSolutionTranslation?.alreadyInTargetLanguage;
+  }
+
+  get translatedSourceLanguageName(): string {
+    const sourceLanguage = this.activeSolutionTranslation?.sourceLanguage;
+    if (!sourceLanguage) return '';
+    const key = `solutionPreview.translation.languages.${sourceLanguage}`;
+    const translated = this.translate.instant(key);
+    return translated === key ? sourceLanguage.toUpperCase() : translated;
+  }
+
+  get displayedOriginalLanguageName(): string {
+    return (
+      this.translatedSourceLanguageName ||
+      this.translate.instant('solutionPreview.translation.original')
+    );
+  }
+
+  async translateActiveSolutionView(): Promise<void> {
+    const translationKey = this.activeSolutionTranslationKey;
+    const existing = this.solutionTranslations.get(translationKey);
+    if (existing) {
+      this.solutionOriginalKeys.delete(translationKey);
+      return;
+    }
+    if (this.solutionTranslationLoading) return;
+
+    this.solutionTranslationLoading = true;
+    this.solutionTranslationErrorKey = '';
+    try {
+      const callable = this.fns.httpsCallable('translateCommunityContent');
+      const result = (await firstValueFrom(
+        callable({
+          solutionId: this.solutionId,
+          contentType: 'solution',
+          view: this.activePreviewView,
+          targetLanguage: this.contentTargetLanguage,
+        })
+      )) as CommunityContentTranslation;
+      this.solutionTranslations.set(translationKey, result);
+      if (result.alreadyInTargetLanguage) {
+        this.solutionOriginalKeys.add(translationKey);
+      } else {
+        this.solutionOriginalKeys.delete(translationKey);
+      }
+    } catch (error: any) {
+      console.error('Unable to translate solution content', error);
+      this.solutionTranslationErrorKey = this.translationErrorKey(error);
+    } finally {
+      this.solutionTranslationLoading = false;
+    }
+  }
+
+  showOriginalSolution(): void {
+    this.solutionOriginalKeys.add(this.activeSolutionTranslationKey);
+  }
+
+  showTranslatedSolution(): void {
+    this.solutionOriginalKeys.delete(this.activeSolutionTranslationKey);
+  }
+
+  displayedSolutionTitle(): string {
+    return this.solutionTranslatedValue(
+      'title',
+      String(this.currentSolution.title || '')
+    );
+  }
+
+  displayedSolutionDescription(): string {
+    return this.solutionTranslatedValue(
+      'description',
+      String(this.currentSolution.description || '')
+    );
+  }
+
+  displayedAnswerContent(answer: SolutionPreviewAnswer): string {
+    return this.solutionTranslatedValue(
+      `answer:${answer.key}`,
+      answer.content
+    );
+  }
+
+  displayedNarrativeContent(
+    view: 'draft' | 'published'
+  ): string {
+    const original =
+      view === 'draft'
+        ? this.currentSolution.strategyReview
+        : this.currentSolution.content;
+    return this.solutionTranslatedValue(view, String(original || ''));
+  }
+
+  commentTranslationState(
+    comment: any,
+    index: number
+  ): CommentTranslationState | undefined {
+    return this.commentTranslationStates.get(
+      this.commentTranslationKey(comment, index)
+    );
+  }
+
+  displayedCommentContent(comment: any, index: number): string {
+    const state = this.commentTranslationState(comment, index);
+    if (
+      state?.result &&
+      !state.result.alreadyInTargetLanguage &&
+      !state.showOriginal
+    ) {
+      return state.result.translations['comment'] || comment.content || '';
+    }
+    return String(comment?.content || '');
+  }
+
+  async translateComment(comment: any, index: number): Promise<void> {
+    const key = this.commentTranslationKey(comment, index);
+    const existing = this.commentTranslationStates.get(key);
+    if (existing?.result) {
+      existing.showOriginal = false;
+      existing.errorKey = '';
+      return;
+    }
+    if (existing?.loading) return;
+
+    const state: CommentTranslationState = {
+      loading: true,
+      showOriginal: false,
+      errorKey: '',
+    };
+    this.commentTranslationStates.set(key, state);
+
+    try {
+      const callable = this.fns.httpsCallable('translateCommunityContent');
+      const result = (await firstValueFrom(
+        callable({
+          solutionId: this.solutionId,
+          contentType: 'comment',
+          commentId: String(comment?.messageId || ''),
+          legacyCommentIndex: comment?.messageId ? null : index,
+          targetLanguage: this.contentTargetLanguage,
+        })
+      )) as CommunityContentTranslation;
+      state.result = result;
+      state.showOriginal = result.alreadyInTargetLanguage;
+    } catch (error: any) {
+      console.error('Unable to translate comment', error);
+      state.errorKey = this.translationErrorKey(error);
+    } finally {
+      state.loading = false;
+    }
+  }
+
+  toggleCommentOriginal(comment: any, index: number): void {
+    const state = this.commentTranslationState(comment, index);
+    if (!state?.result) return;
+    state.showOriginal = !state.showOriginal;
+  }
+
+  commentIsTranslated(comment: any, index: number): boolean {
+    const state = this.commentTranslationState(comment, index);
+    return (
+      !!state?.result &&
+      !state.result.alreadyInTargetLanguage &&
+      !state.showOriginal
+    );
+  }
+
+  commentIsAlreadyInTargetLanguage(comment: any, index: number): boolean {
+    return !!this.commentTranslationState(comment, index)?.result
+      ?.alreadyInTargetLanguage;
+  }
+
+  private get activeSolutionTranslationKey(): string {
+    return `${this.activePreviewView}:${this.contentTargetLanguage}`;
+  }
+
+  private solutionTranslatedValue(key: string, original: string): string {
+    if (!this.isShowingSolutionTranslation) return original;
+    return this.activeSolutionTranslation?.translations[key] || original;
+  }
+
+  private commentTranslationKey(comment: any, index: number): string {
+    return `${String(comment?.messageId || `legacy-${index}`)}:${
+      this.contentTargetLanguage
+    }`;
+  }
+
+  private translationErrorKey(error: any): string {
+    const code = String(error?.code || error?.details?.code || '');
+    if (code.includes('resource-exhausted')) {
+      return 'solutionPreview.translation.errors.limit';
+    }
+    if (code.includes('aborted')) {
+      return 'solutionPreview.translation.errors.inProgress';
+    }
+    if (code.includes('permission-denied')) {
+      return 'solutionPreview.translation.errors.access';
+    }
+    return 'solutionPreview.translation.errors.unavailable';
   }
 
   private watchCommunityComments(): void {
@@ -564,14 +834,14 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     const status = this.currentSolution.status || {};
     this.developmentSections = SOLUTION_STEP_SECTIONS.map((section) => ({
       step: section.step,
-      title: section.title,
-      description: section.description,
+      title: this.translate.instant(section.titleKey),
+      description: this.translate.instant(section.descriptionKey),
       icon: section.icon,
       total: section.questions.length,
       answers: section.questions
         .map((question) => ({
           key: question.key,
-          label: question.label,
+          label: this.translate.instant(question.labelKey),
           content: String(status[question.key] || ''),
         }))
         .filter((answer) => this.hasMeaningfulContent(answer.content)),

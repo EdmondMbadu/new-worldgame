@@ -29,7 +29,7 @@
         <h1
           class="nwg-hero-title text-4xl md:text-5xl lg:text-6xl font-semibold text-white max-w-3xl"
         >
-          {{ currentSolution.title }}
+          {{ displayedSolutionTitle() }}
         </h1>
       </div>
     </div>
@@ -291,6 +291,112 @@
            
 
             <section *ngIf="hasAnyPreviewContent" class="solution-content-explorer">
+                <div
+                    class="solution-translation-toolbar"
+                    role="status"
+                    aria-live="polite"
+                >
+                    <span
+                        class="solution-translation-toolbar__icon material-symbols-outlined"
+                        aria-hidden="true"
+                    >
+                        translate
+                    </span>
+                    <div class="solution-translation-toolbar__copy">
+                        <strong *ngIf="solutionTranslationLoading">
+                            {{ 'solutionPreview.translation.translatingDocument' | translate }}
+                        </strong>
+                        <strong *ngIf="!solutionTranslationLoading && isSolutionAlreadyInTargetLanguage">
+                            {{
+                                'solutionPreview.translation.alreadyInLanguage'
+                                    | translate: { language: contentTargetLanguageName }
+                            }}
+                        </strong>
+                        <strong *ngIf="!solutionTranslationLoading && isShowingSolutionTranslation">
+                            {{
+                                'solutionPreview.translation.machineTranslatedTo'
+                                    | translate: { language: contentTargetLanguageName }
+                            }}
+                        </strong>
+                        <strong
+                            *ngIf="
+                                !solutionTranslationLoading &&
+                                activeSolutionTranslation &&
+                                !isSolutionAlreadyInTargetLanguage &&
+                                !isShowingSolutionTranslation
+                            "
+                        >
+                            {{
+                                'solutionPreview.translation.showingOriginal'
+                                    | translate
+                                      : {
+                                          language: displayedOriginalLanguageName
+                                        }
+                            }}
+                        </strong>
+                        <strong
+                            *ngIf="
+                                !solutionTranslationLoading &&
+                                !activeSolutionTranslation
+                            "
+                        >
+                            {{ 'solutionPreview.translation.documentPrompt' | translate }}
+                        </strong>
+                        <small *ngIf="activeSolutionTranslation && !isSolutionAlreadyInTargetLanguage">
+                            {{ 'solutionPreview.translation.machineNotice' | translate }}
+                        </small>
+                        <small
+                            *ngIf="solutionTranslationErrorKey"
+                            class="solution-translation-toolbar__error"
+                        >
+                            {{ solutionTranslationErrorKey | translate }}
+                        </small>
+                    </div>
+
+                    <button
+                        *ngIf="!activeSolutionTranslation"
+                        type="button"
+                        class="solution-translation-toolbar__button"
+                        (click)="translateActiveSolutionView()"
+                        [disabled]="solutionTranslationLoading"
+                    >
+                        <span
+                            *ngIf="solutionTranslationLoading"
+                            class="solution-translation-spinner"
+                            aria-hidden="true"
+                        ></span>
+                        {{
+                            (solutionTranslationLoading
+                                ? 'solutionPreview.translation.translating'
+                                : 'solutionPreview.translation.translateTo')
+                                | translate: { language: contentTargetLanguageName }
+                        }}
+                    </button>
+                    <button
+                        *ngIf="isShowingSolutionTranslation"
+                        type="button"
+                        class="solution-translation-toolbar__button solution-translation-toolbar__button--secondary"
+                        (click)="showOriginalSolution()"
+                    >
+                        {{ 'solutionPreview.translation.viewOriginal' | translate }}
+                    </button>
+                    <button
+                        *ngIf="
+                            activeSolutionTranslation &&
+                            !isSolutionAlreadyInTargetLanguage &&
+                            !isShowingSolutionTranslation
+                        "
+                        type="button"
+                        class="solution-translation-toolbar__button"
+                        (click)="showTranslatedSolution()"
+                    >
+                        {{
+                            'solutionPreview.translation.showTranslation'
+                                | translate: { language: contentTargetLanguageName }
+                        }}
+                    </button>
+                </div>
+
                 <div class="solution-content-explorer__heading">
                     <div>
                         <span
@@ -298,33 +404,43 @@
                             [class.solution-content-explorer__status--submitted]="!isInDevelopment"
                         >
                             <span class="solution-content-explorer__status-dot"></span>
-                            {{ isInDevelopment ? 'In development' : 'Submitted solution' }}
+                            {{
+                                (isInDevelopment
+                                    ? 'solutionPreview.content.status.inDevelopment'
+                                    : 'solutionPreview.content.status.submitted') | translate
+                            }}
                         </span>
                         <h2>
                             {{
-                                isInDevelopment
-                                    ? 'A working solution, open to thoughtful input'
-                                    : 'Explore the solution'
+                                (isInDevelopment
+                                    ? 'solutionPreview.content.heading.inDevelopment'
+                                    : 'solutionPreview.content.heading.submitted') | translate
                             }}
                         </h2>
                         <p>
                             {{
-                                isInDevelopment
-                                    ? 'Read the team’s latest work or switch to its edited narrative before adding a comment.'
-                                    : 'Read the published solution or explore the development work behind it.'
+                                (isInDevelopment
+                                    ? 'solutionPreview.content.description.inDevelopment'
+                                    : 'solutionPreview.content.description.submitted') | translate
                             }}
                         </p>
                     </div>
                     <span class="solution-content-explorer__source">
                         <span class="material-symbols-outlined" aria-hidden="true">sync</span>
-                        {{ activePreviewView === 'latest' ? 'Live team work' : activePreviewView === 'draft' ? 'Editable draft' : 'Saved publication' }}
+                        {{
+                            (activePreviewView === 'latest'
+                                ? 'solutionPreview.content.sources.latest'
+                                : activePreviewView === 'draft'
+                                  ? 'solutionPreview.content.sources.draft'
+                                  : 'solutionPreview.content.sources.published') | translate
+                        }}
                     </span>
                 </div>
 
                 <nav
                     *ngIf="previewViewCount > 1"
                     class="solution-content-tabs"
-                    aria-label="Choose solution content"
+                    [attr.aria-label]="'solutionPreview.content.chooseContent' | translate"
                 >
                     <button
                         *ngIf="hasLatestWork"
@@ -334,7 +450,7 @@
                         [attr.aria-pressed]="activePreviewView === 'latest'"
                     >
                         <span class="material-symbols-outlined" aria-hidden="true">dynamic_feed</span>
-                        Latest work
+                        {{ 'solutionPreview.content.tabs.latest' | translate }}
                     </button>
                     <button
                         *ngIf="hasTeamDraft"
@@ -344,8 +460,12 @@
                         [attr.aria-pressed]="activePreviewView === 'draft'"
                     >
                         <span class="material-symbols-outlined" aria-hidden="true">edit_note</span>
-                        Team draft
-                        <span *ngIf="isDraftBehindSteps" class="solution-content-tabs__update-dot" aria-label="Newer team work is available"></span>
+                        {{ 'solutionPreview.content.tabs.draft' | translate }}
+                        <span
+                            *ngIf="isDraftBehindSteps"
+                            class="solution-content-tabs__update-dot"
+                            [attr.aria-label]="'solutionPreview.content.newerWorkAvailable' | translate"
+                        ></span>
                     </button>
                     <button
                         *ngIf="hasCompiledContent"
@@ -355,7 +475,7 @@
                         [attr.aria-pressed]="activePreviewView === 'published'"
                     >
                         <span class="material-symbols-outlined" aria-hidden="true">article</span>
-                        Published version
+                        {{ 'solutionPreview.content.tabs.published' | translate }}
                     </button>
                 </nav>
 
@@ -363,14 +483,16 @@
                     <div class="solution-content-note">
                         <span class="material-symbols-outlined" aria-hidden="true">update</span>
                         <p>
-                            <strong>The team’s most current work</strong>
-                            This view comes directly from its saved work across Steps 1–4.
+                            <strong>{{ 'solutionPreview.content.latestNote.title' | translate }}</strong>
+                            {{ 'solutionPreview.content.latestNote.description' | translate }}
                         </p>
                     </div>
 
                     <article *ngIf="currentSolution.description" class="solution-overview-card">
-                        <p class="solution-content-label">Solution overview</p>
-                        <div class="nwg-article" [innerHTML]="currentSolution.description"></div>
+                        <p class="solution-content-label">
+                            {{ 'solutionPreview.content.labels.overview' | translate }}
+                        </p>
+                        <div class="nwg-article" [innerHTML]="displayedSolutionDescription()"></div>
                     </article>
 
                     <article
@@ -382,12 +504,24 @@
                                 {{ section.icon }}
                             </span>
                             <div>
-                                <span class="solution-step-section__eyebrow">Step {{ section.step }}</span>
+                                <span class="solution-step-section__eyebrow">
+                                    {{
+                                        'solutionPreview.content.step'
+                                            | translate: { step: section.step }
+                                    }}
+                                </span>
                                 <h3>{{ section.title }}</h3>
                                 <p>{{ section.description }}</p>
                             </div>
                             <span class="solution-step-section__count">
-                                {{ section.answers.length }} of {{ section.total }} answered
+                                {{
+                                    'solutionPreview.content.answered'
+                                        | translate
+                                          : {
+                                              answered: section.answers.length,
+                                              total: section.total
+                                            }
+                                }}
                             </span>
                         </header>
 
@@ -397,7 +531,7 @@
                                 class="solution-step-answer"
                             >
                                 <h4>{{ answer.label }}</h4>
-                                <div class="nwg-article" [innerHTML]="answer.content"></div>
+                                <div class="nwg-article" [innerHTML]="displayedAnswerContent(answer)"></div>
                             </section>
                         </div>
                     </article>
@@ -407,14 +541,15 @@
                     <div *ngIf="isDraftBehindSteps" class="solution-freshness-note">
                         <span class="material-symbols-outlined" aria-hidden="true">info</span>
                         <p>
-                            <strong>Newer development work is available.</strong>
-                            The team has updated Steps 1–4 since this narrative was last refreshed.
-                            Choose “Latest work” to read the newest material.
+                            <strong>{{ 'solutionPreview.content.draftFreshness.title' | translate }}</strong>
+                            {{ 'solutionPreview.content.draftFreshness.description' | translate }}
                         </p>
                     </div>
                     <div class="solution-narrative-view__paper">
-                        <p class="solution-content-label">Team draft</p>
-                        <div class="nwg-article" [innerHTML]="currentSolution.strategyReview"></div>
+                        <p class="solution-content-label">
+                            {{ 'solutionPreview.content.labels.draft' | translate }}
+                        </p>
+                        <div class="nwg-article" [innerHTML]="displayedNarrativeContent('draft')"></div>
                     </div>
                 </div>
 
@@ -422,15 +557,19 @@
                     <div *ngIf="isPublishedSnapshotBehind" class="solution-freshness-note">
                         <span class="material-symbols-outlined" aria-hidden="true">info</span>
                         <p>
-                            <strong>This saved preview is not the team’s newest work.</strong>
-                            Choose “Latest work” to see changes made since this version was created.
+                            <strong>{{ 'solutionPreview.content.publishedFreshness.title' | translate }}</strong>
+                            {{ 'solutionPreview.content.publishedFreshness.description' | translate }}
                         </p>
                     </div>
                     <div class="solution-narrative-view__paper">
                         <p class="solution-content-label">
-                            {{ isInDevelopment ? 'Saved preview' : 'Published solution' }}
+                            {{
+                                (isInDevelopment
+                                    ? 'solutionPreview.content.labels.savedPreview'
+                                    : 'solutionPreview.content.labels.published') | translate
+                            }}
                         </p>
-                        <div class="nwg-article" [innerHTML]="currentSolution.content"></div>
+                        <div class="nwg-article" [innerHTML]="displayedNarrativeContent('published')"></div>
                     </div>
                 </div>
 
@@ -438,8 +577,10 @@
                     *ngIf="!hasLatestWork && !hasTeamDraft && !hasCompiledContent && currentSolution.description"
                     class="solution-overview-card"
                 >
-                    <p class="solution-content-label">Solution overview</p>
-                    <div class="nwg-article" [innerHTML]="currentSolution.description"></div>
+                    <p class="solution-content-label">
+                        {{ 'solutionPreview.content.labels.overview' | translate }}
+                    </p>
+                    <div class="nwg-article" [innerHTML]="displayedSolutionDescription()"></div>
                 </article>
             </section>
 
@@ -716,7 +857,97 @@
                     <!-- Dropdown menu -->
                     
                 </footer>
-                <p class ="text-gray-700 dark:text-gray-300 leading-relaxed">{{comment.content}}</p>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {{ displayedCommentContent(comment, i) }}
+                </p>
+
+                <div class="community-comment-translation">
+                    <ng-container
+                        *ngIf="commentTranslationState(comment, i) as translationState; else untranslatedComment"
+                    >
+                        <span
+                            *ngIf="translationState.loading"
+                            class="community-comment-translation__status"
+                        >
+                            <span
+                                class="solution-translation-spinner"
+                                aria-hidden="true"
+                            ></span>
+                            {{ 'solutionPreview.translation.translating' | translate }}
+                        </span>
+
+                        <span
+                            *ngIf="
+                                !translationState.loading &&
+                                commentIsAlreadyInTargetLanguage(comment, i)
+                            "
+                            class="community-comment-translation__status"
+                        >
+                            {{
+                                'solutionPreview.translation.commentAlreadyInLanguage'
+                                    | translate: { language: contentTargetLanguageName }
+                            }}
+                        </span>
+
+                        <ng-container
+                            *ngIf="
+                                !translationState.loading &&
+                                translationState.result &&
+                                !commentIsAlreadyInTargetLanguage(comment, i)
+                            "
+                        >
+                            <span
+                                *ngIf="commentIsTranslated(comment, i)"
+                                class="community-comment-translation__status"
+                            >
+                                {{ 'solutionPreview.translation.machineTranslated' | translate }}
+                            </span>
+                            <button
+                                type="button"
+                                (click)="toggleCommentOriginal(comment, i)"
+                            >
+                                {{
+                                    (commentIsTranslated(comment, i)
+                                        ? 'solutionPreview.translation.viewOriginal'
+                                        : 'solutionPreview.translation.showTranslation')
+                                        | translate: { language: contentTargetLanguageName }
+                                }}
+                            </button>
+                        </ng-container>
+
+                        <ng-container
+                            *ngIf="
+                                !translationState.loading &&
+                                !translationState.result
+                            "
+                        >
+                            <span
+                                *ngIf="translationState.errorKey"
+                                class="community-comment-translation__error"
+                            >
+                                {{ translationState.errorKey | translate }}
+                            </span>
+                            <button
+                                type="button"
+                                (click)="translateComment(comment, i)"
+                            >
+                                {{ 'solutionPreview.translation.retry' | translate }}
+                            </button>
+                        </ng-container>
+                    </ng-container>
+
+                    <ng-template #untranslatedComment>
+                        <button
+                            type="button"
+                            (click)="translateComment(comment, i)"
+                        >
+                            {{
+                                'solutionPreview.translation.translateTo'
+                                    | translate: { language: contentTargetLanguageName }
+                            }}
+                        </button>
+                    </ng-template>
+                </div>
 
             </article>
             </div>

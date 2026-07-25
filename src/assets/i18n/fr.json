@@ -1715,6 +1715,125 @@
       "message": "Une erreur s'est produite. Veuillez réessayer."
     }
   },
+  "solutionPreview": {
+    "translation": {
+      "languages": {
+        "en": "anglais",
+        "fr": "français"
+      },
+      "original": "langue d’origine",
+      "documentPrompt": "Lisez cette solution dans la langue de votre choix",
+      "translatingDocument": "Traduction de cette vue en cours…",
+      "alreadyInLanguage": "Ce contenu est déjà en {{language}}",
+      "machineTranslatedTo": "Traduit automatiquement en {{language}}",
+      "showingOriginal": "Version originale affichée ({{language}})",
+      "machineNotice": "La traduction automatique peut contenir des erreurs. La version originale est toujours conservée.",
+      "translating": "Traduction en cours…",
+      "translateTo": "Traduire en {{language}}",
+      "viewOriginal": "Voir l’original",
+      "showTranslation": "Afficher la traduction en {{language}}",
+      "machineTranslated": "Traduit automatiquement",
+      "commentAlreadyInLanguage": "Ce commentaire est déjà en {{language}}",
+      "retry": "Réessayer",
+      "errors": {
+        "unavailable": "La traduction est temporairement indisponible. La version originale reste visible.",
+        "limit": "La limite de sécurité du service de traduction a été atteinte. Veuillez réessayer plus tard.",
+        "inProgress": "Cette traduction est en cours de préparation. Veuillez réessayer dans un instant.",
+        "access": "Vous n’avez pas l’autorisation de traduire ce contenu."
+      }
+    },
+    "content": {
+      "status": {
+        "inDevelopment": "En développement",
+        "submitted": "Solution soumise"
+      },
+      "heading": {
+        "inDevelopment": "Une solution en cours, ouverte aux contributions constructives",
+        "submitted": "Explorer la solution"
+      },
+      "description": {
+        "inDevelopment": "Consultez les travaux les plus récents de l’équipe ou son récit édité avant d’ajouter un commentaire.",
+        "submitted": "Lisez la solution publiée ou découvrez les travaux qui ont mené à son élaboration."
+      },
+      "sources": {
+        "latest": "Travaux actuels de l’équipe",
+        "draft": "Brouillon modifiable",
+        "published": "Publication enregistrée"
+      },
+      "chooseContent": "Choisir la version de la solution",
+      "tabs": {
+        "latest": "Travaux récents",
+        "draft": "Brouillon de l’équipe",
+        "published": "Version publiée"
+      },
+      "newerWorkAvailable": "Des travaux plus récents sont disponibles",
+      "latestNote": {
+        "title": "Les travaux les plus récents de l’équipe",
+        "description": "Cette vue provient directement des travaux enregistrés aux étapes 1 à 4."
+      },
+      "labels": {
+        "overview": "Vue d’ensemble de la solution",
+        "draft": "Brouillon de l’équipe",
+        "savedPreview": "Aperçu enregistré",
+        "published": "Solution publiée"
+      },
+      "step": "Étape {{step}}",
+      "answered": "{{answered}} réponses sur {{total}}",
+      "draftFreshness": {
+        "title": "Des travaux plus récents sont disponibles.",
+        "description": "L’équipe a mis à jour les étapes 1 à 4 depuis la dernière actualisation de ce récit. Choisissez « Travaux récents » pour consulter la version la plus récente."
+      },
+      "publishedFreshness": {
+        "title": "Cet aperçu enregistré ne contient pas les travaux les plus récents de l’équipe.",
+        "description": "Choisissez « Travaux récents » pour voir les changements apportés depuis la création de cette version."
+      }
+    },
+    "steps": {
+      "step1": {
+        "title": "Comprendre le problème",
+        "description": "Le défi, ses causes, son ampleur et l’importance d’agir."
+      },
+      "step2": {
+        "title": "Définir l’avenir souhaité",
+        "description": "Le résultat que l’équipe souhaite obtenir et les critères qui permettront de reconnaître sa réussite."
+      },
+      "step3": {
+        "title": "Concevoir la solution",
+        "description": "L’approche proposée, les ressources nécessaires et les possibilités d’impact."
+      },
+      "step4": {
+        "title": "Planifier la mise en œuvre",
+        "description": "Les coûts, partenaires, financements, actions et résultats attendus de la mise en œuvre."
+      },
+      "questions": {
+        "S1-A": "Le problème et son importance",
+        "S1-B": "Les symptômes, causes, systèmes et principaux acteurs",
+        "S1-C": "Les personnes et territoires concernés",
+        "S1-D": "Les conséquences de l’inaction",
+        "S2-A": "L’avenir souhaité et l’objectif général",
+        "S2-B": "Les indicateurs de réussite",
+        "S3-A": "La solution proposée et ses leviers d’action",
+        "S3-B": "Les technologies, programmes et politiques nécessaires",
+        "S3-C": "Les ressources et le soutien de la communauté",
+        "S3-D": "L’opportunité économique",
+        "S3-E": "Une conception circulaire, régénératrice et équitable",
+        "S4-A": "Le coût de la preuve de concept",
+        "S4-B": "Le coût d’une mise en œuvre à grande échelle",
+        "S4-C": "La stratégie de financement et d’investissement",
+        "S4-D": "Les partenaires et le lieu de mise en œuvre",
+        "S4-E": "Les actions à mener au cours des 6 à 12 prochains mois",
+        "S4-F": "Le modèle détaillé de mise en œuvre",
+        "S4-G": "Les résultats locaux attendus",
+        "S4-H": "Les résultats mondiaux attendus",
+        "S4-I": "La voie vers l’avenir souhaité",
+        "S4-J": "L’impact environnemental",
+        "S4-K": "Les meilleures sources de financement",
+        "S4-L": "L’équité et la justice sociale",
+        "S4-M": "Comment 10 000 $ permettraient de faire avancer le projet",
+        "S4-N": "Ce que l’équipe peut faire dès maintenant"
+      }
+    }
+  },
   "challengeSpaces": {
     "eyebrow": "Espaces de défis",
     "title": "Espaces de défis",

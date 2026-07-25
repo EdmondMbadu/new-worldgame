@@ -1715,6 +1715,125 @@
       "message": "An error occurred. Please try again."
     }
   },
+  "solutionPreview": {
+    "translation": {
+      "languages": {
+        "en": "English",
+        "fr": "French"
+      },
+      "original": "original language",
+      "documentPrompt": "Read this solution in your preferred language",
+      "translatingDocument": "Translating this view…",
+      "alreadyInLanguage": "This content is already in {{language}}",
+      "machineTranslatedTo": "Machine translated into {{language}}",
+      "showingOriginal": "Showing the original ({{language}})",
+      "machineNotice": "Machine translations may contain errors. The original is always preserved.",
+      "translating": "Translating…",
+      "translateTo": "Translate to {{language}}",
+      "viewOriginal": "View original",
+      "showTranslation": "Show {{language}} translation",
+      "machineTranslated": "Machine translated",
+      "commentAlreadyInLanguage": "This comment is already in {{language}}",
+      "retry": "Try again",
+      "errors": {
+        "unavailable": "Translation is temporarily unavailable. The original remains visible.",
+        "limit": "The translation safety limit has been reached. Please try again later.",
+        "inProgress": "This translation is being prepared. Please try again in a moment.",
+        "access": "You do not have access to translate this content."
+      }
+    },
+    "content": {
+      "status": {
+        "inDevelopment": "In development",
+        "submitted": "Submitted solution"
+      },
+      "heading": {
+        "inDevelopment": "A working solution, open to thoughtful input",
+        "submitted": "Explore the solution"
+      },
+      "description": {
+        "inDevelopment": "Read the team’s latest work or switch to its edited narrative before adding a comment.",
+        "submitted": "Read the published solution or explore the development work behind it."
+      },
+      "sources": {
+        "latest": "Live team work",
+        "draft": "Editable draft",
+        "published": "Saved publication"
+      },
+      "chooseContent": "Choose solution content",
+      "tabs": {
+        "latest": "Latest work",
+        "draft": "Team draft",
+        "published": "Published version"
+      },
+      "newerWorkAvailable": "Newer team work is available",
+      "latestNote": {
+        "title": "The team’s most current work",
+        "description": "This view comes directly from its saved work across Steps 1–4."
+      },
+      "labels": {
+        "overview": "Solution overview",
+        "draft": "Team draft",
+        "savedPreview": "Saved preview",
+        "published": "Published solution"
+      },
+      "step": "Step {{step}}",
+      "answered": "{{answered}} of {{total}} answered",
+      "draftFreshness": {
+        "title": "Newer development work is available.",
+        "description": "The team has updated Steps 1–4 since this narrative was last refreshed. Choose “Latest work” to read the newest material."
+      },
+      "publishedFreshness": {
+        "title": "This saved preview is not the team’s newest work.",
+        "description": "Choose “Latest work” to see changes made since this version was created."
+      }
+    },
+    "steps": {
+      "step1": {
+        "title": "Understanding the problem",
+        "description": "The challenge, its causes, its scale, and why action matters."
+      },
+      "step2": {
+        "title": "Defining the preferred future",
+        "description": "The outcome the team wants to create and how success will be recognized."
+      },
+      "step3": {
+        "title": "Designing the solution",
+        "description": "The proposed approach, enabling resources, and opportunities for impact."
+      },
+      "step4": {
+        "title": "Planning implementation",
+        "description": "Costs, partners, funding, actions, and the results expected from implementation."
+      },
+      "questions": {
+        "S1-A": "The problem and why it matters",
+        "S1-B": "Symptoms, causes, systems, and major actors",
+        "S1-C": "People and places affected",
+        "S1-D": "Consequences if nothing changes",
+        "S2-A": "The preferred future and overall goal",
+        "S2-B": "Measures of success",
+        "S3-A": "The proposed solution and its leverage points",
+        "S3-B": "Technology, programs, and policies required",
+        "S3-C": "Resources and community support",
+        "S3-D": "Business opportunity",
+        "S3-E": "Circular, regenerative, and equitable design",
+        "S4-A": "Proof-of-concept cost",
+        "S4-B": "Cost to implement at scale",
+        "S4-C": "Funding and investment strategy",
+        "S4-D": "Implementation partners and location",
+        "S4-E": "Actions for the next 6–12 months",
+        "S4-F": "Detailed implementation model",
+        "S4-G": "Expected local results",
+        "S4-H": "Expected global results",
+        "S4-I": "Path to the preferred future",
+        "S4-J": "Environmental impact",
+        "S4-K": "Best funding sources",
+        "S4-L": "Equity and social justice",
+        "S4-M": "How $10,000 would advance the work",
+        "S4-N": "What the team can do now"
+      }
+    }
+  },
   "challengeSpaces": {
     "eyebrow": "Challenge spaces",
     "title": "Challenge Spaces",

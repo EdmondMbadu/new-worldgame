@@ -27,6 +27,7 @@ import {
   extractImageGenerationPrompt,
   isImageGenerationRequest,
 } from './image-request';
+export { translateCommunityContent } from './community-translation';
 
 // read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
 const GEMINI_KEY = functions.config()['gemini'].key;
