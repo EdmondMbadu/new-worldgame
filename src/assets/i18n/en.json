@@ -1715,6 +1715,71 @@
       "message": "An error occurred. Please try again."
     }
   },
+  "challengeSpaces": {
+    "eyebrow": "Challenge spaces",
+    "title": "Challenge Spaces",
+    "untitled": "Untitled challenge space",
+    "search": {
+      "label": "Search challenge spaces",
+      "placeholder": "Search spaces"
+    },
+    "loading": "Loading challenge spaces…",
+    "featured": {
+      "badge": "Featured space",
+      "label": "Highlighted space"
+    },
+    "sections": {
+      "joined": "Spaces You Are In",
+      "other": "Other Challenge Spaces",
+      "joinRequests": "Join Requests"
+    },
+    "status": {
+      "joined": "Joined",
+      "private": "Private",
+      "pending": "Pending"
+    },
+    "members": {
+      "one": "{{count}} member",
+      "other": "{{count}} members"
+    },
+    "online": {
+      "one": "{{count}} online",
+      "other": "{{count}} online"
+    },
+    "actions": {
+      "openFeatured": "Open featured space",
+      "requestToJoin": "Request to join",
+      "requestPending": "Request pending",
+      "accepted": "Accepted",
+      "reject": "Reject",
+      "accept": "Accept",
+      "cancel": "Cancel",
+      "sending": "Sending…",
+      "sendRequest": "Send request"
+    },
+    "joinRequests": {
+      "requested": "{{email}} requested access to {{space}}"
+    },
+    "empty": "No challenge spaces found.",
+    "requestForm": {
+      "eyebrow": "Request access",
+      "closeLabel": "Close request form",
+      "reasonLabel": "Why do you want to join?",
+      "placeholder": "Write a short note for the admin…",
+      "errors": {
+        "noteRequired": "Please write a short note before requesting access.",
+        "missingId": "This challenge space is missing an ID.",
+        "sendFailed": "Could not send this request. Please try again."
+      }
+    },
+    "toasts": {
+      "requestSent": "Your request was sent to the challenge space admin.",
+      "memberAdded": "{{name}} was added.",
+      "acceptFailed": "Could not accept this request.",
+      "requestRejected": "Request rejected.",
+      "rejectFailed": "Could not reject this request."
+    }
+  },
   "challengeCard": {
     "challengeAlt": "Challenge",
     "descriptionLabel": "Description",

@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Subscription, firstValueFrom } from 'rxjs';
 import { ChallengeJoinRequest, ChallengePage, User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -42,7 +43,8 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     public auth: AuthService,
     private challenges: ChallengesService,
     private presence: PresenceService,
-    private toast: ToastService
+    private toast: ToastService,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -147,7 +149,8 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   displayTitle(space: ChallengePage): string {
     return (
-      String(space.name || space.heading || '').trim() || 'Untitled challenge space'
+      String(space.name || space.heading || '').trim() ||
+      this.translate.instant('challengeSpaces.untitled')
     );
   }
 
@@ -157,7 +160,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   featuredActionLabel(space: ChallengePage): string {
     if (this.isCurrentUserInSpace(space)) {
-      return 'Open featured space';
+      return this.translate.instant('challengeSpaces.actions.openFeatured');
     }
 
     return this.requestButtonLabel(space);
@@ -190,9 +193,13 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   requestButtonLabel(space: ChallengePage): string {
     const status = this.myRequestStatus(space);
-    if (status === 'pending') return 'Request pending';
-    if (status === 'accepted') return 'Accepted';
-    return 'Request to join';
+    if (status === 'pending') {
+      return this.translate.instant('challengeSpaces.actions.requestPending');
+    }
+    if (status === 'accepted') {
+      return this.translate.instant('challengeSpaces.actions.accepted');
+    }
+    return this.translate.instant('challengeSpaces.actions.requestToJoin');
   }
 
   canRequestToJoin(space: ChallengePage): boolean {
@@ -228,13 +235,17 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     }
 
     if (!message) {
-      this.requestError = 'Please write a short note before requesting access.';
+      this.requestError = this.translate.instant(
+        'challengeSpaces.requestForm.errors.noteRequired'
+      );
       return;
     }
 
     const challengePageId = this.spaceKey(space);
     if (!challengePageId) {
-      this.requestError = 'This challenge space is missing an ID.';
+      this.requestError = this.translate.instant(
+        'challengeSpaces.requestForm.errors.missingId'
+      );
       return;
     }
 
@@ -243,12 +254,16 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
     try {
       await this.challenges.requestToJoinChallengePage(challengePageId, message);
-      this.toast.success('Your request was sent to the challenge space admin.');
+      this.toast.success(
+        this.translate.instant('challengeSpaces.toasts.requestSent')
+      );
       this.selectedRequestSpace = null;
       this.requestMessage = '';
     } catch (error) {
       console.error('Unable to request challenge space access', error);
-      this.requestError = 'Could not send this request. Please try again.';
+      this.requestError = this.translate.instant(
+        'challengeSpaces.requestForm.errors.sendFailed'
+      );
     } finally {
       this.submittingRequest = false;
     }
@@ -262,10 +277,16 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     this.processingRequestIds.add(request.id);
     try {
       await this.challenges.acceptChallengeJoinRequest(request.id);
-      this.toast.success(`${request.requesterName || request.requesterEmail} was added.`);
+      this.toast.success(
+        this.translate.instant('challengeSpaces.toasts.memberAdded', {
+          name: request.requesterName || request.requesterEmail,
+        })
+      );
     } catch (error) {
       console.error('Unable to accept challenge join request', error);
-      this.toast.error('Could not accept this request.');
+      this.toast.error(
+        this.translate.instant('challengeSpaces.toasts.acceptFailed')
+      );
     } finally {
       this.processingRequestIds.delete(request.id);
     }
@@ -279,10 +300,14 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     this.processingRequestIds.add(request.id);
     try {
       await this.challenges.rejectChallengeJoinRequest(request.id);
-      this.toast.success('Request rejected.');
+      this.toast.success(
+        this.translate.instant('challengeSpaces.toasts.requestRejected')
+      );
     } catch (error) {
       console.error('Unable to reject challenge join request', error);
-      this.toast.error('Could not reject this request.');
+      this.toast.error(
+        this.translate.instant('challengeSpaces.toasts.rejectFailed')
+      );
     } finally {
       this.processingRequestIds.delete(request.id);
     }
@@ -327,7 +352,12 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   memberLabel(space: ChallengePage): string {
     const count = this.memberCount(space);
-    return `${count} member${count === 1 ? '' : 's'}`;
+    return this.translate.instant(
+      count === 1
+        ? 'challengeSpaces.members.one'
+        : 'challengeSpaces.members.other',
+      { count }
+    );
   }
 
   onlineCount(space: ChallengePage): number {
@@ -338,7 +368,12 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   onlineLabel(space: ChallengePage): string {
     const count = this.onlineCount(space);
-    return `${count} online`;
+    return this.translate.instant(
+      count === 1
+        ? 'challengeSpaces.online.one'
+        : 'challengeSpaces.online.other',
+      { count }
+    );
   }
 
   isCurrentUserInSpace(space: ChallengePage): boolean {

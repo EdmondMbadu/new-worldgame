@@ -1715,6 +1715,71 @@
       "message": "Une erreur s'est produite. Veuillez réessayer."
     }
   },
+  "challengeSpaces": {
+    "eyebrow": "Espaces de défis",
+    "title": "Espaces de défis",
+    "untitled": "Espace de défi sans titre",
+    "search": {
+      "label": "Rechercher parmi les espaces de défis",
+      "placeholder": "Rechercher un espace"
+    },
+    "loading": "Chargement des espaces de défis…",
+    "featured": {
+      "badge": "Espace à la une",
+      "label": "Espace mis en avant"
+    },
+    "sections": {
+      "joined": "Vos espaces",
+      "other": "Autres espaces de défis",
+      "joinRequests": "Demandes d’adhésion"
+    },
+    "status": {
+      "joined": "Membre",
+      "private": "Privé",
+      "pending": "En attente"
+    },
+    "members": {
+      "one": "{{count}} membre",
+      "other": "{{count}} membres"
+    },
+    "online": {
+      "one": "{{count}} en ligne",
+      "other": "{{count}} en ligne"
+    },
+    "actions": {
+      "openFeatured": "Ouvrir l’espace à la une",
+      "requestToJoin": "Demander à rejoindre",
+      "requestPending": "Demande en attente",
+      "accepted": "Acceptée",
+      "reject": "Refuser",
+      "accept": "Accepter",
+      "cancel": "Annuler",
+      "sending": "Envoi en cours…",
+      "sendRequest": "Envoyer la demande"
+    },
+    "joinRequests": {
+      "requested": "{{email}} souhaite rejoindre {{space}}"
+    },
+    "empty": "Aucun espace de défi trouvé.",
+    "requestForm": {
+      "eyebrow": "Demander l’accès",
+      "closeLabel": "Fermer le formulaire de demande",
+      "reasonLabel": "Pourquoi souhaitez-vous rejoindre cet espace ?",
+      "placeholder": "Rédigez un court message à l’administrateur…",
+      "errors": {
+        "noteRequired": "Veuillez rédiger un court message avant de demander l’accès.",
+        "missingId": "L’identifiant de cet espace de défi est manquant.",
+        "sendFailed": "Impossible d’envoyer cette demande. Veuillez réessayer."
+      }
+    },
+    "toasts": {
+      "requestSent": "Votre demande a été envoyée à l’administrateur de l’espace.",
+      "memberAdded": "{{name}} a été ajouté(e).",
+      "acceptFailed": "Impossible d’accepter cette demande.",
+      "requestRejected": "Demande refusée.",
+      "rejectFailed": "Impossible de refuser cette demande."
+    }
+  },
   "challengeCard": {
     "challengeAlt": "Défi",
     "descriptionLabel": "Description",
