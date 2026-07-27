@@ -330,7 +330,10 @@
 
             <section *ngIf="hasAnyPreviewContent" class="solution-content-explorer">
                 <div
-                    *ngIf="isLoggedIn; else guestTranslationPrompt"
+                    *ngIf="
+                        shouldOfferSolutionTranslation && isLoggedIn;
+                        else guestTranslationPrompt
+                    "
                     class="solution-translation-toolbar"
                     role="status"
                     aria-live="polite"
@@ -436,7 +439,10 @@
                     </button>
                 </div>
                 <ng-template #guestTranslationPrompt>
-                    <div class="solution-translation-toolbar border-dashed">
+                    <div
+                        *ngIf="shouldOfferSolutionTranslation"
+                        class="solution-translation-toolbar border-dashed"
+                    >
                         <span
                             class="solution-translation-toolbar__icon material-symbols-outlined"
                             aria-hidden="true"

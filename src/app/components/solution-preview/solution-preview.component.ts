@@ -9,9 +9,15 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import {
+  detectSupportedContentLanguage,
+  normalizeSupportedContentLanguage,
+  shouldOfferContentTranslation,
+  SupportedContentLanguage,
+} from './solution-content-language';
 
 type SolutionPreviewContentView = 'latest' | 'draft' | 'published';
-type ContentTranslationLanguage = 'en' | 'fr';
+type ContentTranslationLanguage = SupportedContentLanguage;
 
 interface CommunityContentTranslation {
   translations: Record<string, string>;
@@ -166,6 +172,10 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   private commentTranslationStates = new Map<
     string,
     CommentTranslationState
+  >();
+  private detectedSolutionLanguages = new Map<
+    SolutionPreviewContentView,
+    SupportedContentLanguage | null
   >();
   isDiscussionInView = false;
   private commentReturnScrollY = 0;
@@ -636,6 +646,24 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     );
   }
 
+  get activeSolutionSourceLanguage(): SupportedContentLanguage | null {
+    return (
+      normalizeSupportedContentLanguage(
+        this.activeSolutionTranslation?.sourceLanguage
+      ) ||
+      this.detectedSolutionLanguages.get(this.activePreviewView) ||
+      null
+    );
+  }
+
+  get shouldOfferSolutionTranslation(): boolean {
+    return shouldOfferContentTranslation(
+      this.activeSolutionSourceLanguage,
+      this.contentTargetLanguage,
+      this.isSolutionAlreadyInTargetLanguage
+    );
+  }
+
   get activeSolutionTranslation(): CommunityContentTranslation | undefined {
     return this.solutionTranslations.get(this.activeSolutionTranslationKey);
   }
@@ -931,6 +959,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
         }))
         .filter((answer) => this.hasMeaningfulContent(answer.content)),
     })).filter((section) => section.answers.length > 0);
+    this.refreshDetectedSolutionLanguages();
 
     const solutionKey = String(
       this.currentSolution.solutionId || this.solutionId || ''
@@ -948,6 +977,37 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     ) {
       this.activePreviewView = this.defaultPreviewView();
     }
+  }
+
+  private refreshDetectedSolutionLanguages(): void {
+    const title = this.currentSolution.title;
+    const description = this.currentSolution.description;
+    const status = this.currentSolution.status || {};
+    const latestAnswers = SOLUTION_STEP_SECTIONS.flatMap((section) =>
+      section.questions.map((question) => status[question.key])
+    );
+    const publishedContent = this.currentSolution.content;
+
+    this.detectedSolutionLanguages.set(
+      'latest',
+      detectSupportedContentLanguage([title, description, ...latestAnswers])
+    );
+    this.detectedSolutionLanguages.set(
+      'draft',
+      detectSupportedContentLanguage([
+        title,
+        this.currentSolution.strategyReview,
+      ])
+    );
+    this.detectedSolutionLanguages.set(
+      'published',
+      detectSupportedContentLanguage([
+        title,
+        this.hasMeaningfulContent(publishedContent)
+          ? publishedContent
+          : description,
+      ])
+    );
   }
 
   private defaultPreviewView(): SolutionPreviewContentView {
