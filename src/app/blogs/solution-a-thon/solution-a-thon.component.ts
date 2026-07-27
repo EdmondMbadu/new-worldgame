@@ -24,13 +24,13 @@ export class SolutionAThonComponent {
       time: '9:00 AM',
       title: 'Problem State',
       body:
-        'Teams define the real-world problem, its symptoms and causes, the people and places affected, current constraints, and what happens if nothing is done. Bucky helps expand the breadth, depth, and speed of research.',
+        'Teams define the real-world problem, its symptoms and causes, the people and places affected, current constraints, and what happens if nothing is done. AI Bucky helps expand the breadth, depth, and speed of research.',
     },
     {
       time: '9:30 AM',
       title: 'Preferred State',
       body:
-        'Teams envision a future without the problem, what that future looks like, and its impacts. Bucky helps extend the team’s vision and explore second-order effects.',
+        'Teams envision a future without the problem, what that future looks like, and its impacts. AI Bucky helps extend the team’s vision and explore second-order effects.',
     },
     {
       time: '10:00 AM',
@@ -54,7 +54,7 @@ export class SolutionAThonComponent {
       time: '2:00 PM',
       title: 'Present the Solution',
       body:
-        'Teams present their solution pitch. The host can schedule judging and an optional awards livestream after the presentations.',
+        'Teams present their solution pitch. Host can schedule an optional awards livestream after the presentations.',
     },
   ];
 
@@ -94,7 +94,7 @@ export class SolutionAThonComponent {
     'A Global/Local Community Solutions Lab platform customized for your local situation, with specialized AI colleagues for sprint coaching and research.',
     'A structured systems-thinking and design-science methodology that turns vague or intractable problems into fundable, community-building prototypes.',
     'A lower-cost, higher-creativity alternative to consultants, innovation workshops, commissioned research studies, or continued inaction.',
-    'A solution and implementation brief created by your organization—a practical foundation for funding proposals, partnerships, membership recruitment, and public outreach.',
+    'A solution and implementation brief created by your organization and community—a practical foundation for moving forward with funding proposals, partnerships, membership recruitment, public outreach, plus access to the Global/Local Solutions platform for further work.',
     'An engaging event that brings your organization and community together around a shared challenge.',
   ];
 

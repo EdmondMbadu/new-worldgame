@@ -527,14 +527,17 @@
 .sat-cost-grid h2 {
   margin-top: 14px;
   color: var(--sat-navy);
-  font-size: clamp(2.8rem, 6vw, 5.4rem);
+  font-size: 1.12rem;
+  line-height: 1.6;
 }
 
 .sat-cost-note {
-  margin-top: 16px;
-  max-width: 440px;
+  margin: 28px 0 0;
+  border-top: 1px solid var(--sat-rule);
+  padding-top: 18px;
   color: var(--sat-muted);
-  line-height: 1.65;
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .sat-final {

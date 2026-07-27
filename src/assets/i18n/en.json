@@ -1582,8 +1582,8 @@
   },
   "contactPage": {
     "heading": "Contact Us",
-    "description": "Have a question about Global Solutions Lab and how you can use or customize it? Got a technical issue? Want to send feedback about a beta feature? Need details about supporting Global Solutions Lab? Let us know.",
-    "emailPrompt": "Send us an email at",
+    "description": "Have a question about a Solution-a-thon for your community, or want to schedule a meeting and demo of the Solution-a-thon platform?",
+    "emailPrompt": "Get in touch here:",
     "alerts": {
       "completeFields": "Complete all fields",
       "invalidEmail": "Enter a valid email"
