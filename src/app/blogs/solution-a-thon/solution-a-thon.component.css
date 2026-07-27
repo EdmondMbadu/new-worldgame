@@ -83,9 +83,17 @@
   font-size: clamp(2rem, 4vw, 3.6rem);
 }
 
+.sat-overview-card h2 {
+  margin: 14px 0 0;
+  color: white;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  font-weight: 900;
+  line-height: 1.08;
+}
+
 .sat-panel h3,
 .sat-time-row h3,
-.sat-format-row h3 {
+.sat-final-card h3 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 850;
@@ -146,12 +154,49 @@
   font-weight: 700;
 }
 
+.sat-overview-card,
 .sat-prize-card {
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.05);
   padding: clamp(22px, 3vw, 32px);
+}
+
+.sat-overview-card > p:not(.sat-card-label) {
+  margin: 18px 0 0;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.65;
+}
+
+.sat-overview-list {
+  margin-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.sat-overview-list > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 20px;
+  align-items: baseline;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 13px 0;
+}
+
+.sat-overview-list > div:last-child {
+  border-bottom: 0;
+}
+
+.sat-overview-list span {
+  min-width: 0;
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.35;
+}
+
+.sat-overview-list strong {
+  color: var(--sat-coral);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .sat-prize {
@@ -166,9 +211,9 @@
 .sat-prize span {
   color: var(--sat-coral);
   font-family: Georgia, serif;
+  font-size: 0.62em;
   font-style: italic;
   font-weight: 400;
-  font-size: 0.62em;
   vertical-align: text-top;
 }
 
@@ -208,14 +253,6 @@
   color: var(--sat-coral);
   text-align: right;
   white-space: nowrap;
-}
-
-.sat-check-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  padding: 13px 0;
 }
 
 .sat-strip {
@@ -311,10 +348,23 @@
   line-height: 1.45;
 }
 
+.sat-copy em {
+  color: var(--sat-ink);
+}
+
 .sat-small-copy {
   margin-top: 18px;
   color: var(--sat-muted);
   line-height: 1.7;
+}
+
+.sat-community-grid,
+.sat-prep-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--sat-rule);
+  background: var(--sat-rule);
 }
 
 .sat-division-grid {
@@ -397,8 +447,7 @@
   font-weight: 900;
 }
 
-.sat-time-row p,
-.sat-format-row p {
+.sat-time-row p {
   margin: 8px 0 0;
   color: inherit;
   line-height: 1.7;
@@ -429,42 +478,63 @@
   font-weight: 800;
 }
 
-.sat-format-list {
+.sat-prep-grid .sat-panel h3 {
+  margin-top: 10px;
+}
+
+.sat-prep-grid .sat-panel ul {
+  margin-top: 24px;
+}
+
+.sat-section--host {
+  border-bottom: 1px solid var(--sat-rule);
+}
+
+.sat-benefit-list {
   border-top: 1px solid var(--sat-rule);
 }
 
-.sat-format-row {
+.sat-benefit-list article {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 150px;
-  gap: 24px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 18px;
   border-bottom: 1px solid var(--sat-rule);
-  padding: 24px 0;
+  padding: 18px 0;
 }
 
-.sat-format-row > strong {
+.sat-benefit-list span {
   color: var(--sat-coral-deep);
-  font-size: 1.4rem;
-  font-weight: 950;
-}
-
-.sat-format-row > span {
-  color: var(--sat-muted);
-  font-size: 0.82rem;
   font-weight: 900;
-  text-transform: uppercase;
 }
 
-.sat-check-row {
-  border-top-color: var(--sat-rule);
-}
-
-.sat-check-row span {
+.sat-benefit-list p {
+  margin: 0;
   color: var(--sat-muted);
+  line-height: 1.7;
 }
 
-.sat-check-row strong {
-  color: var(--sat-ink);
-  text-align: right;
+.sat-section--cost {
+  background: #fffdf8;
+}
+
+.sat-cost-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+  gap: clamp(28px, 6vw, 88px);
+  align-items: start;
+}
+
+.sat-cost-grid h2 {
+  margin-top: 14px;
+  color: var(--sat-navy);
+  font-size: clamp(2.8rem, 6vw, 5.4rem);
+}
+
+.sat-cost-note {
+  margin-top: 16px;
+  max-width: 440px;
+  color: var(--sat-muted);
+  line-height: 1.65;
 }
 
 .sat-final {
@@ -488,6 +558,38 @@
   padding: clamp(22px, 3vw, 32px);
 }
 
+.sat-final-card h3 {
+  margin-top: 12px;
+  color: white;
+  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+}
+
+.sat-final-card p {
+  margin-top: 14px;
+  font-size: 1rem;
+}
+
+.sat-final-card .sat-btn {
+  margin-top: 24px;
+}
+
+.sat-check-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 1px solid var(--sat-rule);
+  padding: 13px 0;
+}
+
+.sat-check-row span {
+  color: var(--sat-muted);
+}
+
+.sat-check-row strong {
+  color: var(--sat-ink);
+  text-align: right;
+}
+
 .sat-final-card .sat-check-row {
   border-top-color: rgba(255, 255, 255, 0.16);
 }
@@ -508,7 +610,13 @@
   .sat-hero__grid,
   .sat-two-col,
   .sat-section-head,
-  .sat-final__grid {
+  .sat-final__grid,
+  .sat-cost-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sat-community-grid,
+  .sat-prep-grid {
     grid-template-columns: 1fr;
   }
 
@@ -552,12 +660,20 @@
   }
 
   .sat-time-row,
-  .sat-format-row,
   .sat-rubric div {
     grid-template-columns: 1fr;
   }
 
-  .sat-format-row > span {
-    order: -1;
+  .sat-overview-list > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .sat-overview-list strong {
+    text-align: left;
+  }
+
+  .sat-benefit-list article {
+    grid-template-columns: 42px minmax(0, 1fr);
   }
 }

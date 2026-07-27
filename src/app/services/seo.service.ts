@@ -177,15 +177,15 @@ export class SeoService {
         url: `${baseUrl}/landing-community`
       },
       '/solution-a-thon': {
-        title: 'Solution-a-thon 2026 | One-Day SDG Sprint for Student Teams',
-        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using Global Solutions Lab, Bucky, and design science to create structured Solution Briefs.',
-        keywords: 'Solution-a-thon, Global Solutions Lab Solution-a-thon, student SDG sprint, design science competition, student solution brief, global challenges competition',
+        title: 'Community Solution-a-thon | Five-Hour Real-World Solution Sprint',
+        description: 'Host a five-hour community Solution-a-thon using design science, the Global/Local Community Solutions Lab platform, and AI-supported research to build actionable solutions.',
+        keywords: 'community Solution-a-thon, Global Solutions Lab, community solution sprint, design science workshop, community innovation, AI-supported research, solution brief',
         url: `${baseUrl}/solution-a-thon`
       },
       '/gsl-solution-a-thon': {
-        title: 'Solution-a-thon 2026 | One-Day SDG Sprint for Student Teams',
-        description: 'The 2026 Solution-a-thon is a one-day SDG sprint for high school and university teams using Global Solutions Lab, Bucky, and design science to create structured Solution Briefs.',
-        keywords: 'Solution-a-thon, GSL Solution-a-thon, Global Solutions Lab Solution-a-thon, student SDG sprint, design science competition',
+        title: 'Community Solution-a-thon | Five-Hour Real-World Solution Sprint',
+        description: 'Host a five-hour community Solution-a-thon using design science, the Global/Local Community Solutions Lab platform, and AI-supported research to build actionable solutions.',
+        keywords: 'community Solution-a-thon, GSL Solution-a-thon, Global Solutions Lab, community solution sprint, design science workshop, AI-supported research',
         url: `${baseUrl}/solution-a-thon`
       },
       '/solution-a-thon-hubs': {

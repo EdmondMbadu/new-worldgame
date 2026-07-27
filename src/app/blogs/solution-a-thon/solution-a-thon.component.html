@@ -5,56 +5,43 @@
     <section class="sat-hero">
       <div class="sat-hero__grid">
         <div>
-          <div class="sat-briefing">
-            <span><strong>Mission</strong> SAT-26</span>
-            <span><strong>Duration</strong> 8 hours</span>
-            <span><strong>Format</strong> Hubs + virtual</span>
+          <div class="sat-briefing" aria-label="Solution-a-thon overview">
+            <span><strong>Mission</strong> Real-world solution</span>
+            <span><strong>Duration</strong> 5 hours</span>
+            <span><strong>Format</strong> Community teams</span>
             <span><strong>Experience</strong> None required</span>
           </div>
 
           <h1>The<br /><span class="sat-accent">Solution-a-thon.</span></h1>
 
           <p class="sat-lede">
-            America's one-day SDG sprint. High schoolers and university students pick one of five UN Sustainable Development challenges and build a deployable solution in 8 hours, with an AI co-pilot and $15,000 in prize money on the table.
+            A community half-day solution sprint. Your organization chooses one or more community challenges, then teams build deployable solutions in five hours with an AI co-pilot—and optional prize money on the table.
           </p>
 
           <div class="sat-actions">
-            <button type="button" class="sat-btn sat-btn--primary" (click)="scrollTo('register')">
-              Register your team
+            <a class="sat-btn sat-btn--primary" routerLink="/contact">
+              Plan your Solution-a-thon
               <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </a>
+            <button type="button" class="sat-btn sat-btn--secondary" (click)="scrollTo('schedule')">
+              See how the day works
             </button>
-            <button type="button" class="sat-btn sat-btn--secondary" (click)="scrollTo('tracks')">
-              See challenge tracks
-            </button>
-          </div>
-
-          <div class="sat-meta">
-            <span>Regional hubs · growing list</span>
-            <span>Virtual teams welcome nationwide</span>
-            <span>9th grade through grad school</span>
           </div>
         </div>
 
-        <aside class="sat-prize-card" aria-label="Prize pool summary">
-          <div class="sat-prize"><span>$</span>15,000</div>
-          <p class="sat-prize-sub">Across 13 awards · 2 divisions · 1 grand prize</p>
-          <div class="sat-prize-breakdown" aria-label="Prize breakdown">
-            <div class="sat-prize-row"><span>Grand Prize</span><strong>$5,000</strong></div>
-            <div class="sat-prize-row"><span>University Track winners (5)</span><strong>$1,000 ea.</strong></div>
-            <div class="sat-prize-row"><span>High School Track winners (5)</span><strong>$500 ea.</strong></div>
-            <div class="sat-prize-row"><span>Best AI-Native Solution</span><strong>$1,000</strong></div>
-            <div class="sat-prize-row"><span>People's Choice</span><strong>$1,500</strong></div>
+        <aside class="sat-overview-card" aria-label="Solution-a-thon host overview">
+          <p class="sat-card-label">A host-led sprint</p>
+          <h2>Bring your community’s challenge.</h2>
+          <p>
+            We bring the Global/Local Community Solutions Lab platform, design-science process, and specialized AI research assistance.
+          </p>
+          <div class="sat-overview-list">
+            <div><span>Teams</span><strong>3-5 people</strong></div>
+            <div><span>Working time</span><strong>9:00 AM-2:00 PM</strong></div>
+            <div><span>Core deliverable</span><strong>Solution Brief</strong></div>
+            <div><span>Host investment</span><strong>$1,000-$2,000</strong></div>
           </div>
         </aside>
-      </div>
-    </section>
-
-    <section class="sat-strip" aria-label="Methodology facts">
-      <div class="sat-wrap sat-facts">
-        <div *ngFor="let fact of facts" class="sat-fact">
-          <strong>{{ fact.value }}</strong>
-          <span>{{ fact.label }}</span>
-        </div>
       </div>
     </section>
 
@@ -66,13 +53,13 @@
         </div>
         <div class="sat-copy">
           <p class="sat-lead-copy">
-            The Solution-a-thon is a one-day, hybrid competition where teams of 3-5 pick one of five UN SDG challenges and build a comprehensive solution in 8 hours.
+            The Solution-a-thon is a half-day, hybrid competition where a community host determines one or more problem focus areas and teams of 3-5 build a comprehensive solution in five hours using the Global/Local Community Solutions Lab and its AI colleagues’ research assistance.
           </p>
           <p>
-            You do not need to code. You will not be judged on prototype polish. You will be judged by a design-science test: have you accurately described the problem, and comprehensively designed a solution that can actually be deployed?
+            Participants do not need to code, and they are not judged on prototype polish. The design-science test is whether they accurately describe the problem, envision a compelling future, and comprehensively design a solution that can actually be deployed.
           </p>
           <p>
-            Each team gets access to the Global Solutions Lab platform and Bucky, our AI co-pilot. At 4:30 PM ET, teams submit. At 6:30 PM ET, prizes are awarded on the closing livestream.
+            Each team gets access to the Global/Local Community Solutions Lab platform and <em>Bucky</em>, our AI co-pilot. After five hours, teams submit their solutions. Prizes can be awarded on a closing livestream an hour—or more, depending on the number of teams—later.
           </p>
           <blockquote>
             Design science is the organized use of imagination and science to develop innovative and viable solutions to critical real-world problems.
@@ -85,52 +72,47 @@
       <div class="sat-wrap">
         <div class="sat-section-head">
           <div>
-            <p class="sat-eyebrow">§ 02 · Two divisions</p>
-            <h2>Built for every level of student.</h2>
+            <p class="sat-eyebrow">§ 02 · The community</p>
+            <h2>Built for every community.</h2>
           </div>
           <p class="sat-lede sat-lede--dark">
-            One division for high schoolers, one for university students. Same five tracks, same judging rubric, separate prize pools.
+            The host sets the problem focus and brings together people with different lived experiences, expertise, and perspectives. No prior design or technical experience is required.
           </p>
         </div>
 
-        <div class="sat-division-grid">
+        <div class="sat-community-grid">
           <article class="sat-panel">
-            <p class="sat-card-label">High School Division</p>
-            <h3>Grades 9-12. Public, private, charter, homeschool.</h3>
-            <p>Teams of 3-5. Built for the student whose first portfolio piece is the one they are about to make.</p>
-            <ul>
-              <li>$500 per Track winner</li>
-              <li>Bucky AI co-pilot access</li>
-              <li>Eligible for Grand Prize, AI-Native, People's Choice</li>
-            </ul>
+            <p class="sat-card-label">Host-defined</p>
+            <h3>Start with a challenge that matters locally.</h3>
+            <p>Your organization chooses the problem, defines what a winning solution should accomplish, and invites local evaluators.</p>
           </article>
           <article class="sat-panel">
-            <p class="sat-card-label">University Division</p>
-            <h3>Undergrad. Graduate. Two-year, four-year, online.</h3>
-            <p>Teams of 3-5. Mixed teams with high school members compete in this division.</p>
-            <ul>
-              <li>$1,000 per Track winner</li>
-              <li>Solutions Fellow credential for winners</li>
-              <li>Eligible for Grand Prize, AI-Native, People's Choice</li>
-            </ul>
+            <p class="sat-card-label">Team-powered</p>
+            <h3>Mobilize the people already in your community.</h3>
+            <p>Teams of 3-5 combine local knowledge, practical experience, imagination, and AI-supported research.</p>
+          </article>
+          <article class="sat-panel">
+            <p class="sat-card-label">Outcome-focused</p>
+            <h3>Finish with a solution and implementation brief.</h3>
+            <p>The result is a practical foundation for funding proposals, partnerships, recruitment, and public outreach.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="tracks" class="sat-section scroll-mt-28">
+    <section id="challenges" class="sat-section scroll-mt-28">
       <div class="sat-wrap sat-two-col">
         <div>
-          <p class="sat-eyebrow">§ 03 · The tracks</p>
-          <h2>Choose your challenge.</h2>
+          <p class="sat-eyebrow">§ 03 · The focus</p>
+          <h2>Example community challenges.</h2>
           <p class="sat-small-copy">
-            Every registered team receives a track packet two weeks ahead of the sprint so event day can focus on design, not basic research.
+            Choose one challenge or create a focus area around the issue your community most needs to solve.
           </p>
         </div>
         <div class="sat-track-list">
-          <article *ngFor="let track of tracks; let i = index" class="sat-track-row">
+          <article *ngFor="let challenge of challenges; let i = index" class="sat-track-row">
             <span>{{ i + 1 | number: '2.0' }}</span>
-            <h3>{{ track }}</h3>
+            <h3>{{ challenge }}</h3>
           </article>
         </div>
       </div>
@@ -141,19 +123,19 @@
         <div class="sat-section-head">
           <div>
             <p class="sat-eyebrow">§ 04 · The day</p>
-            <h2>Eight hours. From brief to pitch.</h2>
+            <h2>Five hours. From problem to pitch.</h2>
           </div>
           <p class="sat-lede">
-            All teams work the same clock. The phases map to the sections of the Solution Brief so the sprint stays focused.
+            Teams move through a shared design-science sequence while Bucky supports the breadth, depth, and speed of their research.
           </p>
         </div>
 
         <div class="sat-timeline">
           <article *ngFor="let item of schedule" class="sat-time-row">
-            <time>{{ item[0] }}</time>
+            <time>{{ item.time }}</time>
             <div>
-              <h3>{{ item[1] }}</h3>
-              <p>{{ item[2] }}</p>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.body }}</p>
             </div>
           </article>
         </div>
@@ -163,70 +145,111 @@
     <section class="sat-section">
       <div class="sat-wrap sat-two-col">
         <div>
-          <p class="sat-eyebrow">§ 05 · Judging</p>
-          <h2>Six criteria. Same rubric every team.</h2>
+          <p class="sat-eyebrow">§ 05 · Evaluation</p>
+          <h2>Six criteria. A locally defined win.</h2>
+          <p class="sat-small-copy">
+            Alongside these criteria, the Solution-a-thon host helps define what winning means: what should a successful solution look like and accomplish for this community?
+          </p>
         </div>
         <div class="sat-rubric">
-          <div><strong>20%</strong><span>Near-term real-world impact within a 2-3 year horizon</span></div>
-          <div><strong>20%</strong><span>Scale and urgency of the chosen problem for people or the environment</span></div>
-          <div><strong>20%</strong><span>Comprehensive anticipatory design</span></div>
-          <div><strong>15%</strong><span>Feasibility and first-year execution</span></div>
-          <div><strong>15%</strong><span>AI-native thinking and methodology</span></div>
-          <div><strong>10%</strong><span>Clarity, communication, and pitch</span></div>
+          <div *ngFor="let criterion of criteria">
+            <strong>{{ criterion.weight }}</strong>
+            <span>{{ criterion.label }}</span>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="format" class="sat-section sat-section--muted scroll-mt-28">
+    <section id="prepare" class="sat-section sat-section--muted scroll-mt-28">
       <div class="sat-wrap">
         <div class="sat-section-head">
           <div>
-            <p class="sat-eyebrow">§ 06 · The format</p>
-            <h2>How 8 hours is enough.</h2>
+            <p class="sat-eyebrow">§ 06 · Getting ready</p>
+            <h2>What’s needed to start your Solution-a-thon.</h2>
           </div>
           <p class="sat-lede sat-lede--dark">
-            We do not try to compress a ten-day Global Solutions Lab into a single Saturday. We make a different artifact: a structured Solution Brief.
+            The host brings the community and local context. Global Solutions Lab supplies the structured solution-development environment.
           </p>
         </div>
 
-        <div class="sat-format-list">
-          <article *ngFor="let move of formatMoves" class="sat-format-row">
-            <strong>{{ move.number }}</strong>
-            <div>
-              <h3>{{ move.title }}</h3>
-              <p>{{ move.body }}</p>
-            </div>
-            <span>{{ move.timing }}</span>
+        <div class="sat-prep-grid">
+          <article class="sat-panel">
+            <p class="sat-card-label">Before the day</p>
+            <h3>What the host prepares</h3>
+            <ul>
+              <li *ngFor="let item of hostPreparation">{{ item }}</li>
+            </ul>
+          </article>
+          <article class="sat-panel">
+            <p class="sat-card-label">Typical schedule</p>
+            <h3>A focused half day</h3>
+            <ul>
+              <li *ngFor="let item of typicalSchedule">{{ item }}</li>
+            </ul>
+          </article>
+          <article class="sat-panel">
+            <p class="sat-card-label">Built into the platform</p>
+            <h3>The solution structure</h3>
+            <ul>
+              <li *ngFor="let item of solutionStructure">{{ item }}</li>
+            </ul>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="register" class="sat-final scroll-mt-28">
+    <section class="sat-section sat-section--host">
+      <div class="sat-wrap sat-two-col">
+        <div>
+          <p class="sat-eyebrow">§ 07 · What the host gets</p>
+          <h2>Capacity that lasts beyond the sprint.</h2>
+        </div>
+        <div class="sat-benefit-list">
+          <article *ngFor="let benefit of hostBenefits; let i = index">
+            <span>{{ i + 1 | number: '2.0' }}</span>
+            <p>{{ benefit }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sat-section sat-section--cost">
+      <div class="sat-wrap sat-cost-grid">
+        <div>
+          <p class="sat-eyebrow">§ 08 · Cost</p>
+          <h2>$1,000-$2,000</h2>
+          <p class="sat-cost-note">Based on the number of participants and teams, and the amount of platform customization required.</p>
+        </div>
+        <div class="sat-copy">
+          <p class="sat-lead-copy">
+            The cost includes full use of the Global/Local Community Solutions Lab platform before and after the Solution-a-thon.
+          </p>
+          <p>
+            It also includes its supporting tools for research, solution launch, publication of results, post-Solution-a-thon strategy development, and AI assistance. Cash prizes, if your organization chooses to award them, are additional.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="sat-final scroll-mt-28">
       <div class="sat-wrap sat-final__grid">
         <div>
-          <p class="sat-eyebrow">§ 07 · Sat · Oct 24 · 2026</p>
+          <p class="sat-eyebrow">Bring people together around a real challenge</p>
           <h2>Show up. Build something real.</h2>
           <p>
-            Register as a team of 3-5 and lock your roster at registration. Students at partner schools enroll free. Virtual teams are welcome from anywhere with WiFi.
+            A Solution-a-thon can involve youth, seniors, businesses, government, community organizations, and religious groups—building communication, consensus, cooperation, collaboration, and community.
           </p>
-          <div class="sat-actions">
-            <a class="sat-btn sat-btn--primary" href="mailto:info@newworld-game.org?subject=Solution-a-thon%20team%20registration">
-              Register your team
-              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-            </a>
-            <a class="sat-btn sat-btn--secondary" href="mailto:info@newworld-game.org?subject=Solution-a-thon%20participant%20question">
-              Ask a question
-            </a>
-          </div>
         </div>
         <aside class="sat-final-card">
-          <div class="sat-check-row"><span>Sprint begins</span><strong>11:00 AM ET</strong></div>
-          <div class="sat-check-row"><span>Submissions due</span><strong>4:30 PM ET</strong></div>
-          <div class="sat-check-row"><span>Awards livestream</span><strong>6:30 PM ET</strong></div>
-          <div class="sat-check-row"><span>Team size</span><strong>3-5 students</strong></div>
-          <div class="sat-check-row"><span>Partner schools</span><strong>Free</strong></div>
-          <div class="sat-check-row"><span>Apply by</span><strong>Oct 20, 2026</strong></div>
+          <p class="sat-card-label">Tell us your challenge</p>
+          <h3>Schedule a conversation and platform demo.</h3>
+          <p>
+            We’ll help you shape a focused, practical sprint around your organization’s needs and your community’s definition of success.
+          </p>
+          <a class="sat-btn sat-btn--primary" routerLink="/contact">
+            Get in touch
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
         </aside>
       </div>
     </section>
