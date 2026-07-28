@@ -260,6 +260,67 @@
   background: var(--sat-paper);
 }
 
+.sat-video-section {
+  border-bottom: 1px solid var(--sat-rule);
+  background: var(--sat-paper-2);
+  padding: clamp(52px, 7vw, 88px) 0;
+}
+
+.sat-video-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: center;
+}
+
+.sat-video-copy h2 {
+  margin: 14px 0 0;
+  color: var(--sat-navy);
+  font-size: clamp(2rem, 3.8vw, 3.35rem);
+  font-weight: 900;
+  line-height: 1.04;
+}
+
+.sat-video-copy > p:not(.sat-eyebrow) {
+  margin: 18px 0 0;
+  color: var(--sat-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.sat-video-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: var(--sat-navy);
+  font-weight: 850;
+  text-decoration-color: var(--sat-coral-deep);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+}
+
+.sat-video-link .material-symbols-outlined {
+  color: var(--sat-coral-deep);
+  font-size: 1.15rem;
+}
+
+.sat-video-frame {
+  overflow: hidden;
+  border: 1px solid rgba(5, 26, 51, 0.18);
+  border-radius: 8px;
+  background: #020814;
+  box-shadow: 0 24px 58px rgba(5, 26, 51, 0.18);
+}
+
+.sat-video-frame video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #020814;
+  object-fit: contain;
+}
+
 .sat-facts {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -614,7 +675,8 @@
   .sat-two-col,
   .sat-section-head,
   .sat-final__grid,
-  .sat-cost-grid {
+  .sat-cost-grid,
+  .sat-video-grid {
     grid-template-columns: 1fr;
   }
 

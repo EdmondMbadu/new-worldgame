@@ -23,6 +23,10 @@
               Plan your Solution-a-thon
               <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
             </a>
+            <button type="button" class="sat-btn sat-btn--secondary" (click)="scrollTo('overview-video')">
+              <span class="material-symbols-outlined" aria-hidden="true">play_circle</span>
+              Watch the short video
+            </button>
             <button type="button" class="sat-btn sat-btn--secondary" (click)="scrollTo('schedule')">
               See how the day works
             </button>
@@ -42,6 +46,38 @@
             <div><span>Core deliverable</span><strong>Solution Brief</strong></div>
           </div>
         </aside>
+      </div>
+    </section>
+
+    <section id="overview-video" class="sat-video-section scroll-mt-28" aria-labelledby="overview-video-title">
+      <div class="sat-wrap sat-video-grid">
+        <div class="sat-video-copy">
+          <p class="sat-eyebrow">Short video</p>
+          <h2 id="overview-video-title">Watch the Community Solution a-thon overview.</h2>
+          <p>
+            Presented by Sofia.
+          </p>
+          <a
+            class="sat-video-link"
+            routerLink="/nwg-news"
+            [queryParams]="{ v: 'dbr8JnM6732APWVLjtY7' }">
+            View in Global Solutions Lab News
+            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+          </a>
+        </div>
+
+        <div class="sat-video-frame">
+          <video
+            controls
+            playsinline
+            preload="metadata"
+            aria-label="Community Solution a-thon overview presented by Sofia">
+            <source
+              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/nwgNewsVideos%2Fvideos%2F2026%2Fdbr8JnM6732APWVLjtY7-community-solution-a-thon-overview_1080p_caption.mp4?alt=media&amp;token=b2e72779-0b29-450c-a608-a616bd34ca36"
+              type="video/mp4" />
+            Your browser does not support the video player.
+          </video>
+        </div>
       </div>
     </section>
 
