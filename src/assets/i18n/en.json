@@ -1060,8 +1060,8 @@
   },
   "createSolution": {
     "steps": {
-      "intro": "Welcome to the Global Solutions Lab!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global problem on which you choose to work. Let’s start.",
-      "focusArea": "What is the Global Solutions Lab Solution General Focus Area?",
+      "intro": "Welcome to the Global Solutions Lab!\nMy role, as your colleague—your problem-solving partner—is to help us develop a solution to a global or local problem on which you choose to work. Let’s start.",
+      "focusArea": "What is your general Focus Area? (Example: food, energy, shelter, climate, etc.)",
       "projectTitle": "Provide a starting title to your project. You can change it later as your work progresses.",
       "problemDescription": "In a few words, how would you describe the specific problem you're focusing on, and the opportunity its solution presents.",
       "teamMembers": "If there is a team, list its members, and add their emails below. (This enables communication between team members and, as per Global Solutions Lab Privacy Policy, their information will remain private.)",

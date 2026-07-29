@@ -1060,8 +1060,8 @@
   },
   "createSolution": {
     "steps": {
-      "intro": "Bienvenue dans le Global Solutions Lab !\nMon rôle, en tant que collègue — votre partenaire de résolution de problèmes — est de nous aider à développer une solution à un problème mondial sur lequel vous choisissez de travailler. Commençons.",
-      "focusArea": "Quel est le domaine général de la solution Global Solutions Lab ?",
+      "intro": "Bienvenue dans le Global Solutions Lab !\nMon rôle, en tant que collègue — votre partenaire de résolution de problèmes — est de nous aider à développer une solution à un problème mondial ou local sur lequel vous choisissez de travailler. Commençons.",
+      "focusArea": "Quel est votre domaine général ? (Exemple : alimentation, énergie, logement, climat, etc.)",
       "projectTitle": "Proposez un titre de départ pour votre projet. Vous pourrez le modifier plus tard au fil de vos progrès.",
       "problemDescription": "En quelques mots, comment décririez-vous le problème spécifique sur lequel vous vous concentrez ?",
       "teamMembers": "Listez les membres de vos équipes. Ajoutez leurs courriels ci-dessous. (Cela permet la communication entre les membres de l’équipe et, conformément à la Politique de confidentialité GSL, leurs informations resteront privées.)",
