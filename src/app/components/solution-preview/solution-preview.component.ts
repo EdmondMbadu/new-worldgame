@@ -598,10 +598,14 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     const stepsUpdatedAt = this.timestampMillis(
       this.currentSolution.stepsUpdatedAt
     );
-    const draftUpdatedAt = this.timestampMillis(
-      this.currentSolution.draftUpdatedAt
+    const reviewedAgainstStepsAt = this.timestampMillis(
+      this.currentSolution.strategyReviewReviewedAgainstStepsAt
     );
+    const draftUpdatedAt =
+      reviewedAgainstStepsAt ||
+      this.timestampMillis(this.currentSolution.draftUpdatedAt);
     return (
+      this.currentSolution.strategyReviewSyncStatus === 'attention' ||
       stepsUpdatedAt > 0 &&
       draftUpdatedAt > 0 &&
       stepsUpdatedAt > draftUpdatedAt

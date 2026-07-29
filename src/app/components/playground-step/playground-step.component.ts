@@ -29,6 +29,21 @@ import { DataService } from 'src/app/services/data.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatbotComponent } from '../chatbot/chatbot.component';
 import { PresenceService } from 'src/app/services/presence.service';
+import {
+  StrategyReviewConflict,
+  StrategyReviewReconciliation,
+  StrategyReviewResolution,
+  StrategyReviewStepKey,
+  StrategyReviewSyncMetadata,
+  acknowledgeConflictStep,
+  buildStrategyReviewFromSteps,
+  createStrategyReviewSyncMetadata,
+  reconcileStrategyReview,
+  resolveStrategyReviewConflict,
+  strategyReviewPlainText,
+  strategyReviewSourceAnswers,
+  strategyReviewStepsHash,
+} from 'src/app/utils/strategy-review-sync';
 
 type StepSupportedLanguage = 'en' | 'fr';
 
@@ -129,6 +144,33 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
   isLoading: boolean = false;
 
   showRefreshStrategyReviewModal = false;
+  showRestoreStrategyReviewModal = false;
+  restoringPreviousStrategyReview = false;
+  strategySyncState:
+    | 'loading'
+    | 'aligned'
+    | 'updated'
+    | 'attention'
+    | 'error' = 'loading';
+  strategySyncNotice = '';
+  strategyConflicts: StrategyReviewConflict[] = [];
+  resolvingStrategyConflict = false;
+  savingStrategyConflictStep?: StrategyReviewStepKey;
+  strategyReviewMergeHighlighted = false;
+  expandedStrategyConflictSteps: Partial<
+    Record<StrategyReviewStepKey, boolean>
+  > = {};
+  private strategySyncMetadata?: StrategyReviewSyncMetadata;
+  private pendingStrategyReconciliation?: StrategyReviewReconciliation;
+  private pendingStrategyDraft = '';
+  private strategyInitializationStarted = false;
+  private strategyReconciliationTimer?: ReturnType<typeof setTimeout>;
+  private strategyReconciliationInFlight = false;
+  private strategyReviewMergeHighlightTimer?: ReturnType<typeof setTimeout>;
+  private strategyConflictDisplayCache = new WeakMap<
+    StrategyReviewConflict,
+    { blockCount: number; needsExpansion: boolean }
+  >();
   constructor(
     private router: Router,
     private solution: SolutionService,
@@ -236,12 +278,14 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     // Real-time subscription - no take(1), so we get continuous updates
     this.solutionSub = this.solution
       .getSolution(this.solutionId)
-      .subscribe((data: any) => {
+      .subscribe(async (data: any) => {
         if (!data) return;
         
-        const isFirstLoad = !this.dataInitialized;
+        const isFirstLoad =
+          !this.dataInitialized && !this.strategyInitializationStarted;
         
         if (isFirstLoad) {
+          this.strategyInitializationStarted = true;
           // First load - initialize everything
           this.currentSolution = data;
           this.title = this.currentSolution.title || this.title || '';
@@ -263,8 +307,19 @@ complex social issues like poverty (SDG 1) and inequality (SDG
             Object.keys(this.currentSolution.participants!).length > 1
               ? 'Et al'
               : '';
-          this.initializeContents();
-          this.dataInitialized = true;
+          try {
+            await this.initializeContents();
+            this.dataInitialized = true;
+          } catch (error) {
+            console.error('Could not initialize the solution step', error);
+            this.strategySyncState = 'error';
+            this.strategySyncNotice =
+              'We could not compare this draft with Steps 1–4. Your work was not changed.';
+            this.dataInitialized = true;
+          }
+        } else if (!this.dataInitialized) {
+          // Keep the newest snapshot while the reconciliation metadata loads.
+          this.currentSolution = data;
         } else {
           // Subsequent updates - handle real-time sync from other users
           this.handleRemoteUpdate(data);
@@ -321,18 +376,15 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.strategyReviewSelected = false;
     this.staticContentArray[0] = this.contentsArray[0];
   }
-  initializeContents() {
+  async initializeContents(): Promise<void> {
     this.contentsArray = [];
     this.staticContentArray = [];
     for (let q of this.questions) {
       this.contentsArray.push('');
       this.staticContentArray.push('');
     }
-    if (
-      this.questionsTitles.length === 1 &&
-      this.currentSolution.status !== undefined
-    ) {
-      this.initializeStrategy();
+    if (this.isStrategyReviewStep) {
+      await this.initializeStrategy();
     } else if (this.currentSolution.status !== undefined) {
       const hasAnySavedValue = this.questionsTitles.some(
         (key) => key in this.currentSolution.status!
@@ -405,10 +457,22 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     const now = Date.now();
     const timeSinceLastEdit = now - this.lastLocalEditTime;
     const userIsTyping = timeSinceLastEdit < this.TYPING_COOLDOWN_MS;
+    const previousStepsHash = strategyReviewStepsHash(
+      strategyReviewSourceAnswers(this.currentSolution.status)
+    );
     
     // Always update non-content fields
     this.currentSolution = { ...this.currentSolution, ...data };
+    const sourceStepsChanged =
+      this.isStrategyReviewStep &&
+      previousStepsHash !==
+        strategyReviewStepsHash(
+          strategyReviewSourceAnswers(this.currentSolution.status)
+        );
     this.title = this.currentSolution.title || '';
+    if (data.strategyReviewSyncMetadata) {
+      this.strategySyncMetadata = data.strategyReviewSyncMetadata;
+    }
 
     if (!this.isEditingTitle) {
       this.titleDraft = this.title || '';
@@ -422,6 +486,9 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     
     // If user is actively typing, don't overwrite their content
     if (userIsTyping) {
+      if (sourceStepsChanged) {
+        this.scheduleStrategyReconciliation(this.TYPING_COOLDOWN_MS + 150);
+      }
       return;
     }
     
@@ -452,6 +519,9 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       // Reset flag after a short delay to allow Angular change detection
       setTimeout(() => {
         this.isReceivingRemoteUpdate = false;
+        if (sourceStepsChanged) {
+          this.scheduleStrategyReconciliation();
+        }
       }, 100);
     }
   }
@@ -757,11 +827,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   }
 
   saveSolutionStatus() {
-    if (
-      // check if this is the strategy review phase
-      this.questionsTitles.length === 1 &&
-      this.currentSolution.status !== undefined
-    ) {
+    if (this.isStrategyReviewStep) {
       if (
         this.strategyReviewSelected &&
         this.strategyReview !== this.lastSavedStrategyReview
@@ -825,11 +891,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
 
   saveSolutionStatusDirectly() {
     if (!this.dataInitialized) return; // Prevent execution if not initialized
-    if (
-      // check if this is the strategy review phase
-      this.questionsTitles.length === 1 &&
-      this.currentSolution.status !== undefined
-    ) {
+    if (this.isStrategyReviewStep) {
       if (
         this.strategyReviewSelected &&
         this.strategyReview !== this.lastSavedStrategyReview
@@ -944,24 +1006,31 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     console.log('Content updated successfully for:', questionKey);
   }
 
-  initializeStrategy() {
+  async initializeStrategy(): Promise<void> {
+    this.strategySyncState = 'loading';
+    this.strategySyncNotice = '';
+
+    this.strategySyncMetadata =
+      await this.solution.getStrategyReviewSyncMetadata(this.solutionId);
+    this.strategyReview = String(
+      this.currentSolution.strategyReview ?? this.strategyReview ?? ''
+    );
     const finalContent = this.buildStrategySummary();
     this.contentsArray = [finalContent];
     this.staticContentArray = [finalContent];
 
-    if (!this.strategyReview || this.strategyReview.trim() === '') {
+    const reconciliation = reconcileStrategyReview(
+      this.currentSolution.status,
+      this.strategyReview,
+      this.strategySyncMetadata,
+      this.getStrategyHeadingMap()
+    );
+    await this.applyStrategyReconciliation(reconciliation, true);
+
+    if (!this.strategyReview.trim() && finalContent) {
       this.strategyReview = finalContent;
-      this.solution
-        .saveSolutionStrategyReview(this.solutionId, finalContent)
-        .then(() => {
-          this.lastSavedStrategyReview = finalContent;
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    } else {
-      this.lastSavedStrategyReview = this.strategyReview;
     }
+    this.lastSavedStrategyReview = this.strategyReview;
 
     if (this.isStrategyReviewStep) {
       this.chooseStrategyReview();
@@ -970,7 +1039,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     }
   }
 
-  refreshStrategyReviewFromSteps() {
+  async refreshStrategyReviewFromSteps(): Promise<void> {
     if (!this.isStrategyReviewStep) {
       return;
     }
@@ -988,17 +1057,39 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       this.staticContentArray[0] = finalContent;
     }
 
-    this.strategyReview = finalContent;
-    this.chooseStrategyReview();
+    const previousReview = this.strategyReview;
+    const metadata = createStrategyReviewSyncMetadata(
+      this.currentSolution.status,
+      'replaced',
+      this.getStrategyHeadingMap()
+    );
 
-    this.solution
-      .saveSolutionStrategyReview(this.solutionId, finalContent)
-      .then(() => {
-        this.lastSavedStrategyReview = finalContent;
-      })
-      .catch((error) => {
-        console.error('Error refreshing from steps 1-4', error);
-      });
+    try {
+      await this.solution.saveStrategyReviewReconciliation(
+        this.solutionId,
+        finalContent,
+        metadata,
+        {
+          previousReview,
+          reason: 'replaced',
+        }
+      );
+      this.strategyReview = finalContent;
+      this.lastSavedStrategyReview = finalContent;
+      this.strategySyncMetadata = metadata;
+      this.pendingStrategyReconciliation = undefined;
+      this.pendingStrategyDraft = '';
+      this.strategyConflicts = [];
+      this.strategySyncState = 'aligned';
+      this.strategySyncNotice =
+        'Strategy Review now matches the latest work in Steps 1–4. Your previous draft was preserved in version history.';
+      this.chooseStrategyReview();
+    } catch (error) {
+      console.error('Error refreshing from steps 1-4', error);
+      this.strategySyncState = 'error';
+      this.strategySyncNotice =
+        'The draft could not be replaced. Your existing Strategy Review was not changed.';
+    }
   }
 
   openRefreshStrategyReviewModal() {
@@ -1014,50 +1105,683 @@ complex social issues like poverty (SDG 1) and inequality (SDG
 
   confirmRefreshStrategyReview() {
     this.showRefreshStrategyReviewModal = false;
-    this.refreshStrategyReviewFromSteps();
+    void this.refreshStrategyReviewFromSteps();
+  }
+
+  get canRestorePreviousStrategyReview(): boolean {
+    const previousReview =
+      this.currentSolution.strategyReviewPreviousRevision?.review || '';
+    return (
+      this.strategySyncState !== 'attention' &&
+      Boolean(previousReview) &&
+      previousReview !== this.strategyReview
+    );
+  }
+
+  openRestoreStrategyReviewModal(): void {
+    if (this.canRestorePreviousStrategyReview) {
+      this.showRestoreStrategyReviewModal = true;
+    }
+  }
+
+  cancelRestoreStrategyReview(): void {
+    this.showRestoreStrategyReviewModal = false;
+  }
+
+  async confirmRestoreStrategyReview(): Promise<void> {
+    const previousReview =
+      this.currentSolution.strategyReviewPreviousRevision?.review || '';
+    if (
+      !previousReview ||
+      !this.strategySyncMetadata ||
+      this.restoringPreviousStrategyReview
+    ) {
+      this.showRestoreStrategyReviewModal = false;
+      return;
+    }
+
+    this.restoringPreviousStrategyReview = true;
+    try {
+      const currentReview = this.strategyReview;
+      await this.solution.saveStrategyReviewReconciliation(
+        this.solutionId,
+        previousReview,
+        {
+          ...this.strategySyncMetadata,
+          lastOutcome: 'restored',
+        },
+        {
+          previousReview: currentReview,
+          reason: 'restored',
+        }
+      );
+      this.strategyReview = previousReview;
+      this.lastSavedStrategyReview = previousReview;
+      this.strategySyncMetadata = {
+        ...this.strategySyncMetadata,
+        lastOutcome: 'restored',
+      };
+      this.strategySyncState = 'aligned';
+      this.strategySyncNotice =
+        'The previous Strategy Review was restored. Steps 1–4 were not changed.';
+      this.chooseStrategyReview();
+    } catch (error) {
+      console.error('Could not restore the previous Strategy Review', error);
+      this.strategySyncState = 'error';
+      this.strategySyncNotice =
+        'The previous draft could not be restored. Your current Strategy Review was not changed.';
+    } finally {
+      this.restoringPreviousStrategyReview = false;
+      this.showRestoreStrategyReviewModal = false;
+    }
   }
 
   private buildStrategySummary(): string {
-    if (!this.currentSolution.status) {
-      return '';
+    return buildStrategyReviewFromSteps(
+      this.currentSolution.status,
+      this.getStrategyHeadingMap()
+    );
+  }
+
+  async resolveStrategyConflict(
+    conflict: StrategyReviewConflict,
+    resolution: StrategyReviewResolution
+  ): Promise<void> {
+    if (
+      !this.pendingStrategyReconciliation ||
+      this.resolvingStrategyConflict
+    ) {
+      return;
     }
 
-    const keys = Object.keys(this.currentSolution.status).sort((a, b) => {
-      const [aPrefix, aSuffix = ''] = a.split('-');
-      const [bPrefix, bSuffix = ''] = b.split('-');
-      const prefixComparison = aPrefix.localeCompare(bPrefix);
-      if (prefixComparison === 0) {
-        return aSuffix.localeCompare(bSuffix);
-      }
-      return prefixComparison;
-    });
+    this.resolvingStrategyConflict = true;
+    this.savingStrategyConflictStep = conflict.stepKey;
+    try {
+      const previousReview = this.strategyReview;
+      const nextDraft = resolveStrategyReviewConflict(
+        this.pendingStrategyDraft,
+        conflict,
+        resolution
+      );
+      const outcome =
+        resolution === 'keep-review'
+          ? 'kept-review'
+          : resolution === 'use-steps'
+            ? 'replaced'
+            : 'merged';
+      const remainingConflicts = this.strategyConflicts.filter(
+        (item) => item.stepKey !== conflict.stepKey
+      );
+      const previousMetadata =
+        this.pendingStrategyReconciliation.nextMetadata;
+      const recoveryAlreadyCreated =
+        previousMetadata.reconciliationRecoveryCreated || false;
+      const createsRecoveryCopy =
+        !recoveryAlreadyCreated &&
+        Boolean(previousReview) &&
+        previousReview !== nextDraft;
+      const acknowledgedMetadata = acknowledgeConflictStep(
+        previousMetadata,
+        this.currentSolution.status,
+        conflict.stepKey,
+        outcome,
+        this.getStrategyHeadingMap()
+      );
+      const nextMetadata: StrategyReviewSyncMetadata = {
+        ...acknowledgedMetadata,
+        pendingConflictStepKeys: remainingConflicts.map(
+          (item) => item.stepKey
+        ),
+        reconciliationRecoveryCreated: remainingConflicts.length
+          ? recoveryAlreadyCreated || createsRecoveryCopy
+          : false,
+      };
+      const syncStatus = remainingConflicts.length
+        ? 'attention'
+        : 'aligned';
 
-    const stepSnippets: { [step: number]: string[] } = {
-      1: [],
-      2: [],
-      3: [],
-      4: [],
-      5: [],
+      await this.solution.saveStrategyReviewReconciliation(
+        this.solutionId,
+        nextDraft,
+        nextMetadata,
+        {
+          previousReview,
+          reason: outcome,
+          syncStatus,
+          remainingConflictCount: remainingConflicts.length,
+          preserveRecoveryRevision: recoveryAlreadyCreated,
+        }
+      );
+
+      this.strategyReview = nextDraft;
+      this.lastSavedStrategyReview = this.strategyReview;
+      this.strategySyncMetadata = nextMetadata;
+      this.currentSolution.strategyReview = nextDraft;
+      this.currentSolution.strategyReviewSyncMetadata = nextMetadata;
+      this.currentSolution.strategyReviewSyncStatus = syncStatus;
+      this.currentSolution.strategyReviewConflictCount =
+        remainingConflicts.length;
+      this.pendingStrategyDraft = nextDraft;
+      this.strategyConflicts = remainingConflicts;
+      delete this.expandedStrategyConflictSteps[conflict.stepKey];
+
+      if (remainingConflicts.length) {
+        this.pendingStrategyReconciliation = {
+          ...this.pendingStrategyReconciliation,
+          draftHtml: nextDraft,
+          conflicts: remainingConflicts,
+          nextMetadata,
+        };
+        this.strategySyncState = 'attention';
+        this.strategySyncNotice = `Decision saved. ${
+          remainingConflicts.length
+        } ${
+          remainingConflicts.length === 1 ? 'section remains' : 'sections remain'
+        }. You can safely leave and return later.`;
+      } else {
+        this.pendingStrategyReconciliation = undefined;
+        this.pendingStrategyDraft = '';
+        this.expandedStrategyConflictSteps = {};
+        this.strategySyncState = 'aligned';
+        this.strategySyncNotice =
+          'All decisions are saved. Strategy Review is up to date, Steps 1–4 were not changed, and your previous draft was preserved.';
+      }
+      this.chooseStrategyReview();
+      if (!remainingConflicts.length && resolution === 'combine') {
+        this.highlightMergedStrategyReview();
+      }
+    } catch (error) {
+      console.error('Could not resolve Strategy Review conflict', error);
+      if (this.isConcurrentStrategyChange(error)) {
+        this.strategySyncState = 'loading';
+        this.strategySyncNotice =
+          'New team changes arrived while you were deciding. We are checking the latest version again.';
+        this.scheduleStrategyReconciliation(500);
+      } else {
+        this.strategySyncState = 'attention';
+        this.strategySyncNotice =
+          'That decision was not saved. Your existing Strategy Review was not changed—please try again.';
+      }
+    } finally {
+      this.resolvingStrategyConflict = false;
+      this.savingStrategyConflictStep = undefined;
+    }
+  }
+
+  async keepCurrentStrategyReviewForAllConflicts(): Promise<void> {
+    if (
+      !this.pendingStrategyReconciliation ||
+      !this.strategyConflicts.length ||
+      this.resolvingStrategyConflict
+    ) {
+      return;
+    }
+
+    this.resolvingStrategyConflict = true;
+    try {
+      const recoveryAlreadyCreated =
+        this.pendingStrategyReconciliation.nextMetadata
+          .reconciliationRecoveryCreated || false;
+      let metadata = this.pendingStrategyReconciliation.nextMetadata;
+      this.strategyConflicts.forEach((conflict) => {
+        metadata = acknowledgeConflictStep(
+          metadata,
+          this.currentSolution.status,
+          conflict.stepKey,
+          'kept-review',
+          this.getStrategyHeadingMap()
+        );
+      });
+      metadata = {
+        ...metadata,
+        pendingConflictStepKeys: [],
+        reconciliationRecoveryCreated: false,
+      };
+      await this.solution.saveStrategyReviewReconciliation(
+        this.solutionId,
+        this.pendingStrategyDraft,
+        metadata,
+        {
+          previousReview: this.strategyReview,
+          reason: 'kept-review',
+          syncStatus: 'aligned',
+          remainingConflictCount: 0,
+          preserveRecoveryRevision: recoveryAlreadyCreated,
+        }
+      );
+      this.strategyReview = this.pendingStrategyDraft;
+      this.lastSavedStrategyReview = this.strategyReview;
+      this.strategySyncMetadata = metadata;
+      this.currentSolution.strategyReview = this.strategyReview;
+      this.currentSolution.strategyReviewSyncMetadata = metadata;
+      this.currentSolution.strategyReviewSyncStatus = 'aligned';
+      this.currentSolution.strategyReviewConflictCount = 0;
+      this.pendingStrategyReconciliation = undefined;
+      this.pendingStrategyDraft = '';
+      this.strategyConflicts = [];
+      this.expandedStrategyConflictSteps = {};
+      this.strategySyncState = 'aligned';
+      this.strategySyncNotice =
+        'Your wording was kept for every conflicting section. Safe updates from other sections were added, Steps 1–4 were not changed, and you will only be asked again when those steps contain newer changes.';
+      this.chooseStrategyReview();
+    } catch (error) {
+      console.error('Could not keep the current Strategy Review', error);
+      if (this.isConcurrentStrategyChange(error)) {
+        this.strategySyncState = 'loading';
+        this.strategySyncNotice =
+          'New team changes arrived while you were deciding. We are checking the latest version again.';
+        this.scheduleStrategyReconciliation(500);
+      } else {
+        this.strategySyncState = 'attention';
+        this.strategySyncNotice =
+          'Those decisions were not saved. Your Strategy Review was not changed—please try again.';
+      }
+    } finally {
+      this.resolvingStrategyConflict = false;
+    }
+  }
+
+  strategyConflictSourceText(conflict: StrategyReviewConflict): string {
+    const changedText = strategyReviewPlainText(conflict.changedSourceHtml);
+    const removedNotice = this.strategyConflictRemovedNotice(conflict);
+    return [changedText, removedNotice].filter(Boolean).join('\n\n');
+  }
+
+  strategyConflictRemovedNotice(
+    conflict: StrategyReviewConflict
+  ): string {
+    return conflict.removedAnswerKeys.length
+      ? `${conflict.removedAnswerKeys.length} previously saved ${
+          conflict.removedAnswerKeys.length === 1 ? 'answer was' : 'answers were'
+        } removed from Step ${conflict.stepNumber}.`
+      : '';
+  }
+
+  strategyConflictHasNewContent(
+    conflict: StrategyReviewConflict
+  ): boolean {
+    return (
+      strategyReviewPlainText(conflict.changedSourceHtml).length > 0 ||
+      /<(?:img|video|audio|iframe|table)\b/i.test(
+        conflict.changedSourceHtml || ''
+      )
+    );
+  }
+
+  strategyConflictDraftText(conflict: StrategyReviewConflict): string {
+    return (
+      strategyReviewPlainText(conflict.currentDraftHtml) ||
+      'This section is not currently present in Strategy Review.'
+    );
+  }
+
+  strategyConflictQuestionLabel(conflict: StrategyReviewConflict): string {
+    return conflict.changedAnswerKeys
+      .map((key) => {
+        const suffix = key.split('-')[1];
+        return suffix ? `Question ${suffix}` : key;
+      })
+      .join(', ');
+  }
+
+  strategyConflictChangeType(conflict: StrategyReviewConflict): string {
+    if (!conflict.currentDraftHtml && conflict.currentSourceHtml) {
+      return 'New section';
+    }
+    if (
+      conflict.removedAnswerKeys.length === conflict.changedAnswerKeys.length &&
+      !conflict.currentSourceHtml
+    ) {
+      return 'Removed from Step';
+    }
+    if (conflict.removedAnswerKeys.length) {
+      return 'Updated and removed';
+    }
+    return conflict.legacy ? 'One-time review' : 'Updated information';
+  }
+
+  strategyConflictNeedsExpansion(
+    conflict: StrategyReviewConflict
+  ): boolean {
+    return this.strategyConflictDisplay(conflict).needsExpansion;
+  }
+
+  strategyConflictLengthLabel(conflict: StrategyReviewConflict): string {
+    const blocks = this.strategyConflictDisplay(conflict).blockCount;
+    return blocks === 1 ? '1 paragraph' : `${blocks} paragraphs`;
+  }
+
+  isStrategyConflictExpanded(conflict: StrategyReviewConflict): boolean {
+    return (
+      !this.strategyConflictNeedsExpansion(conflict) ||
+      Boolean(this.expandedStrategyConflictSteps[conflict.stepKey])
+    );
+  }
+
+  toggleStrategyConflictExpansion(
+    conflict: StrategyReviewConflict
+  ): void {
+    this.expandedStrategyConflictSteps = {
+      ...this.expandedStrategyConflictSteps,
+      [conflict.stepKey]: !this.isStrategyConflictExpanded(conflict),
+    };
+  }
+
+  get hasExpandableStrategyConflicts(): boolean {
+    return this.strategyConflicts.some((conflict) =>
+      this.strategyConflictNeedsExpansion(conflict)
+    );
+  }
+
+  get allStrategyConflictsExpanded(): boolean {
+    const expandable = this.strategyConflicts.filter((conflict) =>
+      this.strategyConflictNeedsExpansion(conflict)
+    );
+    return (
+      expandable.length > 0 &&
+      expandable.every(
+        (conflict) =>
+          this.expandedStrategyConflictSteps[conflict.stepKey] === true
+      )
+    );
+  }
+
+  setAllStrategyConflictsExpanded(expanded: boolean): void {
+    this.expandedStrategyConflictSteps = this.strategyConflicts.reduce<
+      Partial<Record<StrategyReviewStepKey, boolean>>
+    >((state, conflict) => {
+      if (this.strategyConflictNeedsExpansion(conflict)) {
+        state[conflict.stepKey] = expanded;
+      }
+      return state;
+    }, {});
+  }
+
+  focusStrategySyncPanel(): void {
+    document.getElementById('strategy-review-sync-panel')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start',
+    });
+  }
+
+  private highlightMergedStrategyReview(): void {
+    this.strategyReviewMergeHighlighted = true;
+    if (this.strategyReviewMergeHighlightTimer) {
+      clearTimeout(this.strategyReviewMergeHighlightTimer);
+    }
+    setTimeout(() => {
+      document.getElementById('box-0')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      });
+    });
+    this.strategyReviewMergeHighlightTimer = setTimeout(() => {
+      this.strategyReviewMergeHighlighted = false;
+    }, 3500);
+  }
+
+  private strategyConflictBlockCount(
+    conflict: StrategyReviewConflict
+  ): number {
+    const html = `${conflict.changedSourceHtml || ''}\n${
+      conflict.currentDraftHtml || ''
+    }`;
+    const htmlBlocks =
+      html.match(/<(?:p|li|h[1-6]|blockquote|table)\b/gi)?.length || 0;
+    if (htmlBlocks) {
+      return htmlBlocks;
+    }
+    const textBlocks = `${this.strategyConflictSourceText(conflict)}\n${
+      this.strategyConflictDraftText(conflict)
+    }`
+      .split(/\n{2,}/)
+      .filter((block) => block.trim()).length;
+    return Math.max(1, textBlocks);
+  }
+
+  private strategyConflictDisplay(
+    conflict: StrategyReviewConflict
+  ): { blockCount: number; needsExpansion: boolean } {
+    const cached = this.strategyConflictDisplayCache.get(conflict);
+    if (cached) {
+      return cached;
+    }
+    const blockCount = this.strategyConflictBlockCount(conflict);
+    const sourceText = this.strategyConflictSourceText(conflict);
+    const draftText = this.strategyConflictDraftText(conflict);
+    const display = {
+      blockCount,
+      needsExpansion:
+        sourceText.length + draftText.length > 700 || blockCount > 8,
+    };
+    this.strategyConflictDisplayCache.set(conflict, display);
+    return display;
+  }
+
+  private scheduleStrategyReconciliation(delay = 150): void {
+    if (!this.isStrategyReviewStep || !this.dataInitialized) {
+      return;
+    }
+    if (this.strategyReconciliationTimer) {
+      clearTimeout(this.strategyReconciliationTimer);
+    }
+    this.strategyReconciliationTimer = setTimeout(() => {
+      void this.reconcileCurrentStrategy();
+    }, delay);
+  }
+
+  private async reconcileCurrentStrategy(): Promise<void> {
+    if (
+      this.strategyReconciliationInFlight ||
+      !this.isStrategyReviewStep ||
+      !this.strategySyncMetadata
+    ) {
+      return;
+    }
+
+    this.strategyReconciliationInFlight = true;
+    try {
+      const latestSource = this.buildStrategySummary();
+      this.contentsArray = [latestSource];
+      this.staticContentArray = [latestSource];
+      const reconciliation = reconcileStrategyReview(
+        this.currentSolution.status,
+        this.strategyReview,
+        this.strategySyncMetadata,
+        this.getStrategyHeadingMap()
+      );
+      await this.applyStrategyReconciliation(reconciliation, false);
+    } catch (error) {
+      console.error('Could not reconcile Strategy Review', error);
+      if (this.isConcurrentStrategyChange(error)) {
+        this.strategySyncState = 'loading';
+        this.strategySyncNotice =
+          'New team changes arrived. We are checking the latest version again.';
+        this.scheduleStrategyReconciliation(500);
+      } else {
+        this.strategySyncState = 'error';
+        this.strategySyncNotice =
+          'We could not compare this draft with Steps 1–4. Your work was not changed.';
+      }
+    } finally {
+      this.strategyReconciliationInFlight = false;
+    }
+  }
+
+  private async applyStrategyReconciliation(
+    reconciliation: StrategyReviewReconciliation,
+    initializing: boolean
+  ): Promise<void> {
+    this.pendingStrategyReconciliation = undefined;
+    this.pendingStrategyDraft = '';
+    this.strategyConflicts = [];
+
+    if (reconciliation.state === 'aligned') {
+      this.expandedStrategyConflictSteps = {};
+      this.strategySyncMetadata = reconciliation.nextMetadata;
+      this.strategySyncState = 'aligned';
+      this.strategySyncNotice = initializing
+        ? 'Strategy Review is up to date with Steps 1–4.'
+        : '';
+
+      if (
+        reconciliation.legacy ||
+        this.currentSolution.strategyReviewSyncStatus === 'attention'
+      ) {
+        await this.solution.saveStrategyReviewReconciliation(
+          this.solutionId,
+          this.strategyReview,
+          reconciliation.nextMetadata,
+          {
+            previousReview: this.strategyReview,
+            reason: reconciliation.legacy
+              ? 'initialized'
+              : reconciliation.nextMetadata.lastOutcome,
+          }
+        );
+      }
+      return;
+    }
+
+    if (reconciliation.state === 'auto-updated') {
+      this.expandedStrategyConflictSteps = {};
+      const previousReview = this.strategyReview;
+      const reason = previousReview.trim() ? 'auto-updated' : 'generated';
+      const metadata = {
+        ...reconciliation.nextMetadata,
+        lastOutcome: reason,
+      } as StrategyReviewSyncMetadata;
+      await this.solution.saveStrategyReviewReconciliation(
+        this.solutionId,
+        reconciliation.draftHtml,
+        metadata,
+        {
+          previousReview,
+          reason,
+        }
+      );
+      this.strategyReview = reconciliation.draftHtml;
+      this.lastSavedStrategyReview = this.strategyReview;
+      this.strategySyncMetadata = metadata;
+      this.strategySyncState = previousReview.trim() ? 'updated' : 'aligned';
+      this.strategySyncNotice = previousReview.trim()
+        ? `Strategy Review was updated with ${reconciliation.changedAnswerKeys.length} newer ${
+            reconciliation.changedAnswerKeys.length === 1
+              ? 'answer'
+              : 'answers'
+          }. Your draft-only writing was preserved.`
+        : 'Strategy Review was created from Steps 1–4.';
+      return;
+    }
+
+    const previousReview = this.strategyReview;
+    const recoveryAlreadyCreated =
+      reconciliation.nextMetadata.reconciliationRecoveryCreated || false;
+    const createsRecoveryCopy =
+      !recoveryAlreadyCreated &&
+      Boolean(previousReview) &&
+      previousReview !== reconciliation.draftHtml;
+    const progressMetadata: StrategyReviewSyncMetadata = {
+      ...reconciliation.nextMetadata,
+      pendingConflictStepKeys: reconciliation.conflicts.map(
+        (conflict) => conflict.stepKey
+      ),
+      reconciliationRecoveryCreated:
+        recoveryAlreadyCreated || createsRecoveryCopy,
+    };
+    const progressReconciliation: StrategyReviewReconciliation = {
+      ...reconciliation,
+      nextMetadata: progressMetadata,
     };
 
-    keys.forEach((key) => {
-      const prefix = key.split('-')[0];
-      const stepNumber = Number(prefix.substring(1));
-      if (stepSnippets.hasOwnProperty(stepNumber)) {
-        stepSnippets[stepNumber].push(this.currentSolution.status![key]);
-      }
-    });
+    this.pendingStrategyReconciliation = progressReconciliation;
+    this.pendingStrategyDraft = progressReconciliation.draftHtml;
+    this.strategyConflicts = [...reconciliation.conflicts];
+    this.expandedStrategyConflictSteps =
+      this.strategyConflicts.reduce<
+        Partial<Record<StrategyReviewStepKey, boolean>>
+      >((state, conflict) => {
+        if (this.expandedStrategyConflictSteps[conflict.stepKey]) {
+          state[conflict.stepKey] = true;
+        }
+        return state;
+      }, {});
+    this.strategySyncState = 'attention';
+    const progressAlreadyPersisted =
+      this.strategyReconciliationProgressIsPersisted(
+        progressReconciliation.draftHtml,
+        progressMetadata,
+        this.strategyConflicts.length
+      );
+    this.strategySyncNotice = progressAlreadyPersisted
+      ? `Your earlier decisions are saved. ${this.strategyConflicts.length} ${
+          this.strategyConflicts.length === 1 ? 'section remains' : 'sections remain'
+        }, and you can continue where you left off.`
+      : reconciliation.legacy
+        ? `This existing draft needs a one-time review against Steps 1–4. ${this.strategyConflicts.length} ${
+            this.strategyConflicts.length === 1 ? 'section needs' : 'sections need'
+          } your decision.`
+        : `${this.strategyConflicts.length} ${
+            this.strategyConflicts.length === 1 ? 'section needs' : 'sections need'
+          } your decision. Each decision saves immediately, and unrelated draft writing will be preserved.`;
 
-    const titles = this.getLocalizedStrategyHeadings();
-    const result: string[] = [];
-    for (let step = 1; step <= 5; step++) {
-      if (stepSnippets[step] && stepSnippets[step].length > 0) {
-        result.push(titles[step - 1]);
-        stepSnippets[step].forEach((snippet) => result.push(snippet));
-      }
+    if (!progressAlreadyPersisted) {
+      await this.solution.saveStrategyReviewReconciliation(
+        this.solutionId,
+        progressReconciliation.draftHtml,
+        progressMetadata,
+        {
+          previousReview,
+          reason: reconciliation.legacy
+            ? 'initialized'
+            : progressMetadata.lastOutcome,
+          syncStatus: 'attention',
+          remainingConflictCount: this.strategyConflicts.length,
+          preserveRecoveryRevision: recoveryAlreadyCreated,
+        }
+      );
+      this.strategyReview = progressReconciliation.draftHtml;
+      this.lastSavedStrategyReview = this.strategyReview;
+      this.strategySyncMetadata = progressMetadata;
+      this.currentSolution.strategyReview = this.strategyReview;
+      this.currentSolution.strategyReviewSyncMetadata = progressMetadata;
+      this.currentSolution.strategyReviewSyncStatus = 'attention';
+      this.currentSolution.strategyReviewConflictCount =
+        this.strategyConflicts.length;
     }
+  }
 
-    return result.join('\n');
+  private strategyReconciliationProgressIsPersisted(
+    review: string,
+    metadata: StrategyReviewSyncMetadata,
+    conflictCount: number
+  ): boolean {
+    const savedMetadata =
+      this.currentSolution.strategyReviewSyncMetadata ||
+      this.strategySyncMetadata;
+    return (
+      this.currentSolution.strategyReviewSyncStatus === 'attention' &&
+      Number(this.currentSolution.strategyReviewConflictCount || 0) ===
+        conflictCount &&
+      String(this.currentSolution.strategyReview || '') === review &&
+      savedMetadata?.lastReviewedStepsHash ===
+        metadata.lastReviewedStepsHash &&
+      (savedMetadata?.sourceSnapshotHash ||
+        savedMetadata?.lastReviewedStepsHash) ===
+        (metadata.sourceSnapshotHash || metadata.lastReviewedStepsHash) &&
+      (savedMetadata?.pendingConflictStepKeys || []).join('|') ===
+        (metadata.pendingConflictStepKeys || []).join('|') &&
+      Boolean(savedMetadata?.reconciliationRecoveryCreated) ===
+        Boolean(metadata.reconciliationRecoveryCreated)
+    );
+  }
+
+  private isConcurrentStrategyChange(error: unknown): boolean {
+    const message = String((error as any)?.message || error || '');
+    return (
+      message.includes('STRATEGY_REVIEW_CHANGED') ||
+      message.includes('STRATEGY_STEPS_CHANGED')
+    );
   }
 
   onHoverPopup(index: number) {
@@ -1159,6 +1883,12 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.langSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
     clearTimeout(this.saveTimeout);
+    if (this.strategyReconciliationTimer) {
+      clearTimeout(this.strategyReconciliationTimer);
+    }
+    if (this.strategyReviewMergeHighlightTimer) {
+      clearTimeout(this.strategyReviewMergeHighlightTimer);
+    }
     this.stopAnswerTyping();
     this.activity.stopEditing();
   }
@@ -1252,5 +1982,15 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       this.strategySectionTitles[this.currentLanguage] ||
       this.strategySectionTitles[this.defaultLanguage]
     );
+  }
+
+  private getStrategyHeadingMap(): Record<StrategyReviewStepKey, string> {
+    const headings = this.getLocalizedStrategyHeadings();
+    return {
+      S1: headings[0],
+      S2: headings[1],
+      S3: headings[2],
+      S4: headings[3],
+    };
   }
 }

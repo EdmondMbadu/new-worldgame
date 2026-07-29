@@ -1516,12 +1516,12 @@
     "strategyReview": {
       "referenceSteps": "Reference (Steps 1–4)",
       "currentDraft": "Current Draft",
-      "refreshFromSteps": "Refresh from Steps 1–4",
+      "refreshFromSteps": "Replace draft from Steps 1–4",
       "refreshModal": {
-        "title": "Refresh from Steps 1–4?",
-        "body": "This will replace your current draft with a Step 1–4 summary. Any edits in the draft will be lost.",
+        "title": "Replace the draft from Steps 1–4?",
+        "body": "This will replace the current Strategy Review with the latest Steps 1–4. Your current draft will be preserved in version history, and Steps 1–4 will not be changed.",
         "cancel": "Cancel",
-        "proceed": "Proceed"
+        "proceed": "Replace draft"
       }
     }
   },

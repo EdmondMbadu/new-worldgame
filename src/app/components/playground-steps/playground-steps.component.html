@@ -795,6 +795,16 @@
                     </div>
                   </div>
 
+                  <div
+                    *ngIf="isStrategyReviewBehindSteps"
+                    class="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs leading-5 text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+                    <span class="material-symbols-outlined mt-0.5 text-base" aria-hidden="true">info</span>
+                    <p>
+                      Studio tools use the current Strategy Review. Steps 1–4 contain newer information;
+                      review the changed sections first or use a complete-work export.
+                    </p>
+                  </div>
+
                   <a
                     [routerLink]="['/solution-launch', currentSolution.solutionId || id]"
                     class="mt-3 flex items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-left transition hover:border-emerald-300 hover:bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/30"
@@ -841,7 +851,7 @@
                     <div class="grid grid-cols-2 gap-3">
                       <button
                         type="button"
-                        (click)="downloadCurrentDraftPdf()"
+                        (click)="requestDraftExport('pdf')"
                         [disabled]="!currentDraftText || downloadingDraftPdf"
                         class="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:border-slate-300 disabled:opacity-50 disabled:cursor-not-allowed dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
                         <ng-container *ngIf="!downloadingDraftPdf; else draftPdfLoading">
@@ -859,7 +869,7 @@
                       </button>
                       <button
                         type="button"
-                        (click)="downloadCurrentDraftDocx()"
+                        (click)="requestDraftExport('docx')"
                         [disabled]="!currentDraftText || downloadingDraftDocx"
                         class="flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-slate-700 dark:hover:bg-slate-600">
                         <ng-container *ngIf="!downloadingDraftDocx; else draftDocxLoading">
@@ -876,6 +886,79 @@
                         </ng-template>
                       </button>
                     </div>
+
+                    <div class="rounded-xl border border-teal-200 bg-teal-50/70 p-3 dark:border-teal-900 dark:bg-teal-950/20">
+                      <div class="flex items-start gap-2">
+                        <span class="material-symbols-outlined mt-0.5 text-base text-teal-700 dark:text-teal-300" aria-hidden="true">library_books</span>
+                        <div>
+                          <p class="text-xs font-bold text-teal-950 dark:text-teal-100">Complete body of work</p>
+                          <p class="mt-0.5 text-[11px] leading-5 text-teal-800 dark:text-teal-200">
+                            Includes every saved answer from Steps 1–4 and the current Strategy Review.
+                          </p>
+                        </div>
+                      </div>
+                      <div class="mt-3 grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          (click)="requestCompleteWorkExport('pdf')"
+                          [disabled]="exportingCompleteWork"
+                          class="rounded-lg border border-teal-300 bg-white px-3 py-2 text-xs font-bold text-teal-800 transition hover:bg-teal-100 disabled:opacity-50 dark:border-teal-700 dark:bg-slate-900 dark:text-teal-200 dark:hover:bg-teal-950">
+                          Complete PDF
+                        </button>
+                        <button
+                          type="button"
+                          (click)="requestCompleteWorkExport('docx')"
+                          [disabled]="exportingCompleteWork"
+                          class="rounded-lg bg-teal-700 px-3 py-2 text-xs font-bold text-white transition hover:bg-teal-600 disabled:opacity-50 dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400">
+                          Complete Word
+                        </button>
+                      </div>
+                    </div>
+
+                    <section
+                      *ngIf="pendingDraftExportFormat"
+                      class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-100"
+                      role="alert">
+                      <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined mt-0.5 text-xl" aria-hidden="true">difference</span>
+                        <div>
+                          <p class="text-sm font-bold">Your Strategy Review needs attention</p>
+                          <p class="mt-1 text-xs leading-5">
+                            Steps 1–4 contain newer information that has not been reviewed in the current draft.
+                            Nothing has been lost.
+                          </p>
+                        </div>
+                      </div>
+                      <div class="mt-4 flex flex-col gap-2">
+                        <button
+                          type="button"
+                          (click)="exportCompleteWork()"
+                          [disabled]="exportingCompleteWork"
+                          class="inline-flex items-center justify-center rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-600 disabled:opacity-50 dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400">
+                          {{ exportingCompleteWork
+                            ? 'Preparing complete export…'
+                            : 'Export complete work (recommended)' }}
+                        </button>
+                        <button
+                          type="button"
+                          (click)="reviewStrategyChangesBeforeExport()"
+                          class="inline-flex items-center justify-center rounded-lg border border-amber-400 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 transition hover:bg-amber-100 dark:border-amber-600 dark:bg-slate-900 dark:text-amber-100 dark:hover:bg-amber-950">
+                          Review the changed sections first
+                        </button>
+                        <button
+                          type="button"
+                          (click)="exportCurrentDraftAnyway()"
+                          class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold text-amber-800 underline decoration-amber-400 underline-offset-4 hover:text-amber-950 dark:text-amber-200 dark:hover:text-white">
+                          Export the current draft anyway
+                        </button>
+                        <button
+                          type="button"
+                          (click)="cancelPendingDraftExport()"
+                          class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100">
+                          Cancel
+                        </button>
+                      </div>
+                    </section>
                   </div>
 
                   <!-- AI Feedback Panel -->

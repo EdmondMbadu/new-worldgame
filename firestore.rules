@@ -102,6 +102,14 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /solutions/{solutionId}/strategyReviewRevisions/{revisionId} {
+      allow read: if canReadSolution(
+        get(/databases/$(database)/documents/solutions/$(solutionId)).data
+      );
+      allow create: if isSignedIn();
+      allow update, delete: if isPlatformAdmin();
+    }
+
     // Deliberately minimal, server-maintained card data for the public home
     // feed. Full solution documents remain protected by the rules above.
     match /publicCommunitySolutions/{solutionId} {

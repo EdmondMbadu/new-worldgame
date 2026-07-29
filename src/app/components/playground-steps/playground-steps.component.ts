@@ -387,6 +387,8 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   downloadingReportDocx = false;
   downloadingFeedbackPdf = false;
   reportDownloadStatus = '';
+  pendingDraftExportFormat: 'pdf' | 'docx' | null = null;
+  exportingCompleteWork = false;
   reportGroupState: Record<string, boolean> = {
     funder: true,
     summary: false,
@@ -3320,6 +3322,107 @@ Infographic requirements:
     pdf.save(filename);
   }
 
+  get isStrategyReviewBehindSteps(): boolean {
+    if (this.currentSolution?.strategyReviewSyncStatus === 'attention') {
+      return true;
+    }
+
+    const stepsUpdatedAt = this.solutionTimestampMillis(
+      this.currentSolution?.stepsUpdatedAt
+    );
+    const reviewedAgainstStepsAt = this.solutionTimestampMillis(
+      this.currentSolution?.strategyReviewReviewedAgainstStepsAt
+    );
+    const legacyDraftUpdatedAt = this.solutionTimestampMillis(
+      this.currentSolution?.draftUpdatedAt
+    );
+    const comparisonTimestamp =
+      reviewedAgainstStepsAt || legacyDraftUpdatedAt;
+
+    return (
+      stepsUpdatedAt > 0 &&
+      comparisonTimestamp > 0 &&
+      stepsUpdatedAt > comparisonTimestamp
+    );
+  }
+
+  requestDraftExport(format: 'pdf' | 'docx'): void {
+    if (this.isStrategyReviewBehindSteps) {
+      this.pendingDraftExportFormat = format;
+      return;
+    }
+    if (format === 'pdf') {
+      void this.downloadCurrentDraftPdf();
+    } else {
+      void this.downloadCurrentDraftDocx();
+    }
+  }
+
+  cancelPendingDraftExport(): void {
+    this.pendingDraftExportFormat = null;
+  }
+
+  reviewStrategyChangesBeforeExport(): void {
+    this.pendingDraftExportFormat = null;
+    this.studioActivePanel = null;
+    this.playgroundStepComponents?.first?.focusStrategySyncPanel();
+  }
+
+  exportCurrentDraftAnyway(): void {
+    const format = this.pendingDraftExportFormat;
+    this.pendingDraftExportFormat = null;
+    if (format === 'pdf') {
+      void this.downloadCurrentDraftPdf();
+    } else if (format === 'docx') {
+      void this.downloadCurrentDraftDocx();
+    }
+  }
+
+  requestCompleteWorkExport(format: 'pdf' | 'docx'): void {
+    this.pendingDraftExportFormat = format;
+    void this.exportCompleteWork();
+  }
+
+  async exportCompleteWork(): Promise<void> {
+    const format = this.pendingDraftExportFormat;
+    if (!format || this.exportingCompleteWork) {
+      return;
+    }
+
+    this.exportingCompleteWork = true;
+    this.pendingDraftExportFormat = null;
+    try {
+      const title = this.currentSolution?.title || 'Untitled Solution';
+      const completeHtml = this.buildCompleteWorkHtml();
+      if (format === 'docx') {
+        const blocks = await this.buildDocxParagraphsFromHtml(completeHtml);
+        const doc = this.buildBeautifulDraftDocument(
+          title,
+          blocks,
+          'Complete Body of Work',
+          'Complete Body of Work'
+        );
+        const blob = await Packer.toBlob(doc);
+        this.triggerDownload(blob, this.buildCompleteWorkFileName('docx'));
+        return;
+      }
+
+      await this.renderPaginatedHtmlToPdf(
+        this.buildStyledDraftPrintHtml(title, {
+          bodyHtml: completeHtml,
+          sectionLabel: 'Steps 1–4 and Strategy Review',
+          documentHeading: 'Complete Body of Work',
+          statusLabel: 'Complete work',
+        }),
+        this.buildCompleteWorkFileName('pdf')
+      );
+    } catch (error) {
+      console.error('Complete-work export failed', error);
+    } finally {
+      this.exportingCompleteWork = false;
+    }
+  }
+
   async downloadCurrentDraftPdf() {
     if (!this.currentDraftText || this.downloadingDraftPdf) {
       return;
@@ -3354,7 +3457,12 @@ Infographic requirements:
     }
   }
 
-  private buildBeautifulDraftDocument(title: string, contentBlocks: DraftDocxBlock[]): Document {
+  private buildBeautifulDraftDocument(
+    title: string,
+    contentBlocks: DraftDocxBlock[],
+    sectionLabel = 'Step 5 Current Draft',
+    documentHeading = 'Current Draft'
+  ): Document {
     const blocks = contentBlocks.length
       ? contentBlocks
       : [this.draftBodyParagraph('No draft content is available yet.', { italic: true, color: '6B7280' })];
@@ -3439,10 +3547,10 @@ Infographic requirements:
           },
           footers: { default: this.buildDraftFooter() },
           children: [
-            ...this.buildDraftCoverBlocks(title),
+            ...this.buildDraftCoverBlocks(title, documentHeading),
             new Paragraph({ children: [new PageBreak()] }),
-            this.draftSectionLabel('Step 5 Current Draft', '0F766E'),
-            this.draftHeading('Current Draft', 1),
+            this.draftSectionLabel(sectionLabel, '0F766E'),
+            this.draftHeading(documentHeading, 1),
             ...blocks,
           ],
         },
@@ -3480,7 +3588,10 @@ Infographic requirements:
     });
   }
 
-  private buildDraftCoverBlocks(title: string): DraftDocxBlock[] {
+  private buildDraftCoverBlocks(
+    title: string,
+    documentHeading = 'Current Draft'
+  ): DraftDocxBlock[] {
     const author = this.getDraftAuthorName();
     const team = this.getDraftTeamNames();
     const dateStr = new Date().toLocaleDateString('en-US', {
@@ -3533,9 +3644,11 @@ Infographic requirements:
       ]),
       this.draftSpacer(260),
       this.draftCallout(
-        'Current Working Draft',
+        documentHeading,
         description ||
-          'This export packages the current Step 5 draft into a polished working document for review, sharing, and continued refinement.',
+          (documentHeading === 'Current Draft'
+            ? 'This export packages the current Step 5 draft into a polished working document for review, sharing, and continued refinement.'
+            : 'This export preserves the complete saved work from Steps 1–4 together with the current Strategy Review.'),
         'E1F5EE',
         '1D9E75',
         '085041'
@@ -3544,7 +3657,7 @@ Infographic requirements:
       this.draftMetadataTable([
         { label: 'Source', value: 'Playground Steps' },
         { label: 'Format', value: 'DOCX primary, PDF mirror' },
-        { label: 'Status', value: 'Current draft' },
+        { label: 'Status', value: documentHeading },
       ]),
     ];
   }
@@ -5027,10 +5140,84 @@ INTEGRITY RULES:
     return this.textToHtml(fallbackText);
   }
 
+  private buildCompleteWorkHtml(): string {
+    const sections: string[] = [];
+    const description = this.currentSolution?.description || '';
+    if (description) {
+      const descriptionHtml = /<[^>]+>/.test(description)
+        ? description
+        : this.textToHtml(description);
+      sections.push(
+        '<h1>Solution Overview</h1>',
+        descriptionHtml
+      );
+    }
+
+    sections.push('<h1>Steps 1–4 Source Material</h1>');
+    this.questionsTitles.slice(0, 4).forEach((questionKeys, stepIndex) => {
+      const stepAnswers = questionKeys
+        .map((key, questionIndex) => {
+          const answer = String(this.currentSolution?.status?.[key] || '');
+          if (!this.hasMeaningfulStepAnswer(answer)) {
+            return '';
+          }
+          const prompt = this.AllQuestions[stepIndex]?.[questionIndex] || key;
+          return [
+            `<h3>${this.escapeHtml(`Question ${questionIndex + 1}`)}</h3>`,
+            `<p><strong>Prompt:</strong> ${this.escapeHtml(
+              this.normalizeWhitespace(prompt)
+            )}</p>`,
+            answer,
+          ].join('\n');
+        })
+        .filter(Boolean);
+
+      if (!stepAnswers.length) {
+        return;
+      }
+      const stepTitle =
+        this.getStepDisplayTitle(this.steps[stepIndex]) ||
+        `Step ${stepIndex + 1}`;
+      sections.push(
+        `<h2>${this.escapeHtml(
+          `Step ${stepIndex + 1}: ${stepTitle}`
+        )}</h2>`,
+        ...stepAnswers
+      );
+    });
+
+    sections.push('<h1>Strategy Review</h1>');
+    sections.push(
+      this.currentSolution?.strategyReview ||
+        '<p>No Strategy Review has been saved yet.</p>'
+    );
+
+    return sections.join('\n');
+  }
+
   private buildDraftFileName(extension: 'pdf' | 'docx'): string {
     const title = (this.currentSolution?.title || 'current-draft').toLowerCase();
     const safeTitle = title.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     return `${safeTitle || 'current-draft'}.${extension}`;
+  }
+
+  private buildCompleteWorkFileName(extension: 'pdf' | 'docx'): string {
+    const title = (this.currentSolution?.title || 'solution').toLowerCase();
+    const safeTitle = title
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    return `${safeTitle || 'solution'}-complete-work.${extension}`;
+  }
+
+  private solutionTimestampMillis(value: any): number {
+    const direct = value?.toMillis?.();
+    if (Number.isFinite(direct)) {
+      return Number(direct);
+    }
+
+    const date = value?.toDate?.() || (value ? new Date(value) : null);
+    const millis = date?.getTime?.();
+    return Number.isFinite(millis) ? Number(millis) : 0;
   }
 
   private buildReportFileName(extension: 'pdf' | 'docx'): string {
@@ -6594,7 +6781,15 @@ INTEGRITY RULES:
     return body.scrollHeight > body.clientHeight + 1;
   }
 
-  private buildStyledDraftPrintHtml(title: string): string {
+  private buildStyledDraftPrintHtml(
+    title: string,
+    options: {
+      bodyHtml?: string;
+      sectionLabel?: string;
+      documentHeading?: string;
+      statusLabel?: string;
+    } = {}
+  ): string {
     const author = this.escapeHtml(this.getDraftAuthorName() || 'Unknown');
     const team = this.escapeHtml(this.getDraftTeamNames() || 'Individual draft');
     const generated = this.escapeHtml(
@@ -6606,9 +6801,23 @@ INTEGRITY RULES:
     );
     const description = this.escapeHtml(
       this.toPlainText(this.currentSolution?.description || '').slice(0, 520) ||
-        'This export packages the current Step 5 draft into a polished working document for review, sharing, and continued refinement.'
+        (options.documentHeading === 'Complete Body of Work'
+          ? 'This export preserves every saved answer from Steps 1–4 together with the current Strategy Review.'
+          : 'This export packages the current Step 5 draft into a polished working document for review, sharing, and continued refinement.')
     );
-    const bodyHtml = this.currentDraftHtml || this.textToHtml(this.currentDraftText);
+    const bodyHtml =
+      options.bodyHtml ||
+      this.currentDraftHtml ||
+      this.textToHtml(this.currentDraftText);
+    const sectionLabel = this.escapeHtml(
+      options.sectionLabel || 'Step 5 Current Draft'
+    );
+    const documentHeading = this.escapeHtml(
+      options.documentHeading || 'Current Draft'
+    );
+    const statusLabel = this.escapeHtml(
+      options.statusLabel || 'Current draft'
+    );
 
     return `
       <style>
@@ -6820,13 +7029,13 @@ INTEGRITY RULES:
               <div><span>Generated</span><strong>${generated}</strong></div>
             </section>
             <section class="draft-callout">
-              <strong>Current Working Draft</strong>
+              <strong>${documentHeading}</strong>
               <p>${description}</p>
             </section>
             <section class="draft-meta">
               <div><span>Source</span><strong>Playground Steps</strong></div>
               <div><span>Format</span><strong>DOCX primary, PDF mirror</strong></div>
-              <div><span>Status</span><strong>Current draft</strong></div>
+              <div><span>Status</span><strong>${statusLabel}</strong></div>
             </section>
           </div>
           <footer class="draft-page-footer">
@@ -6836,8 +7045,8 @@ INTEGRITY RULES:
         </section>
         <div class="draft-pages"></div>
         <section class="draft-content-source draft-content">
-          <p class="draft-section-label">Step 5 Current Draft</p>
-          <h1>Current Draft</h1>
+          <p class="draft-section-label">${sectionLabel}</p>
+          <h1>${documentHeading}</h1>
           ${bodyHtml}
         </section>
       </article>

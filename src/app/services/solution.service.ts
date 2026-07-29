@@ -35,6 +35,11 @@ import { Email } from '../components/create-playground/create-playground.compone
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import {
+  StrategyReviewSyncMetadata,
+  strategyReviewSourceAnswers,
+  strategyReviewStepsHash,
+} from '../utils/strategy-review-sync';
 type BroadcastStatus = 'active' | 'paused' | 'pending' | 'stopped';
 
 export type CommunitySolutionFilter =
@@ -1008,6 +1013,133 @@ export class SolutionService {
       void this.activity.recordEvent('edit', solutionId);
     });
   }
+
+  async getStrategyReviewSyncMetadata(
+    solutionId: string
+  ): Promise<StrategyReviewSyncMetadata | undefined> {
+    if (!solutionId) {
+      return undefined;
+    }
+
+    const snapshot = await this.afs
+      .doc<Solution>(`solutions/${solutionId}`)
+      .ref.get();
+    return snapshot.exists
+      ? snapshot.data()?.strategyReviewSyncMetadata
+      : undefined;
+  }
+
+  async saveStrategyReviewReconciliation(
+    solutionId: string,
+    review: string,
+    metadata: StrategyReviewSyncMetadata,
+    options: {
+      previousReview?: string;
+      reason:
+        | 'generated'
+        | 'auto-updated'
+        | 'merged'
+        | 'kept-review'
+        | 'replaced'
+        | 'restored'
+        | 'initialized';
+      syncStatus?: 'aligned' | 'attention';
+      remainingConflictCount?: number;
+      preserveRecoveryRevision?: boolean;
+    }
+  ): Promise<void> {
+    const now = this.serverTimestamp();
+    const solutionRef = this.afs.doc(`solutions/${solutionId}`).ref;
+    const hasExpectedReview = options.previousReview !== undefined;
+    const previousReview = options.previousReview || '';
+    const syncStatus = options.syncStatus || 'aligned';
+    const remainingConflictCount =
+      syncStatus === 'attention'
+        ? Math.max(1, Number(options.remainingConflictCount || 0))
+        : 0;
+    const shouldArchivePreviousReview =
+      Boolean(previousReview) &&
+      previousReview !== review &&
+      !options.preserveRecoveryRevision;
+
+    await this.afs.firestore.runTransaction(async (transaction) => {
+      const solutionSnapshot = await transaction.get(solutionRef);
+      const serverSolution = (solutionSnapshot.data() || {}) as Solution;
+      const serverReview = String(serverSolution.strategyReview || '');
+      const serverAnswers = strategyReviewSourceAnswers(
+        serverSolution.status as Record<string, string> | undefined
+      );
+      const serverStepsHash = strategyReviewStepsHash(serverAnswers);
+      const expectedSourceHash =
+        metadata.sourceSnapshotHash || metadata.lastReviewedStepsHash;
+
+      if (hasExpectedReview && serverReview !== previousReview) {
+        throw new Error(
+          'STRATEGY_REVIEW_CHANGED: A teammate updated Strategy Review while it was being reconciled.'
+        );
+      }
+      if (serverStepsHash !== expectedSourceHash) {
+        throw new Error(
+          'STRATEGY_STEPS_CHANGED: Steps 1–4 changed while Strategy Review was being reconciled.'
+        );
+      }
+
+      const previousRevision = shouldArchivePreviousReview
+        ? {
+            review: previousReview,
+            reason: options.reason,
+            createdAt: now,
+            createdByUid: this.auth.currentUser?.uid || '',
+            createdByEmail: this.auth.currentUser?.email || '',
+          }
+        : serverSolution.strategyReviewPreviousRevision;
+
+      transaction.set(
+        solutionRef,
+        {
+          strategyReview: review,
+          strategyReviewSyncMetadata: {
+            ...metadata,
+            lastOutcome: options.reason,
+            updatedAt: now,
+          },
+          ...(previousRevision
+            ? { strategyReviewPreviousRevision: previousRevision }
+            : {}),
+          draftUpdatedAt: now,
+          ...(syncStatus === 'aligned'
+            ? { strategyReviewReviewedAgainstStepsAt: now }
+            : {}),
+          strategyReviewSyncStatus: syncStatus,
+          strategyReviewConflictCount: remainingConflictCount,
+          updatedAt: now,
+          lastSubstantiveEditAt: now,
+          feedUpdatedAt: now,
+        },
+        { merge: true }
+      );
+    });
+
+    if (shouldArchivePreviousReview) {
+      void this.afs
+        .collection(`solutions/${solutionId}/strategyReviewRevisions`)
+        .add({
+          review: previousReview,
+          reason: options.reason,
+          createdAt: this.serverTimestamp(),
+          createdByUid: this.auth.currentUser?.uid || '',
+          createdByEmail: this.auth.currentUser?.email || '',
+        })
+        .catch((error) =>
+          console.warn(
+            'Could not add the Strategy Review history entry. The latest recovery copy remains on the solution.',
+            error
+          )
+        );
+    }
+    void this.activity.recordEvent('edit', solutionId);
+  }
+
   saveSolutionStatus(solutionId: string, status: any) {
     const data = this.withSolutionSubstantiveEditAt(
       {

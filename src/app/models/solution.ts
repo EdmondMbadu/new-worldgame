@@ -1,5 +1,6 @@
 import { Email } from '../components/create-playground/create-playground.component';
 import { Avatar, User } from '../models/user';
+import { StrategyReviewSyncMetadata } from '../utils/strategy-review-sync';
 
 export class Solution {
   solutionId?: string;
@@ -88,6 +89,17 @@ export class Solution {
   stepsUpdatedAt?: any;
   draftUpdatedAt?: any;
   publishedContentUpdatedAt?: any;
+  strategyReviewReviewedAgainstStepsAt?: any;
+  strategyReviewSyncStatus?: 'aligned' | 'attention';
+  strategyReviewConflictCount?: number;
+  strategyReviewSyncMetadata?: StrategyReviewSyncMetadata;
+  strategyReviewPreviousRevision?: {
+    review: string;
+    reason: string;
+    createdAt?: any;
+    createdByUid?: string;
+    createdByEmail?: string;
+  };
 }
 
 export interface SolutionRecruitmentProfile {
