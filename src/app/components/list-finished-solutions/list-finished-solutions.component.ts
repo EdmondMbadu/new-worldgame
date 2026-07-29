@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { Solution } from 'src/app/models/solution';
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 
 @Component({
     selector: 'app-list-finished-solutions',
@@ -52,6 +53,10 @@ export class ListFinishedSolutionsComponent implements OnInit {
   }
   ngOnInit(): void {
     window.scroll(0, 0);
+  }
+
+  isOwnerOfSolution(solution: Solution): boolean {
+    return isSolutionOwner(solution, this.auth.currentUser);
   }
   @Input() title: string = 'problemListView.tabs.submitted';
 

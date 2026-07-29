@@ -5,6 +5,10 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import {
+  isSolutionOwner,
+  solutionOwnerIdentity,
+} from 'src/app/utils/solution-ownership';
 
 @Component({
     selector: 'app-problem-list',
@@ -56,10 +60,7 @@ export class ProblemListComponent {
   imagesPath: string = '../../../assets/img/user.png';
 
   isAuthorOfSolution(solution: Solution): boolean {
-    if (this.currentUser && solution) {
-      return solution.authorAccountId === this.auth.currentUser.uid;
-    }
-    return false;
+    return isSolutionOwner(solution, this.auth.currentUser);
   }
 
   memberLabel(solution: Solution): string {
@@ -89,22 +90,12 @@ export class ProblemListComponent {
       Object.values(solution.participants).forEach(addEmail);
     }
     (solution.participantsHolder || []).forEach(addEmail);
-    addEmail(solution.authorEmail);
+    addEmail(solutionOwnerIdentity(solution)?.authorEmail);
 
-    return emails.size || (solution.authorAccountId ? 1 : 0);
+    return emails.size || (solutionOwnerIdentity(solution) ? 1 : 0);
   }
 
   private solutionKey(solution: Solution): string {
     return solution.solutionId || solution.title || '';
   }
-  // get isAdminOfSolution(currentSolution: Solution): boolean {
-  //   if (currentSolution || !this.auth.currentUser) return false;
-  //   const uid = this.auth.currentUser.uid;
-  //   return (
-  //   currentSolution.authorAccountId === uid ||
-  //     (currentSolution.chosenAdmins ?? []).some(
-  //       (a:any) => a.authorAccountId === uid
-  //     )
-  //   );
-  // }
 }

@@ -5,6 +5,7 @@ import { Solution, SolutionRecruitmentProfile } from 'src/app/models/solution';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
+import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 
 type ReqStatus = 'none' | 'pending' | 'cancelled' | 'approved' | 'rejected';
 
@@ -230,21 +231,7 @@ export class JoinSolutionComponent implements OnInit, OnDestroy {
   }
 
   private isOwnerOf(s: any): boolean {
-    const uid = this.auth?.currentUser?.uid;
-    const email = (this.auth?.currentUser?.email || '').toLowerCase();
-
-    // common owner fields your docs might use
-    const ownerUidMatches =
-      s?.authorAccountId === uid ||
-      s?.authorUid === uid ||
-      s?.ownerId === uid ||
-      s?.createdById === uid;
-
-    const ownerEmailMatches =
-      (s?.authorEmail || '').toLowerCase() === email ||
-      (s?.ownerEmail || '').toLowerCase() === email;
-
-    return !!(ownerUidMatches || ownerEmailMatches);
+    return isSolutionOwner(s, this.auth?.currentUser);
   }
 
   private isUserInParticipants(

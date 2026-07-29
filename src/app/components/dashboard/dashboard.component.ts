@@ -8,6 +8,10 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import {
+  isSolutionAdmin,
+  solutionOwnerIdentity,
+} from 'src/app/utils/solution-ownership';
 
 interface OnlineTeamMember {
   email: string;
@@ -369,21 +373,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get isAdminOfSolution(): boolean {
-    if (!this.currentSolution || !this.auth.currentUser) return false;
-
-    const uid = this.auth.currentUser.uid;
-    const email = this.normalizeEmail(this.auth.currentUser.email);
-
-    return (
-      (!!uid && this.currentSolution.authorAccountId === uid) ||
-      (!!email &&
-        this.normalizeEmail(this.currentSolution.authorEmail) === email) ||
-      (this.currentSolution.chosenAdmins ?? []).some(
-        (admin) =>
-          (!!uid && admin.authorAccountId === uid) ||
-          (!!email && this.normalizeEmail(admin.authorEmail) === email)
-      )
-    );
+    return isSolutionAdmin(this.currentSolution, this.auth.currentUser);
   }
 
   get canLeaveSolution(): boolean {
@@ -949,7 +939,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       fallbackLastActiveByUid.set(member.uid, member.lastActiveAt);
     });
 
-    if (this.currentSolution.authorAccountId) {
+    const owner = solutionOwnerIdentity(this.currentSolution);
+    if (owner?.authorAccountId) {
       const author = this.memberFromSolutionAuthor(this.currentSolution);
       if (author) {
         uids.add(author.uid);
@@ -981,7 +972,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       Object.values(solution.participants).forEach(addEmail);
     }
     (solution.participantsHolder || []).forEach(addEmail);
-    addEmail(solution.authorEmail);
+    addEmail(solutionOwnerIdentity(solution)?.authorEmail);
 
     return Array.from(emails);
   }
@@ -1058,11 +1049,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private memberFromSolutionAuthor(solution: Solution): OnlineTeamMember | null {
-    if (!solution.authorAccountId) return null;
+    const owner = solutionOwnerIdentity(solution);
+    if (!owner?.authorAccountId) return null;
     return {
-      email: this.normalizeEmail(solution.authorEmail || ''),
-      displayName: solution.authorName || solution.authorEmail || 'Solution owner',
-      uid: solution.authorAccountId,
+      email: this.normalizeEmail(owner.authorEmail),
+      displayName: owner.authorName || owner.authorEmail || 'Solution owner',
+      uid: owner.authorAccountId,
     };
   }
 

@@ -8,6 +8,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 
 @Component({
     selector: 'app-solution-view',
@@ -127,7 +128,7 @@ export class SolutionViewComponent implements OnInit {
         this.currentSolution = data[0];
         if (
           this.auth.currentUser &&
-          this.currentSolution.authorEmail === this.auth.currentUser.email
+          isSolutionOwner(this.currentSolution, this.auth.currentUser)
         ) {
           this.iscreatorOfThisSolution = true;
         }

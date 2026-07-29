@@ -131,6 +131,74 @@
         <!-- Right Column: Team Info -->
         <div class="space-y-6">
 
+          <!-- Creator Card -->
+          <div *ngIf="canViewCreatorManagement && displayedOwner as owner"
+               class="overflow-visible rounded-2xl border border-teal-200 bg-white shadow-sm dark:border-teal-800 dark:bg-slate-800">
+            <div class="flex items-center justify-between gap-3 border-b border-teal-100 px-5 py-4 dark:border-teal-900/70">
+              <div class="flex items-center gap-3">
+                <div class="rounded-lg bg-teal-100 p-2 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300">
+                  <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3Zm0 0c-3.314 0-6 2.239-6 5v2h12v-2c0-2.761-2.686-5-6-5Zm7-5 1.5 1.5L23 5" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-gray-900 dark:text-white">Solution creator</h3>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">Primary responsibility</span>
+                </div>
+              </div>
+              <button
+                *ngIf="canTransferOwnership"
+                type="button"
+                (click)="openTransferOwnershipModal()"
+                class="rounded-lg border border-teal-200 px-3 py-1.5 text-xs font-semibold text-teal-700 transition hover:border-teal-300 hover:bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-500/50 dark:border-teal-700 dark:text-teal-200 dark:hover:bg-teal-950/40"
+              >
+                Transfer
+              </button>
+            </div>
+            <div class="px-5 py-4">
+              <div class="flex items-center gap-3">
+                <img
+                  *ngIf="owner.authorProfilePicture?.downloadURL"
+                  [src]="owner.authorProfilePicture!.downloadURL"
+                  class="h-12 w-12 rounded-full border-2 border-white object-cover shadow-sm dark:border-slate-700"
+                  [alt]="owner.authorName"
+                />
+                <div
+                  *ngIf="!owner.authorProfilePicture?.downloadURL"
+                  class="flex h-12 w-12 items-center justify-center rounded-full bg-teal-100 text-sm font-semibold text-teal-800 ring-2 ring-white dark:bg-teal-900/50 dark:text-teal-100 dark:ring-slate-700"
+                >
+                  {{ getInitials(undefined, undefined, owner.authorEmail, owner.authorName) }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="truncate font-semibold text-gray-900 dark:text-white">
+                      {{ owner.authorName }}
+                    </p>
+                    <span class="rounded-full bg-teal-100 px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-wide text-teal-700 dark:bg-teal-900/50 dark:text-teal-200">
+                      Creator
+                    </span>
+                  </div>
+                  <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                    {{ owner.authorEmail }}
+                  </p>
+                </div>
+              </div>
+              <p *ngIf="displayedCreator as creator"
+                 class="mt-3 border-t border-gray-100 pt-3 text-xs leading-5 text-gray-500 dark:border-slate-700 dark:text-gray-400">
+                Originally created by
+                <span class="font-medium text-gray-700 dark:text-gray-300">{{ creator.authorName }}</span>
+                <span *ngIf="ownerAndCreatorDiffer"> · Creator role has been transferred</span>
+              </p>
+            </div>
+          </div>
+
+          <p
+            *ngIf="canViewCreatorManagement && ownershipTransferMessage"
+            class="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+          >
+            {{ ownershipTransferMessage }}
+          </p>
+
           <!-- Designers Card -->
           <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-visible">
             <div class="px-5 py-4 border-b border-gray-100 dark:border-slate-700">
@@ -475,6 +543,169 @@
 <ng-template #modalBackdrop>
   <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"></div>
 </ng-template>
+
+<!-- Transfer Creator Modal -->
+<div *ngIf="showTransferOwnership" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+  <div
+    class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+    (click)="closeTransferOwnershipModal()"
+  ></div>
+  <div
+    class="relative flex max-h-[90vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/10 dark:bg-slate-900 dark:ring-white/10"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="transferOwnershipTitle"
+  >
+    <div class="border-b border-gray-200 px-6 py-5 dark:border-slate-700">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-wider text-teal-600 dark:text-teal-300">
+            Solution creator
+          </p>
+          <h2 id="transferOwnershipTitle" class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">
+            Transfer creator role
+          </h2>
+          <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">
+            The new creator will receive primary control of this solution. The original creator will remain recorded in its history.
+          </p>
+        </div>
+        <button
+          type="button"
+          (click)="closeTransferOwnershipModal()"
+          [disabled]="isTransferringOwnership"
+          class="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-slate-800 dark:hover:text-gray-200"
+          aria-label="Close creator transfer"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-y-auto px-6 py-5">
+      <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-200">
+        Only one person can be designated as the solution creator. Administrators can continue helping manage the work, but they cannot transfer the creator role.
+      </div>
+
+      <div class="mt-5">
+        <label for="transferOwnerSearch" class="block text-sm font-semibold text-gray-900 dark:text-white">
+          New creator
+        </label>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Choose an existing admin below, or search for any registered user.
+        </p>
+        <div class="relative mt-3">
+          <input
+            id="transferOwnerSearch"
+            type="text"
+            [(ngModel)]="transferOwnerQuery"
+            (input)="onTransferOwnerQueryChange()"
+            (focus)="onTransferOwnerQueryChange()"
+            placeholder="Search by name or email"
+            autocomplete="off"
+            class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pr-10 text-gray-900 placeholder-gray-400 transition focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/30 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+          />
+          <svg class="pointer-events-none absolute right-3 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m2.35-5.65a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z" />
+          </svg>
+        </div>
+
+        <div *ngIf="transferOwnerResults.length" class="mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
+          <button
+            *ngFor="let user of transferOwnerResults"
+            type="button"
+            (click)="selectTransferOwner(user)"
+            class="flex w-full items-center gap-3 border-b border-gray-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-teal-50 dark:border-slate-700 dark:hover:bg-teal-950/30"
+          >
+            <img
+              *ngIf="user.profilePicture?.downloadURL"
+              [src]="user.profilePicture!.downloadURL"
+              class="h-9 w-9 rounded-full object-cover"
+              [alt]="user.firstName || user.email"
+            />
+            <div
+              *ngIf="!user.profilePicture?.downloadURL"
+              class="flex h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold text-gray-600 dark:bg-slate-700 dark:text-gray-200"
+            >
+              {{ getInitials(user.firstName, user.lastName, user.email) }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                {{ user.firstName }} {{ user.lastName }}
+              </p>
+              <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ user.email }}</p>
+            </div>
+          </button>
+        </div>
+
+        <div
+          *ngIf="selectedTransferOwner"
+          class="mt-3 flex items-center gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 dark:border-teal-800 dark:bg-teal-950/30"
+        >
+          <svg class="h-5 w-5 flex-none text-teal-600 dark:text-teal-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6" />
+          </svg>
+          <div class="min-w-0">
+            <p class="truncate text-sm font-semibold text-teal-900 dark:text-teal-100">
+              {{ selectedTransferOwner.firstName }} {{ selectedTransferOwner.lastName }}
+            </p>
+            <p class="truncate text-xs text-teal-700 dark:text-teal-300">{{ selectedTransferOwner.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <label
+        *ngIf="displayedOwner as owner"
+        class="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 px-4 py-3 dark:border-slate-700"
+      >
+        <input
+          type="checkbox"
+          [(ngModel)]="keepPreviousOwnerAsAdmin"
+          class="mt-1 h-4 w-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+        />
+        <span>
+          <span class="block text-sm font-semibold text-gray-900 dark:text-white">
+            Keep {{ isCurrentUserOwner ? 'me' : owner.authorName }} as an admin
+          </span>
+          <span class="mt-1 block text-sm leading-5 text-gray-500 dark:text-gray-400">
+            Recommended. The former creator remains available to help, but the new creator has primary control.
+          </span>
+        </span>
+      </label>
+
+      <p
+        *ngIf="ownershipTransferError"
+        class="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:bg-red-950/40 dark:text-red-300"
+      >
+        {{ ownershipTransferError }}
+      </p>
+    </div>
+
+    <div class="flex flex-col-reverse gap-3 border-t border-gray-200 bg-gray-50 px-6 py-4 sm:flex-row sm:justify-end dark:border-slate-700 dark:bg-slate-800/70">
+      <button
+        type="button"
+        (click)="closeTransferOwnershipModal()"
+        [disabled]="isTransferringOwnership"
+        class="rounded-xl border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-600 dark:bg-slate-800 dark:text-gray-200 dark:hover:bg-slate-700"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        (click)="submitOwnershipTransfer()"
+        [disabled]="!selectedTransferOwner || isTransferringOwnership"
+        class="inline-flex items-center justify-center gap-2 rounded-xl bg-teal-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-600 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        <svg *ngIf="isTransferringOwnership" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" opacity="0.25" />
+          <path d="M21 12a9 9 0 0 1-9 9" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+        </svg>
+        {{ isTransferringOwnership ? 'Transferring…' : 'Transfer creator role' }}
+      </button>
+    </div>
+  </div>
+</div>
 
 <div *ngIf="showDeleteSolutionConfirm" class="fixed inset-0 z-[10000] flex items-center justify-center p-4">
   <div

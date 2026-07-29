@@ -4,11 +4,25 @@ import { StrategyReviewSyncMetadata } from '../utils/strategy-review-sync';
 
 export class Solution {
   solutionId?: string;
+  /**
+   * Immutable creator attribution. Legacy solutions use these fields as both
+   * creator and owner until explicit owner fields are added by a transfer.
+   */
   authorEmail?: string;
   authorAccountId?: string;
   initiatorId?: string;
   authorProfileCredential?: string;
   authorName?: string;
+  /** Mutable stewardship. Always prefer these fields for access decisions. */
+  ownerEmail?: string;
+  ownerAccountId?: string;
+  ownerName?: string;
+  ownerProfileCredential?: string;
+  ownerProfilePicture?: Avatar;
+  ownershipTransferredAtMs?: number;
+  ownershipTransferredByUid?: string;
+  ownershipTransferredByEmail?: string;
+  ownershipHistory?: SolutionOwnershipHistoryEntry[];
   content?: string;
   title?: string;
   description?: string;
@@ -55,6 +69,7 @@ export class Solution {
   feedUpdatedAt?: any;
   commentCount?: number;
   publicMemberCount?: number;
+  publicDesignerCount?: number;
   publicProgress?: number;
   hasMoreComments?: boolean;
   teamMemberEmails?: string[];
@@ -162,6 +177,19 @@ export interface Admin {
   authorName: string;
   authorEmail: string;
   authorProfilePicture?: Avatar;
+}
+
+export interface SolutionOwnershipHistoryEntry {
+  transferredAtMs: number;
+  transferredByUid: string;
+  transferredByEmail: string;
+  previousOwnerAccountId: string;
+  previousOwnerName: string;
+  previousOwnerEmail: string;
+  newOwnerAccountId: string;
+  newOwnerName: string;
+  newOwnerEmail: string;
+  previousOwnerKeptAsAdmin: boolean;
 }
 export class Comment {
   messageId?: string;

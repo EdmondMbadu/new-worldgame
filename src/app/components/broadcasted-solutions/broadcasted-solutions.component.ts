@@ -17,6 +17,7 @@ import {
 import { AuthService } from 'src/app/services/auth.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TranslateService } from '@ngx-translate/core';
+import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 
 type Status = 'active' | 'paused' | 'stopped';
 
@@ -104,9 +105,6 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
           map((solutions: Solution[]) => {
             const byId = new Map(solutions.map((s) => [s.solutionId!, s]));
 
-            // ✅ Safely read current user id (null if logged out)
-            const currentUid = this.auth.currentUser?.uid ?? null;
-
             return bcs.map((b) => {
               const s = byId.get(b.solutionId);
               const designersCount = this.countParticipants(s?.participants);
@@ -118,10 +116,7 @@ export class BroadcastedSolutionsComponent implements OnInit, OnDestroy {
                   : b.message || '';
 
               // ✅ Compare only if both sides exist
-              const isOwner =
-                !!s?.authorAccountId &&
-                !!currentUid &&
-                s.authorAccountId === currentUid;
+              const isOwner = isSolutionOwner(s, this.auth.currentUser);
 
               const vm: BroadcastVM = {
                 broadcastId: b.broadcastId,

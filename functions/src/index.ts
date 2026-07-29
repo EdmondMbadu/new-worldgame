@@ -484,10 +484,11 @@ function solutionBelongsToRealUsersForAutomation(
   const participantEmails = normalizeParticipantEmailsForAutomation(
     solution?.participants
   );
-  const authorEmail = normalizeEmailForAutomation(solution?.authorEmail);
-  const ownerEmail = normalizeEmailForAutomation(solution?.ownerEmail);
+  const ownerEmail = normalizeEmailForAutomation(
+    solution?.ownerEmail || solution?.authorEmail
+  );
 
-  return [...participantEmails, authorEmail, ownerEmail].some(
+  return [...participantEmails, ownerEmail].some(
     (email) => email && realUserEmailSet.has(email)
   );
 }
@@ -854,8 +855,9 @@ function buildWeeklyActivityEmailData(
         new Set(
           [
             ...normalizeParticipantEmailsForAutomation(solution?.participants),
-            normalizeEmailForAutomation(solution?.authorEmail),
-            normalizeEmailForAutomation(solution?.ownerEmail),
+            normalizeEmailForAutomation(
+              solution?.ownerEmail || solution?.authorEmail
+            ),
           ].filter(Boolean)
         )
       );
@@ -3629,8 +3631,7 @@ const extractAIInsightsSolutionEmails = (solution: any): string[] => {
     emails.add(email);
   };
 
-  addEmail(solution?.authorEmail);
-  addEmail(solution?.ownerEmail);
+  addEmail(solution?.ownerEmail || solution?.authorEmail);
 
   const participants = solution?.participants;
   if (Array.isArray(participants)) {
@@ -4009,8 +4010,10 @@ function buildSolutionsByParticipantForAIInsightsAutomation(
     const emails = new Set<string>([
       ...normalizeParticipantEmailsForAutomation(solution?.participants),
     ]);
-    const authorEmail = normalizeEmailForAutomation(solution?.authorEmail);
-    if (authorEmail) emails.add(authorEmail);
+    const ownerEmail = normalizeEmailForAutomation(
+      solution?.ownerEmail || solution?.authorEmail
+    );
+    if (ownerEmail) emails.add(ownerEmail);
 
     emails.forEach((email) => {
       if (!isValidEmailForAutomation(email)) return;
@@ -10803,7 +10806,7 @@ const communitySolutionEmails = (solution: any): string[] => {
     if (emailRegex.test(email)) emails.add(email);
   };
 
-  add(solution?.authorEmail);
+  add(solution?.ownerEmail || solution?.authorEmail);
   [solution?.participants, solution?.participantsHolder].forEach((value) => {
     if (Array.isArray(value)) value.forEach(add);
     else if (value && typeof value === 'object') Object.values(value).forEach(add);
@@ -10827,8 +10830,9 @@ const isCommunitySolutionOwnerOrAdmin = (
   email: string
 ): boolean => {
   if (
-    solution?.authorAccountId === uid ||
-    normalizeCommunityEmail(solution?.authorEmail) === email
+    (solution?.ownerAccountId || solution?.authorAccountId) === uid ||
+    normalizeCommunityEmail(solution?.ownerEmail || solution?.authorEmail) ===
+      email
   ) {
     return true;
   }
@@ -11122,7 +11126,9 @@ export const maintainCommunitySolutionFeedMetadata = functions.firestore
       solutionAdminEmails: Array.from(
         new Set(
           [
-            normalizeCommunityEmail(solution['authorEmail']),
+            normalizeCommunityEmail(
+              solution['ownerEmail'] || solution['authorEmail']
+            ),
             ...(Array.isArray(solution['chosenAdmins'])
               ? solution['chosenAdmins'].map((entry: any) =>
                   normalizeCommunityEmail(entry?.authorEmail)

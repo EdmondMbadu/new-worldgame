@@ -173,8 +173,8 @@
               <span>
                 <strong>{{ item.authorName || ('home.community.defaultTeamName' | translate) }}</strong>
                 <small>
-                  {{ communityMemberCount(item) }}
-                  {{ (communityMemberCount(item) === 1 ? 'home.community.member' : 'home.community.members') | translate }}
+                  {{ communityDesignerCount(item) === null ? '' : communityDesignerCount(item) }}
+                  {{ (communityDesignerCount(item) === 1 ? 'home.community.designer' : 'home.community.designers') | translate }}
                 </small>
               </span>
             </div>

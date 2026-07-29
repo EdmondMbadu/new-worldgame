@@ -39,7 +39,7 @@ const solutionEmails = (solution) => {
     );
     if (emailPattern.test(email)) emails.add(email);
   };
-  add(solution.authorEmail);
+  add(solution.ownerEmail || solution.authorEmail);
   [solution.participants, solution.participantsHolder].forEach((value) => {
     if (Array.isArray(value)) value.forEach(add);
     else if (value && typeof value === 'object') Object.values(value).forEach(add);
@@ -52,7 +52,7 @@ const adminEmails = (solution) =>
   Array.from(
     new Set(
       [
-        normalizeEmail(solution.authorEmail),
+        normalizeEmail(solution.ownerEmail || solution.authorEmail),
         ...(Array.isArray(solution.chosenAdmins)
           ? solution.chosenAdmins.map((entry) =>
               normalizeEmail(entry?.authorEmail)

@@ -23,6 +23,7 @@ import {
   PresenceService,
   TypingPresence,
 } from 'src/app/services/presence.service';
+import { solutionOwnerIdentity } from 'src/app/utils/solution-ownership';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
 import {
   Document,
@@ -1944,7 +1945,7 @@ STYLE REQUIREMENTS:
     } else if (participants && typeof participants === 'object') {
       Object.values(participants).forEach(addEmail);
     }
-    addEmail(this.currentSolution.authorEmail);
+    addEmail(solutionOwnerIdentity(this.currentSolution)?.authorEmail);
 
     return Array.from(emails);
   }

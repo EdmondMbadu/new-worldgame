@@ -275,7 +275,7 @@
                   </span>
                   <div class="flex items-center gap-2">
                     <button
-                      *ngIf="solution.authorAccountId === auth.currentUser.uid"
+                      *ngIf="isOwnerOfSolution(solution)"
                       type="button"
                       (click)="
                         receiveConfirmationDelete(solution);

@@ -465,7 +465,7 @@
                       }}
                     </button>
                     <button
-                      *ngIf="solution.authorAccountId === auth.currentUser.uid"
+                      *ngIf="isOwnerOfSolution(solution)"
                       type="button"
                       (click)="
                         receiveConfirmationDelete(solution);

@@ -40,6 +40,13 @@ import {
   strategyReviewSourceAnswers,
   strategyReviewStepsHash,
 } from '../utils/strategy-review-sync';
+import {
+  buildSolutionOwnershipTransfer,
+  isPlatformAdminUser,
+  isSolutionOwner,
+  normalizeSolutionEmail,
+  ownershipTargetFromUser,
+} from '../utils/solution-ownership';
 type BroadcastStatus = 'active' | 'paused' | 'pending' | 'stopped';
 
 export type CommunitySolutionFilter =
@@ -214,6 +221,10 @@ export class SolutionService {
       authorAccountId: string;
       authorName: string;
       authorEmail: string;
+      ownerAccountId: string;
+      ownerName: string;
+      ownerEmail: string;
+      ownerProfileCredential: string;
       description: string;
       participants: any;
       evaluators: any;
@@ -236,6 +247,10 @@ export class SolutionService {
       authorAccountId: this.auth.currentUser.uid,
       authorName: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
       authorEmail: this.auth.currentUser.email,
+      ownerAccountId: this.auth.currentUser.uid,
+      ownerName: `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`,
+      ownerEmail: normalizeSolutionEmail(this.auth.currentUser.email),
+      ownerProfileCredential: this.auth.currentUser.profileCredential,
       description: description,
       participants: participants,
       evaluators: evaluators,
@@ -389,13 +404,54 @@ export class SolutionService {
 
   getAuthenticatedUserAllSolutions(email = this.auth.currentUser?.email) {
     if (!email) return of([] as Solution[]);
-    return this.afs
+    const normalizedEmail = normalizeSolutionEmail(email);
+    const participantSolutions$ = this.afs
       .collection<Solution>(`solutions`, (ref) =>
         ref.where('participants', 'array-contains', {
           name: email,
         })
       )
       .valueChanges();
+    const ownerSolutions$ = this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref.where('ownerEmail', '==', normalizedEmail)
+      )
+      .valueChanges();
+    const legacyAuthorSolutions$ = this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref.where('authorEmail', '==', email)
+      )
+      .valueChanges()
+      .pipe(
+        map((solutions) =>
+          solutions.filter(
+            (solution) => !solution.ownerAccountId && !solution.ownerEmail
+          )
+        )
+      );
+    const adminSolutions$ = this.afs
+      .collection<Solution>('solutions', (ref) =>
+        ref.where('solutionAdminEmails', 'array-contains', normalizedEmail)
+      )
+      .valueChanges();
+
+    return combineLatest([
+      participantSolutions$,
+      ownerSolutions$,
+      legacyAuthorSolutions$,
+      adminSolutions$,
+    ]).pipe(
+      map((groups) => {
+        const unique = new Map<string, Solution>();
+        groups.flat().forEach((solution) => {
+          const key =
+            solution.solutionId ||
+            `${solution.title || ''}:${solution.creationDate || ''}`;
+          unique.set(key, solution);
+        });
+        return Array.from(unique.values());
+      })
+    );
   }
 
   async getSolutionsForUserPicker(
@@ -448,18 +504,31 @@ export class SolutionService {
       })
       .filter((solution) => {
         const legacySolution = solution as any;
+        const hasExplicitOwner = !!(
+          solution.ownerAccountId || solution.ownerEmail
+        );
         const ownerIds = [
-          solution.authorAccountId,
-          solution.initiatorId,
-          legacySolution.authorId,
-          legacySolution.ownerId,
-          legacySolution.userId,
-          legacySolution.createdBy,
+          solution.ownerAccountId,
+          ...(hasExplicitOwner
+            ? []
+            : [
+                solution.authorAccountId,
+                solution.initiatorId,
+                legacySolution.authorId,
+                legacySolution.ownerId,
+                legacySolution.userId,
+                legacySolution.createdBy,
+              ]),
         ];
         const ownerEmails = [
-          solution.authorEmail,
-          legacySolution.createdByEmail,
-          legacySolution.ownerEmail,
+          solution.ownerEmail,
+          ...(hasExplicitOwner
+            ? []
+            : [
+                solution.authorEmail,
+                legacySolution.createdByEmail,
+                legacySolution.ownerEmail,
+              ]),
         ].map((value) => String(value || '').trim().toLowerCase());
 
         return (
@@ -470,6 +539,81 @@ export class SolutionService {
           listIncludesUser(solution.chosenAdmins)
         );
       });
+  }
+
+  async transferSolutionOwnership(
+    solutionId: string,
+    requestedOwner: User,
+    keepPreviousOwnerAsAdmin: boolean
+  ): Promise<void> {
+    const actor = this.auth.currentUser;
+    const requestedTarget = ownershipTargetFromUser(requestedOwner);
+    if (!solutionId || !actor?.uid || !actor?.email || !requestedTarget) {
+      throw new Error('A signed-in user and registered new owner are required.');
+    }
+
+    const solutionRef = this.afs.doc<Solution>(
+      `solutions/${solutionId}`
+    ).ref;
+    const targetUserRef = this.afs.doc<User>(
+      `users/${requestedTarget.authorAccountId}`
+    ).ref;
+
+    await this.afs.firestore.runTransaction(async (transaction) => {
+      const [solutionSnapshot, targetUserSnapshot] = await Promise.all([
+        transaction.get(solutionRef),
+        transaction.get(targetUserRef),
+      ]);
+      if (!solutionSnapshot.exists) {
+        throw new Error('The solution no longer exists.');
+      }
+      if (!targetUserSnapshot.exists) {
+        throw new Error('The new owner must be a registered user.');
+      }
+
+      const currentSolution = solutionSnapshot.data() as Solution;
+      if (
+        !isSolutionOwner(currentSolution, actor) &&
+        !isPlatformAdminUser(actor)
+      ) {
+        throw new Error(
+          'Only the current owner or a platform administrator can transfer ownership.'
+        );
+      }
+
+      const storedUser = {
+        ...(targetUserSnapshot.data() as User),
+        uid: targetUserSnapshot.id,
+      };
+      const verifiedTarget = ownershipTargetFromUser(storedUser);
+      if (!verifiedTarget) {
+        throw new Error('The selected user does not have a valid account.');
+      }
+
+      const update = buildSolutionOwnershipTransfer(
+        currentSolution,
+        verifiedTarget,
+        {
+          uid: actor.uid,
+          email: actor.email,
+        },
+        keepPreviousOwnerAsAdmin
+      );
+      const persistedUpdate: Record<string, any> = {
+        ...update,
+        updatedAt: this.serverTimestamp(),
+      };
+      if (!verifiedTarget.authorProfilePicture) {
+        persistedUpdate['ownerProfilePicture'] =
+          firebase.firestore.FieldValue.delete();
+      }
+
+      transaction.set(
+        solutionRef,
+        persistedUpdate,
+        { merge: true }
+      );
+    });
   }
   getAuthenticatedUserPendingEvaluations(email = this.auth.currentUser?.email) {
     if (!email) return of([] as Solution[]);

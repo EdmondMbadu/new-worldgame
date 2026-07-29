@@ -9,6 +9,7 @@ import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { firstValueFrom, of } from 'rxjs';
+import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 
 @Component({
     selector: 'app-tournament-details',
@@ -291,7 +292,7 @@ export class TournamentDetailsComponent implements OnInit {
     return (
       !this.isPostDeadline && // ⬅️ must still be open
       (this.isAuthor || // tournament owner
-        sol.authorAccountId === this.auth.currentUser.uid) // solution owner
+        isSolutionOwner(sol, this.auth.currentUser)) // solution owner
     );
   }
   /*  New: choose / clear winner  */

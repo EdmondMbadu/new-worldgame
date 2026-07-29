@@ -17,6 +17,7 @@ import {
   SolutionService,
 } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { solutionOwnerIdentity } from 'src/app/utils/solution-ownership';
 
 @Component({
     selector: 'app-home',
@@ -177,6 +178,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           .getAuthenticatedUserAllSolutions(user.email)
           .subscribe((data) => {
             this.currentUserSolutions = data;
+            this.mergeAccessibleSolutionAttribution();
             this.findPendingSolutions();
           });
 
@@ -323,6 +325,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         );
         this.communitySolutions = [...this.communitySolutions, ...nextPage];
       }
+      this.mergeAccessibleSolutionAttribution();
       this.hasMoreCommunitySolutions = page.hasMore;
       if (reset) this.restoreCommunityScroll();
     } catch (error) {
@@ -396,27 +399,64 @@ export class HomeComponent implements OnInit, OnDestroy {
     return Math.min(90, Math.max(10, (answers + supporting) * 10));
   }
 
-  communityMemberCount(solution: Solution): number {
-    if (Number.isFinite(Number(solution.publicMemberCount))) {
-      return Math.max(1, Number(solution.publicMemberCount));
+  communityDesignerCount(solution: Solution): number | null {
+    if (!Number.isFinite(Number(solution.publicDesignerCount))) return null;
+    return Math.max(0, Number(solution.publicDesignerCount));
+  }
+
+  private mergeAccessibleSolutionAttribution(): void {
+    if (!this.currentUserSolutions.length || !this.communitySolutions.length) {
+      return;
     }
-    if (Array.isArray(solution.teamMemberEmails)) {
-      return Math.max(1, solution.teamMemberEmails.length);
-    }
-    const value: any = solution.participants;
-    return Math.max(
-      1,
-      Array.isArray(value)
-        ? value.length
-        : value && typeof value === 'object'
-        ? Object.keys(value).length
-        : 0
+
+    const accessibleById = new Map(
+      this.currentUserSolutions
+        .filter((solution) => Boolean(solution.solutionId))
+        .map((solution) => [solution.solutionId, solution])
     );
+
+    this.communitySolutions = this.communitySolutions.map((card) => {
+      const fullSolution = accessibleById.get(card.solutionId);
+      if (!fullSolution) return card;
+
+      const owner = solutionOwnerIdentity(fullSolution);
+      return {
+        ...card,
+        authorName: owner?.authorName || card.authorName,
+        publicDesignerCount:
+          this.designerCountFromParticipants(fullSolution),
+      };
+    });
+  }
+
+  private designerCountFromParticipants(solution: Solution): number {
+    const value: any = solution.participants;
+    const entries = Array.isArray(value)
+      ? value
+      : value && typeof value === 'object'
+      ? Object.values(value)
+      : [];
+    const emails = entries
+      .map((entry: any) =>
+        String(
+          typeof entry === 'string'
+            ? entry
+            : entry?.name ||
+              entry?.email ||
+              Object.values(entry || {})[0] ||
+              ''
+        )
+          .trim()
+          .toLowerCase()
+      )
+      .filter(Boolean);
+
+    return new Set(emails).size;
   }
 
   communityInitials(solution: Solution): string {
     const name = String(
-      solution.authorName || solution.authorEmail || solution.title || 'GS'
+      solution.authorName || solution.title || 'Solution team'
     ).trim();
     const words = name.split(/\s+/).filter(Boolean);
     return words.length > 1
@@ -505,13 +545,25 @@ export class HomeComponent implements OnInit, OnDestroy {
     while (remaining.length) {
       const previousOwners = output
         .slice(-2)
-        .map((item) => item.authorAccountId || item.authorEmail || '');
+        .map(
+          (item) =>
+            item.ownerAccountId ||
+            item.ownerEmail ||
+            item.authorAccountId ||
+            item.authorEmail ||
+            ''
+        );
       const index = remaining.findIndex(
         (item) =>
           !previousOwners.length ||
           !previousOwners.every(
             (owner) =>
-              owner === (item.authorAccountId || item.authorEmail || '')
+              owner ===
+              (item.ownerAccountId ||
+                item.ownerEmail ||
+                item.authorAccountId ||
+                item.authorEmail ||
+                '')
           )
       );
       output.push(remaining.splice(index >= 0 ? index : 0, 1)[0]);

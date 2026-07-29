@@ -8,6 +8,10 @@ import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import {
+  isSolutionOwner,
+  solutionOwnerIdentity,
+} from 'src/app/utils/solution-ownership';
 
 interface SolutionMember {
   email: string;
@@ -105,6 +109,10 @@ export class ProblemListViewComponent implements OnInit {
   ngOnDestroy(): void {
     this.solutionsSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
+  }
+
+  isOwnerOfSolution(solution: Solution): boolean {
+    return isSolutionOwner(solution, this.auth.currentUser);
   }
   async findPendingSolutions() {
     this.pendingSolutions = [];
@@ -608,10 +616,13 @@ export class ProblemListViewComponent implements OnInit {
         this.memberLastActiveByUid.set(member.uid, member.lastActiveAt);
       });
 
-      if (solution.authorAccountId) {
-        uids.add(solution.authorAccountId);
+      const owner = solutionOwnerIdentity(solution);
+      if (owner?.authorAccountId) {
+        uids.add(owner.authorAccountId);
         const authorMember = this.memberFromSolutionAuthor(solution);
-        if (authorMember) this.memberByUid.set(solution.authorAccountId, authorMember);
+        if (authorMember) {
+          this.memberByUid.set(owner.authorAccountId, authorMember);
+        }
       }
 
       const uidList = Array.from(uids);
@@ -653,7 +664,7 @@ export class ProblemListViewComponent implements OnInit {
       Object.values(participants).forEach(addEmail);
     }
     (solution.participantsHolder || []).forEach(addEmail);
-    addEmail(solution.authorEmail);
+    addEmail(solutionOwnerIdentity(solution)?.authorEmail);
 
     return Array.from(emails);
   }
@@ -704,11 +715,12 @@ export class ProblemListViewComponent implements OnInit {
   }
 
   private memberFromSolutionAuthor(solution: Solution): SolutionMember | null {
-    if (!solution.authorAccountId) return null;
+    const owner = solutionOwnerIdentity(solution);
+    if (!owner?.authorAccountId) return null;
     return {
-      email: this.normalizeEmail(solution.authorEmail || ''),
-      displayName: solution.authorName || solution.authorEmail || 'Solution owner',
-      uid: solution.authorAccountId,
+      email: this.normalizeEmail(owner.authorEmail),
+      displayName: owner.authorName || owner.authorEmail || 'Solution owner',
+      uid: owner.authorAccountId,
     };
   }
 

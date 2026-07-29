@@ -43,7 +43,7 @@ service cloud.firestore {
 
     function authEmail() {
       return isSignedIn() && request.auth.token.email is string
-        ? request.auth.token.email
+        ? request.auth.token.email.lower()
         : '';
     }
 
@@ -72,6 +72,71 @@ service cloud.firestore {
       ]);
     }
 
+    function solutionOwnerUid(solution) {
+      return solution.get(
+        'ownerAccountId',
+        solution.get('authorAccountId', solution.get('initiatorId', ''))
+      );
+    }
+
+    function solutionOwnerEmail(solution) {
+      return solution.get('ownerEmail', solution.get('authorEmail', ''));
+    }
+
+    function isCurrentSolutionOwner(solution) {
+      return isSignedIn()
+        && (
+          solutionOwnerUid(solution) == request.auth.uid
+          || solutionOwnerEmail(solution) == authEmail()
+        );
+    }
+
+    function changesSolutionOwnership() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasAny([
+        'ownerAccountId',
+        'ownerEmail',
+        'ownerName',
+        'ownerProfileCredential',
+        'ownerProfilePicture',
+        'ownershipTransferredAtMs',
+        'ownershipTransferredByUid',
+        'ownershipTransferredByEmail',
+        'ownershipHistory'
+      ]);
+    }
+
+    function validSolutionOwnershipTransfer() {
+      let nextOwnerUid = request.resource.data.get('ownerAccountId', '');
+      let nextOwnerEmail = request.resource.data.get('ownerEmail', '');
+      return (
+          isPlatformAdmin()
+          || isCurrentSolutionOwner(resource.data)
+        )
+        && nextOwnerUid is string
+        && nextOwnerUid.size() > 0
+        && nextOwnerEmail is string
+        && nextOwnerEmail.size() > 0
+        && exists(/databases/$(database)/documents/users/$(nextOwnerUid))
+        && get(
+          /databases/$(database)/documents/users/$(nextOwnerUid)
+        ).data.email.lower() == nextOwnerEmail.lower()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'ownerAccountId',
+          'ownerEmail',
+          'ownerName',
+          'ownerProfileCredential',
+          'ownerProfilePicture',
+          'chosenAdmins',
+          'solutionAdminEmails',
+          'teamMemberEmails',
+          'ownershipTransferredAtMs',
+          'ownershipTransferredByUid',
+          'ownershipTransferredByEmail',
+          'ownershipHistory',
+          'updatedAt'
+        ]);
+    }
+
     // Solution documents are community-readable only for authenticated
     // members. Approved publication remains the separate, public pathway.
     match /{path=**}/solutions/{solutionId} {
@@ -79,15 +144,24 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isSignedIn()
         && (
-          !changesProtectedVisibilityFields()
-          || isPlatformAdmin()
-          || resource.data.get('solutionAdminEmails', []).hasAny([authEmail()])
+          (
+            !changesSolutionOwnership()
+            && (
+              !changesProtectedVisibilityFields()
+              || isPlatformAdmin()
+              || resource.data.get('solutionAdminEmails', []).hasAny([authEmail()])
+            )
+          )
+          || (
+            changesSolutionOwnership()
+            && validSolutionOwnershipTransfer()
+          )
         );
       allow delete: if isPlatformAdmin()
         || (
           isSignedIn()
           && (
-            resource.data.authorAccountId == request.auth.uid
+            solutionOwnerUid(resource.data) == request.auth.uid
             || resource.data.get('solutionAdminEmails', []).hasAny([authEmail()])
           )
         );

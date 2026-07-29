@@ -8,6 +8,14 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { PresenceService } from 'src/app/services/presence.service';
 import { SolutionService } from 'src/app/services/solution.service';
+import {
+  isPlatformAdminUser,
+  isSolutionAdmin,
+  isSolutionOwner,
+  normalizeSolutionEmail,
+  solutionCreatorIdentity,
+  solutionOwnerIdentity,
+} from 'src/app/utils/solution-ownership';
 
 /** Full SDG titles in the order 1 → 17.
  *  ⚠  Keep the exact spelling & double-space after the number,
@@ -124,6 +132,14 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   adminToDelete = '';
   showAddAdmin = false;
   showRemoveAdmin = false;
+  showTransferOwnership = false;
+  transferOwnerQuery = '';
+  transferOwnerResults: User[] = [];
+  selectedTransferOwner: User | null = null;
+  keepPreviousOwnerAsAdmin = true;
+  isTransferringOwnership = false;
+  ownershipTransferError = '';
+  ownershipTransferMessage = '';
 
   // Invite modal state (designers/evaluators/admins)
   showInviteModal = false;
@@ -164,7 +180,9 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       console.log('the current solution sdgs', this.currentSolution.sdgs);
       // edge case if the solution has no description
       /* ––– load admins once solution arrives ––– */
-      this.admins = this.currentSolution.chosenAdmins ?? [];
+      this.admins = this.solutionAdminsForDisplay(
+        this.currentSolution.chosenAdmins ?? []
+      );
 
       this.newReadMe = this.currentSolution.description || '';
       this.title = this.currentSolution.title || '';
@@ -175,6 +193,9 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
 
     this.auth.getALlUsers().subscribe((users) => {
       this.allUsers = users;
+      if (this.showTransferOwnership) {
+        this.refreshTransferOwnerResults();
+      }
     });
   }
 
@@ -720,8 +741,9 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       if (uid) uids.add(uid);
     });
 
-    if (this.currentSolution.authorAccountId) {
-      uids.add(this.currentSolution.authorAccountId);
+    const owner = solutionOwnerIdentity(this.currentSolution);
+    if (owner?.authorAccountId) {
+      uids.add(owner.authorAccountId);
     }
     (this.currentSolution.chosenAdmins || []).forEach((admin) => {
       if (admin.authorAccountId) uids.add(admin.authorAccountId);
@@ -750,7 +772,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
     (this.currentSolution.chosenAdmins || []).forEach((admin) =>
       addEmail(admin.authorEmail)
     );
-    addEmail(this.currentSolution.authorEmail);
+    addEmail(solutionOwnerIdentity(this.currentSolution)?.authorEmail);
 
     return Array.from(emails);
   }
@@ -782,7 +804,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   }
 
   private normalizeEmail(value: any): string {
-    return String(value || '').trim().toLowerCase();
+    return normalizeSolutionEmail(value);
   }
 
   private getParticipantEmails(): string[] {
@@ -997,33 +1019,192 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
       alert('Enter a valid email!');
     }
   }
-  // get isAuthorOfSolution(): boolean {
-  //   if (this.currentSolution && this.auth.currentUser) {
-  //     return this.currentSolution.authorAccountId === this.auth.currentUser.uid;
-  //   }
-  //   return false;
-  //   // return this.challengePage.authorId === this.auth.currentUser.uid;
-  // }
-
-  /* ––– replace old author-only check ––– */
   get isAdminOfSolution(): boolean {
-    if (!this.currentSolution || !this.auth.currentUser) return false;
-    const uid = this.auth.currentUser.uid;
-    const email = this.normalizeEmail(this.auth.currentUser.email);
+    return isSolutionAdmin(this.currentSolution, this.auth.currentUser);
+  }
+
+  get isCurrentUserOwner(): boolean {
+    return isSolutionOwner(this.currentSolution, this.auth.currentUser);
+  }
+
+  get canViewCreatorManagement(): boolean {
+    return this.isAdminOfSolution;
+  }
+
+  get canTransferOwnership(): boolean {
     return (
-      (!!uid && this.currentSolution.authorAccountId === uid) ||
-      (!!email &&
-        this.normalizeEmail(this.currentSolution.authorEmail) === email) ||
-      (this.currentSolution.chosenAdmins ?? []).some(
-        (a) =>
-          (!!uid && a.authorAccountId === uid) ||
-          (!!email && this.normalizeEmail(a.authorEmail) === email)
-      )
+      this.isCurrentUserOwner ||
+      isPlatformAdminUser(this.auth.currentUser)
+    );
+  }
+
+  get displayedOwner(): Admin | null {
+    const owner = solutionOwnerIdentity(this.currentSolution);
+    if (!owner) return null;
+
+    const user = this.allUsers.find(
+      (candidate) =>
+        candidate.uid === owner.authorAccountId ||
+        this.normalizeEmail(candidate.email) === owner.authorEmail
+    );
+    return {
+      ...owner,
+      authorName:
+        `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
+        owner.authorName,
+      authorProfilePicture:
+        user?.profilePicture || owner.authorProfilePicture,
+    };
+  }
+
+  get displayedCreator(): Admin | null {
+    return solutionCreatorIdentity(this.currentSolution);
+  }
+
+  get ownerAndCreatorDiffer(): boolean {
+    const owner = this.displayedOwner;
+    const creator = this.displayedCreator;
+    if (!owner || !creator) return false;
+    return (
+      owner.authorAccountId !== creator.authorAccountId ||
+      owner.authorEmail !== creator.authorEmail
+    );
+  }
+
+  private solutionAdminsForDisplay(admins: Admin[]): Admin[] {
+    const owner = solutionOwnerIdentity(this.currentSolution);
+    return admins.filter(
+      (admin) =>
+        admin.authorAccountId !== owner?.authorAccountId &&
+        this.normalizeEmail(admin.authorEmail) !== owner?.authorEmail
     );
   }
 
   get canLeaveSolution(): boolean {
     return !this.isAdminOfSolution && this.isCurrentUserParticipant();
+  }
+
+  openTransferOwnershipModal(): void {
+    if (!this.canTransferOwnership || this.isTransferringOwnership) return;
+    this.showTransferOwnership = true;
+    this.transferOwnerQuery = '';
+    this.selectedTransferOwner = null;
+    this.keepPreviousOwnerAsAdmin = true;
+    this.ownershipTransferError = '';
+    this.ownershipTransferMessage = '';
+    this.refreshTransferOwnerResults();
+  }
+
+  closeTransferOwnershipModal(): void {
+    if (this.isTransferringOwnership) return;
+    this.showTransferOwnership = false;
+    this.transferOwnerQuery = '';
+    this.transferOwnerResults = [];
+    this.selectedTransferOwner = null;
+    this.ownershipTransferError = '';
+  }
+
+  onTransferOwnerQueryChange(): void {
+    if (this.selectedTransferOwner) {
+      const selectedLabel = this.transferOwnerLabel(this.selectedTransferOwner);
+      if (this.transferOwnerQuery !== selectedLabel) {
+        this.selectedTransferOwner = null;
+      }
+    }
+    this.refreshTransferOwnerResults();
+  }
+
+  selectTransferOwner(user: User): void {
+    this.selectedTransferOwner = user;
+    this.transferOwnerQuery = this.transferOwnerLabel(user);
+    this.transferOwnerResults = [];
+    this.ownershipTransferError = '';
+  }
+
+  transferOwnerLabel(user: User): string {
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    return fullName ? `${fullName} (${user.email})` : user.email || '';
+  }
+
+  async submitOwnershipTransfer(): Promise<void> {
+    const solutionId = this.currentSolution.solutionId || this.id;
+    if (
+      !solutionId ||
+      !this.selectedTransferOwner ||
+      !this.canTransferOwnership ||
+      this.isTransferringOwnership
+    ) {
+      this.ownershipTransferError =
+        'Select a registered user to become the new creator.';
+      return;
+    }
+
+    this.isTransferringOwnership = true;
+    this.ownershipTransferError = '';
+    try {
+      const newOwnerName = this.transferOwnerLabel(this.selectedTransferOwner);
+      await this.solution.transferSolutionOwnership(
+        solutionId,
+        this.selectedTransferOwner,
+        this.keepPreviousOwnerAsAdmin
+      );
+      this.ownershipTransferMessage = `Creator role transferred to ${newOwnerName}.`;
+      this.isTransferringOwnership = false;
+      this.closeTransferOwnershipModal();
+    } catch (error: any) {
+      console.error('Unable to transfer solution ownership:', error);
+      this.ownershipTransferError =
+        error?.message ||
+        'The creator role could not be transferred. Please try again.';
+    } finally {
+      this.isTransferringOwnership = false;
+    }
+  }
+
+  private refreshTransferOwnerResults(): void {
+    const owner = this.displayedOwner;
+    const query = this.normalizeEmail(this.transferOwnerQuery);
+    const queryWords = query.split(/\s+/).filter(Boolean);
+    const currentAdmins = new Set(
+      (this.currentSolution.chosenAdmins || []).flatMap((admin) => [
+        admin.authorAccountId,
+        this.normalizeEmail(admin.authorEmail),
+      ])
+    );
+
+    this.transferOwnerResults = this.allUsers
+      .filter((user) => {
+        if (!user.uid || !user.email) return false;
+        if (
+          user.uid === owner?.authorAccountId ||
+          this.normalizeEmail(user.email) === owner?.authorEmail
+        ) {
+          return false;
+        }
+        if (!queryWords.length) {
+          return (
+            currentAdmins.has(user.uid) ||
+            currentAdmins.has(this.normalizeEmail(user.email))
+          );
+        }
+        const searchable = this.normalizeEmail(
+          `${user.firstName || ''} ${user.lastName || ''} ${user.email}`
+        );
+        return queryWords.every((word) => searchable.includes(word));
+      })
+      .sort((left, right) => {
+        const leftIsAdmin =
+          currentAdmins.has(left.uid || '') ||
+          currentAdmins.has(this.normalizeEmail(left.email));
+        const rightIsAdmin =
+          currentAdmins.has(right.uid || '') ||
+          currentAdmins.has(this.normalizeEmail(right.email));
+        if (leftIsAdmin !== rightIsAdmin) return leftIsAdmin ? -1 : 1;
+        return this.transferOwnerLabel(left).localeCompare(
+          this.transferOwnerLabel(right)
+        );
+      })
+      .slice(0, 8);
   }
 
   openDeleteSolutionConfirm() {
@@ -1251,7 +1432,7 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
           newAdmin,
         ];
         this.persistAdmins(updated, () => {
-          this.admins = updated;
+          this.admins = this.solutionAdminsForDisplay(updated);
           this.newAdminEmail = '';
           this.toggle('showAddAdmin');
         });
@@ -1259,17 +1440,27 @@ export class SolutionDetailsComponent implements OnInit, OnDestroy {
   }
 
   removeAdminFromSolution(email: string) {
-    const updated = (this.currentSolution.chosenAdmins ?? []).filter(
-      (a) =>
-        a.authorEmail !== email &&
-        a.authorAccountId !== this.currentSolution.authorAccountId // original author is protected
+    const owner = this.displayedOwner;
+    const target = (this.currentSolution.chosenAdmins ?? []).find(
+      (admin) =>
+        this.normalizeEmail(admin.authorEmail) === this.normalizeEmail(email)
     );
-    if (updated.length === (this.currentSolution.chosenAdmins ?? []).length) {
+    if (
+      !target ||
+      target.authorAccountId === owner?.authorAccountId ||
+      this.normalizeEmail(target.authorEmail) === owner?.authorEmail
+    ) {
       alert('Cannot remove this admin');
       return;
     }
+    const updated = (this.currentSolution.chosenAdmins ?? []).filter(
+      (admin) =>
+        admin.authorAccountId !== target.authorAccountId &&
+        this.normalizeEmail(admin.authorEmail) !==
+          this.normalizeEmail(target.authorEmail)
+    );
     this.persistAdmins(updated, () => {
-      this.admins = updated;
+      this.admins = this.solutionAdminsForDisplay(updated);
       this.adminToDelete = '';
       this.toggle('showRemoveAdmin');
     });

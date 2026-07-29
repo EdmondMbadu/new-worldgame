@@ -114,17 +114,15 @@ export const isCommunityVisible = (solution: any): boolean =>
   solution?.isPrivate === false &&
   solution?.communityVisibility !== 'private';
 
-const publicMemberCount = (solution: any): number => {
-  const members = new Set<string>();
+const publicDesignerCount = (solution: any): number => {
+  const designers = new Set<string>();
   const add = (value: unknown) => {
     const normalized = String(value || '').trim().toLowerCase();
-    if (normalized) members.add(normalized);
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
+      designers.add(normalized);
+    }
   };
 
-  add(solution?.authorEmail);
-  if (Array.isArray(solution?.teamMemberEmails)) {
-    solution.teamMemberEmails.forEach(add);
-  }
   if (Array.isArray(solution?.participants)) {
     solution.participants.forEach((entry: any) =>
       add(typeof entry === 'string' ? entry : entry?.name || entry?.email)
@@ -136,7 +134,7 @@ const publicMemberCount = (solution: any): number => {
     });
   }
 
-  return Math.max(1, members.size);
+  return designers.size;
 };
 
 const publicProgress = (solution: any): number => {
@@ -156,6 +154,11 @@ const publicProgress = (solution: any): number => {
   ).length;
   return Math.min(90, Math.max(10, (answers + supporting) * 10));
 };
+
+const publicOwnerName = (solution: any): string =>
+  safePlainText(solution?.ownerName, 160) ||
+  safePlainText(solution?.authorName, 160) ||
+  'Solution team';
 
 export const publicFeedSolution = (
   document: Pick<admin.firestore.DocumentSnapshot, 'id' | 'data'>
@@ -177,7 +180,9 @@ export const publicFeedSolution = (
         solution['content']
     ),
     image: safePublicUrl(solution['image']),
-    authorName: safePlainText(solution['authorName'], 160) || 'Solution team',
+    // Keep the public field name for older clients, but attribute the solution
+    // to its current owner after a handoff.
+    authorName: publicOwnerName(solution),
     finished: solution['finished'] === 'true' ? 'true' : 'false',
     feedStatus:
       solution['feedStatus'] === 'submitted' || solution['finished'] === 'true'
@@ -188,7 +193,9 @@ export const publicFeedSolution = (
       0,
       Number(solution['commentCount'] || solution['comments']?.length || 0)
     ),
-    publicMemberCount: publicMemberCount(solution),
+    publicDesignerCount: publicDesignerCount(solution),
+    // Kept for older clients; its meaning is now designers, not every role.
+    publicMemberCount: publicDesignerCount(solution),
     publicProgress: publicProgress(solution),
   };
 };
@@ -292,7 +299,7 @@ const publicPreviewSolution = (
   title: safePlainText(solution?.title, 240),
   description: safeRichText(solution?.description, PUBLIC_DESCRIPTION_LIMIT),
   image: safePublicUrl(solution?.image),
-  authorName: safePlainText(solution?.authorName, 160) || 'Solution team',
+  authorName: publicOwnerName(solution),
   content: safeRichText(solution?.content),
   strategyReview: safeRichText(solution?.strategyReview),
   status: publicStatus(solution?.status),
@@ -312,7 +319,8 @@ const publicPreviewSolution = (
   numShare: String(Math.max(0, Number(solution?.numShare || 0))),
   tournament: solution?.tournament === 'true' ? 'true' : 'false',
   winner: solution?.winner === 'true' ? 'true' : 'false',
-  publicMemberCount: publicMemberCount(solution),
+  publicDesignerCount: publicDesignerCount(solution),
+  publicMemberCount: publicDesignerCount(solution),
   comments,
   commentCount: Math.max(
     comments.length,

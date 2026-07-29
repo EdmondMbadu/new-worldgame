@@ -9,6 +9,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 import {
   detectSupportedContentLanguage,
   normalizeSupportedContentLanguage,
@@ -441,7 +442,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     this.refreshPreviewContentModel();
     if (
       !publicGuestView &&
-      this.currentSolution.authorEmail === this.auth.currentUser?.email
+      isSolutionOwner(this.currentSolution, this.auth.currentUser)
     ) {
       this.iscreatorOfThisSolution = true;
     }
@@ -463,7 +464,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
       this.evaluators.push(evaluator);
     });
     const memberCount = publicGuestView
-      ? Number(this.currentSolution.publicMemberCount || 1)
+      ? Number(this.currentSolution.publicDesignerCount || 0)
       : this.solutionMemberEmails().length;
     this.etAl = memberCount > 1 ? 'Et al' : '';
     this.comments = Array.isArray(this.currentSolution.comments)
@@ -908,29 +909,29 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
   }
 
   private solutionMemberEmails(): string[] {
-    if (Array.isArray(this.currentSolution.teamMemberEmails)) {
-      return this.currentSolution.teamMemberEmails;
-    }
     const values: any = this.currentSolution.participants;
     const entries = Array.isArray(values)
       ? values
       : values && typeof values === 'object'
       ? Object.values(values)
       : [];
-    return entries
+
+    const emails = entries
       .map((entry: any) =>
         String(
           typeof entry === 'string'
             ? entry
             : entry?.name ||
-                entry?.email ||
-                Object.values(entry || {})[0] ||
-                ''
+              entry?.email ||
+              Object.values(entry || {})[0] ||
+              ''
         )
           .trim()
           .toLowerCase()
       )
       .filter(Boolean);
+
+    return Array.from(new Set(emails));
   }
 
   trackDevelopmentSection(
@@ -1316,6 +1317,13 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
     const solutionEvaluationInvite = this.fns.httpsCallable(
       'solutionEvaluationInvite'
     );
+    const designerNames = this.teamMembers
+      .map((member) => `${member.firstName || ''} ${member.lastName || ''}`.trim())
+      .filter(Boolean);
+    const designerAttribution = designerNames.length
+      ? designerNames.join(', ')
+      : 'Solution team';
+
     // remove duplicate in evaluators
     const evaluatorSet = new Set();
     this.evaluators = this.evaluators.filter((evaluator) => {
@@ -1328,7 +1336,7 @@ export class SolutionPreviewComponent implements OnInit, OnDestroy {
         email: evaluator.name,
         subject: `You have been invited to evaluate the Global Solutions Lab solution: ...`,
         title: this.currentSolution.title,
-        description: `${this.currentSolution.title} by ${this.currentSolution.authorName} ${this.etAl}`,
+        description: `${this.currentSolution.title} by ${designerAttribution}`,
         path: `https://newworld-game.org/problem-feedback/${this.currentSolution.solutionId}`,
         // Include any other data required by your Cloud Function
       };

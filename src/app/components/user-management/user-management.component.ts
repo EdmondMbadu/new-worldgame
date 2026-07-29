@@ -10,6 +10,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataService } from 'src/app/services/data.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
+import { solutionOwnerIdentity } from 'src/app/utils/solution-ownership';
 
 type SolutionEditFilterPreset =
   | 'all'
@@ -2735,7 +2736,7 @@ export class UserManagementComponent implements OnInit {
       }
     };
 
-    addEmail(solution.authorEmail);
+    addEmail(solutionOwnerIdentity(solution)?.authorEmail);
     addCollection((solution as any).participants);
     addCollection((solution as any).participantsHolder);
     addCollection((solution as any).teamMembers);
@@ -3031,8 +3032,10 @@ export class UserManagementComponent implements OnInit {
       const emails = new Set<string>([
         ...this.normalizeParticipantEmails((sol as any).participants),
       ]);
-      const author = this.normalizeEmail((sol as any).authorEmail);
-      if (author) emails.add(author);
+      const owner = this.normalizeEmail(
+        solutionOwnerIdentity(sol)?.authorEmail
+      );
+      if (owner) emails.add(owner);
       emails.forEach((email) => {
         if (!email) return;
         if (!map.has(email)) map.set(email, []);
