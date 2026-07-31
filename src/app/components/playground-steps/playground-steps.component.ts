@@ -3609,7 +3609,7 @@ Infographic requirements:
         spacing: { after: 140 },
         children: [
           new TextRun({
-            text: 'NEWWORLD GAME DRAFT',
+            text: 'GLOBAL SOLUTIONS LAB DRAFT',
             font: 'Arial',
             size: 18,
             bold: true,
@@ -7021,7 +7021,7 @@ INTEGRITY RULES:
       <article class="draft-pdf-document">
         <section class="draft-page draft-cover-page">
           <div class="draft-page-body">
-            <p class="draft-kicker">NEWWORLD GAME DRAFT</p>
+            <p class="draft-kicker">GLOBAL SOLUTIONS LAB DRAFT</p>
             <h1 class="draft-title">${this.escapeHtml(title)}</h1>
             <div class="draft-rule"></div>
             <section class="draft-meta">
