@@ -299,6 +299,9 @@ export class UserManagementComponent implements OnInit {
   weeklyActivityError = '';
   weeklyActivitySubject = '';
   weeklyActivityPreviewHtml = '';
+  weeklyVideoScriptPrompt = '';
+  weeklyVideoScriptPromptCopied = false;
+  weeklyVideoScriptPromptError = '';
   private readonly weeklyActivityWindowDays = 7;
 
   // UI toggle: default = respect unsubscribes (do NOT send to them)
@@ -2171,17 +2174,196 @@ export class UserManagementComponent implements OnInit {
       )
       .slice(0, 12)
       .map((sol) => {
+        const teamMembers = this.solutionTeamMembersForReport(sol);
         return {
           title: String((sol as any).title || 'Untitled').trim() || 'Untitled',
           description: String((sol as any).description || '').trim(),
           solutionArea: String((sol as any).solutionArea || '').trim(),
-          teamMembers: this.solutionTeamMembersForReport(sol),
+          strategyReview: String((sol as any).strategyReview || '').trim(),
+          content: String((sol as any).content || '').trim(),
+          teamMembers,
+          excludedIdentities: [
+            ...teamMembers,
+            String((sol as any).authorName || '').trim(),
+            String((sol as any).ownerName || '').trim(),
+            String((sol as any).authorEmail || '').trim(),
+            String((sol as any).ownerEmail || '').trim(),
+            ...this.normalizeParticipantEmails((sol as any).participants),
+          ].filter(Boolean),
           lastActivityMs: this.solutionSubstantiveEditMs(sol),
           dashboardUrl: `https://newworld-game.org/dashboard/${
             (sol as any).solutionId || ''
           }`,
         };
       });
+  }
+
+  private cleanWeeklyVideoScriptSource(
+    value: unknown,
+    maxLength = 12000
+  ): string {
+    const decoded = String(value || '')
+      .replace(/<br\s*\/?\s*>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '\n- ')
+      .replace(/<\/(p|div|li|h[1-6]|section|article|blockquote)>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;|&#34;/gi, '"')
+      .replace(/&apos;|&#39;/gi, "'")
+      .replace(/&#(\d+);/g, (_match, code) =>
+        String.fromCharCode(Number(code))
+      )
+      .replace(/\r/g, '')
+      .replace(/[ \t]+/g, ' ')
+      .replace(/\n[ \t]+/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    if (decoded.length <= maxLength) return decoded;
+    return `${decoded.slice(0, maxLength).trimEnd()}…`;
+  }
+
+  private redactWeeklyVideoScriptIdentities(
+    value: unknown,
+    excludedIdentities: string[],
+    maxLength: number
+  ): string {
+    let text = this.cleanWeeklyVideoScriptSource(value, maxLength);
+    text = text.replace(
+      /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,
+      '[email omitted]'
+    );
+
+    const identities = Array.from(
+      new Set(
+        excludedIdentities
+          .map((identity) => this.cleanWeeklyVideoScriptSource(identity, 300))
+          .filter((identity) => identity.length >= 3 && !identity.includes('@'))
+      )
+    ).sort((a, b) => b.length - a.length);
+
+    for (const identity of identities) {
+      const escaped = identity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      text = text.replace(new RegExp(escaped, 'gi'), '[team member omitted]');
+    }
+
+    return text;
+  }
+
+  generateWeeklyVideoScriptPrompt() {
+    const metrics = this.weeklyActivityMetrics;
+    const solutions = this.weeklyWorkedSolutionsForReport();
+    const reportingWindow = `${this.formatDateMDY(
+      metrics.windowStartMs
+    )} to ${this.formatDateMDY(metrics.nowMs)}`;
+
+    const solutionSources = solutions.length
+      ? solutions
+          .map((solution, index) => {
+            const title = this.redactWeeklyVideoScriptIdentities(
+              solution.title,
+              solution.excludedIdentities,
+              300
+            );
+            const area = this.redactWeeklyVideoScriptIdentities(
+              solution.solutionArea,
+              solution.excludedIdentities,
+              500
+            );
+            const description = this.redactWeeklyVideoScriptIdentities(
+              solution.description,
+              solution.excludedIdentities,
+              2500
+            );
+            const strategyReview = this.redactWeeklyVideoScriptIdentities(
+              solution.strategyReview,
+              solution.excludedIdentities,
+              12000
+            );
+            const additionalContent = strategyReview
+              ? ''
+              : this.redactWeeklyVideoScriptIdentities(
+                  solution.content,
+                  solution.excludedIdentities,
+                  5000
+                );
+
+            return [
+              `## Solution ${index + 1}: ${title || 'Untitled solution'}`,
+              area ? `Solution area: ${area}` : '',
+              description ? `Description: ${description}` : '',
+              strategyReview
+                ? `Strategy Review:\n${strategyReview}`
+                : additionalContent
+                  ? `Available solution content:\n${additionalContent}`
+                  : 'No narrative content is available for this solution.',
+            ]
+              .filter(Boolean)
+              .join('\n\n');
+          })
+          .join('\n\n---\n\n')
+      : 'No solutions had saved writing activity during this reporting window.';
+
+    this.weeklyVideoScriptPrompt = `Create a complete, ready-to-read presenter script for this week's Global Solutions Lab video intelligence brief.
+
+The presenter is Sofia, an AI colleague. Write in a natural, energetic, warm, and engaging voice that sounds excellent when spoken aloud. Use the supplied solution material as the source of truth and transform it into a cohesive story rather than merely summarizing fields.
+
+PRIVACY AND ACCURACY RULES
+- Do not mention or infer author names, owner names, participant names, team-member names, email addresses, or report recipients.
+- Solution/project titles are allowed and should be used when they make the story clearer.
+- Do not invent facts, statistics, outcomes, partnerships, dates, or claims. If a detail is not supported below, leave it out.
+- Describe proposals as proposals and completed work as completed work. Do not make a developing idea sound already implemented.
+- Focus on the substance of each problem, preferred future, proposed solution, implementation approach, intended impact, and measurable goals.
+
+SCRIPT REQUIREMENTS
+- Output only the finished script in polished Markdown. Do not include planning notes or explain your process.
+- Begin with the title "Global Solutions Lab Weekly Intelligence Brief" and the subtitle "Presented by Sofia."
+- Open with "Hello, everyone! I'm Sofia, your AI colleague..." and welcome viewers to this week's report.
+- Include a short, tasteful, human-sounding moment of humor near the opening, without making light of the problems.
+- Give every supplied solution its own clear section with smooth spoken transitions between sections.
+- For each solution, explain why the challenge matters, what the team is developing, what a better future would look like, and how progress could be measured when the source supports those points.
+- Connect related themes across the solutions and emphasize systems thinking, practical local action, collaboration, and measurable impact.
+- Use short paragraphs, varied sentence length, and occasional one-sentence emphasis so the script is easy for a presenter to deliver.
+- Avoid repetitive openings such as "another team" in every section. Vary the transitions.
+- End with a "One Platform, Many Solutions" synthesis, an invitation to join or invite someone to the Global Solutions Lab Platform, and Sofia's thank-you/sign-off.
+- Aim for roughly 120 to 180 spoken words per solution, plus a concise opening and closing. Prioritize clarity over forcing a specific length.
+
+REPORTING CONTEXT
+- Reporting window: ${reportingWindow}
+- Solutions with saved writing activity: ${solutions.length}
+
+SOURCE MATERIAL
+The source below intentionally excludes people's names and contact information.
+
+${solutionSources}`;
+
+    this.weeklyVideoScriptPromptCopied = false;
+    this.weeklyVideoScriptPromptError = '';
+  }
+
+  async copyWeeklyVideoScriptPrompt() {
+    if (!this.weeklyVideoScriptPrompt) {
+      this.generateWeeklyVideoScriptPrompt();
+    }
+
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error('Clipboard access is not available in this browser.');
+      }
+      await navigator.clipboard.writeText(this.weeklyVideoScriptPrompt);
+      this.weeklyVideoScriptPromptCopied = true;
+      this.weeklyVideoScriptPromptError = '';
+      window.setTimeout(() => {
+        this.weeklyVideoScriptPromptCopied = false;
+      }, 2500);
+    } catch (error: any) {
+      this.weeklyVideoScriptPromptCopied = false;
+      this.weeklyVideoScriptPromptError =
+        error?.message || 'Could not copy the prompt. Select the text and copy it manually.';
+    }
   }
 
   private solutionTeamMembersForReport(solution: Solution): string[] {
@@ -2468,6 +2650,9 @@ export class UserManagementComponent implements OnInit {
     this.weeklyActivityPreviewHtml = this.buildWeeklyActivityReportHtml();
     this.weeklyActivityError = '';
     this.weeklyActivitySent = false;
+    this.weeklyVideoScriptPrompt = '';
+    this.weeklyVideoScriptPromptCopied = false;
+    this.weeklyVideoScriptPromptError = '';
     this.weeklyActivityOpen = true;
   }
 
@@ -2479,6 +2664,9 @@ export class UserManagementComponent implements OnInit {
     this.weeklyActivityPreviewHtml = this.buildWeeklyActivityReportHtml();
     this.weeklyActivitySent = false;
     this.weeklyActivityError = '';
+    this.weeklyVideoScriptPrompt = '';
+    this.weeklyVideoScriptPromptCopied = false;
+    this.weeklyVideoScriptPromptError = '';
   }
 
   async sendWeeklyActivityReport() {
