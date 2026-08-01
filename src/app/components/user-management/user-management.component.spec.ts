@@ -61,4 +61,34 @@ describe('UserManagementComponent', () => {
     );
     expect(component.weeklyVideoScriptPrompt).not.toContain('<h2>');
   });
+
+  it('validates and normalizes labeled intelligence brief links', () => {
+    component.aiInsightsAdditionalLinks = [
+      { label: 'Read the report', url: '' },
+    ];
+    expect(component.aiInsightsAdditionalLinksValidationError()).toBe(
+      'Each link needs a URL.'
+    );
+
+    component.aiInsightsAdditionalLinks = [
+      { label: ' Read the report ', url: 'https://example.com/report' },
+      { label: 'Duplicate', url: 'https://example.com/report' },
+    ];
+    expect(component.aiInsightsAdditionalLinksValidationError()).toBe(
+      'Remove duplicate link URLs before saving.'
+    );
+
+    component.aiInsightsAdditionalLinks = [
+      { label: ' Read the report ', url: 'https://example.com/report' },
+    ];
+    expect(component.aiInsightsAdditionalLinksValidationError()).toBe('');
+    expect(component.hasUnsavedAIInsightsAdditionalLinks()).toBeTrue();
+    expect(
+      (component as any).normalizeAIInsightsAdditionalLinks(
+        component.aiInsightsAdditionalLinks
+      )
+    ).toEqual([
+      { label: 'Read the report', url: 'https://example.com/report' },
+    ]);
+  });
 });

@@ -54,6 +54,11 @@ type AIInsightsBulkCriteria =
   | 'second_recent'
   | 'random';
 
+type AIInsightsBriefLink = {
+  label: string;
+  url: string;
+};
+
 type WeeklyAutomationKey =
   | 'weeklyReminder'
   | 'weeklyActivity'
@@ -87,6 +92,7 @@ type WeeklyAutomationSchedule = {
   includeUnsubscribed?: boolean;
   excludeEmails?: string[];
   videoSummaryUrl?: string;
+  additionalLinks?: AIInsightsBriefLink[];
   lastRunAt?: any;
   lastRunStatus?: WeeklyAutomationStatus;
   lastRunSummary?: string;
@@ -260,6 +266,12 @@ export class UserManagementComponent implements OnInit {
   aiInsightsVideoSummarySaving = false;
   aiInsightsVideoSummaryMessage = '';
   aiInsightsVideoSummaryError = '';
+  aiInsightsAdditionalLinks: AIInsightsBriefLink[] = [];
+  aiInsightsSavedAdditionalLinks: AIInsightsBriefLink[] = [];
+  aiInsightsAdditionalLinksSaving = false;
+  aiInsightsAdditionalLinksMessage = '';
+  aiInsightsAdditionalLinksError = '';
+  readonly aiInsightsAdditionalLinksLimit = 6;
   aiInsightsBulkStats = {
     totalParticipants: 0,
     noSolutions: 0,
@@ -498,6 +510,7 @@ export class UserManagementComponent implements OnInit {
         includeUnsubscribed: false,
         excludeEmails: [],
         videoSummaryUrl: '',
+        additionalLinks: [],
         lastRunStatus: 'idle',
         lastRunSummary: '',
         lastError: '',
@@ -575,6 +588,158 @@ export class UserManagementComponent implements OnInit {
   isValidAIInsightsVideoUrl(value: unknown): boolean {
     const raw = String(value || '').trim();
     return !raw || Boolean(this.normalizeAIInsightsVideoUrl(raw));
+  }
+
+  private normalizeAIInsightsAdditionalLinks(
+    input: unknown
+  ): AIInsightsBriefLink[] {
+    if (!Array.isArray(input)) return [];
+
+    const links: AIInsightsBriefLink[] = [];
+    const seenUrls = new Set<string>();
+    for (const item of input.slice(0, this.aiInsightsAdditionalLinksLimit)) {
+      const label = String(item?.label || '').trim().slice(0, 100);
+      const url = this.normalizeAIInsightsVideoUrl(item?.url);
+      if (!label || !url || seenUrls.has(url)) continue;
+      seenUrls.add(url);
+      links.push({ label, url });
+    }
+    return links;
+  }
+
+  private comparableAIInsightsAdditionalLinks(
+    input: unknown
+  ): AIInsightsBriefLink[] {
+    if (!Array.isArray(input)) return [];
+    return input.map((item) => ({
+      label: String(item?.label || '').trim(),
+      url: String(item?.url || '').trim(),
+    }));
+  }
+
+  aiInsightsAdditionalLinksValidationError(): string {
+    if (this.aiInsightsAdditionalLinks.length > this.aiInsightsAdditionalLinksLimit) {
+      return `Add no more than ${this.aiInsightsAdditionalLinksLimit} links.`;
+    }
+
+    const nonEmptyRows = this.aiInsightsAdditionalLinks.filter(
+      (link) => String(link.label || '').trim() || String(link.url || '').trim()
+    );
+    for (const link of nonEmptyRows) {
+      if (!String(link.label || '').trim()) return 'Each link needs a label.';
+      if (!String(link.url || '').trim()) return 'Each link needs a URL.';
+      if (!this.normalizeAIInsightsVideoUrl(link.url)) {
+        return 'Each link URL must begin with http or https.';
+      }
+    }
+
+    const normalizedUrls = nonEmptyRows.map((link) =>
+      this.normalizeAIInsightsVideoUrl(link.url)
+    );
+    if (new Set(normalizedUrls).size !== normalizedUrls.length) {
+      return 'Remove duplicate link URLs before saving.';
+    }
+
+    return '';
+  }
+
+  hasUnsavedAIInsightsAdditionalLinks(): boolean {
+    return (
+      JSON.stringify(
+        this.comparableAIInsightsAdditionalLinks(this.aiInsightsAdditionalLinks)
+      ) !== JSON.stringify(this.aiInsightsSavedAdditionalLinks)
+    );
+  }
+
+  addAIInsightsAdditionalLink(): void {
+    if (this.aiInsightsAdditionalLinks.length >= this.aiInsightsAdditionalLinksLimit) {
+      return;
+    }
+    this.aiInsightsAdditionalLinks = [
+      ...this.aiInsightsAdditionalLinks,
+      { label: '', url: '' },
+    ];
+    this.clearAIInsightsAdditionalLinksStatus();
+  }
+
+  removeAIInsightsAdditionalLink(index: number): void {
+    this.aiInsightsAdditionalLinks = this.aiInsightsAdditionalLinks.filter(
+      (_link, linkIndex) => linkIndex !== index
+    );
+    this.clearAIInsightsAdditionalLinksStatus();
+  }
+
+  clearAIInsightsAdditionalLinksStatus(): void {
+    this.aiInsightsAdditionalLinksMessage = '';
+    this.aiInsightsAdditionalLinksError = '';
+  }
+
+  async saveAIInsightsAdditionalLinks(): Promise<void> {
+    if (this.aiInsightsAdditionalLinksSaving) return;
+    const validationError = this.aiInsightsAdditionalLinksValidationError();
+    if (validationError) {
+      this.aiInsightsAdditionalLinksError = validationError;
+      return;
+    }
+    await this.persistAIInsightsAdditionalLinks(
+      this.normalizeAIInsightsAdditionalLinks(this.aiInsightsAdditionalLinks)
+    );
+  }
+
+  async clearAIInsightsAdditionalLinks(): Promise<void> {
+    if (this.aiInsightsAdditionalLinksSaving) return;
+    this.aiInsightsAdditionalLinks = [];
+    await this.persistAIInsightsAdditionalLinks([]);
+  }
+
+  private async persistAIInsightsAdditionalLinks(
+    additionalLinks: AIInsightsBriefLink[]
+  ): Promise<void> {
+    this.aiInsightsAdditionalLinksSaving = true;
+    this.clearAIInsightsAdditionalLinksStatus();
+
+    try {
+      const aiInsightsBrief = {
+        ...this.weeklyAutomationConfig.aiInsightsBrief,
+        additionalLinks,
+      };
+      const authorName = `${this.auth.currentUser?.firstName || ''} ${
+        this.auth.currentUser?.lastName || ''
+      }`.trim();
+      const payload = this.stripUndefinedDeep({
+        aiInsightsBrief,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedBy: {
+          uid: this.auth.currentUser?.uid || '',
+          email: this.normalizeEmail(this.auth.currentUser?.email),
+          name: authorName || this.normalizeEmail(this.auth.currentUser?.email),
+        },
+      });
+
+      await this.afs
+        .doc(this.weeklyEmailAutomationDocPath)
+        .set(payload, { merge: true });
+
+      this.weeklyAutomationConfig = {
+        ...this.weeklyAutomationConfig,
+        aiInsightsBrief,
+      };
+      this.aiInsightsAdditionalLinks = additionalLinks.map((link) => ({
+        ...link,
+      }));
+      this.aiInsightsSavedAdditionalLinks = additionalLinks.map((link) => ({
+        ...link,
+      }));
+      this.aiInsightsAdditionalLinksMessage = additionalLinks.length
+        ? `${additionalLinks.length} additional link${additionalLinks.length === 1 ? '' : 's'} saved for weekly intelligence briefs.`
+        : 'Additional links cleared. Future briefs will not include them.';
+    } catch (error) {
+      console.error('Unable to save intelligence brief links', error);
+      this.aiInsightsAdditionalLinksError =
+        'Unable to save the additional links right now.';
+    } finally {
+      this.aiInsightsAdditionalLinksSaving = false;
+    }
   }
 
   hasUnsavedAIInsightsVideoUrl(): boolean {
@@ -693,6 +858,10 @@ export class UserManagementComponent implements OnInit {
         defaults.videoSummaryUrl !== undefined
           ? this.normalizeAIInsightsVideoUrl(raw?.videoSummaryUrl)
           : undefined,
+      additionalLinks:
+        defaults.additionalLinks !== undefined
+          ? this.normalizeAIInsightsAdditionalLinks(raw?.additionalLinks)
+          : undefined,
       lastRunStatus:
         raw?.lastRunStatus === 'running' ||
         raw?.lastRunStatus === 'success' ||
@@ -756,6 +925,12 @@ export class UserManagementComponent implements OnInit {
             this.weeklyAutomationConfig.aiInsightsBrief.videoSummaryUrl || '';
           this.aiInsightsVideoSummaryUrl =
             this.aiInsightsSavedVideoSummaryUrl;
+          this.aiInsightsSavedAdditionalLinks = (
+            this.weeklyAutomationConfig.aiInsightsBrief.additionalLinks || []
+          ).map((link) => ({ ...link }));
+          this.aiInsightsAdditionalLinks = this.aiInsightsSavedAdditionalLinks.map(
+            (link) => ({ ...link })
+          );
           this.automationLoading = false;
         },
         error: (error) => {
@@ -837,6 +1012,14 @@ export class UserManagementComponent implements OnInit {
       !this.isValidAIInsightsVideoUrl(intelligenceBrief.videoSummaryUrl)
     ) {
       return 'Enter a valid http or https video summary link for the intelligence brief.';
+    }
+
+    if (this.aiInsightsAdditionalLinksValidationError()) {
+      return this.aiInsightsAdditionalLinksValidationError();
+    }
+
+    if (this.hasUnsavedAIInsightsAdditionalLinks()) {
+      return 'Save or clear the additional intelligence brief links before saving automation settings.';
     }
 
     return '';
@@ -1003,6 +1186,12 @@ export class UserManagementComponent implements OnInit {
     this.aiInsightsBulkExcludeEmails = (schedule.excludeEmails || []).join('\n');
     this.aiInsightsVideoSummaryUrl = schedule.videoSummaryUrl || '';
     this.aiInsightsSavedVideoSummaryUrl = schedule.videoSummaryUrl || '';
+    this.aiInsightsSavedAdditionalLinks = (schedule.additionalLinks || []).map(
+      (link) => ({ ...link })
+    );
+    this.aiInsightsAdditionalLinks = this.aiInsightsSavedAdditionalLinks.map(
+      (link) => ({ ...link })
+    );
     this.buildBulkAIInsightsList();
     this.weeklyAutomationSectionOpen = true;
     this.automationSaveMessage =
@@ -3162,7 +3351,13 @@ ${solutionSources}`;
         'Save or clear the weekly video summary link before sending.';
       return;
     }
+    if (this.hasUnsavedAIInsightsAdditionalLinks()) {
+      this.aiInsightsError =
+        'Save or clear the additional links before sending.';
+      return;
+    }
     const videoSummaryUrl = this.aiInsightsSavedVideoSummaryUrl;
+    const additionalLinks = this.aiInsightsSavedAdditionalLinks;
 
     const user = this.aiInsightsSelectedUserData.user;
     const solution = this.aiInsightsSelectedSolution;
@@ -3185,6 +3380,7 @@ ${solutionSources}`;
           meetLink: solution.meetLink || '',
           solutionImage: solution.image || '',
           videoSummaryUrl,
+          additionalLinks,
           teamMembers: this.buildAIInsightsTeamMembers(solution),
         })
       );
@@ -3415,7 +3611,14 @@ ${solutionSources}`;
       this.aiInsightsBulkSending = false;
       return;
     }
+    if (this.hasUnsavedAIInsightsAdditionalLinks()) {
+      this.aiInsightsBulkError =
+        'Save or clear the additional links before sending.';
+      this.aiInsightsBulkSending = false;
+      return;
+    }
     const videoSummaryUrl = this.aiInsightsSavedVideoSummaryUrl;
+    const additionalLinks = this.aiInsightsSavedAdditionalLinks;
 
     try {
       const payload = this.aiInsightsBulkSelections.map((item) => {
@@ -3431,6 +3634,7 @@ ${solutionSources}`;
           meetLink: sol.meetLink || '',
           solutionImage: sol.image || '',
           videoSummaryUrl,
+          additionalLinks,
         };
       });
 

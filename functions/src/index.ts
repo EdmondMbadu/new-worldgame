@@ -173,6 +173,7 @@ type AutomationScheduleConfig = {
   includeUnsubscribed?: boolean;
   excludeEmails?: string[];
   videoSummaryUrl?: string;
+  additionalLinks?: AIInsightsBriefLink[];
   lastRunAt?: any;
   lastRunStatus?: string;
   lastRunSummary?: string;
@@ -1771,6 +1772,11 @@ type AIInsightsJoinOpportunity = {
   focusArea?: string;
 };
 
+type AIInsightsBriefLink = {
+  label: string;
+  url: string;
+};
+
 type AIInsightsPayload = {
   userEmail: string;
   userFirstName: string;
@@ -1782,6 +1788,7 @@ type AIInsightsPayload = {
   meetLink?: string;
   solutionImage?: string;
   videoSummaryUrl?: string;
+  additionalLinks?: AIInsightsBriefLink[];
   teamMembers?: AIInsightsTeamMember[];
   joinOpportunities?: AIInsightsJoinOpportunity[];
 };
@@ -3177,6 +3184,50 @@ const buildAIInsightsEmailFromCache = (
       `
     : '';
 
+  const additionalLinks = Array.isArray(data.additionalLinks)
+    ? data.additionalLinks
+        .map((item) => ({
+          label: String(item?.label || '').trim().slice(0, 100),
+          url: safeHttpUrl(item?.url),
+        }))
+        .filter((item) => item.label && item.url)
+        .filter(
+          (item, index, all) =>
+            all.findIndex((candidate) => candidate.url === item.url) === index
+        )
+        .slice(0, 6)
+    : [];
+
+  const additionalLinksRows = additionalLinks
+    .map(
+      (item) => `
+        <tr>
+          <td style="padding:0 0 10px;">
+            <a href="${item.url}" style="display:block;background-color:#ffffff;color:#312e81;text-decoration:none;padding:15px 17px;font-size:14px;line-height:1.45;font-weight:700;border:1px solid #c7d2fe;border-radius:12px;">
+              ${escapeHtml(item.label)}
+              <span style="float:right;color:#6366f1;font-size:18px;line-height:18px;">&#8594;</span>
+            </a>
+          </td>
+        </tr>
+      `
+    )
+    .join('');
+
+  const additionalLinksSection = additionalLinks.length
+    ? `
+          <tr>
+            <td style="padding:30px 24px 22px;background-color:#eef2ff;border-top:1px solid #c7d2fe;">
+              <p style="margin:0 0 7px;font-size:11px;color:#4f46e5;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;">Explore more</p>
+              <h3 style="margin:0 0 8px;font-size:22px;line-height:1.3;font-weight:400;color:#111827;font-family:Georgia,'Times New Roman',serif;">More from Global Solutions Lab</h3>
+              <p style="margin:0 0 18px;font-size:14px;line-height:1.65;color:#4b5563;">Useful resources and next steps selected for this week's brief.</p>
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                ${additionalLinksRows}
+              </table>
+            </td>
+          </tr>
+      `
+    : '';
+
   const safeUrl = (value: unknown): string => {
     const raw = String(value || '').trim();
     if (!raw) return '';
@@ -3542,6 +3593,9 @@ const buildAIInsightsEmailFromCache = (
               </table>
             </td>
           </tr>
+
+          <!-- Additional Links -->
+          ${additionalLinksSection}
 
           <!-- Footer -->
           <tr>
@@ -4207,6 +4261,15 @@ function buildAIInsightsAutomationRecipients(data: {
       ),
       solutionImage: String(picked.solution.image || ''),
       videoSummaryUrl: String(data.schedule.videoSummaryUrl || '').trim(),
+      additionalLinks: Array.isArray(data.schedule.additionalLinks)
+        ? data.schedule.additionalLinks
+            .map((item: any) => ({
+              label: String(item?.label || '').trim(),
+              url: String(item?.url || '').trim(),
+            }))
+            .filter((item: AIInsightsBriefLink) => item.label && item.url)
+            .slice(0, 6)
+        : [],
     });
   }
 
