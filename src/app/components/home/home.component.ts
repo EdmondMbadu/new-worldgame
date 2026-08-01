@@ -3,7 +3,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { TranslateService } from '@ngx-translate/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import { Solution } from 'src/app/models/solution';
@@ -18,6 +18,10 @@ import {
 } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 import { solutionOwnerIdentity } from 'src/app/utils/solution-ownership';
+import {
+  mergeDiscoverSolutionsFirst,
+  rankCommunitySolutions,
+} from 'src/app/utils/community-solution-ranking';
 
 @Component({
     selector: 'app-home',
@@ -65,6 +69,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   communitySolutionsError = '';
   hasMoreCommunitySolutions = false;
   private communityCursor: any = null;
+  private discoverSolutionIds = new Set<string>();
   private readonly communityPageSize = 20;
 
   // (optional) simple cache hit to prevent flashing loader if we already have data for that category
@@ -306,19 +311,35 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const page = await this.solution.getCommunitySolutionsPage(
-        this.communityFilter,
-        this.communityPageSize,
-        this.communityCursor
-      );
+      const [page, discoverSolutions] = await Promise.all([
+        this.solution.getCommunitySolutionsPage(
+          this.communityFilter,
+          this.communityPageSize,
+          this.communityCursor
+        ),
+        reset && this.communityFilter !== 'in-development'
+          ? firstValueFrom(this.solution.getHomePageSolutions().pipe(take(1)))
+          : Promise.resolve([] as Solution[]),
+      ]);
       this.communityCursor = page.cursor;
       if (reset) {
-        this.communitySolutions = this.rankCommunitySolutions(page.solutions);
+        const featured = discoverSolutions.map((solution) =>
+          this.prepareDiscoverSolutionCard(solution)
+        );
+        this.discoverSolutionIds = new Set(
+          featured
+            .map((solution) => solution.solutionId)
+            .filter((id): id is string => Boolean(id))
+        );
+        this.communitySolutions = mergeDiscoverSolutionsFirst(
+          featured,
+          page.solutions
+        );
       } else {
         const existingIds = new Set(
           this.communitySolutions.map((item) => item.solutionId)
         );
-        const nextPage = this.rankCommunitySolutions(
+        const nextPage = rankCommunitySolutions(
           page.solutions.filter(
             (item) => item.solutionId && !existingIds.has(item.solutionId)
           )
@@ -345,10 +366,15 @@ export class HomeComponent implements OnInit, OnDestroy {
       'communitySolutionsScroll',
       String(window.scrollY || 0)
     );
-    void this.router.navigate(['/solution-preview', solution.solutionId], {
+    const route = this.discoverSolutionIds.has(solution.solutionId)
+      ? '/solution-view'
+      : '/solution-preview';
+    void this.router.navigate([route, solution.solutionId], {
       queryParams: {
         returnTo: this.router.url,
-        from: 'community',
+        from: this.discoverSolutionIds.has(solution.solutionId)
+          ? 'discover'
+          : 'community',
       },
     });
   }
@@ -454,6 +480,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     return new Set(emails).size;
   }
 
+  private prepareDiscoverSolutionCard(solution: Solution): Solution {
+    return {
+      ...solution,
+      finished: 'true',
+      feedStatus: 'submitted',
+      publicProgress: 100,
+      publicDesignerCount: this.designerCountFromParticipants(solution),
+      commentCount: Math.max(
+        Number(solution.commentCount || 0),
+        solution.comments?.length || 0
+      ),
+    };
+  }
+
   communityInitials(solution: Solution): string {
     const name = String(
       solution.authorName || solution.title || 'Solution team'
@@ -516,59 +556,6 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   trackCommunitySolution(index: number, solution: Solution): string {
     return solution.solutionId || String(index);
-  }
-
-  private rankCommunitySolutions(solutions: Solution[]): Solution[] {
-    const unique = Array.from(
-      new Map(
-        solutions
-          .filter((item) => item.solutionId)
-          .map((item) => [item.solutionId, item])
-      ).values()
-    );
-    const scored = unique.sort((a, b) => {
-      const score = (solution: Solution) => {
-        const raw =
-          solution.feedUpdatedAt ||
-          solution.lastSubstantiveEditAt ||
-          solution.updatedAt;
-        const time = raw?.toMillis?.() || raw?.toDate?.()?.getTime?.() || 0;
-        const needsFirstResponse =
-          Number(solution.commentCount || solution.comments?.length || 0) === 0;
-        return time + (needsFirstResponse ? 6 * 60 * 60 * 1000 : 0);
-      };
-      return score(b) - score(a);
-    });
-
-    const output: Solution[] = [];
-    const remaining = [...scored];
-    while (remaining.length) {
-      const previousOwners = output
-        .slice(-2)
-        .map(
-          (item) =>
-            item.ownerAccountId ||
-            item.ownerEmail ||
-            item.authorAccountId ||
-            item.authorEmail ||
-            ''
-        );
-      const index = remaining.findIndex(
-        (item) =>
-          !previousOwners.length ||
-          !previousOwners.every(
-            (owner) =>
-              owner ===
-              (item.ownerAccountId ||
-                item.ownerEmail ||
-                item.authorAccountId ||
-                item.authorEmail ||
-                '')
-          )
-      );
-      output.push(remaining.splice(index >= 0 ? index : 0, 1)[0]);
-    }
-    return output;
   }
 
   private restoreCommunityScroll(): void {

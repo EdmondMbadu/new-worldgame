@@ -130,7 +130,7 @@
           class="community-card-grid"
         >
           <article
-            *ngFor="let item of communitySolutions; trackBy: trackCommunitySolution"
+            *ngFor="let item of communitySolutions; let communityIndex = index; trackBy: trackCommunitySolution"
             class="community-card"
             (click)="openCommunitySolution(item)"
             (keydown.enter)="openCommunitySolution(item)"
@@ -152,7 +152,8 @@
                 *ngIf="item.image; else communityImageFallback"
                 [src]="item.image"
                 [alt]="(item.title || ('home.community.defaultSolutionTitle' | translate)) + ' — ' + ('home.community.previewImage' | translate)"
-                loading="lazy"
+                [attr.loading]="communityIndex === 0 ? 'eager' : 'lazy'"
+                [attr.fetchpriority]="communityIndex === 0 ? 'high' : 'auto'"
                 decoding="async"
                 (error)="handleCommunityImageError($event)"
               />

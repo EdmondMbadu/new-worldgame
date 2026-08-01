@@ -663,19 +663,32 @@ export class SolutionService {
       .collectionGroup<Solution>('solutions', (ref) =>
         ref.where('tournament', '==', 'true')
       )
-      .valueChanges();
+      .valueChanges({ idField: 'solutionId' });
 
     const emailSolutions$ = this.afs
       .collectionGroup<Solution>('solutions', (ref) =>
         ref.where('authorEmail', '==', 'globalsollab@gmail.com')
       )
-      .valueChanges();
+      .valueChanges({ idField: 'solutionId' });
 
     return combineLatest([tournamentSolutions$, emailSolutions$]).pipe(
-      map(([tournamentSolutions, emailSolutions]) => [
-        ...tournamentSolutions,
-        ...emailSolutions,
-      ]),
+      map(([tournamentSolutions, emailSolutions]) => {
+        const unique = Array.from(
+          new Map(
+            [...tournamentSolutions, ...emailSolutions]
+              .filter(
+                (solution) =>
+                  solution.finished === 'true' && solution.solutionId
+              )
+              .map((solution) => [solution.solutionId, solution])
+          ).values()
+        );
+        return unique.sort((a, b) => {
+          const likes = (solution: Solution) =>
+            Number.parseInt(solution.numLike || '0', 10) || 0;
+          return likes(b) - likes(a);
+        });
+      }),
       catchError((error) => {
         console.error('Unable to load Discover solutions.', error);
         return of([] as Solution[]);
