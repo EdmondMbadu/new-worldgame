@@ -11,12 +11,25 @@ const solutionActivityScore = (solution: Solution): number => {
   return time + (needsFirstResponse ? 6 * 60 * 60 * 1000 : 0);
 };
 
-const solutionOwnerKey = (solution: Solution): string =>
-  solution.ownerAccountId ||
-  solution.ownerEmail ||
-  solution.authorAccountId ||
-  solution.authorEmail ||
-  '';
+const normalizedIdentity = (value: unknown): string =>
+  String(value || '').trim().toLowerCase();
+
+const solutionOwnerKey = (solution: Solution): string => {
+  const accountId = normalizedIdentity(
+    solution.ownerAccountId || solution.authorAccountId
+  );
+  if (accountId) return `account:${accountId}`;
+
+  const email = normalizedIdentity(
+    solution.ownerEmail || solution.authorEmail
+  );
+  if (email) return `email:${email}`;
+
+  const displayName = normalizedIdentity(
+    solution.ownerName || solution.authorName
+  );
+  return displayName ? `name:${displayName}` : '';
+};
 
 export const communitySolutionTitleKey = (solution: Solution): string =>
   String(solution.title || '')
@@ -24,18 +37,27 @@ export const communitySolutionTitleKey = (solution: Solution): string =>
     .replace(/\s+/g, ' ')
     .toLowerCase();
 
+export const communitySolutionDuplicateKey = (solution: Solution): string => {
+  const ownerKey = solutionOwnerKey(solution);
+  const titleKey = communitySolutionTitleKey(solution);
+  return ownerKey && titleKey ? `${ownerKey}\u0000${titleKey}` : '';
+};
+
 const uniqueSolutionsInOrder = (solutions: Solution[]): Solution[] => {
   const seenIds = new Set<string>();
-  const seenTitles = new Set<string>();
+  const seenDuplicates = new Set<string>();
 
   return solutions.filter((solution) => {
     const id = solution.solutionId || '';
-    const titleKey = communitySolutionTitleKey(solution);
-    if ((id && seenIds.has(id)) || (titleKey && seenTitles.has(titleKey))) {
+    const duplicateKey = communitySolutionDuplicateKey(solution);
+    if (
+      (id && seenIds.has(id)) ||
+      (duplicateKey && seenDuplicates.has(duplicateKey))
+    ) {
       return false;
     }
     if (id) seenIds.add(id);
-    if (titleKey) seenTitles.add(titleKey);
+    if (duplicateKey) seenDuplicates.add(duplicateKey);
     return true;
   });
 };
@@ -78,18 +100,18 @@ export const mergeDiscoverSolutionsFirst = (
     )
   );
   const featuredIds = new Set(featured.map((solution) => solution.solutionId));
-  const featuredTitles = new Set(
-    featured.map(communitySolutionTitleKey).filter(Boolean)
+  const featuredDuplicates = new Set(
+    featured.map(communitySolutionDuplicateKey).filter(Boolean)
   );
 
   return [
     ...featured,
     ...rankCommunitySolutions(
       communitySolutions.filter((solution) => {
-        const titleKey = communitySolutionTitleKey(solution);
+        const duplicateKey = communitySolutionDuplicateKey(solution);
         return (
           !featuredIds.has(solution.solutionId) &&
-          (!titleKey || !featuredTitles.has(titleKey))
+          (!duplicateKey || !featuredDuplicates.has(duplicateKey))
         );
       })
     ),
@@ -103,15 +125,15 @@ export const appendUniqueCommunitySolutions = (
   const existingIds = new Set(
     existingSolutions.map((solution) => solution.solutionId).filter(Boolean)
   );
-  const existingTitles = new Set(
-    existingSolutions.map(communitySolutionTitleKey).filter(Boolean)
+  const existingDuplicates = new Set(
+    existingSolutions.map(communitySolutionDuplicateKey).filter(Boolean)
   );
   const unseenSolutions = incomingSolutions.filter((solution) => {
-    const titleKey = communitySolutionTitleKey(solution);
+    const duplicateKey = communitySolutionDuplicateKey(solution);
     return (
       Boolean(solution.solutionId) &&
       !existingIds.has(solution.solutionId) &&
-      (!titleKey || !existingTitles.has(titleKey))
+      (!duplicateKey || !existingDuplicates.has(duplicateKey))
     );
   });
 

@@ -52,10 +52,32 @@ describe('rankCommunitySolutions', () => {
     ]);
   });
 
-  it('keeps only the most active card when different solutions have the same title', () => {
-    const older = solution('older', 1000);
+  it('allows different owners to use the same title', () => {
+    const firstOwner = solution('first-owner', 1000, false, 'one@example.com');
+    delete firstOwner.ownerEmail;
+    firstOwner.authorName = 'Alex Rivera';
+    firstOwner.title = 'Adapting to a Changing World: Building Resilient Communities';
+    const secondOwner = solution('second-owner', 3000, false, 'two@example.com');
+    delete secondOwner.ownerEmail;
+    secondOwner.authorName = 'Jordan Lee';
+    secondOwner.title = '  ADAPTING to a Changing World:   Building Resilient Communities  ';
+
+    const ranked = rankCommunitySolutions([firstOwner, secondOwner]);
+
+    expect(ranked.map((item) => item.solutionId)).toEqual([
+      'second-owner',
+      'first-owner',
+    ]);
+  });
+
+  it('keeps only the most active card when the same owner repeats a title', () => {
+    const older = solution('older', 1000, false, 'same@example.com');
+    delete older.ownerEmail;
+    older.authorName = 'Kylie Brown';
     older.title = 'Adapting to a Changing World: Building Resilient Communities';
-    const newer = solution('newer', 3000);
+    const newer = solution('newer', 3000, false, 'same@example.com');
+    delete newer.ownerEmail;
+    newer.authorName = 'Kylie Brown';
     newer.title = '  ADAPTING to a Changing World:   Building Resilient Communities  ';
 
     const ranked = rankCommunitySolutions([
@@ -71,9 +93,14 @@ describe('rankCommunitySolutions', () => {
   });
 
   it('prefers a Discover card over a community card with the same title', () => {
-    const featured = solution('featured', 1000, true);
+    const featured = solution('featured', 1000, true, 'same@example.com');
     featured.title = 'One shared title';
-    const communityDuplicate = solution('community-copy', 3000);
+    const communityDuplicate = solution(
+      'community-copy',
+      3000,
+      false,
+      'same@example.com'
+    );
     communityDuplicate.title = 'One shared title';
 
     const merged = mergeDiscoverSolutionsFirst(
@@ -88,9 +115,14 @@ describe('rankCommunitySolutions', () => {
   });
 
   it('does not reintroduce a duplicate title from a later page', () => {
-    const existing = solution('first-page', 3000);
+    const existing = solution('first-page', 3000, false, 'same@example.com');
     existing.title = 'Existing solution';
-    const duplicate = solution('later-page-copy', 2000);
+    const duplicate = solution(
+      'later-page-copy',
+      2000,
+      false,
+      'same@example.com'
+    );
     duplicate.title = ' existing   solution ';
     const newSolution = solution('later-page-new', 1000);
     newSolution.title = 'A genuinely new solution';
