@@ -1,5 +1,6 @@
 import { Solution } from '../models/solution';
 import {
+  appendUniqueCommunitySolutions,
   mergeDiscoverSolutionsFirst,
   rankCommunitySolutions,
 } from './community-solution-ranking';
@@ -48,6 +49,60 @@ describe('rankCommunitySolutions', () => {
       'community-a',
       'community-c',
       'community-b',
+    ]);
+  });
+
+  it('keeps only the most active card when different solutions have the same title', () => {
+    const older = solution('older', 1000);
+    older.title = 'Adapting to a Changing World: Building Resilient Communities';
+    const newer = solution('newer', 3000);
+    newer.title = '  ADAPTING to a Changing World:   Building Resilient Communities  ';
+
+    const ranked = rankCommunitySolutions([
+      older,
+      newer,
+      solution('different', 2000),
+    ]);
+
+    expect(ranked.map((item) => item.solutionId)).toEqual([
+      'newer',
+      'different',
+    ]);
+  });
+
+  it('prefers a Discover card over a community card with the same title', () => {
+    const featured = solution('featured', 1000, true);
+    featured.title = 'One shared title';
+    const communityDuplicate = solution('community-copy', 3000);
+    communityDuplicate.title = 'One shared title';
+
+    const merged = mergeDiscoverSolutionsFirst(
+      [featured],
+      [communityDuplicate, solution('different', 2000)]
+    );
+
+    expect(merged.map((item) => item.solutionId)).toEqual([
+      'featured',
+      'different',
+    ]);
+  });
+
+  it('does not reintroduce a duplicate title from a later page', () => {
+    const existing = solution('first-page', 3000);
+    existing.title = 'Existing solution';
+    const duplicate = solution('later-page-copy', 2000);
+    duplicate.title = ' existing   solution ';
+    const newSolution = solution('later-page-new', 1000);
+    newSolution.title = 'A genuinely new solution';
+
+    const merged = appendUniqueCommunitySolutions(
+      [existing],
+      [duplicate, newSolution]
+    );
+
+    expect(merged.map((item) => item.solutionId)).toEqual([
+      'first-page',
+      'later-page-new',
     ]);
   });
 });

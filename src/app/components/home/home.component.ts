@@ -19,8 +19,8 @@ import {
 import { TimeService } from 'src/app/services/time.service';
 import { solutionOwnerIdentity } from 'src/app/utils/solution-ownership';
 import {
+  appendUniqueCommunitySolutions,
   mergeDiscoverSolutionsFirst,
-  rankCommunitySolutions,
 } from 'src/app/utils/community-solution-ranking';
 
 @Component({
@@ -336,15 +336,10 @@ export class HomeComponent implements OnInit, OnDestroy {
           page.solutions
         );
       } else {
-        const existingIds = new Set(
-          this.communitySolutions.map((item) => item.solutionId)
+        this.communitySolutions = appendUniqueCommunitySolutions(
+          this.communitySolutions,
+          page.solutions
         );
-        const nextPage = rankCommunitySolutions(
-          page.solutions.filter(
-            (item) => item.solutionId && !existingIds.has(item.solutionId)
-          )
-        );
-        this.communitySolutions = [...this.communitySolutions, ...nextPage];
       }
       this.mergeAccessibleSolutionAttribution();
       this.hasMoreCommunitySolutions = page.hasMore;
