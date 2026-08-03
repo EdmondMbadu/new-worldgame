@@ -122,6 +122,11 @@
   color: var(--sat-muted);
 }
 
+.sat-lede strong {
+  color: white;
+  font-weight: 900;
+}
+
 .sat-actions {
   display: flex;
   flex-wrap: wrap;
@@ -477,6 +482,84 @@
   font-weight: 900;
 }
 
+.sat-footnote-mark {
+  color: var(--sat-coral-deep);
+  font-family: Georgia, serif;
+  font-size: 0.55em;
+  vertical-align: super;
+}
+
+.sat-community-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.sat-community-panel > h3 {
+  margin-top: 10px;
+}
+
+.sat-community-panel > p:not(.sat-card-label) {
+  min-height: 7.9em;
+}
+
+.sat-community-panel__groups {
+  margin-top: 26px;
+}
+
+.sat-community-group {
+  border-top: 1px solid var(--sat-rule);
+  padding: 20px 0 18px;
+}
+
+.sat-community-group:last-child {
+  padding-bottom: 0;
+}
+
+.sat-community-group h4 {
+  margin: 0;
+  color: var(--sat-navy);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.045em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.sat-community-group ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 7px;
+  margin: 12px 0 0;
+}
+
+.sat-community-group li {
+  display: inline;
+  border: 0;
+  padding: 0;
+  color: var(--sat-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.sat-community-group li::before {
+  color: var(--sat-coral-deep);
+  content: "•";
+  margin-right: 5px;
+}
+
+.sat-community-note {
+  margin: 18px 0 0;
+  max-width: 920px;
+  color: var(--sat-muted);
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.sat-community-note span {
+  color: var(--sat-coral-deep);
+  font-weight: 900;
+}
+
 .sat-track-list {
   border-top: 1px solid var(--sat-rule);
 }
@@ -695,6 +778,16 @@
     grid-template-columns: 1fr;
   }
 
+  .sat-community-panel > p:not(.sat-card-label) {
+    min-height: auto;
+  }
+
+  .sat-community-panel__groups {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+
   .sat-facts {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -750,5 +843,10 @@
 
   .sat-benefit-list article {
     grid-template-columns: 42px minmax(0, 1fr);
+  }
+
+  .sat-community-panel__groups {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 }

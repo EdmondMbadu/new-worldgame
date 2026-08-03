@@ -18,7 +18,7 @@
           </h1>
 
           <p class="sat-lede">
-            A half-day community solution sprint. Your organization chooses one or more of your community’s challenges, then teams of community members build deployable solutions in five hours with an AI co-pilot—with optional prize money on the table.
+            <strong>Five hours. From problem to pitch.</strong> A half-day community solution sprint. Your organization chooses one or more of your community’s challenges, then teams of community members build deployable solutions in five hours with an AI co-pilot—with optional prize money on the table.
           </p>
 
           <div class="sat-actions">
@@ -112,30 +112,61 @@
         <div class="sat-section-head">
           <div>
             <p class="sat-eyebrow">§ 02 · The community</p>
-            <h2>Built for every community.</h2>
+            <h2>Built for every community<span class="sat-footnote-mark" aria-hidden="true">*</span></h2>
           </div>
           <p class="sat-lede sat-lede--dark">
             The host sets the problem focus and brings together people with different lived experiences, expertise, and perspectives. No prior design or technical experience is required.
           </p>
         </div>
 
-        <div class="sat-community-grid">
-          <article class="sat-panel">
+        <div class="sat-community-grid" aria-describedby="community-definition">
+          <article class="sat-panel sat-community-panel">
             <p class="sat-card-label">Host-defined</p>
             <h3>Start with a challenge that matters locally.</h3>
             <p>Your organization chooses the problem, defines what a winning solution should accomplish, and invites local evaluators.</p>
+
+            <div class="sat-community-panel__groups">
+              <section *ngFor="let group of communityGroups.slice(0, 3)" class="sat-community-group">
+                <h4>{{ group.name }}</h4>
+                <ul>
+                  <li *ngFor="let community of group.communities">{{ community }}</li>
+                </ul>
+              </section>
+            </div>
           </article>
-          <article class="sat-panel">
+          <article class="sat-panel sat-community-panel">
             <p class="sat-card-label">Team-powered</p>
             <h3>Mobilize the people already in your community.</h3>
             <p>Teams of 3-5 combine local knowledge, practical experience, imagination, and AI-supported research.</p>
+
+            <div class="sat-community-panel__groups">
+              <section *ngFor="let group of communityGroups.slice(3, 6)" class="sat-community-group">
+                <h4>{{ group.name }}</h4>
+                <ul>
+                  <li *ngFor="let community of group.communities">{{ community }}</li>
+                </ul>
+              </section>
+            </div>
           </article>
-          <article class="sat-panel">
+          <article class="sat-panel sat-community-panel">
             <p class="sat-card-label">Outcome-focused</p>
             <h3>Finish with a solution and implementation brief.</h3>
             <p>The result is a practical foundation for moving forward with your community-built solution, including funding proposals, partnerships, recruitment, and public outreach.</p>
+
+            <div class="sat-community-panel__groups">
+              <section *ngFor="let group of communityGroups.slice(6, 9)" class="sat-community-group">
+                <h4>{{ group.name }}</h4>
+                <ul>
+                  <li *ngFor="let community of group.communities">{{ community }}</li>
+                </ul>
+              </section>
+            </div>
           </article>
         </div>
+
+        <p id="community-definition" class="sat-community-note">
+          <span aria-hidden="true">*</span> “Community” includes place-based, mission-driven, faith, education, health, business, special-interest, and workplace groups—large or small.
+        </p>
       </div>
     </section>
 
