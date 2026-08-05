@@ -1,16 +1,72 @@
-import { TestBed } from '@angular/core/testing';
+import { firstValueFrom, of } from 'rxjs';
 
+import { Solution } from '../models/solution';
 import { SolutionService } from './solution.service';
 
 describe('SolutionService', () => {
   let service: SolutionService;
+  let where: jasmine.Spy;
+  let collectionValues: Solution[];
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(SolutionService);
+    collectionValues = [];
+    where = jasmine.createSpy('where').and.returnValue({});
+    const afs = {
+      collection: jasmine
+        .createSpy('collection')
+        .and.callFake((_name: string, query: (ref: any) => unknown) => {
+          query({ where });
+          return {
+            valueChanges: () => of(collectionValues),
+          };
+        }),
+    };
+
+    service = new SolutionService(
+      { user$: of(null), currentUser: {} } as any,
+      afs as any,
+      {} as any,
+      {} as any,
+      {} as any
+    );
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
+  });
+
+  it('loads approved, finished solutions for Discover and sorts them by likes', async () => {
+    collectionValues = [
+      {
+        solutionId: 'lower-liked',
+        statusForPublication: 'approved',
+        finished: 'true',
+        numLike: '2',
+      },
+      {
+        solutionId: 'unfinished',
+        statusForPublication: 'approved',
+        finished: 'false',
+        numLike: '50',
+      },
+      {
+        solutionId: 'higher-liked',
+        statusForPublication: 'approved',
+        finished: 'true',
+        numLike: '10',
+      },
+    ];
+
+    const solutions = await firstValueFrom(service.getHomePageSolutions());
+
+    expect(where).toHaveBeenCalledOnceWith(
+      'statusForPublication',
+      '==',
+      'approved'
+    );
+    expect(solutions.map((solution) => solution.solutionId)).toEqual([
+      'higher-liked',
+      'lower-liked',
+    ]);
   });
 });
