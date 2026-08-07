@@ -416,21 +416,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const visibility = this.pendingVisibility;
     if (!solutionId || !visibility || this.isSavingVisibility) return;
 
+    const previousIsPrivate = this.currentSolution.isPrivate;
+    const previousCommunityVisibility = this.currentSolution.communityVisibility;
+
     this.isSavingVisibility = true;
     this.visibilityError = '';
     this.visibilityMessage = '';
+
+    // Reflect the requested state immediately while the callable performs the
+    // permission-checked update. Restore the server-backed state on failure.
+    this.currentSolution.isPrivate = visibility === 'private';
+    this.currentSolution.communityVisibility = visibility;
+    this.showVisibilityConfirm = false;
+    this.pendingVisibility = null;
+
     try {
-      await this.solution.setCommunityVisibility(solutionId, visibility);
-      this.currentSolution.isPrivate = visibility === 'private';
-      this.currentSolution.communityVisibility = visibility;
+      const result = await this.solution.setCommunityVisibility(
+        solutionId,
+        visibility
+      );
+      this.currentSolution.feedEligible = result.feedEligible;
       this.visibilityMessage =
         visibility === 'private'
           ? 'This solution is now private and hidden from the community home page.'
           : 'This solution is now visible on the community home page.';
-      this.showVisibilityConfirm = false;
-      this.pendingVisibility = null;
     } catch (error: any) {
       console.error('Unable to update solution visibility', error);
+      this.currentSolution.isPrivate = previousIsPrivate;
+      this.currentSolution.communityVisibility = previousCommunityVisibility;
       this.visibilityError =
         error?.message ||
         'Visibility could not be updated. Please try again.';

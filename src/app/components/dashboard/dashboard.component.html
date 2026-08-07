@@ -313,8 +313,12 @@
             [disabled]="isSavingVisibility"
             class="community-visibility-primary community-visibility-primary--private"
           >
-            <span class="material-symbols-outlined">lock</span>
-            Make private — hide from home page
+            <svg *ngIf="isSavingVisibility" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+            </svg>
+            <span *ngIf="!isSavingVisibility" class="material-symbols-outlined">lock</span>
+            {{ isSavingVisibility ? "Saving visibility…" : "Make private — hide from home page" }}
           </button>
 
           <button
@@ -324,8 +328,12 @@
             [disabled]="isSavingVisibility"
             class="community-visibility-primary"
           >
-            <span class="material-symbols-outlined">public</span>
-            Show to community — add to home page
+            <svg *ngIf="isSavingVisibility" class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25" />
+              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="4" />
+            </svg>
+            <span *ngIf="!isSavingVisibility" class="material-symbols-outlined">public</span>
+            {{ isSavingVisibility ? "Saving visibility…" : "Show to community — add to home page" }}
           </button>
 
           <p *ngIf="!isCommunityVisible && !canRestoreCommunityVisibility" class="community-visibility-card__locked">
