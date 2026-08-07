@@ -15,17 +15,20 @@ import {
   hasMeaningfulModerationContent,
   MODERATION_CATEGORIES,
   MODERATION_POLICY_VERSION,
+  ModerationResponseFormatError,
   ModerationAssessment,
   ModerationCategory,
   ModerationDecision,
   normalizeModerationAssessment,
   normalizeModerationPolicy,
+  parseModerationAssessmentResponse,
   SolutionModerationPolicy,
 } from './solution-moderation-core';
 
 const MODERATION_MODEL = 'gemini-2.5-flash';
 const MODERATION_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 const MODERATION_QUEUE_PAGE_SIZE = 10;
+const MODERATION_RESPONSE_ATTEMPTS = 3;
 const POLICY_DOCUMENT_PATH = 'solutionModerationPolicies/current';
 const moderationApiKey = String(functions.config()['gemini']?.key || '').trim();
 
@@ -187,25 +190,13 @@ Return calibrated probabilities from 0 to 1 for:
 - scam_or_fraud: deceptive financial schemes, impersonation, phishing, or fraud.
 - political_persuasion: partisan campaigning, candidate promotion/opposition, election persuasion, or propaganda. Neutral civic education, governance analysis, and public-policy problem solving are not partisan persuasion.
 
-Use context. Discussions that condemn, study, prevent, or solve a dangerous problem should score low unless they include unsafe advocacy or actionable detail. Evidence excerpts must be brief, non-graphic, and no more than 15 words. If an image is supplied, classify both its visible content and embedded text.
+Use context. Discussions that condemn, study, prevent, or solve a dangerous problem should score low unless they include unsafe advocacy or actionable detail. Return at most 4 evidence items. Evidence excerpts must be brief, non-graphic, and no more than 15 words. Keep the summary under 160 characters. If an image is supplied, classify both its visible content and embedded text.
 
 This is chunk ${chunkIndex + 1} of ${total}.
 
 USER-CREATED CONTENT:
 ${chunk}
 `.trim();
-
-const parseAssessment = (text: string): ModerationAssessment => {
-  let parsed: Partial<ModerationAssessment> = {};
-  try {
-    parsed = JSON.parse(text) as Partial<ModerationAssessment>;
-  } catch {
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('The moderation model returned invalid JSON.');
-    parsed = JSON.parse(match[0]) as Partial<ModerationAssessment>;
-  }
-  return normalizeModerationAssessment(parsed);
-};
 
 const mergeAssessments = (
   assessments: ModerationAssessment[],
@@ -255,7 +246,7 @@ const runAutomatedAssessment = async (
     model: MODERATION_MODEL,
     generationConfig: {
       temperature: 0,
-      maxOutputTokens: 900,
+      maxOutputTokens: 1600,
       responseMimeType: 'application/json',
       responseSchema: moderationResponseSchema,
     },
@@ -272,12 +263,45 @@ const runAutomatedAssessment = async (
 
   const assessments = await Promise.all(
     textPayload.chunks.map(async (chunk, index) => {
-      const parts: any[] = [
-        { text: buildClassificationPrompt(chunk, index, textPayload.chunks.length) },
-      ];
-      if (index === 0 && imagePart) parts.push(imagePart);
-      const result = await model.generateContent(parts);
-      return parseAssessment(result.response.text());
+      let lastFormatError: ModerationResponseFormatError | null = null;
+      for (let attempt = 1; attempt <= MODERATION_RESPONSE_ATTEMPTS; attempt += 1) {
+        const retryInstruction =
+          attempt === 1
+            ? ''
+            : '\n\nIMPORTANT: The previous response could not be read. Return only one compact JSON object containing every required score. Do not use Markdown.';
+        const parts: any[] = [
+          {
+            text:
+              buildClassificationPrompt(chunk, index, textPayload.chunks.length) +
+              retryInstruction,
+          },
+        ];
+        if (index === 0 && imagePart) parts.push(imagePart);
+        const result = await model.generateContent(parts);
+        const candidate = result.response.candidates?.[0];
+        let responseText = '';
+        try {
+          responseText = result.response.text();
+        } catch {
+          responseText = (candidate?.content?.parts || [])
+            .map((part: any) => String(part?.text || ''))
+            .join('');
+        }
+        try {
+          return parseModerationAssessmentResponse(responseText);
+        } catch (error) {
+          if (!(error instanceof ModerationResponseFormatError)) throw error;
+          lastFormatError = error;
+          console.warn('Moderation response was unreadable; retrying if possible.', {
+            attempt,
+            maxAttempts: MODERATION_RESPONSE_ATTEMPTS,
+            finishReason: candidate?.finishReason || 'unknown',
+            responseCharacters: responseText.length,
+            outputTokens: result.response.usageMetadata?.candidatesTokenCount || 0,
+          });
+        }
+      }
+      throw lastFormatError || new ModerationResponseFormatError();
     })
   );
   const assessment = mergeAssessments(assessments, Boolean(imagePart));
@@ -459,6 +483,21 @@ export const moderateSolutionOnWrite = functions.firestore
         solutionId: context.params.solutionId,
         error: error instanceof Error ? error.message : String(error),
       });
+      if (error instanceof ModerationResponseFormatError) {
+        await writeModerationState(context.params.solutionId, contentHash, {
+          status: 'needs_review',
+          contentHash,
+          policyVersion: policy.version,
+          model: MODERATION_MODEL,
+          reasonCodes: ['scanner_response_unreadable'],
+          summary:
+            'The automatic check could not produce a reliable decision after retries. Please review this solution manually.',
+          decisionSource: 'automatic_fallback',
+          scannedAtMs: Date.now(),
+          lastProcessedRescanToken: rescanToken,
+        });
+        return;
+      }
       await writeModerationState(context.params.solutionId, contentHash, {
         status: 'error',
         contentHash,

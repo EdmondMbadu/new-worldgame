@@ -11,6 +11,7 @@ const {
   hasMeaningfulModerationContent,
   MODERATION_CATEGORIES,
   MODERATION_ENFORCEMENT_EPOCH_MS,
+  parseModerationAssessmentResponse,
 } = require('../lib/solution-moderation-core');
 
 const assessment = (overrides = {}, imageAssessed = true) => ({
@@ -128,5 +129,38 @@ test('only a server-marked pre-enforcement solution receives rollout grace', () 
       moderationLegacyExempt: true,
     }),
     true
+  );
+});
+
+test('parses fenced moderation JSON with trailing commas', () => {
+  const scores = Object.fromEntries(
+    MODERATION_CATEGORIES.map((category) => [category, 0.01])
+  );
+  const json = JSON.stringify({ scores, evidence: [], summary: 'Low risk.' })
+    .replace(/}$/, ',}');
+  const parsed = parseModerationAssessmentResponse(
+    '```json\n' + json + '\n```'
+  );
+  assert.equal(parsed.scores.explicit_sexual, 0.01);
+});
+
+test('recovers complete scores when later JSON output is truncated', () => {
+  const scoreLines = MODERATION_CATEGORIES.map(
+    (category) => `"${category}": 0.02`
+  ).join(',');
+  const parsed = parseModerationAssessmentResponse(
+    `{"scores":{${scoreLines}},"evidence":[`
+  );
+  assert.equal(parsed.scores.violence_promotion, 0.02);
+  assert.match(parsed.summary, /recovered/i);
+});
+
+test('rejects incomplete score maps instead of assuming missing risks are safe', () => {
+  assert.throws(
+    () =>
+      parseModerationAssessmentResponse(
+        '{"scores":{"explicit_sexual":0.01}}'
+      ),
+    /unreadable response/i
   );
 });

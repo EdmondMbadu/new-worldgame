@@ -66,6 +66,13 @@ export interface ModerationTextPayload {
   truncated: boolean;
 }
 
+export class ModerationResponseFormatError extends Error {
+  constructor(message = 'The moderation model returned an unreadable response.') {
+    super(message);
+    this.name = 'ModerationResponseFormatError';
+  }
+}
+
 const HARD_BLOCK_CATEGORIES = new Set<ModerationCategory>([
   'sexual_minors',
   'explicit_sexual',
@@ -229,6 +236,79 @@ export const normalizeModerationAssessment = (
     summary: plainText(value?.summary).slice(0, 600),
     imageAssessed: value?.imageAssessed === true,
   };
+};
+
+const hasCompleteModerationScores = (value: any): boolean =>
+  Boolean(
+    value?.scores &&
+      typeof value.scores === 'object' &&
+      MODERATION_CATEGORIES.every((category) => {
+        const score = Number(value.scores[category]);
+        return Number.isFinite(score) && score >= 0 && score <= 1;
+      })
+  );
+
+/**
+ * Accepts valid JSON, fenced JSON, JSON with trailing commas, and a truncated
+ * response whose complete score map was emitted before the truncation.
+ *
+ * Missing category scores are never filled with zero here: doing that could
+ * accidentally approve content that the model did not finish assessing.
+ */
+export const parseModerationAssessmentResponse = (
+  responseText: unknown
+): ModerationAssessment => {
+  const raw = String(responseText || '')
+    .replace(/^\uFEFF/, '')
+    .trim();
+  const unfenced = raw
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```\s*$/i, '')
+    .trim();
+  const objectStart = unfenced.indexOf('{');
+  const objectEnd = unfenced.lastIndexOf('}');
+  const candidates = Array.from(
+    new Set([
+      unfenced,
+      objectStart >= 0 && objectEnd > objectStart
+        ? unfenced.slice(objectStart, objectEnd + 1)
+        : '',
+    ])
+  ).filter(Boolean);
+
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate.replace(/,\s*([}\]])/g, '$1'));
+      if (hasCompleteModerationScores(parsed)) {
+        return normalizeModerationAssessment(parsed);
+      }
+    } catch {
+      // A complete score map can still be recovered below if later output was
+      // truncated or surrounded by non-JSON prose.
+    }
+  }
+
+  const scores = {} as Record<ModerationCategory, number>;
+  for (const category of MODERATION_CATEGORIES) {
+    const match = unfenced.match(
+      new RegExp(
+        `["']?${category}["']?\\s*:\\s*(-?(?:\\d+(?:\\.\\d+)?|\\.\\d+))`,
+        'i'
+      )
+    );
+    const score = Number(match?.[1]);
+    if (!Number.isFinite(score) || score < 0 || score > 1) {
+      throw new ModerationResponseFormatError();
+    }
+    scores[category] = score;
+  }
+
+  return normalizeModerationAssessment({
+    scores,
+    evidence: [],
+    summary: 'Safety scores recovered from an incomplete structured response.',
+    imageAssessed: false,
+  });
 };
 
 export const normalizeModerationPolicy = (
