@@ -32,23 +32,87 @@
     </div>
     <!-- ───────────────────────────────────────────────────────────────────── -->
 
-    <main class="mx-auto max-w-7xl px-1 pb-4 pt-24 sm:px-3 sm:pt-28">
-      <header class="community-home-header">
-        <div class="community-home-header__copy">
+    <main class="mx-auto max-w-7xl px-1 pb-4 pt-20 sm:px-3 sm:pt-24">
+      <header class="community-home-hero">
+        <div class="community-home-hero__copy">
           <p class="community-eyebrow">{{ 'home.community.eyebrow' | translate }}</p>
-          <h1>{{ 'home.community.title' | translate }}</h1>
-          <p>
+          <h1 [attr.aria-label]="'home.community.title' | translate">
+            <span>{{ 'home.community.headline.global' | translate }}</span>
+            <span>{{ 'home.community.headline.local' | translate }}</span>
+            <span>{{ 'home.community.headline.impact' | translate }}</span>
+          </h1>
+          <p class="community-home-hero__description">
             {{ 'home.community.description' | translate }}
           </p>
+
+          <div class="community-hero-actions">
+            <button type="button" class="community-start-button" (click)="startSolution()">
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              {{
+                (isGuest
+                  ? 'home.community.signInToStart'
+                  : 'home.community.startSolution') | translate
+              }}
+            </button>
+            <button type="button" class="community-explore-button" (click)="selectHomeView('challenges')">
+              {{ 'home.community.exploreChallenges' | translate }}
+              <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+            </button>
+          </div>
+
+          <ul class="community-hero-principles" [attr.aria-label]="'home.community.principles.label' | translate">
+            <li>
+              <span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>
+              {{ 'home.community.principles.discover' | translate }}
+            </li>
+            <li>
+              <span class="material-symbols-outlined" aria-hidden="true">group</span>
+              {{ 'home.community.principles.collaborate' | translate }}
+            </li>
+            <li>
+              <span class="material-symbols-outlined" aria-hidden="true">monitoring</span>
+              {{ 'home.community.principles.impact' | translate }}
+            </li>
+          </ul>
         </div>
-        <button type="button" class="community-start-button" (click)="startSolution()">
-          <span class="material-symbols-outlined" aria-hidden="true">add</span>
-          {{
-            (isGuest
-              ? 'home.community.signInToStart'
-              : 'home.community.startSolution') | translate
-          }}
-        </button>
+
+        <div class="community-home-hero__visual" role="img" [attr.aria-label]="'home.community.heroVisualAlt' | translate">
+          <img class="community-hero-map" src="assets/img/community-world-map.svg" alt="" fetchpriority="high" />
+          <svg class="community-map-connections" viewBox="0 0 960 430" aria-hidden="true">
+            <path d="M176 137 C286 72 390 98 488 145 S688 206 792 128" />
+            <path d="M250 283 C360 240 426 203 488 145 S610 112 792 128" />
+            <path d="M488 145 C484 210 492 254 520 286 S680 344 828 314" />
+            <circle cx="176" cy="137" r="5" />
+            <circle cx="250" cy="283" r="5" />
+            <circle cx="488" cy="145" r="5" />
+            <circle cx="520" cy="286" r="5" />
+            <circle cx="792" cy="128" r="5" />
+            <circle cx="828" cy="314" r="5" />
+          </svg>
+
+          <div class="community-map-person community-map-person--north-america" aria-hidden="true">
+            <img src="assets/img/sofia-agent.png" alt="" />
+          </div>
+          <div class="community-map-person community-map-person--south-america" aria-hidden="true">
+            <img src="assets/img/edmond.png" alt="" />
+          </div>
+          <div class="community-map-person community-map-person--europe" aria-hidden="true">
+            <img src="assets/img/jim.jpeg" alt="" />
+          </div>
+          <div class="community-map-person community-map-person--africa" aria-hidden="true">
+            <img src="assets/img/zara-agent.png" alt="" />
+          </div>
+          <div class="community-map-person community-map-person--asia" aria-hidden="true">
+            <img src="assets/img/arjun-agent.png" alt="" />
+          </div>
+          <div class="community-map-person community-map-person--oceania" aria-hidden="true">
+            <img src="assets/img/tane-agent.png" alt="" />
+          </div>
+
+          <div class="community-map-idea" aria-hidden="true">
+            <span class="material-symbols-outlined">lightbulb</span>
+          </div>
+        </div>
       </header>
 
       <nav class="community-view-switcher" [attr.aria-label]="'home.community.homeContentLabel' | translate">
@@ -73,6 +137,7 @@
       <section *ngIf="homeView === 'solutions'" id="solutions" class="community-solutions-section">
         <div class="community-feed-toolbar">
           <div>
+            <p class="community-section-eyebrow">{{ 'home.community.sectionEyebrow' | translate }}</p>
             <h2>{{ 'home.community.sectionTitle' | translate }}</h2>
             <p>{{ 'home.community.sectionSubtitle' | translate }}</p>
           </div>

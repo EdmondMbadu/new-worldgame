@@ -259,17 +259,35 @@
   "home": {
     "community": {
       "eyebrow": "Global Solutions Lab community",
-      "title": "Solutions worth building together",
-      "description": "See what teams are developing, understand their thinking, and add a useful comment that helps the work move forward.",
+      "title": "Global collaboration. Local solutions. Real impact.",
+      "headline": {
+        "global": "Global collaboration.",
+        "local": "Local solutions.",
+        "impact": "Real impact."
+      },
+      "description": "Join a worldwide community turning bold ideas into practical solutions for the places and people who need them most.",
       "startSolution": "Start a solution",
       "signInToStart": "Sign in to start",
+      "exploreChallenges": "Explore challenges",
+      "heroVisualAlt": "People around the world collaborating on practical solutions",
+      "principles": {
+        "label": "How the community works",
+        "discover": "Discover ideas",
+        "collaborate": "Share expertise",
+        "impact": "Build impact"
+      },
+      "visual": {
+        "global": "Worldwide community",
+        "building": "Ideas in action"
+      },
       "homeContentLabel": "Home content",
       "tabs": {
         "solutions": "Community solutions",
         "challenges": "Explore challenges"
       },
-      "sectionTitle": "Community solutions",
-      "sectionSubtitle": "Community-visible work from across the Lab.",
+      "sectionEyebrow": "Explore the work",
+      "sectionTitle": "Solutions moving from idea to impact",
+      "sectionSubtitle": "Follow work in progress, learn from each team, and contribute a perspective that moves an idea forward.",
       "filterLabel": "Filter solutions by status",
       "filters": {
         "all": "All",

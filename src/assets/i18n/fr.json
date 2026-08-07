@@ -259,17 +259,35 @@
   "home": {
     "community": {
       "eyebrow": "Communauté du Global Solutions Lab",
-      "title": "Des solutions qui méritent d’être construites ensemble",
-      "description": "Découvrez ce que les équipes développent, comprenez leur démarche et ajoutez un commentaire utile pour faire avancer leur travail.",
+      "title": "Collaboration mondiale. Solutions locales. Impact réel.",
+      "headline": {
+        "global": "Collaboration mondiale.",
+        "local": "Solutions locales.",
+        "impact": "Impact réel."
+      },
+      "description": "Rejoignez une communauté mondiale qui transforme des idées audacieuses en solutions concrètes pour les personnes et les territoires qui en ont le plus besoin.",
       "startSolution": "Créer une solution",
       "signInToStart": "Se connecter pour commencer",
+      "exploreChallenges": "Explorer les défis",
+      "heroVisualAlt": "Des personnes du monde entier collaborent à des solutions concrètes",
+      "principles": {
+        "label": "Comment fonctionne la communauté",
+        "discover": "Découvrir des idées",
+        "collaborate": "Partager son expertise",
+        "impact": "Créer de l’impact"
+      },
+      "visual": {
+        "global": "Communauté mondiale",
+        "building": "Des idées en action"
+      },
       "homeContentLabel": "Contenu de l’accueil",
       "tabs": {
         "solutions": "Solutions de la communauté",
         "challenges": "Explorer les défis"
       },
-      "sectionTitle": "Solutions de la communauté",
-      "sectionSubtitle": "Les travaux visibles par la communauté dans l’ensemble du Lab.",
+      "sectionEyebrow": "Explorer les projets",
+      "sectionTitle": "Des solutions qui passent de l’idée à l’impact",
+      "sectionSubtitle": "Suivez les projets en cours, apprenez de chaque équipe et apportez un point de vue qui fait avancer une idée.",
       "filterLabel": "Filtrer les solutions par statut",
       "filters": {
         "all": "Toutes",
