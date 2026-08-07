@@ -962,31 +962,31 @@
                   </button>
                 </div>
 
-                <div class="rounded-xl border-2 border-teal-300 bg-gradient-to-br from-teal-50 to-white p-4 shadow-sm dark:border-teal-700 dark:from-teal-950/40 dark:to-slate-900">
-                  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="flex items-start gap-3">
-                      <span class="material-symbols-outlined rounded-lg bg-teal-600 p-2 text-white" aria-hidden="true">quiz</span>
-                      <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                          <p class="font-bold text-slate-900 dark:text-white">Solution questions</p>
-                          <span
-                            class="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide"
-                            [ngClass]="questionTemplate?.mode === 'custom' ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'">
-                            {{ questionTemplate?.mode === 'custom' ? 'Customized' : 'Standard' }}
-                          </span>
-                        </div>
-                        <p class="mt-1 max-w-xl text-xs leading-5 text-slate-600 dark:text-slate-300">
-                          Set the wording used by all {{ ids.length }} solution{{ ids.length === 1 ? '' : 's' }} in this challenge space. The five stages and saved answer slots stay unchanged.
-                        </p>
+                <div class="overflow-hidden rounded-xl border border-teal-200 bg-teal-50/70 p-3.5 shadow-sm dark:border-teal-800 dark:bg-teal-950/25">
+                  <div class="flex min-w-0 items-start gap-3">
+                    <span
+                      class="material-symbols-outlined flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-600 text-xl text-white"
+                      aria-hidden="true">quiz</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex min-w-0 flex-wrap items-center gap-2">
+                        <p class="text-sm font-bold leading-5 text-slate-900 dark:text-white">Solution questions</p>
+                        <span
+                          class="max-w-full rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+                          [ngClass]="questionTemplate?.mode === 'custom' ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200'">
+                          {{ questionTemplate?.mode === 'custom' ? 'Customized' : 'Standard' }}
+                        </span>
                       </div>
+                      <p class="mt-1 break-words text-xs leading-4 text-slate-600 dark:text-slate-300">
+                        Customize prompts for {{ ids.length }} solution{{ ids.length === 1 ? '' : 's' }} in this space. Stages and saved answers stay unchanged.
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      (click)="openQuestionEditor()"
-                      class="shrink-0 rounded-lg bg-teal-700 px-4 py-2.5 text-sm font-bold text-white shadow transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-200 dark:focus:ring-teal-900">
-                      Edit solution questions
-                    </button>
                   </div>
+                  <button
+                    type="button"
+                    (click)="openQuestionEditor()"
+                    class="mt-3 inline-flex w-full min-w-0 items-center justify-center rounded-lg bg-teal-700 px-3 py-2 text-center text-xs font-bold leading-5 text-white shadow-sm transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-200 dark:focus:ring-teal-900">
+                    Edit solution questions
+                  </button>
                 </div>
 
                 <!-- Tools groups -->
