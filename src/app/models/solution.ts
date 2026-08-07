@@ -4,6 +4,8 @@ import { StrategyReviewSyncMetadata } from '../utils/strategy-review-sync';
 
 export class Solution {
   solutionId?: string;
+  /** Challenge space whose question template this solution inherits. */
+  challengePageId?: string;
   /**
    * Immutable creator attribution. Legacy solutions use these fields as both
    * creator and owner until explicit owner fields are added by a transfer.

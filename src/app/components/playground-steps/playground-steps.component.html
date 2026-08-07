@@ -628,6 +628,16 @@
   
       <!-- LEFT/CENTER: Display the current step questions -->
       <div class="w-full lg:w-2/3">
+        <div
+          *ngIf="activeQuestionTemplate?.mode === 'custom'"
+          class="mb-5 flex items-start gap-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm text-teal-900 dark:border-teal-800 dark:bg-teal-950/30 dark:text-teal-100"
+          role="status">
+          <span class="material-symbols-outlined text-lg" aria-hidden="true">tune</span>
+          <div>
+            <p class="font-semibold">{{ currentLanguage === 'fr' ? 'Questions adaptées à cet espace défi' : 'Questions customized for this challenge space' }}</p>
+            <p class="mt-0.5 text-xs opacity-80">{{ currentLanguage === 'fr' ? 'Vos réponses enregistrées restent associées aux mêmes étapes.' : 'Your saved answers remain attached to the same steps.' }}</p>
+          </div>
+        </div>
         <!-- We only want one step visible at a time -->
         <ng-container *ngFor="let item of AllQuestions; let i = index">
           <app-playground-step

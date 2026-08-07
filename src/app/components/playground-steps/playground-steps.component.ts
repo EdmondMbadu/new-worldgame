@@ -13,6 +13,13 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { firstValueFrom, Subscription } from 'rxjs';
+import {
+  getDefaultQuestions,
+  PLAYGROUND_QUESTION_KEYS,
+  questionRecordToGroups,
+} from 'src/app/config/playground-question-schema';
+import { ResolvedPlaygroundQuestionTemplate } from 'src/app/models/challenge-question-template';
+import { PlaygroundQuestionTemplateService } from 'src/app/services/playground-question-template.service';
 import { LanguageService } from 'src/app/services/language.service';
 import { ChatContextService, PlaygroundQuestion, PlaygroundContext } from 'src/app/services/chat-context.service';
 import {
@@ -352,9 +359,11 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   AllQuestions: Array<Array<string>> = this.localizedContent[
     this.defaultLanguage
   ].questions.map((group) => [...group]);
+  activeQuestionTemplate: ResolvedPlaygroundQuestionTemplate | null = null;
   private langSub?: Subscription;
   private insertRequestSub?: Subscription;
   private solutionSub?: Subscription;
+  private questionTemplateSub?: Subscription;
   private teamRosterSignature = '';
   private teamRosterRequestId = 0;
   aiFeedbackLoading = false;
@@ -489,7 +498,8 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
     private chatContext: ChatContextService,
     private presence: PresenceService,
     private discussionNotifications: DiscussionNotificationsService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private questionTemplates: PlaygroundQuestionTemplateService
   ) {
     this.currentUser = this.auth.currentUser;
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -529,6 +539,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
       }
       
       if (isFirstLoad) {
+        this.watchQuestionTemplate();
         // First load - initialize everything
         this.currentSolution.evaluators?.forEach((ev: any) => {
           this.evaluators.push(ev);
@@ -2054,29 +2065,7 @@ STYLE REQUIREMENTS:
   currentIndexDisplay: number = 0;
 
   @Input() title?: string = 'World Hunger';
-  questionsTitles: Array<Array<string>> = [
-    ['S1-A', 'S1-B', 'S1-C', 'S1-D'],
-    ['S2-A', 'S2-B'],
-    ['S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E'],
-    [
-      'S4-A',
-      'S4-B',
-      'S4-C',
-      'S4-D',
-      'S4-E',
-      'S4-F',
-      'S4-G',
-      'S4-H',
-      'S4-I',
-      'S4-J',
-      'S4-K',
-      'S4-L',
-      'S4-M',
-      'S4-N',
-      // 'S4-K',
-    ],
-    ['S5'],
-  ];
+  questionsTitles: Array<Array<string>> = PLAYGROUND_QUESTION_KEYS.map((keys) => [...keys]);
   timelineDisplay = [
     'bg-gray-500 h-2',
     'bg-gray-500 h-2',
@@ -4403,6 +4392,7 @@ Infographic requirements:
     this.presentationRequestSub?.unsubscribe();
     this.insertRequestSub?.unsubscribe();
     this.solutionSub?.unsubscribe();
+    this.questionTemplateSub?.unsubscribe();
     this.teamPresenceSub?.unsubscribe();
     this.teamTypingSub?.unsubscribe();
     this.discussionUnreadSub?.unsubscribe();
@@ -4426,8 +4416,22 @@ Infographic requirements:
     const content = this.localizedContent[lang];
     this.steps = [...content.steps];
     this.subtitles = [...content.subtitles];
-    this.AllQuestions = content.questions.map((group) => [...group]);
+    this.AllQuestions = this.activeQuestionTemplate?.mode === 'custom'
+      ? questionRecordToGroups(this.activeQuestionTemplate.locales[lang])
+      : getDefaultQuestions(lang);
     this.buttontexts = this.createButtonTexts(lang);
+  }
+
+  private watchQuestionTemplate(): void {
+    this.questionTemplateSub?.unsubscribe();
+    this.questionTemplateSub = this.questionTemplates
+      .watchForSolution(String(this.id || ''), this.currentSolution)
+      .subscribe((template) => {
+        this.activeQuestionTemplate = template;
+        this.setLocalizedContent(this.currentLanguage);
+        this.refreshStepProgress();
+        this.updateChatContextStep();
+      });
   }
 
   private createButtonTexts(language: SupportedLanguage): string[] {

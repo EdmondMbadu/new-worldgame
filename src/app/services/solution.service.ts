@@ -206,7 +206,8 @@ export class SolutionService {
     evaluators: any,
     // endDate: string,
     sdgs: string[],
-    solutionId: string = ''
+    solutionId: string = '',
+    challengePageId: string = ''
   ) {
     console.log('The list of designers', participants);
 
@@ -240,6 +241,7 @@ export class SolutionService {
       isPrivate?: boolean;
       communityVisibility?: 'community';
       feedUpdatedAt?: firebase.firestore.FieldValue;
+      challengePageId?: string;
     } = {
       solutionId: this.solutionId,
       title: title,
@@ -268,6 +270,9 @@ export class SolutionService {
     // Only add the image property if it is defined and not empty
     if (image) {
       data.image = image;
+    }
+    if (challengePageId) {
+      data.challengePageId = challengePageId;
     }
 
     data = this.withSolutionCreatedAndUpdatedAt(data);

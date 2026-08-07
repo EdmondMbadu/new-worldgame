@@ -15,9 +15,23 @@ import {
 } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
 import { PresenceService } from 'src/app/services/presence.service';
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/firestore';
 import { SolutionService } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
 import { ToastService } from 'src/app/services/toast.service';
+import {
+  PLAYGROUND_QUESTION_KEYS,
+  PLAYGROUND_QUESTION_KEYS_FLAT,
+  PLAYGROUND_QUESTION_SECTIONS,
+  getDefaultQuestionLocales,
+} from 'src/app/config/playground-question-schema';
+import {
+  PlaygroundQuestionLanguage,
+  ResolvedPlaygroundQuestionTemplate,
+} from 'src/app/models/challenge-question-template';
+import { PlaygroundQuestionTemplateService } from 'src/app/services/playground-question-template.service';
+import { filterChallengeLinksForPage } from 'src/app/utils/challenge-page-links';
 
 @Component({
     selector: 'app-home-challenge',
@@ -216,6 +230,16 @@ export class HomeChallengeComponent implements OnDestroy {
   private readonly allChallengesKey = '__all__';
   private readonly historyPageIdKey = 'homeChallengePageId';
   private readonly historyPageSlugKey = 'homeChallengePageSlug';
+  showQuestionEditor = false;
+  questionEditorLanguage: PlaygroundQuestionLanguage = 'en';
+  questionTemplate: ResolvedPlaygroundQuestionTemplate | null = null;
+  questionDraft = getDefaultQuestionLocales();
+  private questionOriginalDraft = getDefaultQuestionLocales();
+  isSavingQuestions = false;
+  questionResetArmed = false;
+  readonly questionSections = PLAYGROUND_QUESTION_SECTIONS;
+  readonly questionKeys = PLAYGROUND_QUESTION_KEYS;
+  private questionTemplateSub?: Subscription;
 
   // home-challenge.component.ts
   goToChallengeDiscussion() {
@@ -245,7 +269,8 @@ export class HomeChallengeComponent implements OnDestroy {
     private fns: AngularFireFunctions,
     private toast: ToastService,
     private translate: TranslateService,
-    private presence: PresenceService
+    private presence: PresenceService,
+    private questionTemplates: PlaygroundQuestionTemplateService
   ) {}
   ngOnInit(): void {
     window.scrollTo(0, 0);
@@ -289,6 +314,7 @@ export class HomeChallengeComponent implements OnDestroy {
     this.challengeJoinRequestsSub?.unsubscribe();
     this.pageChallengesSub?.unsubscribe();
     this.challengeHydrationSub?.unsubscribe();
+    this.questionTemplateSub?.unsubscribe();
   }
   private resetPageState(): void {
     // everything that can legitimately be “missing” on a page
@@ -356,6 +382,7 @@ export class HomeChallengeComponent implements OnDestroy {
       }
 
       this.challengePageId = resolved.id;
+      this.watchQuestionTemplate(resolved.id);
       const resolvedSlug = String(resolved.data.customUrl || '');
       this.rememberResolvedChallengePage(
         resolved.id,
@@ -507,14 +534,18 @@ export class HomeChallengeComponent implements OnDestroy {
 
   private async loadPageChallenges(loadToken: number): Promise<void> {
     this.pageChallengesSub?.unsubscribe();
+    const expectedPageId = String(this.challengePageId || '');
 
     try {
       const initialChallenges = await this.challenge
-        .getUserChallengesForPageOnce(this.challengePageId);
-      if (loadToken !== this.pageLoadToken) {
+        .getUserChallengesForPageOnce(expectedPageId);
+      if (
+        loadToken !== this.pageLoadToken ||
+        expectedPageId !== String(this.challengePageId || '')
+      ) {
         return;
       }
-      this.applyPageChallenges(initialChallenges);
+      this.applyPageChallenges(initialChallenges, loadToken, expectedPageId);
     } catch (error) {
       console.error('Unable to load solution links for challenge page', error);
     }
@@ -524,18 +555,21 @@ export class HomeChallengeComponent implements OnDestroy {
     }
 
     this.pageChallengesSub = this.challenge
-      .getUserChallengesForPage(this.challengePageId)
+      .getUserChallengesForPage(expectedPageId)
       .subscribe({
         next: (challenges: any[]) => {
-          if (loadToken !== this.pageLoadToken) {
+          if (
+            loadToken !== this.pageLoadToken ||
+            expectedPageId !== String(this.challengePageId || '')
+          ) {
             return;
           }
           const nextChallenges = challenges || [];
           if (!nextChallenges.length && this.pageChallengeCards.length) {
-            void this.confirmEmptyPageChallenges(loadToken);
+            void this.confirmEmptyPageChallenges(loadToken, expectedPageId);
             return;
           }
-          this.applyPageChallenges(nextChallenges);
+          this.applyPageChallenges(nextChallenges, loadToken, expectedPageId);
         },
         error: (error) => {
           console.error('Solution link updates stopped', error);
@@ -543,12 +577,18 @@ export class HomeChallengeComponent implements OnDestroy {
       });
   }
 
-  private async confirmEmptyPageChallenges(loadToken: number): Promise<void> {
+  private async confirmEmptyPageChallenges(
+    loadToken: number,
+    expectedPageId: string
+  ): Promise<void> {
     try {
       const confirmedChallenges = await this.challenge
-        .getUserChallengesForPageOnce(this.challengePageId);
-      if (loadToken === this.pageLoadToken) {
-        this.applyPageChallenges(confirmedChallenges);
+        .getUserChallengesForPageOnce(expectedPageId);
+      if (
+        loadToken === this.pageLoadToken &&
+        expectedPageId === String(this.challengePageId || '')
+      ) {
+        this.applyPageChallenges(confirmedChallenges, loadToken, expectedPageId);
       }
     } catch (error) {
       // Preserve the last known-good grid when an empty cached emission cannot
@@ -557,20 +597,37 @@ export class HomeChallengeComponent implements OnDestroy {
     }
   }
 
-  private applyPageChallenges(challenges: any[]): void {
-    const pageChallenges = challenges || [];
+  private applyPageChallenges(
+    challenges: any[],
+    loadToken: number = this.pageLoadToken,
+    expectedPageId: string = String(this.challengePageId || '')
+  ): void {
+    if (
+      loadToken !== this.pageLoadToken ||
+      expectedPageId !== String(this.challengePageId || '')
+    ) {
+      return;
+    }
+
+    // Treat the Firestore query as a first filter, not the authority. Cached
+    // or stale emissions must never leak links from another challenge space
+    // into the active page.
+    const pageChallenges = filterChallengeLinksForPage(
+      challenges,
+      expectedPageId
+    );
     const signature = pageChallenges
       .map((challenge) => String(challenge.id || challenge.docId || ''))
       .filter(Boolean)
       .sort()
       .join('|');
-    if (signature === this.pageChallengeSignature) {
+    if (signature === this.pageChallengeSignature && pageChallenges.length) {
       return;
     }
 
     this.pageChallengeSignature = signature;
     this.pageChallengeCards = pageChallenges;
-    this.fetchChallenges(pageChallenges);
+    this.fetchChallenges(pageChallenges, loadToken, expectedPageId);
   }
   private checkAccess(): void {
     const email = this.normalizeEmail(this.auth.currentUser?.email || '');
@@ -614,6 +671,130 @@ export class HomeChallengeComponent implements OnDestroy {
       (this.adminUids || []).includes(meUid);
 
     return isAuthor || isPageAdmin;
+  }
+
+  openQuestionEditor(): void {
+    this.questionDraft = this.questionTemplates.createEditorDraft(this.questionTemplate);
+    this.questionOriginalDraft = this.questionTemplates.createEditorDraft(this.questionTemplate);
+    this.questionEditorLanguage = 'en';
+    this.questionResetArmed = false;
+    this.showQuestionEditor = true;
+  }
+
+  closeQuestionEditor(): void {
+    if (this.isSavingQuestions) return;
+    if (
+      this.hasQuestionDraftChanges &&
+      typeof window !== 'undefined' &&
+      !window.confirm('Discard your unsaved question changes?')
+    ) {
+      return;
+    }
+    this.showQuestionEditor = false;
+    this.questionResetArmed = false;
+  }
+
+  restoreStandardQuestion(key: string): void {
+    this.questionDraft[this.questionEditorLanguage][key] =
+      getDefaultQuestionLocales()[this.questionEditorLanguage][key];
+  }
+
+  get changedQuestionCount(): number {
+    const defaults = getDefaultQuestionLocales();
+    return PLAYGROUND_QUESTION_KEYS_FLAT.filter((key) =>
+      (['en', 'fr'] as PlaygroundQuestionLanguage[]).some(
+        (language) => this.questionDraft[language][key].trim() !== defaults[language][key].trim()
+      )
+    ).length;
+  }
+
+  get hasQuestionDraftChanges(): boolean {
+    return (['en', 'fr'] as PlaygroundQuestionLanguage[]).some((language) =>
+      PLAYGROUND_QUESTION_KEYS_FLAT.some(
+        (key) => this.questionDraft[language][key] !== this.questionOriginalDraft[language][key]
+      )
+    );
+  }
+
+  async saveQuestionTemplate(): Promise<void> {
+    if (!this.isAuthorPage || !this.challengePageId || this.isSavingQuestions) return;
+    if (!this.hasQuestionDraftChanges) {
+      this.toast.warning('No question wording has changed. Nothing was saved.');
+      return;
+    }
+    if (!this.changedQuestionCount) {
+      this.toast.warning('Use “Restore all standard questions” to return to the standard template.');
+      return;
+    }
+    const invalidKey = PLAYGROUND_QUESTION_KEYS_FLAT.find((key) =>
+      (['en', 'fr'] as PlaygroundQuestionLanguage[]).some(
+        (language) => !this.questionDraft[language][key]?.trim()
+      )
+    );
+    if (invalidKey) {
+      this.toast.error(`Question ${invalidKey} cannot be empty.`);
+      return;
+    }
+
+    this.isSavingQuestions = true;
+    try {
+      this.questionTemplate = await this.questionTemplates.save(
+        String(this.challengePageId),
+        this.questionDraft
+      );
+      this.questionDraft = this.questionTemplates.createEditorDraft(this.questionTemplate);
+      this.questionOriginalDraft = this.questionTemplates.createEditorDraft(this.questionTemplate);
+      this.toast.success(`Questions updated for ${this.ids.length} solution${this.ids.length === 1 ? '' : 's'}.`);
+      this.showQuestionEditor = false;
+    } catch (error) {
+      console.error('Unable to save challenge questions', error);
+      this.toast.error('Could not save the questions. Your draft is still here; please try again.');
+    } finally {
+      this.isSavingQuestions = false;
+    }
+  }
+
+  async resetQuestionTemplate(): Promise<void> {
+    if (!this.questionResetArmed) {
+      this.questionResetArmed = true;
+      return;
+    }
+    if (!this.isAuthorPage || !this.challengePageId || this.isSavingQuestions) return;
+    if (this.questionTemplate?.mode !== 'custom') {
+      this.questionDraft = getDefaultQuestionLocales();
+      this.questionOriginalDraft = getDefaultQuestionLocales();
+      this.questionResetArmed = false;
+      this.showQuestionEditor = false;
+      this.toast.success('The standard Solution Playground questions are already active.');
+      return;
+    }
+    this.isSavingQuestions = true;
+    try {
+      this.questionTemplate = await this.questionTemplates.reset(String(this.challengePageId));
+      this.questionDraft = this.questionTemplates.createEditorDraft(this.questionTemplate);
+      this.questionOriginalDraft = this.questionTemplates.createEditorDraft(this.questionTemplate);
+      this.questionResetArmed = false;
+      this.toast.success('Standard Solution Playground questions restored.');
+      this.showQuestionEditor = false;
+    } catch (error) {
+      console.error('Unable to restore standard questions', error);
+      this.toast.error('Could not restore the standard questions. Please try again.');
+    } finally {
+      this.isSavingQuestions = false;
+    }
+  }
+
+  private watchQuestionTemplate(challengePageId: string): void {
+    this.questionTemplateSub?.unsubscribe();
+    this.questionTemplateSub = this.questionTemplates
+      .watchForChallenge(challengePageId)
+      .subscribe((template) => {
+        this.questionTemplate = template;
+        if (!this.showQuestionEditor) {
+          this.questionDraft = this.questionTemplates.createEditorDraft(template);
+          this.questionOriginalDraft = this.questionTemplates.createEditorDraft(template);
+        }
+      });
   }
 
   get pendingJoinRequestsForPage(): ChallengeJoinRequest[] {
@@ -700,10 +881,24 @@ export class HomeChallengeComponent implements OnDestroy {
   /** whether the detailed list is visible */
   showParticipantsList = false;
 
-  fetchChallenges(pageChallenges: any[] = this.pageChallengeCards) {
+  fetchChallenges(
+    pageChallenges: any[] = this.pageChallengeCards,
+    loadToken: number = this.pageLoadToken,
+    expectedPageId: string = String(this.challengePageId || '')
+  ) {
     this.challengeHydrationSub?.unsubscribe();
 
-    const matchingChallenges = pageChallenges || [];
+    if (
+      loadToken !== this.pageLoadToken ||
+      expectedPageId !== String(this.challengePageId || '')
+    ) {
+      return;
+    }
+
+    const matchingChallenges = filterChallengeLinksForPage(
+      pageChallenges,
+      expectedPageId
+    );
 
     if (!matchingChallenges.length) {
       this.challenges[this.allChallengesKey] = {
@@ -734,6 +929,12 @@ export class HomeChallengeComponent implements OnDestroy {
         )
       )
     ).subscribe((data: any[]) => {
+        if (
+          loadToken !== this.pageLoadToken ||
+          expectedPageId !== String(this.challengePageId || '')
+        ) {
+          return;
+        }
         // Transform the array into the expected format
         const transformedData = {
           ids: data.map((challenge) => challenge.id),
@@ -998,7 +1199,8 @@ export class HomeChallengeComponent implements OnDestroy {
         this.solution.newSolution.participantsHolder,
         [],
         [],
-        newChallengeId
+        newChallengeId,
+        String(this.challengePageId)
       );
 
       this.toast.success('Challenge added to this workspace.');
@@ -1961,7 +2163,8 @@ export class HomeChallengeComponent implements OnDestroy {
         [], // Assuming 'any' means an array of evaluators
         // endDate: "", // This was commented out in your request, so I've kept it out
         [],
-        this.challengeId
+        this.challengeId,
+        String(this.challengePageId)
       );
       // Clear the form fields
 
@@ -2088,8 +2291,23 @@ export class HomeChallengeComponent implements OnDestroy {
 
     this.isRemovingSolution = true;
     try {
-      // Remove only the page link. The underlying solution and its team stay intact.
-      await this.afs.doc(`user-challenges/${target.id}`).delete();
+      // Remove the page link and its denormalized inheritance pointer. The
+      // underlying solution, answers, and team remain intact.
+      const solutionRef = this.afs.doc<Solution>(`solutions/${target.id}`).ref;
+      const solutionSnapshot = await solutionRef.get();
+      const solutionData = solutionSnapshot.data();
+      const batch = this.afs.firestore.batch();
+      batch.delete(this.afs.doc(`user-challenges/${target.id}`).ref);
+      if (
+        solutionData &&
+        solutionData.challengePageId === this.challengePageId &&
+        this.canManageSolutionDocument(solutionData)
+      ) {
+        batch.update(solutionRef, {
+          challengePageId: firebase.firestore.FieldValue.delete(),
+        });
+      }
+      await batch.commit();
 
       this.ids.splice(currentIndex, 1);
       this.titles.splice(currentIndex, 1);
@@ -2524,8 +2742,18 @@ export class HomeChallengeComponent implements OnDestroy {
       const image = (solutionToAdd.image || '').toString();
       const titleLower = title.toLowerCase();
 
-      const cardRef = this.afs.doc(`user-challenges/${id}`).ref;
-      await cardRef.set(
+      const cardRef = this.afs.doc<any>(`user-challenges/${id}`).ref;
+      const existingLink = await cardRef.get();
+      const existingChallengePageId = String(existingLink.data()?.challengePageId || '');
+      if (existingChallengePageId && existingChallengePageId !== String(this.challengePageId)) {
+        this.toast.error('This solution already belongs to another challenge space. Remove it there before moving it.');
+        return false;
+      }
+
+      const solutionRef = this.afs.doc<Solution>(`solutions/${id}`).ref;
+      const batch = this.afs.firestore.batch();
+      batch.set(
+        cardRef,
         {
           id,
           title,
@@ -2538,6 +2766,14 @@ export class HomeChallengeComponent implements OnDestroy {
         },
         { merge: true }
       );
+      if (this.canManageSolutionDocument(solutionToAdd)) {
+        batch.set(
+          solutionRef,
+          { challengePageId: String(this.challengePageId) },
+          { merge: true }
+        );
+      }
+      await batch.commit();
 
       if (!this.ids.includes(id)) {
         this.ids.unshift(id);
@@ -2560,6 +2796,20 @@ export class HomeChallengeComponent implements OnDestroy {
     } finally {
       this.addingSolutionId = '';
     }
+  }
+
+  private canManageSolutionDocument(solution: Solution): boolean {
+    const uid = String(this.auth.currentUser?.uid || '');
+    const email = this.normalizeEmail(this.auth.currentUser?.email || '');
+    const ownerUids = [
+      solution.ownerAccountId,
+      solution.authorAccountId,
+      solution.initiatorId,
+    ].map((value) => String(value || ''));
+    const adminEmails = (solution.solutionAdminEmails || []).map((value) =>
+      this.normalizeEmail(value)
+    );
+    return (!!uid && ownerUids.includes(uid)) || (!!email && adminEmails.includes(email));
   }
 
   private normalizeEmail(e: string): string {

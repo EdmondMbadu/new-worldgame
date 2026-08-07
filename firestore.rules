@@ -191,6 +191,19 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // Challenge-space prompt templates are readable by signed-in solution
+    // participants. All mutations go through admin-authorized callable
+    // functions, which also validate the stable answer-key schema and write
+    // an immutable revision record.
+    match /challengeQuestionTemplates/{challengePageId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if false;
+
+      match /revisions/{revisionId} {
+        allow read, create, update, delete: if false;
+      }
+    }
+
     // School invitation lookup uses a collection-group query. Firestore
     // requires an explicit collection-group match so the query can prove that
     // every possible result belongs to the signed-in invitee.
@@ -214,12 +227,14 @@ service cloud.firestore {
       allow read: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'gsl-workshop-announcement-signups'
         && topLevelCollection != 'solutions'
+        && topLevelCollection != 'challengeQuestionTemplates'
         && topLevelCollection != 'publicCommunitySolutions';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
         && topLevelCollection != 'gsl-workshop-announcement-signups'
         && topLevelCollection != 'solutions'
+        && topLevelCollection != 'challengeQuestionTemplates'
         && topLevelCollection != 'publicCommunitySolutions';
     }
   }

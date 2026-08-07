@@ -4713,9 +4713,143 @@ async function assertChallengePageAdmin(
 
   throw new functions.https.HttpsError(
     'permission-denied',
-    'Only challenge space admins can respond to join requests.'
+    'Only challenge space admins can perform this action.'
   );
 }
+
+const CHALLENGE_QUESTION_SCHEMA_VERSION = 1;
+const CHALLENGE_QUESTION_KEYS = [
+  'S1-A', 'S1-B', 'S1-C', 'S1-D',
+  'S2-A', 'S2-B',
+  'S3-A', 'S3-B', 'S3-C', 'S3-D', 'S3-E',
+  'S4-A', 'S4-B', 'S4-C', 'S4-D', 'S4-E', 'S4-F', 'S4-G', 'S4-H',
+  'S4-I', 'S4-J', 'S4-K', 'S4-L', 'S4-M', 'S4-N',
+  'S5',
+];
+const CHALLENGE_QUESTION_KEY_SET = new Set(CHALLENGE_QUESTION_KEYS);
+const MAX_CHALLENGE_QUESTION_LENGTH = 4000;
+
+function validateChallengeQuestionLocales(value: unknown): Record<string, Record<string, string>> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Question locales are required.');
+  }
+
+  const input = value as Record<string, unknown>;
+  const unexpectedLocales = Object.keys(input).filter((language) => !['en', 'fr'].includes(language));
+  if (unexpectedLocales.length) {
+    throw new functions.https.HttpsError('invalid-argument', 'Only English and French question wording is supported.');
+  }
+
+  const result: Record<string, Record<string, string>> = {};
+  for (const language of ['en', 'fr']) {
+    const locale = input[language];
+    if (!locale || typeof locale !== 'object' || Array.isArray(locale)) {
+      throw new functions.https.HttpsError('invalid-argument', `A complete ${language} question set is required.`);
+    }
+    const promptMap = locale as Record<string, unknown>;
+    const keys = Object.keys(promptMap);
+    if (keys.length !== CHALLENGE_QUESTION_KEYS.length || keys.some((key) => !CHALLENGE_QUESTION_KEY_SET.has(key))) {
+      throw new functions.https.HttpsError('invalid-argument', `The ${language} question set must preserve all stable question keys.`);
+    }
+    result[language] = {};
+    for (const key of CHALLENGE_QUESTION_KEYS) {
+      const prompt = typeof promptMap[key] === 'string' ? String(promptMap[key]).trim() : '';
+      if (!prompt || prompt.length > MAX_CHALLENGE_QUESTION_LENGTH) {
+        throw new functions.https.HttpsError(
+          'invalid-argument',
+          `${language}.${key} must contain 1-${MAX_CHALLENGE_QUESTION_LENGTH} characters.`
+        );
+      }
+      result[language][key] = prompt;
+    }
+  }
+  return result;
+}
+
+async function getChallengePageForQuestionUpdate(challengePageId: string): Promise<FirebaseFirestore.DocumentSnapshot> {
+  if (!/^[A-Za-z0-9_-]{1,128}$/.test(challengePageId)) {
+    throw new functions.https.HttpsError('invalid-argument', 'A valid challenge page ID is required.');
+  }
+  const pageSnapshot = await admin.firestore().doc(`challengePages/${challengePageId}`).get();
+  if (!pageSnapshot.exists) {
+    throw new functions.https.HttpsError('not-found', 'Challenge space not found.');
+  }
+  return pageSnapshot;
+}
+
+export const saveChallengeQuestionTemplate = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const challengePageId = String(data?.challengePageId || '').trim();
+    const pageSnapshot = await getChallengePageForQuestionUpdate(challengePageId);
+    const actor = await assertChallengePageAdmin(pageSnapshot.data() || {}, context);
+    if (Number(data?.schemaVersion) !== CHALLENGE_QUESTION_SCHEMA_VERSION) {
+      throw new functions.https.HttpsError('failed-precondition', 'This question editor is out of date. Reload the page and try again.');
+    }
+    const locales = validateChallengeQuestionLocales(data?.locales);
+    const changedKeys = Array.isArray(data?.changedKeys)
+      ? Array.from(new Set<string>(data.changedKeys.map((key: unknown) => String(key || '').trim())))
+      : [];
+    if (!changedKeys.length || changedKeys.some((key) => !CHALLENGE_QUESTION_KEY_SET.has(key))) {
+      throw new functions.https.HttpsError('invalid-argument', 'At least one valid changed question key is required.');
+    }
+    const db = admin.firestore();
+    const templateRef = db.doc(`challengeQuestionTemplates/${challengePageId}`);
+    let nextRevision = 1;
+
+    await db.runTransaction(async (transaction) => {
+      const current = await transaction.get(templateRef);
+      nextRevision = Math.max(0, Number(current.data()?.['revision'] || 0)) + 1;
+      const payload = {
+        challengePageId,
+        schemaVersion: CHALLENGE_QUESTION_SCHEMA_VERSION,
+        baseSchemaVersion: CHALLENGE_QUESTION_SCHEMA_VERSION,
+        revision: nextRevision,
+        mode: 'custom',
+        locales,
+        changedKeys,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedByUid: actor.uid,
+        updatedByEmail: actor.email,
+      };
+      transaction.set(templateRef, payload);
+      transaction.set(templateRef.collection('revisions').doc(String(nextRevision).padStart(8, '0')), payload);
+    });
+
+    return { challengePageId, schemaVersion: 1, baseSchemaVersion: 1, revision: nextRevision, mode: 'custom', locales };
+  }
+);
+
+export const resetChallengeQuestionTemplate = functions.https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    const challengePageId = String(data?.challengePageId || '').trim();
+    const pageSnapshot = await getChallengePageForQuestionUpdate(challengePageId);
+    const actor = await assertChallengePageAdmin(pageSnapshot.data() || {}, context);
+    const db = admin.firestore();
+    const templateRef = db.doc(`challengeQuestionTemplates/${challengePageId}`);
+    let nextRevision = 1;
+
+    await db.runTransaction(async (transaction) => {
+      const current = await transaction.get(templateRef);
+      nextRevision = Math.max(0, Number(current.data()?.['revision'] || 0)) + 1;
+      const payload = {
+        challengePageId,
+        schemaVersion: CHALLENGE_QUESTION_SCHEMA_VERSION,
+        baseSchemaVersion: CHALLENGE_QUESTION_SCHEMA_VERSION,
+        revision: nextRevision,
+        mode: 'standard',
+        locales: {},
+        changedKeys: [],
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedByUid: actor.uid,
+        updatedByEmail: actor.email,
+      };
+      transaction.set(templateRef, payload);
+      transaction.set(templateRef.collection('revisions').doc(String(nextRevision).padStart(8, '0')), payload);
+    });
+
+    return { challengePageId, schemaVersion: 1, baseSchemaVersion: 1, revision: nextRevision, mode: 'standard', locales: {} };
+  }
+);
 
 export const requestChallengePageJoin = functions.https.onCall(
   async (data: any, context: functions.https.CallableContext) => {

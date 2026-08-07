@@ -1,4 +1,5 @@
 import { HomeChallengeComponent } from './home-challenge.component';
+import { of } from 'rxjs';
 
 describe('HomeChallengeComponent', () => {
   const pageId2025 = '1eKg1Mn15M8yRmRIScw5';
@@ -20,6 +21,15 @@ describe('HomeChallengeComponent', () => {
     const challenge = {
       resolveChallengePage,
     };
+    const questionTemplates = {
+      watchForChallenge: () => of({
+        challengePageId: pageId2026,
+        mode: 'standard',
+        revision: 0,
+        locales: { en: {}, fr: {} },
+      }),
+      createEditorDraft: () => ({ en: {}, fr: {} }),
+    };
 
     const component = new (HomeChallengeComponent as any)(
       route,
@@ -33,7 +43,8 @@ describe('HomeChallengeComponent', () => {
       {},
       {},
       {},
-      {}
+      {},
+      questionTemplates
     ) as HomeChallengeComponent;
 
     return { component, router };
@@ -116,5 +127,58 @@ describe('HomeChallengeComponent', () => {
       true,
       jasmine.any(Number)
     );
+  });
+
+  it('keeps only links explicitly assigned to the active challenge space', () => {
+    const { component } = createComponent(jasmine.createSpy('resolveChallengePage'));
+    component.challengePageId = pageId2026;
+    const fetchChallenges = spyOn(component, 'fetchChallenges');
+
+    (component as any).applyPageChallenges([
+      { id: 'expected-1', challengePageId: pageId2026 },
+      { id: 'wrong-page', challengePageId: pageId2025 },
+      { id: 'unassigned' },
+    ]);
+
+    expect(component.pageChallengeCards).toEqual([
+      jasmine.objectContaining({ id: 'expected-1', challengePageId: pageId2026 }),
+    ]);
+    expect(fetchChallenges).toHaveBeenCalledWith(
+      [jasmine.objectContaining({ id: 'expected-1' })],
+      jasmine.any(Number),
+      pageId2026
+    );
+  });
+
+  it('authoritatively clears a previously populated grid for an empty space', () => {
+    const { component } = createComponent(jasmine.createSpy('resolveChallengePage'));
+    component.challengePageId = pageId2026;
+    component.pageChallengeCards = [
+      { id: 'stale-solution', challengePageId: pageId2025 },
+    ];
+    component.titles = ['Stale solution'];
+    component.ids = ['stale-solution'];
+
+    (component as any).applyPageChallenges([]);
+
+    expect(component.pageChallengeCards).toEqual([]);
+    expect(component.titles).toEqual([]);
+    expect(component.ids).toEqual([]);
+  });
+
+  it('ignores a hydration result from an older page load', () => {
+    const { component } = createComponent(jasmine.createSpy('resolveChallengePage'));
+    component.challengePageId = pageId2026;
+    const currentLoadToken = (component as any).pageLoadToken;
+    const fetchChallenges = spyOn(component, 'fetchChallenges');
+
+    (component as any).applyPageChallenges(
+      [{ id: 'old-result', challengePageId: pageId2025 }],
+      currentLoadToken - 1,
+      pageId2025
+    );
+
+    expect(component.pageChallengeCards).toEqual([]);
+    expect(fetchChallenges).not.toHaveBeenCalled();
   });
 });
