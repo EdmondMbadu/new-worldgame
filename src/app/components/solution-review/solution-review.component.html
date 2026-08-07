@@ -1,0 +1,270 @@
+<app-navbar
+  [email]="auth.currentUser?.email || ''"
+  [firstName]="auth.currentUser?.firstName || ''"
+  [lastName]="auth.currentUser?.lastName || ''"
+  [path]="'home'"
+  [sideBarSmall]="true"
+  [sideBarBig]="false"
+></app-navbar>
+
+<app-management-toolbar></app-management-toolbar>
+
+<main class="review-page">
+  <header class="review-hero">
+    <div>
+      <p class="eyebrow">Community protection</p>
+      <h1>Solution Safety Review</h1>
+      <p class="hero-copy">
+        Suspicious versions stay hidden while text and images are checked in the
+        background. Approval applies only to the exact version reviewed.
+      </p>
+    </div>
+    <div class="hero-stat" aria-label="Solutions needing review">
+      <strong>{{ countFor('needs_review') }}</strong>
+      <span>need review</span>
+    </div>
+  </header>
+
+  <div *ngIf="message" class="notice notice-success" role="status">{{ message }}</div>
+  <div *ngIf="errorMessage" class="notice notice-error" role="alert">{{ errorMessage }}</div>
+
+  <section class="policy-card" aria-labelledby="policy-heading">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Expandable controls</p>
+        <h2 id="policy-heading">Safety policy</h2>
+        <p>Threshold changes affect new scans and administrator-requested re-scans.</p>
+      </div>
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="scanNextLegacyBatch()"
+        [disabled]="backfillRunning || !backfillHasMore"
+      >
+        {{
+          backfillRunning
+            ? 'Queuing…'
+            : backfillHasMore
+            ? 'Scan next 10 existing'
+            : 'Existing scan complete'
+        }}
+      </button>
+    </div>
+
+    <div *ngIf="policyLoading" class="loading-line">Loading policy…</div>
+    <div *ngIf="policy" class="policy-grid">
+      <label>
+        <span>Send to review at</span>
+        <div class="range-row">
+          <input
+            type="range"
+            min="0.3"
+            max="0.85"
+            step="0.05"
+            [(ngModel)]="policy.reviewThreshold"
+          />
+          <strong>{{ riskPercent(policy.reviewThreshold) }}%</strong>
+        </div>
+      </label>
+      <label>
+        <span>Automatically hide at</span>
+        <div class="range-row">
+          <input
+            type="range"
+            min="0.6"
+            max="0.99"
+            step="0.01"
+            [(ngModel)]="policy.autoBlockThreshold"
+          />
+          <strong>{{ riskPercent(policy.autoBlockThreshold) }}%</strong>
+        </div>
+      </label>
+      <label>
+        <span>Political content</span>
+        <select [(ngModel)]="policy.politicalMode">
+          <option value="allow_neutral_review_partisan">
+            Allow neutral; review partisan
+          </option>
+          <option value="review_all">Review all political content</option>
+          <option value="block_partisan">Hide strong partisan persuasion</option>
+        </select>
+      </label>
+
+      <div class="category-settings">
+        <span>Categories checked</span>
+        <div class="category-grid">
+          <label *ngFor="let category of categories" class="category-option">
+            <input
+              type="checkbox"
+              [(ngModel)]="policy.enabledCategories[category[0]]"
+              [disabled]="lockedCategories.has(category[0])"
+            />
+            <span>
+              {{ category[1] }}
+              <small *ngIf="lockedCategories.has(category[0])">Always on</small>
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="policy-actions">
+        <small>Policy version: {{ policy.version }}</small>
+        <button
+          type="button"
+          class="primary-button"
+          (click)="savePolicy()"
+          [disabled]="policySaving"
+        >
+          {{ policySaving ? 'Saving…' : 'Save policy' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="queue-section" aria-labelledby="queue-heading">
+    <div class="section-heading queue-heading">
+      <div>
+        <p class="eyebrow">Human verification</p>
+        <h2 id="queue-heading">Review queue</h2>
+      </div>
+      <label class="search-box">
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        <input
+          type="search"
+          [(ngModel)]="searchTerm"
+          placeholder="Search solutions, people, or risks"
+          aria-label="Search review queue"
+        />
+      </label>
+    </div>
+
+    <nav class="status-tabs" aria-label="Moderation status">
+      <button
+        *ngFor="let tab of tabs"
+        type="button"
+        (click)="setStatus(tab.value)"
+        [class.active]="activeStatus === tab.value"
+      >
+        {{ tab.label }}
+        <span>{{ countFor(tab.value) }}</span>
+      </button>
+    </nav>
+
+    <div *ngIf="loading" class="empty-state">Loading the safety queue…</div>
+    <div *ngIf="!loading && filteredQueue.length === 0" class="empty-state">
+      <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>
+      <h3>Nothing in this view</h3>
+      <p>The automatic checks have not placed any recent versions here.</p>
+    </div>
+
+    <div class="review-list" *ngIf="!loading && filteredQueue.length">
+      <article
+        *ngFor="let item of filteredQueue; trackBy: trackBySolutionId"
+        class="review-card"
+      >
+        <div class="review-card-main">
+          <div class="sensitive-media" *ngIf="item.image">
+            <button
+              *ngIf="!isImageRevealed(item.solutionId)"
+              type="button"
+              class="reveal-button"
+              (click)="toggleImage(item.solutionId)"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">visibility</span>
+              Reveal image
+            </button>
+            <img
+              *ngIf="isImageRevealed(item.solutionId)"
+              [src]="item.image"
+              [alt]="item.title + ' image under review'"
+              loading="lazy"
+              decoding="async"
+            />
+            <button
+              *ngIf="isImageRevealed(item.solutionId)"
+              type="button"
+              class="hide-image-button"
+              (click)="toggleImage(item.solutionId)"
+            >
+              Hide image
+            </button>
+          </div>
+
+          <div class="review-content">
+            <div class="review-meta">
+              <span class="status-pill" [ngClass]="statusClass(item.status)">
+                {{ statusLabel(item.status) }}
+              </span>
+              <span>{{ updatedLabel(item.updatedAtMs) }}</span>
+              <span>{{ item.finished === 'true' ? 'Submitted' : 'In development' }}</span>
+            </div>
+            <h3>{{ item.title }}</h3>
+            <p class="author">By {{ item.authorName }}</p>
+            <p *ngIf="item.summary" class="summary">{{ item.summary }}</p>
+
+            <div class="risk-list" *ngIf="item.topRisks?.length">
+              <span
+                *ngFor="let risk of item.topRisks"
+                [class.risk-high]="risk.score >= 0.9"
+                [class.risk-medium]="risk.score >= 0.55 && risk.score < 0.9"
+              >
+                {{ riskLabel(risk.category) }} {{ riskPercent(risk.score) }}%
+              </span>
+            </div>
+
+            <details *ngIf="item.evidence?.length">
+              <summary>Why it was flagged</summary>
+              <ul>
+                <li *ngFor="let evidence of item.evidence">
+                  <strong>{{ riskLabel(evidence.category) }}</strong>
+                  in {{ evidence.field }}: “{{ evidence.excerpt }}”
+                </li>
+              </ul>
+            </details>
+
+            <div class="review-history" *ngIf="item.reviewerEmail">
+              Last reviewed by {{ item.reviewerEmail }}
+              <span *ngIf="item.reviewNote">— {{ item.reviewNote }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-actions">
+          <a [routerLink]="['/solution-view', item.solutionId]" target="_blank">
+            Open full solution
+          </a>
+          <input
+            type="text"
+            [(ngModel)]="notes[item.solutionId]"
+            placeholder="Optional review note"
+            [attr.aria-label]="'Review note for ' + item.title"
+          />
+          <button
+            type="button"
+            class="approve-button"
+            (click)="takeAction(item, 'approve')"
+            [disabled]="busySolutions.has(item.solutionId)"
+          >
+            Approve this version
+          </button>
+          <button
+            type="button"
+            class="hide-button"
+            (click)="takeAction(item, 'keep_hidden')"
+            [disabled]="busySolutions.has(item.solutionId)"
+          >
+            Keep hidden
+          </button>
+          <button
+            type="button"
+            class="rescan-button"
+            (click)="takeAction(item, 'rescan')"
+            [disabled]="busySolutions.has(item.solutionId)"
+          >
+            Re-scan
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>

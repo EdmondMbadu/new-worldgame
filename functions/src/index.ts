@@ -33,6 +33,14 @@ export {
   getPublicCommunitySolutions,
   syncPublicCommunitySolutionFeed,
 } from './public-community';
+export {
+  backfillSolutionModeration,
+  getSolutionModerationPolicy,
+  moderateSolutionOnWrite,
+  reviewSolutionModeration,
+  setSolutionPublicationStatus,
+  updateSolutionModerationPolicy,
+} from './solution-moderation';
 
 // read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
 const GEMINI_KEY = functions.config()['gemini'].key;

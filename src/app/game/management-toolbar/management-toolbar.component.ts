@@ -16,6 +16,7 @@ export class ManagementToolbarComponent {
 
   @Input() items: SubToolLink[] = [
     { path: '/user-management', label: 'Sign-Up' },
+    { path: '/solution-review', label: 'Review' },
     { path: '/solution-publication', label: 'Solutions' },
     { path: '/management-primer', label: 'Primer' },
     { path: '/management-gsl', label: `GSL-${this.currentYear}` },

@@ -48,7 +48,18 @@ service cloud.firestore {
     }
 
     function canReadSolution(solution) {
-      return solution.get('statusForPublication', '') == 'approved'
+      let moderation = solution.get('moderation', {});
+      let hasApprovedModeration =
+        solution.get('moderationLegacyExempt', false) == true
+        || (
+          moderation.get('status', '') == 'approved'
+          && moderation.get('contentHash', '') != ''
+          && moderation.get('contentHash', '') == moderation.get('approvedContentHash', '')
+        );
+      return (
+          solution.get('statusForPublication', '') == 'approved'
+          && hasApprovedModeration
+        )
         || (
           isSignedIn()
           && (
@@ -68,7 +79,13 @@ service cloud.firestore {
         'teamMemberEmails',
         'solutionAdminEmails',
         'visibilityUpdatedAt',
-        'visibilityUpdatedBy'
+        'visibilityUpdatedBy',
+        'moderationLegacyExempt',
+        'moderation',
+        'statusForPublication',
+        'publicationReviewedAtMs',
+        'publicationReviewedByUid',
+        'publicationReviewedByEmail'
       ]);
     }
 
@@ -141,7 +158,15 @@ service cloud.firestore {
     // members. Approved publication remains the separate, public pathway.
     match /{path=**}/solutions/{solutionId} {
       allow read: if canReadSolution(resource.data);
-      allow create: if isSignedIn();
+      allow create: if isSignedIn()
+        && !request.resource.data.keys().hasAny([
+          'moderation',
+          'moderationLegacyExempt',
+          'publicationReviewedAtMs',
+          'publicationReviewedByUid',
+          'publicationReviewedByEmail'
+        ])
+        && request.resource.data.get('statusForPublication', '') != 'approved';
       allow update: if isSignedIn()
         && (
           (
@@ -191,6 +216,23 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // Small server-maintained moderation records. Administrators can inspect
+    // the queue, but every decision and policy mutation goes through a callable
+    // function so client code cannot grant public visibility.
+    match /solutionModerationQueue/{solutionId} {
+      allow read: if isPlatformAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /solutionModerationPolicies/{policyId} {
+      allow read: if isPlatformAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /solutionModerationCache/{cacheId} {
+      allow read, create, update, delete: if false;
+    }
+
     // Challenge-space prompt templates are readable by signed-in solution
     // participants. All mutations go through admin-authorized callable
     // functions, which also validate the stable answer-key schema and write
@@ -228,14 +270,20 @@ service cloud.firestore {
         && topLevelCollection != 'gsl-workshop-announcement-signups'
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
-        && topLevelCollection != 'publicCommunitySolutions';
+        && topLevelCollection != 'publicCommunitySolutions'
+        && topLevelCollection != 'solutionModerationQueue'
+        && topLevelCollection != 'solutionModerationPolicies'
+        && topLevelCollection != 'solutionModerationCache';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
         && topLevelCollection != 'gsl-workshop-announcement-signups'
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
-        && topLevelCollection != 'publicCommunitySolutions';
+        && topLevelCollection != 'publicCommunitySolutions'
+        && topLevelCollection != 'solutionModerationQueue'
+        && topLevelCollection != 'solutionModerationPolicies'
+        && topLevelCollection != 'solutionModerationCache';
     }
   }
 }

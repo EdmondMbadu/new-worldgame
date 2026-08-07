@@ -84,6 +84,7 @@ export class Solution {
   board?: string;
   chosenAdmins?: Admin[] = []; //  NEW
   statusForPublication?: string;
+  moderation?: SolutionModerationState;
   /* ---- UI‑only helper fields (optional) ---- */
   editingCategory?: boolean;
   tempCategory?: string;
@@ -117,6 +118,54 @@ export class Solution {
     createdByUid?: string;
     createdByEmail?: string;
   };
+}
+
+export type SolutionModerationStatus =
+  | 'pending'
+  | 'scanning'
+  | 'approved'
+  | 'needs_review'
+  | 'blocked'
+  | 'error';
+
+export interface SolutionModerationRisk {
+  category: string;
+  score: number;
+}
+
+export interface SolutionModerationEvidence {
+  category: string;
+  field: string;
+  excerpt: string;
+}
+
+export interface SolutionModerationState {
+  status: SolutionModerationStatus;
+  contentHash?: string;
+  approvedContentHash?: string;
+  policyVersion?: string;
+  model?: string;
+  reasonCodes?: string[];
+  topRisks?: SolutionModerationRisk[];
+  evidence?: SolutionModerationEvidence[];
+  summary?: string;
+  scores?: Record<string, number>;
+  imageAssessed?: boolean;
+  decisionSource?: 'automatic' | 'administrator';
+  scannedAtMs?: number;
+  reviewerUid?: string;
+  reviewerEmail?: string;
+  reviewNote?: string;
+  reviewedAtMs?: number;
+}
+
+export interface SolutionModerationQueueItem extends SolutionModerationState {
+  solutionId: string;
+  title: string;
+  authorName: string;
+  image?: string;
+  finished?: string;
+  updatedAtMs: number;
 }
 
 export interface SolutionRecruitmentProfile {

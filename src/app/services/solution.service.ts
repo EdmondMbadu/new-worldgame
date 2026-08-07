@@ -1381,15 +1381,14 @@ export class SolutionService {
     ];
   }
   submitSolutionForPublication(solutionId: string, currentSolution: Solution) {
-    const data = this.withSolutionUpdatedAt({
-      statusForPublication: currentSolution.statusForPublication,
-      evaluators: currentSolution.evaluators,
-    });
-    const solutionRef: AngularFirestoreDocument<Solution> = this.afs.doc(
-      `solutions/${solutionId}`
+    const callable = this.fns.httpsCallable('setSolutionPublicationStatus');
+    return firstValueFrom(
+      callable({
+        solutionId,
+        status: currentSolution.statusForPublication || 'pending',
+        evaluators: currentSolution.evaluators || [],
+      })
     );
-
-    return solutionRef.set(data, { merge: true });
   }
   setSolutionCategoryForPublication(
     solutionId: string,

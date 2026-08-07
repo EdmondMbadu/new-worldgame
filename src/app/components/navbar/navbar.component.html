@@ -1962,6 +1962,19 @@
           </li>
           <li *ngIf="this.auth.currentUser.admin">
             <a
+              routerLink="/solution-review"
+              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+            >
+              <span
+                class="material-symbols-outlined mr-2 inline-block align-middle text-[20px] text-gray-800 dark:text-white"
+                aria-hidden="true"
+                >shield_person</span
+              >
+              {{ 'navbar.safetyReview' | translate }}
+            </a>
+          </li>
+          <li *ngIf="this.auth.currentUser.admin">
+            <a
               routerLink="/user-management"
               class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
@@ -2291,6 +2304,14 @@
               (click)="toggleHamburgerHome()"
               class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
               >{{ schoolNavLabel }}</a
+            >
+          </li>
+          <li *ngIf="this.auth.currentUser.admin">
+            <a
+              routerLink="/solution-review"
+              (click)="toggleHamburgerHome()"
+              class="block rounded-xl px-4 py-3 font-semibold hover:bg-slate-100 dark:hover:bg-slate-800"
+              >{{ 'navbar.safetyReview' | translate }}</a
             >
           </li>
           <li *ngIf="this.auth.currentUser.admin">

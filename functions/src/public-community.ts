@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v1';
+import { hasApprovedCurrentModerationVersion } from './solution-moderation-core';
 
 type CommunityFilter = 'all' | 'in-development' | 'submitted';
 
@@ -112,7 +113,8 @@ const milliseconds = (value: any): number => {
 export const isCommunityVisible = (solution: any): boolean =>
   solution?.feedEligible === true &&
   solution?.isPrivate === false &&
-  solution?.communityVisibility !== 'private';
+  solution?.communityVisibility !== 'private' &&
+  hasApprovedCurrentModerationVersion(solution);
 
 const publicDesignerCount = (solution: any): number => {
   const designers = new Set<string>();
@@ -184,6 +186,11 @@ export const publicFeedSolution = (
     // to its current owner after a handoff.
     authorName: publicOwnerName(solution),
     finished: solution['finished'] === 'true' ? 'true' : 'false',
+    statusForPublication:
+      solution['statusForPublication'] === 'approved' ? 'approved' : 'pending',
+    category: safePlainText(solution['category'], 120),
+    submissionDate: safePlainText(solution['submissionDate'], 80),
+    numLike: String(Math.max(0, Number(solution['numLike'] || 0))),
     feedStatus:
       solution['feedStatus'] === 'submitted' || solution['finished'] === 'true'
         ? 'submitted'

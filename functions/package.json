@@ -3,13 +3,16 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "test:moderation": "npm run build && node --test test/solution-moderation-core.test.js",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "community-feed:audit": "node scripts/backfill-community-solutions.js",
-    "community-feed:apply": "node scripts/backfill-community-solutions.js --apply"
+    "community-feed:apply": "node scripts/backfill-community-solutions.js --apply",
+    "moderation:prepare-legacy": "node scripts/prepare-solution-moderation.js",
+    "moderation:prepare-legacy:apply": "node scripts/prepare-solution-moderation.js --apply"
   },
   "engines": {
     "node": "20"

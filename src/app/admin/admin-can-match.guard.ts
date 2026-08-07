@@ -15,6 +15,7 @@ const ADMIN_PATHS = new Set<string>([
   'bulk-emails',
   'contact-emails',
   'solution-publication',
+  'solution-review',
 ]);
 
 export const adminCanMatch: CanMatchFn = (_route, segments) => {

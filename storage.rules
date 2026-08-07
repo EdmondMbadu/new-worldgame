@@ -12,6 +12,18 @@ service firebase.storage {
         && request.resource.contentType.matches('video/.*');
     }
 
+    function isSolutionImageUpload() {
+      return request.resource != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    match /solutions/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if signedIn() && isSolutionImageUpload();
+      allow delete: if signedIn();
+    }
+
     match /avatarIntroVideos/{avatarSlug}/{fileName} {
       allow read: if true;
       // The app and Firestore document rules enforce platform-admin management.
@@ -30,6 +42,7 @@ service firebase.storage {
     match /{topLevel}/{allPaths=**} {
       allow read: if true;
       allow write: if signedIn()
+        && topLevel != 'solutions'
         && topLevel != 'nwgNewsVideos'
         && topLevel != 'avatarIntroVideos';
     }
