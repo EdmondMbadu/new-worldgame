@@ -425,8 +425,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.currentSolution.communityVisibility = visibility;
       this.visibilityMessage =
         visibility === 'private'
-          ? 'This solution is now private to the team.'
-          : 'This solution is now visible to the signed-in community.';
+          ? 'This solution is now private and hidden from the community home page.'
+          : 'This solution is now visible on the community home page.';
       this.showVisibilityConfirm = false;
       this.pendingVisibility = null;
     } catch (error: any) {

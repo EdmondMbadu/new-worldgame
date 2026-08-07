@@ -269,28 +269,11 @@
       </div>
     </div>
 
-    <!-- ========== PUBLISH INVITE BANNER (Last Item) ========== -->
-    <div
-      (click)="toggleInviteModal()"
-      class="w-full max-w-4xl cursor-pointer group"
+    <!-- ========== COMMUNITY VISIBILITY ========== -->
+    <section
+      class="community-visibility-card w-full max-w-4xl"
+      [class.community-visibility-card--private]="!isCommunityVisible"
     >
-      <div class="rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-950/30 p-5 flex items-center gap-4 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-all">
-        <div class="rounded-xl p-3 bg-indigo-100 dark:bg-indigo-900/50">
-          <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
-          </svg>
-        </div>
-        <div class="flex-1">
-          <h3 class="font-semibold text-indigo-900 dark:text-indigo-100">Define Your Team & Publish Invite</h3>
-          <p class="text-sm text-indigo-700 dark:text-indigo-300">Set up your team profile and broadcast your invite to attract collaborators from the network.</p>
-        </div>
-        <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
-      </div>
-    </div>
-
-    <section class="community-visibility-card mt-6 w-full max-w-4xl">
       <div class="community-visibility-card__icon" [class.community-visibility-card__icon--private]="!isCommunityVisible">
         <span class="material-symbols-outlined">
           {{ isCommunityVisible ? "forum" : "lock" }}
@@ -317,8 +300,8 @@
         <p class="community-visibility-card__description">
           {{
             isCommunityVisible
-              ? "Signed-in Global Solutions Lab members can discover this solution, read the work, and leave comments for the team. It is not published to the public internet."
-              : "Only this solution's team can open the workspace and its comments. It will not appear in the community solutions feed."
+              ? "This solution appears on the community home page. Signed-in Global Solutions Lab members can discover it, read the work, and leave comments for the team. It is not published to the public internet."
+              : "This solution is hidden from the community home page. Only this solution's team can open the workspace and its comments."
           }}
         </p>
 
@@ -328,10 +311,10 @@
             type="button"
             (click)="requestVisibilityChange('private')"
             [disabled]="isSavingVisibility"
-            class="community-visibility-secondary"
+            class="community-visibility-primary community-visibility-primary--private"
           >
             <span class="material-symbols-outlined">lock</span>
-            Make private
+            Make private — hide from home page
           </button>
 
           <button
@@ -342,7 +325,7 @@
             class="community-visibility-primary"
           >
             <span class="material-symbols-outlined">public</span>
-            Make visible to community
+            Show to community — add to home page
           </button>
 
           <p *ngIf="!isCommunityVisible && !canRestoreCommunityVisibility" class="community-visibility-card__locked">
@@ -361,6 +344,27 @@
         </p>
       </div>
     </section>
+
+    <!-- ========== PUBLISH INVITE BANNER (Last Item) ========== -->
+    <div
+      (click)="toggleInviteModal()"
+      class="mt-6 w-full max-w-4xl cursor-pointer group"
+    >
+      <div class="rounded-2xl border-2 border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-950/30 p-5 flex items-center gap-4 hover:border-indigo-400 dark:hover:border-indigo-600 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-all">
+        <div class="rounded-xl p-3 bg-indigo-100 dark:bg-indigo-900/50">
+          <svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="font-semibold text-indigo-900 dark:text-indigo-100">Define Your Team & Publish Invite</h3>
+          <p class="text-sm text-indigo-700 dark:text-indigo-300">Set up your team profile and broadcast your invite to attract collaborators from the network.</p>
+        </div>
+        <svg class="w-5 h-5 text-indigo-500 dark:text-indigo-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </div>
+    </div>
 
     <section
       *ngIf="isAdminOfSolution || canLeaveSolution"
@@ -443,8 +447,8 @@
       <p>
         {{
           pendingVisibility === "private"
-            ? "It will immediately leave the community feed. Existing comments remain safely attached and become visible only to the team."
-            : "Signed-in GSL members will be able to discover, read, and comment on meaningful content in this solution."
+            ? "It will immediately disappear from the community home page. Existing comments remain safely attached and become visible only to the team."
+            : "This solution will appear on the community home page, where signed-in GSL members can discover, read, and comment on its content."
         }}
       </p>
     </div>
@@ -476,8 +480,8 @@
           isSavingVisibility
             ? "Saving…"
             : pendingVisibility === "private"
-            ? "Make private"
-            : "Share with community"
+            ? "Make private and hide"
+            : "Show on community home page"
         }}
       </button>
     </div>
