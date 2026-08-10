@@ -925,47 +925,47 @@
       "imageAlt": "Graphique des Objectifs de développement durable de l'ONU"
     },
     "ai": {
-      "title": "Rencontrez vos collègues IA",
-      "description": "Mentors, stratèges et penseurs systémiques qui vous accompagnent à chaque sprint — du premier croquis aux résultats sur le terrain.",
-      "groupColleague": "Collègue IA",
-      "groupElder": "Aîné IA",
+      "title": "Rencontrez vos assistants de laboratoire IA",
+      "description": "Ils seront vos extraordinaires chercheurs, ainsi que des mentors, stratèges et penseurs systémiques qui vous aideront à chaque étape — des premières idées à la solution mise en œuvre.",
+      "groupColleague": "Assistant de laboratoire IA",
+      "groupElder": "Assistant de laboratoire IA",
       "ask": "Demander à {{name}}",
       "sdgLabel": "ODD {{number}}",
-      "tip": "Astuce : choisissez un collègue IA pour copiloter votre prochain sprint."
+      "tip": "Astuce : choisissez un assistant de laboratoire IA pour vous aider à la prochaine étape."
     },
     "testimonials": {
       "title": "Ce que l'on en dit",
       "subtitle": "Les témoignages de personnes qui transforment des idées ambitieuses en solutions concrètes avec Global Solutions Lab.",
-      "cta": "Voir les témoignages vidéo",
       "featured": {
         "badge": "Témoignage de participante",
         "quote": "Participer aux dix jours du Global Solutions Lab a été tout simplement époustouflant.",
         "summary": "Après avoir rejoint l’équipe Building Community in a Changing Environment, Cynthia a créé une bande dessinée sur les énergies renouvelables, un récit sur la préservation des semences autochtones et un prototype du World House Game qui associe l’action climatique au jeu.",
-        "initials": "CN",
-        "name": "Cynthia Nekesa",
-        "role": "Participante au Global Solutions Lab 2026",
-        "cta": "Lire le témoignage complet de Cynthia"
+        "initials": "C",
+        "name": "Cynthia",
+        "role": "Participante au GSL"
       },
       "sue": {
         "badge": "Témoignage de participante",
         "quote": "Le Global Solutions Lab m’a donné la confiance nécessaire pour voir aussi grand que je l’ai toujours fait. Jusqu’à présent, je n’avais personne qui comprenait ce que j’essayais d’exprimer ! Merci pour ce programme magnifique et les possibilités qu’il ouvre.",
-        "initials": "SB",
-        "name": "Sue Blythe",
-        "role": "Participante au Global Solutions Lab"
+        "initials": "S",
+        "name": "Sue",
+        "role": "Participante au GSL"
       }
     },
     "design": {
       "badge": "Design Science • Méthodologie",
       "title": "Design Science",
-      "description": "La Design Science est la méthodologie utilisée par Global Solutions Lab pour développer des solutions qui préservent et améliorent la vie. Elle s'inspire des travaux de Buckminster Fuller et d'autres via le World Game et le Global Solutions Lab — fondements du Global Solutions Lab. Pour en savoir plus, consultez Tools For Changing the World—A Design Science Primer.",
+      "description": "La Design Science est la méthodologie utilisée par Global Solutions Lab pour développer des solutions qui préservent et améliorent la vie. Elle s'inspire et repose sur les travaux de Buckminster Fuller et d'autres via le World Game et le Global Solutions Lab — fondements de la plateforme Global Solutions Lab. Pour en savoir plus, consultez",
       "imageCaption": "Une méthodologie concrète pour changer le monde.",
       "cta": "Lire le primer"
     },
     "cta": {
       "badge": "Commencez à résoudre de vrais problèmes",
       "title": "Essayez Global Solutions Lab",
-      "description": "Commencez à résoudre des problèmes et à faire la différence.",
-      "cta": "Commencer"
+      "description": "Une série de questions vous sera posée. Vos réponses ouvriront la porte de votre laboratoire privé, où votre travail pourra commencer !",
+      "cta": "Commencer",
+      "supportDescription": "Maintenant que vous savez en quoi consiste le Laboratoire, votre soutien l’aidera à se développer.",
+      "supportCta": "Soutenir Global Solutions Lab"
     }
   },
   "welcomeFlow": {

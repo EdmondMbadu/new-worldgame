@@ -73,13 +73,13 @@ export class SchedulerComponent implements OnInit, OnDestroy {
 
   private readonly defaultConfig: SchedulerConfig = {
     bookingType: 'demo',
-    eventTitle: 'Global Solutions Lab Workshop',
-    meetingTitle: 'Global Solutions Lab Workshop',
+    eventTitle: 'Global Solutions Lab Demonstration',
+    meetingTitle: 'Global Solutions Lab Demonstration',
     meetingDescription:
-      'Live Global Solutions Lab workshop with the Global Solutions Lab team.',
-    durationText: '30 min',
+      'Live Global Solutions Lab demonstration with the Global Solutions Lab team.',
+    durationText: '20–30 min',
     introText:
-      'Join a live Global Solutions Lab workshop with our team. We will walk through the platform, the thinking process behind the game, and how teams can use it to organize knowledge and design practical solutions.',
+      'Join a live Global Solutions Lab demo with our team. We will walk through the platform, its underlying process, and how you can use it to organize knowledge and design practical solutions.',
     scheduledLabel: 'Your Scheduled Demo',
     detailsTitle: 'Enter Your Details',
     notesLabel: 'What questions do you have about Global Solutions Lab?',

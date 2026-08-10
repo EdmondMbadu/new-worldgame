@@ -924,47 +924,47 @@
       "imageAlt": "UN Sustainable Development Goals graphic"
     },
     "ai": {
-      "title": "Meet your AI colleagues",
-      "description": "Mentors, strategists, and systems thinkers who coach you through each sprint — from first sketch to field results.",
-      "groupColleague": "AI Colleague",
-      "groupElder": "AI Elder",
+      "title": "Meet your AI Lab Assistants",
+      "description": "They will be your extraordinary researchers, plus helpful mentors, strategists, and systems thinkers who help you through each stage—from first ideas to implemented solution.",
+      "groupColleague": "AI Lab Assistant",
+      "groupElder": "AI Lab Assistant",
       "ask": "Ask {{name}}",
       "sdgLabel": "SDG {{number}}",
-      "tip": "Tip: pick one AI colleague to co-pilot your next sprint."
+      "tip": "Tip: pick one AI Lab Assistant to help with your next stage."
     },
     "testimonials": {
       "title": "What People Are Saying",
       "subtitle": "Reflections from people turning ambitious ideas into real-world solutions with Global Solutions Lab.",
-      "cta": "Watch video testimonials",
       "featured": {
         "badge": "Participant reflection",
         "quote": "Participating in the 10-day Global Solutions Lab was nothing short of mind-blowing.",
         "summary": "After joining the Building Community in a Changing Environment team, Cynthia created a renewable-energy comic, an Indigenous-seed preservation story, and a World House Game prototype that connects climate action with play.",
-        "initials": "CN",
-        "name": "Cynthia Nekesa",
-        "role": "Global Solutions Lab 2026 participant",
-        "cta": "Read Cynthia’s full reflection"
+        "initials": "C",
+        "name": "Cynthia",
+        "role": "GSL participant"
       },
       "sue": {
         "badge": "Participant reflection",
         "quote": "The Global Solutions Lab has given me the confidence to think as big as I always have. Up until now, I didn't have anyone who understood what I was trying to say! Thank you for this magnificent program and the possibilities it opens up.",
-        "initials": "SB",
-        "name": "Sue Blythe",
-        "role": "Global Solutions Lab participant"
+        "initials": "S",
+        "name": "Sue",
+        "role": "GSL participant"
       }
     },
     "design": {
       "badge": "Design Science • Methodology",
       "title": "Design Science",
-      "description": "Design Science is the methodology used by Global Solutions Lab for developing life-preserving and enhancing solutions to society's problems. This methodology is inspired by the work of Buckminster Fuller and others through the World Game and Global Solutions Lab—on which the Global Solutions Lab is based. For details see Tools For Changing the World—A Design Science Primer.",
+      "description": "Design Science is the methodology used by Global Solutions Lab for developing life-preserving and enhancing solutions to society's problems. This methodology is inspired and based on the work of Buckminster Fuller and others through the World Game and Global Solutions Lab—on which the Global Solutions Lab platform is based. For details, see",
       "imageCaption": "A practical methodology for world-changing solutions.",
       "cta": "Read the Primer"
     },
     "cta": {
       "badge": "Start solving real problems",
       "title": "Try Global Solutions Lab Now",
-      "description": "Start solving problems and making a difference.",
-      "cta": "Get Started"
+      "description": "Here you will be asked a series of questions. Your answers will open the door to your private Laboratory where your work can begin!",
+      "cta": "Get Started",
+      "supportDescription": "Now you know what the Lab is about, your support will help grow it.",
+      "supportCta": "Support Global Solutions Lab"
     }
   },
   "welcomeFlow": {
