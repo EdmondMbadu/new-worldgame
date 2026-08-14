@@ -44,6 +44,7 @@ interface ClinicProfile {
   styleUrls: [
     './drc-clinic-campaign.component.css',
     './drc-clinic-campaign.video.css',
+    './drc-clinic-campaign.evidence.css',
   ],
   standalone: false,
 })
@@ -52,7 +53,10 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   @ViewChild('campaignVideo') private campaignVideo?: ElementRef<HTMLVideoElement>;
 
   readonly donationUrl = 'https://buy.stripe.com/8wM5lR1IK2og8r6000';
-  readonly solutionUrl = '/solution-view-external/a8QC5eufcizRKd1NvgPv';
+  readonly solutionUrl =
+    'https://globalsolutionlab.com/solution-view/o0eqjssL6yn1qZVqAY60';
+  readonly presentationUrl =
+    'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/ndingi%2FNDINGI%20Clinic%20Electrification%20Scale-Up%20Project%20DAY%204.pptx.pdf?alt=media&token=c60bb41a-d6d7-4b6b-bc94-32f6c51735e8';
   readonly videoThumbnail = 'assets/campaigns/drc-clinics/drc-video-thumbnail-v1.png';
   readonly videoPages: Record<Language, string> = {
     en: 'https://globalsolutionlab.com/nwg-news?v=ux8SCCU6hH3WYwBznYrE',
@@ -332,30 +336,59 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     try {
       const response = await fetch('assets/files/countries.geo.json');
       const world = await response.json();
-      const drc = world.features.find(
+      const africaCountryNames = new Set([
+        'Algeria', 'Angola', 'Benin', 'Botswana', 'Burkina Faso', 'Burundi',
+        'Cameroon', 'Central African Rep.', 'Chad', 'Congo', 'Dem. Rep. Congo',
+        "Côte d'Ivoire", 'Djibouti', 'Egypt', 'Eq. Guinea', 'Eritrea',
+        'eSwatini', 'Ethiopia', 'Gabon', 'Gambia', 'Ghana', 'Guinea',
+        'Guinea-Bissau', 'Kenya', 'Lesotho', 'Liberia', 'Libya', 'Madagascar',
+        'Malawi', 'Mali', 'Mauritania', 'Morocco', 'Mozambique', 'Namibia',
+        'Niger', 'Nigeria', 'Rwanda', 'S. Sudan', 'Senegal', 'Sierra Leone',
+        'Somalia', 'Somaliland', 'South Africa', 'Sudan', 'Tanzania', 'Togo',
+        'Tunisia', 'Uganda', 'W. Sahara', 'Zambia', 'Zimbabwe',
+      ]);
+      const africaFeatures = world.features.filter(
+        (feature: { properties?: { name?: string } }) =>
+          africaCountryNames.has(feature.properties?.name || '')
+      );
+      const drc = africaFeatures.find(
         (feature: { properties?: { name?: string } }) =>
           feature.properties?.name === 'Dem. Rep. Congo'
       );
       if (!drc) return;
+
+      const africa = {
+        type: 'FeatureCollection',
+        features: africaFeatures,
+      };
 
       const projection = geoMercator().fitExtent(
         [
           [42, 36],
           [598, 486],
         ],
-        drc
+        africa as never
       );
-      const pathData = geoPath(projection)(drc);
+      const pathGenerator = geoPath(projection);
       const namespace = 'http://www.w3.org/2000/svg';
 
-      const country = document.createElementNS(namespace, 'path');
-      country.setAttribute('d', pathData || '');
-      country.setAttribute('class', 'drc-map__country');
-      svg.appendChild(country);
+      africaFeatures.forEach(
+        (feature: { properties?: { name?: string } }) => {
+          const country = document.createElementNS(namespace, 'path');
+          country.setAttribute('d', pathGenerator(feature as never) || '');
+          country.setAttribute(
+            'class',
+            feature.properties?.name === 'Dem. Rep. Congo'
+              ? 'africa-map__country africa-map__country--active'
+              : 'africa-map__country'
+          );
+          svg.appendChild(country);
+        }
+      );
 
-      const bomaPosition = projection([13.05, -5.85]);
-      if (bomaPosition) {
-        const [x, y] = bomaPosition;
+      const drcPosition = projection([23.65, -2.88]);
+      if (drcPosition) {
+        const [x, y] = drcPosition;
         const pulse = document.createElementNS(namespace, 'circle');
         pulse.setAttribute('cx', String(x));
         pulse.setAttribute('cy', String(y));
@@ -374,7 +407,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
         label.setAttribute('x', String(x + 20));
         label.setAttribute('y', String(y + 4));
         label.setAttribute('class', 'drc-map__label');
-        label.textContent = 'BOMA / KONGO CENTRAL';
+        label.textContent = 'DRC // ACTIVE NOW';
         svg.appendChild(label);
       }
     } catch {

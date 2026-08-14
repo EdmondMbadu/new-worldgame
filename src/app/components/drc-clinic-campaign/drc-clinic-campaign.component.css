@@ -659,14 +659,6 @@ button:focus-visible {
   aspect-ratio: 640 / 520;
 }
 
-:host ::ng-deep .drc-map__country {
-  fill: rgba(63, 143, 183, 0.24);
-  stroke: #74b8da;
-  stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-  filter: drop-shadow(0 0 18px rgba(63, 143, 183, 0.24));
-}
-
 :host ::ng-deep .drc-map__marker {
   fill: var(--mission-amber);
   stroke: #fff3cd;

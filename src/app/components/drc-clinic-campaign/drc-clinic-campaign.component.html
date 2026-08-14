@@ -136,7 +136,7 @@
             'Cette page distingue les preuves documentaires de la visualisation de l’état souhaité. Les donateurs peuvent voir la situation initiale, les travaux réalisés et la norme visée à long terme.'
           ) }}
         </p>
-        <a [routerLink]="solutionUrl" class="text-link">
+        <a [href]="solutionUrl" class="text-link" target="_blank" rel="noopener noreferrer">
           {{ tr('Open the complete project record', 'Ouvrir le dossier complet du projet') }} <span aria-hidden="true">↗</span>
         </a>
       </div>
@@ -185,30 +185,51 @@
       <span>{{ tr('Assess', 'Évaluer') }}</span><i>→</i><span>{{ tr('Transport', 'Transporter') }}</span><i>→</i><span>{{ tr('Install', 'Installer') }}</span
       ><i>→</i><span>{{ tr('Commission', 'Mettre en service') }}</span><i>→</i><span>{{ tr('Monitor', 'Suivre') }}</span>
     </div>
+
+    <div class="proof-assets" [attr.aria-label]="tr('Project evidence and presentations', 'Preuves et présentations du projet')">
+      <a [href]="solutionUrl" target="_blank" rel="noopener noreferrer">
+        <span>01</span>
+        <div>
+          <small>{{ tr('Proven origin', 'Origine éprouvée') }}</small>
+          <strong>{{ tr('The original successful GSL project', 'Le projet GSL initial couronné de succès') }}</strong>
+          <p>{{ tr('See the solution record that launched the Ndingi pilot.', 'Consultez le dossier de solution à l’origine du projet pilote de Ndingi.') }}</p>
+        </div>
+        <i aria-hidden="true">↗</i>
+      </a>
+      <a [href]="presentationUrl" target="_blank" rel="noopener noreferrer">
+        <span>02</span>
+        <div>
+          <small>{{ tr('Recent team presentation', 'Présentation récente de l’équipe') }}</small>
+          <strong>{{ tr('Electrification Scale-Up Project — Phase Two', 'Projet d’électrification à grande échelle — Phase 2') }}</strong>
+          <p>{{ tr('Open the 17-slide presentation outlining the proof, priorities, and scale-up strategy.', 'Ouvrez la présentation de 17 diapositives sur les résultats, les priorités et la stratégie de déploiement.') }}</p>
+        </div>
+        <i aria-hidden="true">↗</i>
+      </a>
+    </div>
   </section>
 
   <section id="geography" class="chapter geography-section">
     <div class="chapter-label"><span>/02</span> {{ tr('Mission geography', 'Géographie de la mission') }}</div>
     <div class="geography-layout">
       <div class="geography-copy">
-        <p class="eyebrow">{{ tr('The Democratic Republic of the Congo', 'La République démocratique du Congo') }}</p>
-        <h2>{{ tr('A national mission.', 'Une mission nationale.') }}<br />{{ tr('A verified path.', 'Une voie vérifiée.') }}</h2>
+        <p class="eyebrow">{{ tr('Africa scale-up // DRC active now', 'Déploiement africain // RDC active maintenant') }}</p>
+        <h2>{{ tr('Active in the DRC.', 'Actif en RDC.') }}<br />{{ tr('Built for Africa.', 'Pensé pour l’Afrique.') }}</h2>
         <p>
           {{ tr(
-            'The current field set begins in the DRC, with the proven Ndingi pilot and Centre Hospitalier Mont Sinaï in Kongo Central. Every new clinic will be mapped only after its coordinates and assessment are verified.',
-            'Le réseau actuel commence en RDC avec le projet pilote éprouvé de Ndingi et le Centre Hospitalier Mont Sinaï au Kongo Central. Chaque nouveau centre ne sera cartographié qu’après vérification de ses coordonnées et de son évaluation.'
+            'The work is active today in the Democratic Republic of the Congo. The long-term system is designed to expand across Africa as each new country, partner, and clinic is verified.',
+            'Le travail est aujourd’hui actif en République démocratique du Congo. Le système à long terme est conçu pour s’étendre à travers l’Afrique à mesure que chaque nouveau pays, partenaire et centre est vérifié.'
           ) }}
         </p>
         <div class="geography-facts" [attr.aria-label]="tr('Campaign geography facts', 'Données géographiques de la campagne')">
-          <div><span>{{ tr('Country', 'Pays') }}</span><strong>{{ tr('DR Congo', 'RD Congo') }}</strong></div>
-          <div><span>{{ tr('Verified region', 'Région vérifiée') }}</span><strong>Kongo Central</strong></div>
+          <div><span>{{ tr('Active country', 'Pays actif') }}</span><strong>{{ tr('DR Congo', 'RD Congo') }}</strong></div>
+          <div><span>{{ tr('Expansion horizon', 'Horizon d’expansion') }}</span><strong>{{ tr('Africa', 'Afrique') }}</strong></div>
           <div><span>{{ tr('Named facilities', 'Établissements identifiés') }}</span><strong>05</strong></div>
         </div>
       </div>
 
       <figure class="drc-map-card">
         <div class="drc-map-card__hud" aria-hidden="true">
-          <span>05.850° S</span><span>13.050° E</span><span>{{ tr('DRC // ACTIVE', 'RDC // ACTIVE') }}</span>
+          <span>{{ tr('AFRICA // EXPANSION HORIZON', 'AFRIQUE // HORIZON D’EXPANSION') }}</span><span>{{ tr('DRC // ACTIVE NOW', 'RDC // ACTIVE MAINTENANT') }}</span>
         </div>
         <svg
           #drcMap
@@ -217,14 +238,18 @@
           role="img"
           aria-labelledby="drc-map-title drc-map-description"
         >
-          <title id="drc-map-title">{{ tr('Map of the Democratic Republic of the Congo', 'Carte de la République démocratique du Congo') }}</title>
+          <title id="drc-map-title">{{ tr('Map of Africa with the Democratic Republic of the Congo highlighted', 'Carte de l’Afrique avec la République démocratique du Congo mise en évidence') }}</title>
           <desc id="drc-map-description">
-            {{ tr('Country outline with Boma and the Kongo Central deployment corridor identified.', 'Contour du pays avec Boma et le corridor de déploiement du Kongo Central identifiés.') }}
+            {{ tr('Africa is shown as the expansion horizon, with the DRC highlighted as the active country.', 'L’Afrique est présentée comme horizon d’expansion, avec la RDC mise en évidence comme pays actif.') }}
           </desc>
         </svg>
+        <div class="map-legend" aria-hidden="true">
+          <span><i class="map-legend__active"></i>{{ tr('Active deployment', 'Déploiement actif') }}</span>
+          <span><i class="map-legend__future"></i>{{ tr('Expansion horizon', 'Horizon d’expansion') }}</span>
+        </div>
         <figcaption>
-          <strong>{{ tr('Current verified geography', 'Géographie actuellement vérifiée') }}</strong>
-          <span>{{ tr('Boma / Kongo Central marker shown. Remaining clinic coordinates are undergoing field verification.', 'Le repère de Boma / Kongo Central est affiché. Les coordonnées des autres centres sont en cours de vérification sur le terrain.') }}</span>
+          <strong>{{ tr('DRC active now', 'RDC active maintenant') }}</strong>
+          <span>{{ tr('Africa is the scale-up horizon. New countries will activate only when partnerships and clinic data are verified.', 'L’Afrique est l’horizon de déploiement. De nouveaux pays seront activés uniquement lorsque les partenariats et les données des centres seront vérifiés.') }}</span>
         </figcaption>
       </figure>
     </div>
@@ -409,9 +434,10 @@
   </section>
 
   <section class="closing-section">
-    <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" [alt]="tr('Clinic team working under electric light at Ndingi Clinic', 'Équipe du centre travaillant sous éclairage électrique à Ndingi')" />
+    <img src="assets/campaigns/drc-clinics/drc-closing-dawn-v1.png" [alt]="tr('Desired-state visualization of an illuminated solar-powered clinic at dawn', 'Visualisation de l’état souhaité d’un centre de santé solaire éclairé à l’aube')" />
     <div></div>
     <article>
+      <span class="closing-visual-label">{{ tr('Desired-state visualization', 'Visualisation de l’état souhaité') }}</span>
       <p class="eyebrow">{{ tr('The next node is waiting', 'Le prochain nœud attend') }}</p>
       <h2>{{ tr('When care cannot wait,', 'Quand les soins ne peuvent attendre,') }}<br />{{ tr('power cannot fail.', 'l’énergie ne peut faillir.') }}</h2>
       <p>{{ tr('One clinic is online. Four more facilities are now documented by name and photograph. Fifteen remain the mission.', 'Un centre est en service. Quatre autres établissements sont désormais documentés par leur nom et leurs photographies. Quinze restent l’objectif de la mission.') }}</p>

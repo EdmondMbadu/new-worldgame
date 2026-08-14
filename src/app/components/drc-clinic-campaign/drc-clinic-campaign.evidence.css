@@ -1,0 +1,135 @@
+.proof-assets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 42px;
+  border: 1px solid var(--mission-line);
+  background: var(--mission-line);
+}
+
+.proof-assets > a {
+  display: grid;
+  grid-template-columns: 40px 1fr auto;
+  align-items: start;
+  gap: 20px;
+  min-width: 0;
+  padding: 28px;
+  background: #080d12;
+  color: var(--mission-white);
+  text-decoration: none;
+  transition: background 180ms ease;
+}
+
+.proof-assets > a:hover { background: rgba(246, 183, 60, 0.07); }
+
+.proof-assets > a > span,
+.proof-assets small,
+.proof-assets > a > i {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.58rem;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.proof-assets > a > span { color: #66727a; }
+.proof-assets small { color: var(--mission-amber); }
+.proof-assets > a > i { color: var(--mission-amber); }
+
+.proof-assets div {
+  display: grid;
+  gap: 9px;
+}
+
+.proof-assets strong {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.proof-assets p {
+  margin: 0;
+  color: #8f9aa1;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+:host ::ng-deep .africa-map__country {
+  fill: rgba(63, 143, 183, 0.13);
+  stroke: rgba(116, 184, 218, 0.48);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+}
+
+:host ::ng-deep .africa-map__country--active {
+  fill: rgba(246, 183, 60, 0.62);
+  stroke: #ffd87e;
+  stroke-width: 1.8;
+  filter: drop-shadow(0 0 14px rgba(246, 183, 60, 0.75));
+}
+
+.map-legend {
+  position: absolute;
+  z-index: 2;
+  right: 20px;
+  bottom: 82px;
+  display: flex;
+  gap: 18px;
+  padding: 9px 11px;
+  border: 1px solid var(--mission-line);
+  background: rgba(5, 9, 13, 0.82);
+  backdrop-filter: blur(10px);
+}
+
+.map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #8f9ba2;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.map-legend i {
+  width: 8px;
+  height: 8px;
+  border: 1px solid rgba(116, 184, 218, 0.65);
+  background: rgba(63, 143, 183, 0.2);
+}
+
+.map-legend .map-legend__active {
+  border-color: #ffd87e;
+  background: var(--mission-amber);
+  box-shadow: 0 0 8px rgba(246, 183, 60, 0.65);
+}
+
+.closing-visual-label {
+  display: inline-flex;
+  margin-bottom: 12px;
+  padding: 6px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  color: #d6dde1;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 760px) {
+  .proof-assets { grid-template-columns: 1fr; }
+
+  .proof-assets > a {
+    grid-template-columns: 28px 1fr auto;
+    gap: 12px;
+    padding: 22px 16px;
+  }
+
+  .map-legend {
+    right: 12px;
+    bottom: 116px;
+    left: 12px;
+    justify-content: space-between;
+    gap: 8px;
+  }
+}
