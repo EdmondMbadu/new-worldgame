@@ -79,12 +79,36 @@ button:focus-visible {
 }
 
 .brand small,
-.language {
+.language-toggle {
   color: var(--mission-muted);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.62rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.language-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 8px;
+  border: 1px solid var(--mission-line);
+  background: rgba(5, 9, 13, 0.55);
+}
+
+.language-toggle button {
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  color: #69757c;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.language-toggle button:hover,
+.language-toggle button.active {
+  color: var(--mission-amber);
 }
 
 .mission-header nav {
@@ -1219,7 +1243,6 @@ button:focus-visible {
   }
 
   .brand small,
-  .language,
   .mission-button--small span {
     display: none;
   }
@@ -1241,6 +1264,50 @@ button:focus-visible {
     min-height: 40px;
     padding: 0 10px;
     font-size: 0.55rem;
+  }
+
+  .language-toggle {
+    padding: 5px 6px;
+    font-size: 0.55rem;
+  }
+
+  .video-opening {
+    min-height: 860px;
+    padding: 118px 20px 110px;
+  }
+
+  .video-opening video {
+    object-position: 64% center;
+  }
+
+  .video-opening__shade {
+    background:
+      linear-gradient(0deg, rgba(3, 7, 11, 0.97) 0%, rgba(3, 7, 11, 0.38) 72%, rgba(3, 7, 11, 0.32) 100%),
+      linear-gradient(90deg, rgba(3, 7, 11, 0.72), rgba(3, 7, 11, 0.08));
+  }
+
+  .video-opening__content {
+    width: 100%;
+  }
+
+  .video-opening__content h1 {
+    font-size: clamp(4rem, 19vw, 6rem);
+  }
+
+  .video-opening__actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .video-source-link {
+    right: 20px;
+    bottom: 28px;
+    left: 20px;
+  }
+
+  .video-opening--playing {
+    min-height: 100svh;
+    padding: 70px 0 0;
   }
 
   .hero {

@@ -1,39 +1,81 @@
 <main class="campaign-shell">
-  <header class="mission-header" aria-label="Campaign navigation">
-    <a class="brand" routerLink="/" aria-label="Global Solutions Lab home">
+  <header class="mission-header" [attr.aria-label]="tr('Campaign navigation', 'Navigation de la campagne')">
+    <a class="brand" routerLink="/" [attr.aria-label]="tr('Global Solutions Lab home', 'Accueil Global Solutions Lab')">
       <img src="assets/img/gsl-logo.png" alt="" width="46" height="46" />
       <span>
         <strong>Global Solutions Lab</strong>
-        <small>DRC clinic power mission</small>
+        <small>{{ tr('DRC clinic power mission', 'Mission énergie-santé en RDC') }}</small>
       </span>
     </a>
 
-    <nav aria-label="Campaign sections">
-      <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">Field proof</a>
-      <a href="#geography" (click)="scrollToSection('geography', $event)">DRC map</a>
-      <a href="#clinics" (click)="scrollToSection('clinics', $event)">Five clinics</a>
-      <a href="#system" (click)="scrollToSection('system', $event)">System</a>
-      <a href="#ledger" (click)="scrollToSection('ledger', $event)">Ledger</a>
+    <nav [attr.aria-label]="tr('Campaign sections', 'Sections de la campagne')">
+      <a href="#video" (click)="scrollToSection('video', $event)">{{ tr('Watch', 'Voir') }}</a>
+      <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">{{ tr('Field proof', 'Preuve terrain') }}</a>
+      <a href="#geography" (click)="scrollToSection('geography', $event)">{{ tr('DRC map', 'Carte RDC') }}</a>
+      <a href="#clinics" (click)="scrollToSection('clinics', $event)">{{ tr('Five clinics', 'Cinq centres') }}</a>
+      <a href="#ledger" (click)="scrollToSection('ledger', $event)">{{ tr('Ledger', 'Budget') }}</a>
     </nav>
 
     <div class="header-actions">
-      <span class="language">EN / FR</span>
+      <div class="language-toggle" role="group" [attr.aria-label]="tr('Choose language', 'Choisir la langue')">
+        <button type="button" [class.active]="currentLanguage === 'en'" [attr.aria-pressed]="currentLanguage === 'en'" (click)="setLanguage('en')">EN</button>
+        <span aria-hidden="true">/</span>
+        <button type="button" [class.active]="currentLanguage === 'fr'" [attr.aria-pressed]="currentLanguage === 'fr'" (click)="setLanguage('fr')">FR</button>
+      </div>
       <a
         class="mission-button mission-button--small"
         [href]="donationUrl"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Fund deployment <span aria-hidden="true">→</span>
+        {{ tr('Donate', 'Faire un don') }} <span aria-hidden="true">→</span>
       </a>
     </div>
   </header>
+
+  <section id="video" class="video-opening" [class.video-opening--playing]="isVideoPlaying" aria-labelledby="video-title">
+    <video
+      #campaignVideo
+      [src]="videoSource"
+      [poster]="videoThumbnail"
+      controls
+      playsinline
+      preload="metadata"
+      (play)="isVideoPlaying = true"
+      (pause)="isVideoPlaying = false"
+      (ended)="isVideoPlaying = false"
+    ></video>
+    <div class="video-opening__shade" aria-hidden="true"></div>
+    <div class="video-opening__grid" aria-hidden="true"></div>
+
+    <div *ngIf="!isVideoPlaying" class="video-opening__content">
+      <p class="eyebrow">{{ tr('Watch the mission // Video briefing', 'Voir la mission // Présentation vidéo') }}</p>
+      <h1 id="video-title">{{ tr('Power changes what is possible.', 'L’énergie change ce qui devient possible.') }}</h1>
+      <p>
+        {{ tr(
+          'See why reliable electricity is the missing clinical infrastructure—and how the DRC team plans to power the next 15 facilities.',
+          'Découvrez pourquoi une électricité fiable est l’infrastructure clinique manquante — et comment l’équipe de la RDC prévoit d’alimenter les 15 prochains centres.'
+        ) }}
+      </p>
+      <div class="video-opening__actions">
+        <button type="button" class="video-play" (click)="playVideo()" [attr.aria-label]="tr('Play campaign film', 'Lire le film de la campagne')">
+          <span aria-hidden="true">▶</span>
+          <strong>{{ tr('Play the film', 'Voir le film') }}</strong>
+        </button>
+        <span class="video-language">{{ currentLanguage === 'fr' ? 'VERSION FRANÇAISE' : 'ENGLISH VERSION' }}</span>
+      </div>
+    </div>
+
+    <a class="video-source-link" [href]="videoPage" target="_blank" rel="noopener noreferrer">
+      {{ tr('Open on GSL News', 'Ouvrir sur GSL News') }} <span aria-hidden="true">↗</span>
+    </a>
+  </section>
 
   <section class="hero" aria-labelledby="campaign-title">
     <img
       class="hero__image"
       src="assets/campaigns/drc-clinics/ndingi-desired-state.png"
-      alt="Desired-state visualization of Ndingi Clinic with a refurbished exterior and solar panels"
+      [alt]="tr('Desired-state visualization of Ndingi Clinic with a refurbished exterior and solar panels', 'Visualisation de la Clinique de Ndingi rénovée et équipée de panneaux solaires')"
     />
     <div class="hero__shade"></div>
     <div class="hero__grid" aria-hidden="true"></div>
@@ -48,13 +90,15 @@
     </div>
 
     <div class="hero__content">
-      <p class="eyebrow">Democratic Republic of the Congo // Field proven</p>
-      <p class="visualization-label">Desired-state visualization</p>
-      <h1 id="campaign-title">Infrastructure<br />for life.</h1>
-      <p class="hero__subhead">Power the next 15 clinics in the DRC.</p>
+      <p class="eyebrow">{{ tr('Democratic Republic of the Congo // Field proven', 'République démocratique du Congo // Éprouvé sur le terrain') }}</p>
+      <p class="visualization-label">{{ tr('Desired-state visualization', 'Visualisation de l’état souhaité') }}</p>
+      <h1 id="campaign-title">{{ tr('Infrastructure', 'Une infrastructure') }}<br />{{ tr('for life.', 'pour la vie.') }}</h1>
+      <p class="hero__subhead">{{ tr('Power the next 15 clinics in the DRC.', 'Électrifier les 15 prochains centres de santé en RDC.') }}</p>
       <p class="hero__copy">
-        From Kongo Central outward, reliable solar energy means safer births,
-        protected vaccines, working equipment, and care after dark.
+        {{ tr(
+          'From Kongo Central outward, reliable solar energy means safer births, protected vaccines, working equipment, and care after dark.',
+          'À partir du Kongo Central, une énergie solaire fiable signifie des accouchements plus sûrs, des vaccins protégés, des équipements fonctionnels et des soins après la tombée de la nuit.'
+        ) }}
       </p>
       <div class="hero__actions">
         <a
@@ -63,36 +107,37 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          Activate the next clinic <span aria-hidden="true">→</span>
+          {{ tr('Activate the next clinic', 'Activer le prochain centre') }} <span aria-hidden="true">→</span>
         </a>
         <a class="ghost-button" href="#field-proof" (click)="scrollToSection('field-proof', $event)">
-          Explore the field proof <span aria-hidden="true">↘</span>
+          {{ tr('Explore the field proof', 'Voir la preuve terrain') }} <span aria-hidden="true">↘</span>
         </a>
       </div>
     </div>
 
-    <div class="telemetry" aria-label="Campaign status">
-      <div><small>Node 01</small><strong class="online-text">Online</strong></div>
-      <div><small>Pilot capacity</small><strong>2.0 kW</strong></div>
-      <div><small>Documented network</small><strong>5 clinics</strong></div>
-      <div><small>Network mission</small><strong>15 clinics</strong></div>
-      <div><small>Mission capital</small><strong>$230K</strong></div>
+    <div class="telemetry" [attr.aria-label]="tr('Campaign status', 'État de la campagne')">
+      <div><small>{{ tr('Node 01', 'Nœud 01') }}</small><strong class="online-text">{{ tr('Online', 'En service') }}</strong></div>
+      <div><small>{{ tr('Pilot capacity', 'Capacité pilote') }}</small><strong>2.0 kW</strong></div>
+      <div><small>{{ tr('Documented network', 'Réseau documenté') }}</small><strong>{{ tr('5 clinics', '5 centres') }}</strong></div>
+      <div><small>{{ tr('Network mission', 'Mission réseau') }}</small><strong>{{ tr('15 clinics', '15 centres') }}</strong></div>
+      <div><small>{{ tr('Mission capital', 'Capital de mission') }}</small><strong>$230K</strong></div>
     </div>
   </section>
 
   <section id="field-proof" class="chapter proof-section">
-    <div class="chapter-label"><span>/01</span> Field proof</div>
+    <div class="chapter-label"><span>/01</span> {{ tr('Field proof', 'Preuve terrain') }}</div>
     <div class="proof-layout">
       <div class="proof-heading">
-        <p class="eyebrow">One place. Three honest views.</p>
-        <h2>The night<br />Ndingi changed.</h2>
+        <p class="eyebrow">{{ tr('One place. Three honest views.', 'Un lieu. Trois regards sincères.') }}</p>
+        <h2>{{ tr('The night', 'La nuit où') }}<br />{{ tr('Ndingi changed.', 'Ndingi a changé.') }}</h2>
         <p>
-          The page separates documentary evidence from the desired-state
-          visualization. Donors can see what existed, what was completed, and
-          what the long-term standard can become.
+          {{ tr(
+            'The page separates documentary evidence from the desired-state visualization. Donors can see what existed, what was completed, and what the long-term standard can become.',
+            'Cette page distingue les preuves documentaires de la visualisation de l’état souhaité. Les donateurs peuvent voir la situation initiale, les travaux réalisés et la norme visée à long terme.'
+          ) }}
         </p>
         <a [routerLink]="solutionUrl" class="text-link">
-          Open the complete project record <span aria-hidden="true">↗</span>
+          {{ tr('Open the complete project record', 'Ouvrir le dossier complet du projet') }} <span aria-hidden="true">↗</span>
         </a>
       </div>
 
@@ -100,21 +145,21 @@
         <div class="proof-viewer__image-wrap">
           <img
             [src]="currentProofImage.src"
-            [alt]="currentProofImage.label + ' at Ndingi Clinic'"
+            [alt]="proofLabel + ' — ' + clinicName(clinics[0])"
           />
           <div class="proof-viewer__caption">
-            <span>{{ currentProofImage.label }}</span>
-            <small>{{ currentProofImage.note }}</small>
+            <span>{{ proofLabel }}</span>
+            <small>{{ proofNote }}</small>
           </div>
         </div>
-        <div class="proof-switcher" role="group" aria-label="Choose a clinic view">
+        <div class="proof-switcher" role="group" [attr.aria-label]="tr('Choose a clinic view', 'Choisir une vue du centre')">
           <button
             type="button"
             [class.active]="proofView === 'before'"
             [attr.aria-pressed]="proofView === 'before'"
             (click)="setProofView('before')"
           >
-            <span>01</span> Before
+            <span>01</span> {{ tr('Before', 'Avant') }}
           </button>
           <button
             type="button"
@@ -122,7 +167,7 @@
             [attr.aria-pressed]="proofView === 'after'"
             (click)="setProofView('after')"
           >
-            <span>02</span> Pilot complete
+            <span>02</span> {{ tr('Pilot complete', 'Projet réalisé') }}
           </button>
           <button
             type="button"
@@ -130,39 +175,40 @@
             [attr.aria-pressed]="proofView === 'desired'"
             (click)="setProofView('desired')"
           >
-            <span>03</span> Desired state
+            <span>03</span> {{ tr('Desired state', 'État souhaité') }}
           </button>
         </div>
       </div>
     </div>
 
-    <div class="field-timeline" aria-label="Implementation sequence">
-      <span>Assess</span><i>→</i><span>Transport</span><i>→</i><span>Install</span
-      ><i>→</i><span>Commission</span><i>→</i><span>Monitor</span>
+    <div class="field-timeline" [attr.aria-label]="tr('Implementation sequence', 'Séquence de mise en œuvre')">
+      <span>{{ tr('Assess', 'Évaluer') }}</span><i>→</i><span>{{ tr('Transport', 'Transporter') }}</span><i>→</i><span>{{ tr('Install', 'Installer') }}</span
+      ><i>→</i><span>{{ tr('Commission', 'Mettre en service') }}</span><i>→</i><span>{{ tr('Monitor', 'Suivre') }}</span>
     </div>
   </section>
 
   <section id="geography" class="chapter geography-section">
-    <div class="chapter-label"><span>/02</span> Mission geography</div>
+    <div class="chapter-label"><span>/02</span> {{ tr('Mission geography', 'Géographie de la mission') }}</div>
     <div class="geography-layout">
       <div class="geography-copy">
-        <p class="eyebrow">The Democratic Republic of the Congo</p>
-        <h2>A national mission.<br />A verified path.</h2>
+        <p class="eyebrow">{{ tr('The Democratic Republic of the Congo', 'La République démocratique du Congo') }}</p>
+        <h2>{{ tr('A national mission.', 'Une mission nationale.') }}<br />{{ tr('A verified path.', 'Une voie vérifiée.') }}</h2>
         <p>
-          The current field set begins in the DRC, with the proven Ndingi pilot
-          and Centre Hospitalier Mont Sinaï in Kongo Central. Every new clinic
-          will be mapped only after its coordinates and assessment are verified.
+          {{ tr(
+            'The current field set begins in the DRC, with the proven Ndingi pilot and Centre Hospitalier Mont Sinaï in Kongo Central. Every new clinic will be mapped only after its coordinates and assessment are verified.',
+            'Le réseau actuel commence en RDC avec le projet pilote éprouvé de Ndingi et le Centre Hospitalier Mont Sinaï au Kongo Central. Chaque nouveau centre ne sera cartographié qu’après vérification de ses coordonnées et de son évaluation.'
+          ) }}
         </p>
-        <div class="geography-facts" aria-label="Campaign geography facts">
-          <div><span>Country</span><strong>DR Congo</strong></div>
-          <div><span>Verified region</span><strong>Kongo Central</strong></div>
-          <div><span>Named facilities</span><strong>05</strong></div>
+        <div class="geography-facts" [attr.aria-label]="tr('Campaign geography facts', 'Données géographiques de la campagne')">
+          <div><span>{{ tr('Country', 'Pays') }}</span><strong>{{ tr('DR Congo', 'RD Congo') }}</strong></div>
+          <div><span>{{ tr('Verified region', 'Région vérifiée') }}</span><strong>Kongo Central</strong></div>
+          <div><span>{{ tr('Named facilities', 'Établissements identifiés') }}</span><strong>05</strong></div>
         </div>
       </div>
 
       <figure class="drc-map-card">
         <div class="drc-map-card__hud" aria-hidden="true">
-          <span>05.850° S</span><span>13.050° E</span><span>DRC // ACTIVE</span>
+          <span>05.850° S</span><span>13.050° E</span><span>{{ tr('DRC // ACTIVE', 'RDC // ACTIVE') }}</span>
         </div>
         <svg
           #drcMap
@@ -171,35 +217,36 @@
           role="img"
           aria-labelledby="drc-map-title drc-map-description"
         >
-          <title id="drc-map-title">Map of the Democratic Republic of the Congo</title>
+          <title id="drc-map-title">{{ tr('Map of the Democratic Republic of the Congo', 'Carte de la République démocratique du Congo') }}</title>
           <desc id="drc-map-description">
-            Country outline with Boma and the Kongo Central deployment corridor identified.
+            {{ tr('Country outline with Boma and the Kongo Central deployment corridor identified.', 'Contour du pays avec Boma et le corridor de déploiement du Kongo Central identifiés.') }}
           </desc>
         </svg>
         <figcaption>
-          <strong>Current verified geography</strong>
-          <span>Boma / Kongo Central marker shown. Remaining clinic coordinates are undergoing field verification.</span>
+          <strong>{{ tr('Current verified geography', 'Géographie actuellement vérifiée') }}</strong>
+          <span>{{ tr('Boma / Kongo Central marker shown. Remaining clinic coordinates are undergoing field verification.', 'Le repère de Boma / Kongo Central est affiché. Les coordonnées des autres centres sont en cours de vérification sur le terrain.') }}</span>
         </figcaption>
       </figure>
     </div>
   </section>
 
   <section id="clinics" class="chapter clinic-section">
-    <div class="chapter-label"><span>/03</span> Five clinic profiles</div>
+    <div class="chapter-label"><span>/03</span> {{ tr('Five clinic profiles', 'Cinq profils de centres') }}</div>
     <div class="section-intro">
       <div>
-        <p class="eyebrow">Current deployment set</p>
-        <h2>Five clinics.<br />One living network.</h2>
+        <p class="eyebrow">{{ tr('Current deployment set', 'Ensemble de déploiement actuel') }}</p>
+        <h2>{{ tr('Five clinics.', 'Cinq centres.') }}<br />{{ tr('One living network.', 'Un réseau vivant.') }}</h2>
       </div>
       <p>
-        One completed pilot and four named facilities now form the visible
-        deployment set. Documentary photo groups are shown as received; power
-        requirements remain clearly marked for field verification.
+        {{ tr(
+          'One completed pilot and four named facilities now form the visible deployment set. Documentary photo groups are shown as received; power requirements remain clearly marked for field verification.',
+          'Un projet pilote achevé et quatre établissements identifiés constituent désormais le déploiement visible. Les séries de photos documentaires sont présentées telles que reçues ; les besoins électriques restent clairement signalés pour vérification sur le terrain.'
+        ) }}
       </p>
     </div>
 
     <div class="clinic-console">
-      <div class="clinic-list" role="list" aria-label="Clinic profiles">
+      <div class="clinic-list" role="list" [attr.aria-label]="tr('Clinic profiles', 'Profils des centres')">
         <button
           *ngFor="let clinic of clinics"
           type="button"
@@ -210,11 +257,11 @@
         >
           <span class="clinic-row__index">{{ clinic.index }}</span>
           <span class="clinic-row__main">
-            <strong>{{ clinic.name }}</strong>
-            <small>{{ clinic.location }}</small>
+            <strong>{{ clinicName(clinic) }}</strong>
+            <small>{{ clinicLocation(clinic) }}</small>
           </span>
           <span class="status" [attr.data-stage]="clinic.stage">
-            <i aria-hidden="true"></i>{{ clinic.stageLabel }}
+            <i aria-hidden="true"></i>{{ clinicStageLabel(clinic) }}
           </span>
           <span aria-hidden="true">→</span>
         </button>
@@ -225,30 +272,30 @@
           <div class="clinic-detail__media">
             <img
               [src]="selectedClinicPhoto"
-              [alt]="selectedClinic.name + ', documentary photograph ' + (selectedPhotoIndex + 1)"
+              [alt]="clinicName(selectedClinic) + tr(', documentary photograph ', ', photographie documentaire ') + (selectedPhotoIndex + 1)"
             />
-            <span>{{ selectedClinic.stageLabel }}</span>
+            <span>{{ clinicStageLabel(selectedClinic) }}</span>
             <small>{{ selectedPhotoIndex + 1 }} / {{ selectedClinic.images.length }}</small>
             <div
               *ngIf="selectedClinic.images.length > 1"
               class="clinic-detail__controls"
               role="group"
-              aria-label="Clinic photograph controls"
+              [attr.aria-label]="tr('Clinic photograph controls', 'Commandes des photographies du centre')"
             >
-              <button type="button" (click)="showPreviousClinicPhoto()" aria-label="Previous photograph">←</button>
-              <button type="button" (click)="showNextClinicPhoto()" aria-label="Next photograph">→</button>
+              <button type="button" (click)="showPreviousClinicPhoto()" [attr.aria-label]="tr('Previous photograph', 'Photographie précédente')">←</button>
+              <button type="button" (click)="showNextClinicPhoto()" [attr.aria-label]="tr('Next photograph', 'Photographie suivante')">→</button>
             </div>
           </div>
           <div
             *ngIf="selectedClinic.images.length > 1"
             class="clinic-thumbnails"
-            aria-label="Clinic photographs"
+            [attr.aria-label]="tr('Clinic photographs', 'Photographies du centre')"
           >
             <button
               *ngFor="let image of selectedClinic.images; let imageIndex = index"
               type="button"
               [class.active]="selectedPhotoIndex === imageIndex"
-              [attr.aria-label]="'Show photograph ' + (imageIndex + 1) + ' of ' + selectedClinic.name"
+              [attr.aria-label]="tr('Show photograph ', 'Afficher la photographie ') + (imageIndex + 1) + tr(' of ', ' de ') + clinicName(selectedClinic)"
               [attr.aria-pressed]="selectedPhotoIndex === imageIndex"
               (click)="selectClinicPhoto(imageIndex)"
             >
@@ -259,21 +306,21 @@
         </div>
 
         <div class="clinic-detail__copy">
-          <p class="eyebrow">Clinic node {{ selectedClinic.index }}</p>
-          <h3>{{ selectedClinic.name }}</h3>
-          <p>{{ selectedClinic.description }}</p>
+          <p class="eyebrow">{{ tr('Clinic node', 'Nœud de santé') }} {{ selectedClinic.index }}</p>
+          <h3>{{ clinicName(selectedClinic) }}</h3>
+          <p>{{ clinicDescription(selectedClinic) }}</p>
           <dl>
             <div>
-              <dt>Status</dt>
-              <dd>{{ selectedClinic.stageLabel }}</dd>
+              <dt>{{ tr('Status', 'Statut') }}</dt>
+              <dd>{{ clinicStageLabel(selectedClinic) }}</dd>
             </div>
             <div>
-              <dt>Capacity</dt>
-              <dd>{{ selectedClinic.capacity || 'After energy assessment' }}</dd>
+              <dt>{{ tr('Capacity', 'Capacité') }}</dt>
+              <dd>{{ clinicCapacity(selectedClinic) }}</dd>
             </div>
             <div>
-              <dt>Next milestone</dt>
-              <dd>{{ selectedClinic.nextMilestone }}</dd>
+              <dt>{{ tr('Next milestone', 'Prochaine étape') }}</dt>
+              <dd>{{ clinicMilestone(selectedClinic) }}</dd>
             </div>
           </dl>
         </div>
@@ -282,65 +329,67 @@
   </section>
 
   <section id="system" class="chapter system-section">
-    <div class="chapter-label"><span>/04</span> System</div>
+    <div class="chapter-label"><span>/04</span> {{ tr('System', 'Système') }}</div>
     <div class="system-layout">
       <div>
-        <p class="eyebrow">Energy becomes capability</p>
-        <h2>From sunlight<br />to care.</h2>
+        <p class="eyebrow">{{ tr('Energy becomes capability', 'L’énergie devient capacité') }}</p>
+        <h2>{{ tr('From sunlight', 'Du soleil') }}<br />{{ tr('to care.', 'aux soins.') }}</h2>
       </div>
-      <div class="system-flow" aria-label="Solar power system stages">
+      <div class="system-flow" [attr.aria-label]="tr('Solar power system stages', 'Étapes du système d’énergie solaire')">
         <article>
-          <span>01</span><strong>Solar array</strong><small>Clean energy captured</small>
+          <span>01</span><strong>{{ tr('Solar array', 'Panneaux solaires') }}</strong><small>{{ tr('Clean energy captured', 'Énergie propre captée') }}</small>
         </article>
         <i aria-hidden="true">→</i>
         <article>
-          <span>02</span><strong>Storage</strong><small>Hybrid night reliability</small>
+          <span>02</span><strong>{{ tr('Storage', 'Stockage') }}</strong><small>{{ tr('Hybrid night reliability', 'Fiabilité nocturne hybride') }}</small>
         </article>
         <i aria-hidden="true">→</i>
         <article>
-          <span>03</span><strong>Clinic power</strong><small>Equipment and lighting</small>
+          <span>03</span><strong>{{ tr('Clinic power', 'Énergie du centre') }}</strong><small>{{ tr('Equipment and lighting', 'Équipements et éclairage') }}</small>
         </article>
         <i aria-hidden="true">→</i>
         <article>
-          <span>04</span><strong>Care after dark</strong><small>Continuity when it matters</small>
+          <span>04</span><strong>{{ tr('Care after dark', 'Soins après la nuit') }}</strong><small>{{ tr('Continuity when it matters', 'Continuité au moment crucial') }}</small>
         </article>
       </div>
     </div>
     <div class="system-film">
       <figure>
-        <img src="assets/campaigns/drc-clinics/ndingi-solar-installation.png" alt="Solar panels prepared at Ndingi Clinic" />
-        <figcaption>Solar array // field installation</figcaption>
+        <img src="assets/campaigns/drc-clinics/ndingi-solar-installation.png" [alt]="tr('Solar panels prepared at Ndingi Clinic', 'Panneaux solaires préparés à la Clinique de Ndingi')" />
+        <figcaption>{{ tr('Solar array // field installation', 'Panneaux solaires // installation terrain') }}</figcaption>
       </figure>
       <figure>
-        <img src="assets/campaigns/drc-clinics/ndingi-commissioning.png" alt="Local team commissioning the clinic power system" />
-        <figcaption>Local team // commissioning</figcaption>
+        <img src="assets/campaigns/drc-clinics/ndingi-commissioning.png" [alt]="tr('Local team commissioning the clinic power system', 'Équipe locale mettant en service le système électrique du centre')" />
+        <figcaption>{{ tr('Local team // commissioning', 'Équipe locale // mise en service') }}</figcaption>
       </figure>
       <figure>
-        <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" alt="Ndingi Clinic interior illuminated at night" />
-        <figcaption>Clinic interior // power online</figcaption>
+        <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" [alt]="tr('Ndingi Clinic interior illuminated at night', 'Intérieur de la Clinique de Ndingi éclairé la nuit')" />
+        <figcaption>{{ tr('Clinic interior // power online', 'Intérieur du centre // énergie en service') }}</figcaption>
       </figure>
     </div>
   </section>
 
   <section id="ledger" class="chapter ledger-section">
-    <div class="chapter-label"><span>/05</span> Capital ledger</div>
+    <div class="chapter-label"><span>/05</span> {{ tr('Capital ledger', 'Budget de la mission') }}</div>
     <div class="ledger-grid">
       <div class="ledger-total">
-        <p class="eyebrow">Mission capital</p>
+        <p class="eyebrow">{{ tr('Mission capital', 'Capital de mission') }}</p>
         <strong>$230,000</strong>
-        <span>Campaign goal</span>
+        <span>{{ tr('Campaign goal', 'Objectif de la campagne') }}</span>
         <p>
-          The detailed working estimate is $15,376.24 per clinic. Public totals
-          should be connected to verified payment and expenditure records.
+          {{ tr(
+            'The detailed working estimate is $15,376.24 per clinic. Public totals should be connected to verified payment and expenditure records.',
+            'L’estimation détaillée est de 15 376,24 $ par centre. Les totaux publics doivent être reliés à des registres vérifiés de paiements et de dépenses.'
+          ) }}
         </p>
       </div>
       <div class="ledger-lines">
-        <div><span>Solar + storage</span><strong>$9,203.40</strong></div>
-        <div><span>Clinic equipment</span><strong>$1,230.00</strong></div>
-        <div><span>Field logistics</span><strong>$1,095.00</strong></div>
-        <div><span>Local implementation team</span><strong>$2,450.00</strong></div>
-        <div><span>Contingency</span><strong>$1,397.84</strong></div>
-        <div class="ledger-lines__total"><span>Estimated per clinic</span><strong>$15,376.24</strong></div>
+        <div><span>{{ tr('Solar + storage', 'Solaire + stockage') }}</span><strong>$9,203.40</strong></div>
+        <div><span>{{ tr('Clinic equipment', 'Équipement du centre') }}</span><strong>$1,230.00</strong></div>
+        <div><span>{{ tr('Field logistics', 'Logistique terrain') }}</span><strong>$1,095.00</strong></div>
+        <div><span>{{ tr('Local implementation team', 'Équipe locale de mise en œuvre') }}</span><strong>$2,450.00</strong></div>
+        <div><span>{{ tr('Contingency', 'Imprévus') }}</span><strong>$1,397.84</strong></div>
+        <div class="ledger-lines__total"><span>{{ tr('Estimated per clinic', 'Estimation par centre') }}</span><strong>$15,376.24</strong></div>
       </div>
       <div class="ledger-actions">
         <a
@@ -349,30 +398,30 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          Contribute to the network <span aria-hidden="true">→</span>
+          {{ tr('Contribute to the network', 'Contribuer au réseau') }} <span aria-hidden="true">→</span>
         </a>
         <a class="ghost-button" href="mailto:sponsors@newworld-game.org?subject=DRC clinic sponsorship inquiry">
-          Fund a full clinic <span aria-hidden="true">↗</span>
+          {{ tr('Fund a full clinic', 'Financer un centre complet') }} <span aria-hidden="true">↗</span>
         </a>
-        <small>Every deployed clinic will carry a public milestone and reporting record.</small>
+        <small>{{ tr('Every deployed clinic will carry a public milestone and reporting record.', 'Chaque centre déployé disposera d’une étape publique et d’un registre de suivi.') }}</small>
       </div>
     </div>
   </section>
 
   <section class="closing-section">
-    <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" alt="Clinic team working under electric light at Ndingi Clinic" />
+    <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" [alt]="tr('Clinic team working under electric light at Ndingi Clinic', 'Équipe du centre travaillant sous éclairage électrique à Ndingi')" />
     <div></div>
     <article>
-      <p class="eyebrow">The next node is waiting</p>
-      <h2>When care cannot wait,<br />power cannot fail.</h2>
-      <p>One clinic is online. Four more facilities are now documented by name and photograph. Fifteen remain the mission.</p>
+      <p class="eyebrow">{{ tr('The next node is waiting', 'Le prochain nœud attend') }}</p>
+      <h2>{{ tr('When care cannot wait,', 'Quand les soins ne peuvent attendre,') }}<br />{{ tr('power cannot fail.', 'l’énergie ne peut faillir.') }}</h2>
+      <p>{{ tr('One clinic is online. Four more facilities are now documented by name and photograph. Fifteen remain the mission.', 'Un centre est en service. Quatre autres établissements sont désormais documentés par leur nom et leurs photographies. Quinze restent l’objectif de la mission.') }}</p>
       <a
         class="mission-button"
         [href]="donationUrl"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Power the next clinic <span aria-hidden="true">→</span>
+        {{ tr('Power the next clinic', 'Électrifier le prochain centre') }} <span aria-hidden="true">→</span>
       </a>
     </article>
   </section>
@@ -380,12 +429,14 @@
   <footer class="campaign-footer">
     <div class="brand brand--footer">
       <img src="assets/img/gsl-logo.png" alt="" width="42" height="42" />
-      <span><strong>Global Solutions Lab</strong><small>A program of EarthGame</small></span>
+      <span><strong>Global Solutions Lab</strong><small>{{ tr('A program of EarthGame', 'Un programme d’EarthGame') }}</small></span>
     </div>
     <p>
-      EarthGame is a 501(c)(3) nonprofit organization. This prototype uses a
-      clearly labeled desired-state visualization alongside documentary images.
+      {{ tr(
+        'EarthGame is a 501(c)(3) nonprofit organization. This prototype uses a clearly labeled desired-state visualization alongside documentary images.',
+        'EarthGame est une organisation à but non lucratif 501(c)(3). Ce prototype utilise une visualisation clairement identifiée de l’état souhaité aux côtés d’images documentaires.'
+      ) }}
     </p>
-    <a href="mailto:contact@newworld-game.org">Contact the campaign team ↗</a>
+    <a href="mailto:contact@newworld-game.org">{{ tr('Contact the campaign team', 'Contacter l’équipe de campagne') }} ↗</a>
   </footer>
 </main>
