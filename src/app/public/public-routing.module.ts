@@ -64,6 +64,7 @@ import { SlpFundComponent } from '../components/slp-fund/slp-fund.component';
 import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.component';
 import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
 import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
+import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/drc-clinic-campaign.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -161,6 +162,10 @@ const routes: Routes = [
   { path: 'partner', component: SlpPartnerComponent },
   { path: 'reach', component: SlpReachComponent },
   { path: 'dymaxion', component: DymaxionComponent },
+  {
+    path: 'campaigns/power-drc-clinics',
+    component: DrcClinicCampaignComponent,
+  },
 ];
 
 @NgModule({

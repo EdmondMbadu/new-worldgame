@@ -1,0 +1,391 @@
+<main class="campaign-shell">
+  <header class="mission-header" aria-label="Campaign navigation">
+    <a class="brand" routerLink="/" aria-label="Global Solutions Lab home">
+      <img src="assets/img/gsl-logo.png" alt="" width="46" height="46" />
+      <span>
+        <strong>Global Solutions Lab</strong>
+        <small>DRC clinic power mission</small>
+      </span>
+    </a>
+
+    <nav aria-label="Campaign sections">
+      <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">Field proof</a>
+      <a href="#geography" (click)="scrollToSection('geography', $event)">DRC map</a>
+      <a href="#clinics" (click)="scrollToSection('clinics', $event)">Five clinics</a>
+      <a href="#system" (click)="scrollToSection('system', $event)">System</a>
+      <a href="#ledger" (click)="scrollToSection('ledger', $event)">Ledger</a>
+    </nav>
+
+    <div class="header-actions">
+      <span class="language">EN / FR</span>
+      <a
+        class="mission-button mission-button--small"
+        [href]="donationUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Fund deployment <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </header>
+
+  <section class="hero" aria-labelledby="campaign-title">
+    <img
+      class="hero__image"
+      src="assets/campaigns/drc-clinics/ndingi-desired-state.png"
+      alt="Desired-state visualization of Ndingi Clinic with a refurbished exterior and solar panels"
+    />
+    <div class="hero__shade"></div>
+    <div class="hero__grid" aria-hidden="true"></div>
+    <div class="hero__network" aria-hidden="true">
+      <span class="network-line network-line--one"></span>
+      <span class="network-line network-line--two"></span>
+      <span class="network-node network-node--online"></span>
+      <span class="network-node network-node--two"></span>
+      <span class="network-node network-node--three"></span>
+      <span class="network-node network-node--four"></span>
+      <span class="network-node network-node--five"></span>
+    </div>
+
+    <div class="hero__content">
+      <p class="eyebrow">Democratic Republic of the Congo // Field proven</p>
+      <p class="visualization-label">Desired-state visualization</p>
+      <h1 id="campaign-title">Infrastructure<br />for life.</h1>
+      <p class="hero__subhead">Power the next 15 clinics in the DRC.</p>
+      <p class="hero__copy">
+        From Kongo Central outward, reliable solar energy means safer births,
+        protected vaccines, working equipment, and care after dark.
+      </p>
+      <div class="hero__actions">
+        <a
+          class="mission-button"
+          [href]="donationUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Activate the next clinic <span aria-hidden="true">→</span>
+        </a>
+        <a class="ghost-button" href="#field-proof" (click)="scrollToSection('field-proof', $event)">
+          Explore the field proof <span aria-hidden="true">↘</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="telemetry" aria-label="Campaign status">
+      <div><small>Node 01</small><strong class="online-text">Online</strong></div>
+      <div><small>Pilot capacity</small><strong>2.0 kW</strong></div>
+      <div><small>Documented network</small><strong>5 clinics</strong></div>
+      <div><small>Network mission</small><strong>15 clinics</strong></div>
+      <div><small>Mission capital</small><strong>$230K</strong></div>
+    </div>
+  </section>
+
+  <section id="field-proof" class="chapter proof-section">
+    <div class="chapter-label"><span>/01</span> Field proof</div>
+    <div class="proof-layout">
+      <div class="proof-heading">
+        <p class="eyebrow">One place. Three honest views.</p>
+        <h2>The night<br />Ndingi changed.</h2>
+        <p>
+          The page separates documentary evidence from the desired-state
+          visualization. Donors can see what existed, what was completed, and
+          what the long-term standard can become.
+        </p>
+        <a [routerLink]="solutionUrl" class="text-link">
+          Open the complete project record <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+
+      <div class="proof-viewer">
+        <div class="proof-viewer__image-wrap">
+          <img
+            [src]="currentProofImage.src"
+            [alt]="currentProofImage.label + ' at Ndingi Clinic'"
+          />
+          <div class="proof-viewer__caption">
+            <span>{{ currentProofImage.label }}</span>
+            <small>{{ currentProofImage.note }}</small>
+          </div>
+        </div>
+        <div class="proof-switcher" role="group" aria-label="Choose a clinic view">
+          <button
+            type="button"
+            [class.active]="proofView === 'before'"
+            [attr.aria-pressed]="proofView === 'before'"
+            (click)="setProofView('before')"
+          >
+            <span>01</span> Before
+          </button>
+          <button
+            type="button"
+            [class.active]="proofView === 'after'"
+            [attr.aria-pressed]="proofView === 'after'"
+            (click)="setProofView('after')"
+          >
+            <span>02</span> Pilot complete
+          </button>
+          <button
+            type="button"
+            [class.active]="proofView === 'desired'"
+            [attr.aria-pressed]="proofView === 'desired'"
+            (click)="setProofView('desired')"
+          >
+            <span>03</span> Desired state
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-timeline" aria-label="Implementation sequence">
+      <span>Assess</span><i>→</i><span>Transport</span><i>→</i><span>Install</span
+      ><i>→</i><span>Commission</span><i>→</i><span>Monitor</span>
+    </div>
+  </section>
+
+  <section id="geography" class="chapter geography-section">
+    <div class="chapter-label"><span>/02</span> Mission geography</div>
+    <div class="geography-layout">
+      <div class="geography-copy">
+        <p class="eyebrow">The Democratic Republic of the Congo</p>
+        <h2>A national mission.<br />A verified path.</h2>
+        <p>
+          The current field set begins in the DRC, with the proven Ndingi pilot
+          and Centre Hospitalier Mont Sinaï in Kongo Central. Every new clinic
+          will be mapped only after its coordinates and assessment are verified.
+        </p>
+        <div class="geography-facts" aria-label="Campaign geography facts">
+          <div><span>Country</span><strong>DR Congo</strong></div>
+          <div><span>Verified region</span><strong>Kongo Central</strong></div>
+          <div><span>Named facilities</span><strong>05</strong></div>
+        </div>
+      </div>
+
+      <figure class="drc-map-card">
+        <div class="drc-map-card__hud" aria-hidden="true">
+          <span>05.850° S</span><span>13.050° E</span><span>DRC // ACTIVE</span>
+        </div>
+        <svg
+          #drcMap
+          class="drc-map"
+          viewBox="0 0 640 520"
+          role="img"
+          aria-labelledby="drc-map-title drc-map-description"
+        >
+          <title id="drc-map-title">Map of the Democratic Republic of the Congo</title>
+          <desc id="drc-map-description">
+            Country outline with Boma and the Kongo Central deployment corridor identified.
+          </desc>
+        </svg>
+        <figcaption>
+          <strong>Current verified geography</strong>
+          <span>Boma / Kongo Central marker shown. Remaining clinic coordinates are undergoing field verification.</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="clinics" class="chapter clinic-section">
+    <div class="chapter-label"><span>/03</span> Five clinic profiles</div>
+    <div class="section-intro">
+      <div>
+        <p class="eyebrow">Current deployment set</p>
+        <h2>Five clinics.<br />One living network.</h2>
+      </div>
+      <p>
+        One completed pilot and four named facilities now form the visible
+        deployment set. Documentary photo groups are shown as received; power
+        requirements remain clearly marked for field verification.
+      </p>
+    </div>
+
+    <div class="clinic-console">
+      <div class="clinic-list" role="list" aria-label="Clinic profiles">
+        <button
+          *ngFor="let clinic of clinics"
+          type="button"
+          role="listitem"
+          class="clinic-row"
+          [class.selected]="selectedClinic.id === clinic.id"
+          (click)="selectClinic(clinic)"
+        >
+          <span class="clinic-row__index">{{ clinic.index }}</span>
+          <span class="clinic-row__main">
+            <strong>{{ clinic.name }}</strong>
+            <small>{{ clinic.location }}</small>
+          </span>
+          <span class="status" [attr.data-stage]="clinic.stage">
+            <i aria-hidden="true"></i>{{ clinic.stageLabel }}
+          </span>
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>
+
+      <article class="clinic-detail" aria-live="polite">
+        <div class="clinic-detail__gallery">
+          <div class="clinic-detail__media">
+            <img
+              [src]="selectedClinicPhoto"
+              [alt]="selectedClinic.name + ', documentary photograph ' + (selectedPhotoIndex + 1)"
+            />
+            <span>{{ selectedClinic.stageLabel }}</span>
+            <small>{{ selectedPhotoIndex + 1 }} / {{ selectedClinic.images.length }}</small>
+            <div
+              *ngIf="selectedClinic.images.length > 1"
+              class="clinic-detail__controls"
+              role="group"
+              aria-label="Clinic photograph controls"
+            >
+              <button type="button" (click)="showPreviousClinicPhoto()" aria-label="Previous photograph">←</button>
+              <button type="button" (click)="showNextClinicPhoto()" aria-label="Next photograph">→</button>
+            </div>
+          </div>
+          <div
+            *ngIf="selectedClinic.images.length > 1"
+            class="clinic-thumbnails"
+            aria-label="Clinic photographs"
+          >
+            <button
+              *ngFor="let image of selectedClinic.images; let imageIndex = index"
+              type="button"
+              [class.active]="selectedPhotoIndex === imageIndex"
+              [attr.aria-label]="'Show photograph ' + (imageIndex + 1) + ' of ' + selectedClinic.name"
+              [attr.aria-pressed]="selectedPhotoIndex === imageIndex"
+              (click)="selectClinicPhoto(imageIndex)"
+            >
+              <img [src]="image" alt="" />
+              <span>{{ imageIndex + 1 }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="clinic-detail__copy">
+          <p class="eyebrow">Clinic node {{ selectedClinic.index }}</p>
+          <h3>{{ selectedClinic.name }}</h3>
+          <p>{{ selectedClinic.description }}</p>
+          <dl>
+            <div>
+              <dt>Status</dt>
+              <dd>{{ selectedClinic.stageLabel }}</dd>
+            </div>
+            <div>
+              <dt>Capacity</dt>
+              <dd>{{ selectedClinic.capacity || 'After energy assessment' }}</dd>
+            </div>
+            <div>
+              <dt>Next milestone</dt>
+              <dd>{{ selectedClinic.nextMilestone }}</dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="system" class="chapter system-section">
+    <div class="chapter-label"><span>/04</span> System</div>
+    <div class="system-layout">
+      <div>
+        <p class="eyebrow">Energy becomes capability</p>
+        <h2>From sunlight<br />to care.</h2>
+      </div>
+      <div class="system-flow" aria-label="Solar power system stages">
+        <article>
+          <span>01</span><strong>Solar array</strong><small>Clean energy captured</small>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>02</span><strong>Storage</strong><small>Hybrid night reliability</small>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>03</span><strong>Clinic power</strong><small>Equipment and lighting</small>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span>04</span><strong>Care after dark</strong><small>Continuity when it matters</small>
+        </article>
+      </div>
+    </div>
+    <div class="system-film">
+      <figure>
+        <img src="assets/campaigns/drc-clinics/ndingi-solar-installation.png" alt="Solar panels prepared at Ndingi Clinic" />
+        <figcaption>Solar array // field installation</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/campaigns/drc-clinics/ndingi-commissioning.png" alt="Local team commissioning the clinic power system" />
+        <figcaption>Local team // commissioning</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" alt="Ndingi Clinic interior illuminated at night" />
+        <figcaption>Clinic interior // power online</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="ledger" class="chapter ledger-section">
+    <div class="chapter-label"><span>/05</span> Capital ledger</div>
+    <div class="ledger-grid">
+      <div class="ledger-total">
+        <p class="eyebrow">Mission capital</p>
+        <strong>$230,000</strong>
+        <span>Campaign goal</span>
+        <p>
+          The detailed working estimate is $15,376.24 per clinic. Public totals
+          should be connected to verified payment and expenditure records.
+        </p>
+      </div>
+      <div class="ledger-lines">
+        <div><span>Solar + storage</span><strong>$9,203.40</strong></div>
+        <div><span>Clinic equipment</span><strong>$1,230.00</strong></div>
+        <div><span>Field logistics</span><strong>$1,095.00</strong></div>
+        <div><span>Local implementation team</span><strong>$2,450.00</strong></div>
+        <div><span>Contingency</span><strong>$1,397.84</strong></div>
+        <div class="ledger-lines__total"><span>Estimated per clinic</span><strong>$15,376.24</strong></div>
+      </div>
+      <div class="ledger-actions">
+        <a
+          class="mission-button"
+          [href]="donationUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Contribute to the network <span aria-hidden="true">→</span>
+        </a>
+        <a class="ghost-button" href="mailto:sponsors@newworld-game.org?subject=DRC clinic sponsorship inquiry">
+          Fund a full clinic <span aria-hidden="true">↗</span>
+        </a>
+        <small>Every deployed clinic will carry a public milestone and reporting record.</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing-section">
+    <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" alt="Clinic team working under electric light at Ndingi Clinic" />
+    <div></div>
+    <article>
+      <p class="eyebrow">The next node is waiting</p>
+      <h2>When care cannot wait,<br />power cannot fail.</h2>
+      <p>One clinic is online. Four more facilities are now documented by name and photograph. Fifteen remain the mission.</p>
+      <a
+        class="mission-button"
+        [href]="donationUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Power the next clinic <span aria-hidden="true">→</span>
+      </a>
+    </article>
+  </section>
+
+  <footer class="campaign-footer">
+    <div class="brand brand--footer">
+      <img src="assets/img/gsl-logo.png" alt="" width="42" height="42" />
+      <span><strong>Global Solutions Lab</strong><small>A program of EarthGame</small></span>
+    </div>
+    <p>
+      EarthGame is a 501(c)(3) nonprofit organization. This prototype uses a
+      clearly labeled desired-state visualization alongside documentary images.
+    </p>
+    <a href="mailto:contact@newworld-game.org">Contact the campaign team ↗</a>
+  </footer>
+</main>
