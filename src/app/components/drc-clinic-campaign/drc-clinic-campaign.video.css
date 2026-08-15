@@ -116,7 +116,7 @@
 .video-language,
 .video-source-link {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.62rem;
+  font-size: 0.875rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }

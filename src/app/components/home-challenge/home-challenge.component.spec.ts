@@ -30,10 +30,24 @@ describe('HomeChallengeComponent', () => {
       }),
       createEditorDraft: () => ({ en: {}, fr: {} }),
     };
+    const auth = {
+      currentUser: {},
+      getUserFromEmail: jasmine
+        .createSpy('getUserFromEmail')
+        .and.callFake((email: string) =>
+          of([
+            {
+              email,
+              displayName:
+                email === 'amy@example.com' ? 'Amy Smith' : email,
+            },
+          ])
+        ),
+    };
 
     const component = new (HomeChallengeComponent as any)(
       route,
-      { currentUser: {} },
+      auth,
       router,
       {},
       {},
@@ -47,7 +61,7 @@ describe('HomeChallengeComponent', () => {
       questionTemplates
     ) as HomeChallengeComponent;
 
-    return { component, router };
+    return { component, router, auth };
   }
 
   it('rejects a stale history ID and resolves the visible slug', async () => {
@@ -180,5 +194,77 @@ describe('HomeChallengeComponent', () => {
 
     expect(component.pageChallengeCards).toEqual([]);
     expect(fetchChallenges).not.toHaveBeenCalled();
+  });
+
+  it('builds one admin video prompt from every team and its saved work', async () => {
+    const { component, auth } = createComponent(
+      jasmine.createSpy('resolveChallengePage')
+    );
+    (auth.currentUser as any) = {
+      uid: 'admin-1',
+      email: 'admin@example.com',
+    };
+    component.challengePage.authorId = 'admin-1';
+    component.heading = 'ENTP 601 2026';
+    component.videoSummarySolutions = [
+      {
+        title: 'Clean Water Access',
+        description: '<p>Make safe water available locally.</p>',
+        participants: [{ name: 'amy@example.com' }],
+        strategyReview: '<p>Start with a community pilot.</p>',
+        status: {
+          'S1-A': 'Unsafe water affects the community.',
+        },
+      },
+      {
+        title: 'Local Food Network',
+        ownerEmail: 'owner@example.com',
+        ownerName: 'Jordan Lee',
+        content: '<h2>Connect growers with neighborhood buyers.</h2>',
+      },
+    ];
+
+    await component.generateChallengeVideoScriptPrompt();
+
+    expect(component.challengeVideoScriptPrompt).toContain(
+      'Teams/solutions: 2'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      '## Team 1: Clean Water Access'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      'Team members: Amy Smith'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      'Strategy Review:\nStart with a community pilot.'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      'Unsafe water affects the community.'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      '## Team 2: Local Food Network'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      'Team members: Jordan Lee'
+    );
+    expect(component.challengeVideoScriptPrompt).toContain(
+      'Connect growers with neighborhood buyers.'
+    );
+  });
+
+  it('does not generate the challenge video prompt for a non-admin user', async () => {
+    const { component, auth } = createComponent(
+      jasmine.createSpy('resolveChallengePage')
+    );
+    (auth.currentUser as any) = {
+      uid: 'participant-1',
+      email: 'participant@example.com',
+    };
+    component.challengePage.authorId = 'admin-1';
+    component.videoSummarySolutions = [{ title: 'Hidden Team Work' }];
+
+    await component.generateChallengeVideoScriptPrompt();
+
+    expect(component.challengeVideoScriptPrompt).toBe('');
   });
 });

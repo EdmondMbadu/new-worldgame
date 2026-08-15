@@ -26,7 +26,7 @@
 .proof-assets small,
 .proof-assets > a > i {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.58rem;
+  font-size: 0.8rem;
   font-style: normal;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -49,7 +49,7 @@
 .proof-assets p {
   margin: 0;
   color: #8f9aa1;
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   line-height: 1.6;
 }
 
@@ -86,7 +86,7 @@
   gap: 7px;
   color: #8f9ba2;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.5rem;
+  font-size: 0.8rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -111,7 +111,7 @@
   border: 1px solid rgba(255, 255, 255, 0.32);
   color: #d6dde1;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.55rem;
+  font-size: 0.875rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }

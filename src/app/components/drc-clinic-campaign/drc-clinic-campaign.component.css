@@ -48,7 +48,7 @@ button:focus-visible {
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  min-height: 82px;
+  min-height: 90px;
   padding: 14px clamp(20px, 4vw, 72px);
   border-bottom: 1px solid var(--mission-line);
   background: rgba(5, 9, 13, 0.68);
@@ -65,6 +65,8 @@ button:focus-visible {
 
 .brand img {
   flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
   border-radius: 4px;
 }
 
@@ -74,7 +76,7 @@ button:focus-visible {
 }
 
 .brand strong {
-  font-size: 0.98rem;
+  font-size: 1.08rem;
   letter-spacing: 0.01em;
 }
 
@@ -82,7 +84,7 @@ button:focus-visible {
 .language-toggle {
   color: var(--mission-muted);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.62rem;
+  font-size: 0.875rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -120,7 +122,7 @@ button:focus-visible {
 .campaign-footer > a {
   color: #c8d0d5;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.65rem;
+  font-size: 0.875rem;
   letter-spacing: 0.1em;
   text-decoration: none;
   text-transform: uppercase;
@@ -150,7 +152,7 @@ button:focus-visible {
   border: 1px solid var(--mission-amber);
   border-radius: 2px;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   line-height: 1.2;
@@ -173,9 +175,9 @@ button:focus-visible {
 }
 
 .mission-button--small {
-  min-height: 42px;
-  padding: 0 16px;
-  font-size: 0.62rem;
+  min-height: 46px;
+  padding: 0 18px;
+  font-size: 0.875rem;
 }
 
 .ghost-button {
@@ -239,7 +241,7 @@ button:focus-visible {
 .chapter-label,
 .visualization-label {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.68rem;
+  font-size: 0.875rem;
   font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
@@ -256,7 +258,7 @@ button:focus-visible {
   padding: 6px 9px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   color: #d6dde1;
-  font-size: 0.56rem;
+  font-size: 0.875rem;
   letter-spacing: 0.09em;
 }
 
@@ -324,7 +326,7 @@ button:focus-visible {
 .telemetry small,
 .telemetry strong {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.58rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -442,7 +444,7 @@ button:focus-visible {
   margin-top: 24px;
   color: var(--mission-white);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   text-underline-offset: 5px;
@@ -480,13 +482,14 @@ button:focus-visible {
   background: rgba(5, 9, 13, 0.82);
   backdrop-filter: blur(12px);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.64rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .proof-viewer__caption small {
   color: var(--mission-amber);
+  font-size: inherit;
 }
 
 .proof-switcher {
@@ -508,7 +511,7 @@ button:focus-visible {
   color: #aab4ba;
   cursor: pointer;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   letter-spacing: 0.05em;
   text-align: left;
   text-transform: uppercase;
@@ -543,7 +546,7 @@ button:focus-visible {
   border-bottom: 1px solid var(--mission-line);
   color: #b2bcc2;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.64rem;
+  font-size: 0.8rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
@@ -592,7 +595,7 @@ button:focus-visible {
   padding: 14px 0;
   border-bottom: 1px solid var(--mission-line);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.63rem;
+  font-size: 0.8rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
 }
@@ -647,7 +650,7 @@ button:focus-visible {
   justify-content: space-between;
   color: #68747b;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.54rem;
+  font-size: 0.8rem;
   letter-spacing: 0.09em;
 }
 
@@ -674,7 +677,7 @@ button:focus-visible {
 :host ::ng-deep .drc-map__label {
   fill: #f2f0e9;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -687,7 +690,7 @@ button:focus-visible {
   border-top: 1px solid var(--mission-line);
   background: rgba(5, 9, 13, 0.9);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.58rem;
+  font-size: 0.8rem;
   letter-spacing: 0.05em;
   line-height: 1.5;
   text-transform: uppercase;
@@ -766,7 +769,7 @@ button:focus-visible {
 .clinic-row__index {
   color: #66727a;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
 }
 
 .clinic-row__main {
@@ -780,7 +783,7 @@ button:focus-visible {
 
 .clinic-row__main small {
   color: var(--mission-muted);
-  font-size: 0.74rem;
+  font-size: 0.8rem;
 }
 
 .status {
@@ -790,7 +793,7 @@ button:focus-visible {
   min-width: 110px;
   color: #b8c2c8;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.58rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -842,7 +845,7 @@ button:focus-visible {
   background: var(--mission-online);
   color: #fff;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.56rem;
+  font-size: 0.8rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -855,7 +858,7 @@ button:focus-visible {
   background: rgba(5, 9, 13, 0.76);
   color: #d6dde1;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.56rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
 }
 
@@ -921,7 +924,7 @@ button:focus-visible {
   left: 6px;
   color: #fff;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.5rem;
+  font-size: 0.8rem;
   text-shadow: 0 1px 4px #000;
 }
 
@@ -983,7 +986,7 @@ button:focus-visible {
 .clinic-detail__copy dd {
   margin: 0;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -1017,7 +1020,7 @@ button:focus-visible {
 .system-flow article small {
   color: var(--mission-muted);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.58rem;
+  font-size: 0.8rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -1067,7 +1070,7 @@ button:focus-visible {
   border-top: 1px solid var(--mission-line);
   background: rgba(5, 9, 13, 0.82);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.58rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1101,7 +1104,7 @@ button:focus-visible {
   margin-top: 12px;
   color: #aab4ba;
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.62rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1113,7 +1116,7 @@ button:focus-visible {
   padding: 15px 0;
   border-bottom: 1px solid var(--mission-line);
   font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.64rem;
+  font-size: 0.8rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -1180,7 +1183,7 @@ button:focus-visible {
   padding: 36px clamp(20px, 4vw, 72px);
   border-top: 1px solid var(--mission-line);
   color: var(--mission-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   line-height: 1.6;
 }
 
@@ -1245,7 +1248,7 @@ button:focus-visible {
   }
 
   .brand strong {
-    font-size: 0.82rem;
+    font-size: 0.95rem;
   }
 
   .header-actions {
@@ -1255,12 +1258,12 @@ button:focus-visible {
   .mission-button--small {
     min-height: 40px;
     padding: 0 10px;
-    font-size: 0.55rem;
+    font-size: 0.75rem;
   }
 
   .language-toggle {
     padding: 5px 6px;
-    font-size: 0.55rem;
+    font-size: 0.75rem;
   }
 
   .video-opening {

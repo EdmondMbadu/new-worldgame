@@ -989,6 +989,104 @@
                   </button>
                 </div>
 
+                <section
+                  class="overflow-hidden rounded-xl border border-slate-200 bg-slate-50/70 shadow-sm dark:border-slate-700 dark:bg-slate-800/40"
+                  aria-labelledby="challengeVideoSummaryTitle"
+                >
+                  <button
+                    type="button"
+                    (click)="showChallengeVideoSummary = !showChallengeVideoSummary"
+                    class="flex w-full items-center justify-between gap-3 p-3.5 text-left"
+                    [attr.aria-expanded]="showChallengeVideoSummary"
+                    aria-controls="challengeVideoSummaryPanel"
+                  >
+                    <span class="flex min-w-0 items-center gap-3">
+                      <span
+                        class="material-symbols-outlined flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-700 text-lg text-white dark:bg-slate-600"
+                        aria-hidden="true"
+                        >movie_edit</span
+                      >
+                      <span class="min-w-0">
+                        <span class="flex flex-wrap items-center gap-2">
+                          <span
+                            id="challengeVideoSummaryTitle"
+                            class="text-sm font-bold text-slate-900 dark:text-white"
+                            >Video script summary</span
+                          >
+                          <span
+                            class="rounded-full bg-slate-200 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                            >Admin only</span
+                          >
+                        </span>
+                        <span class="mt-0.5 block text-xs leading-4 text-slate-500 dark:text-slate-400">
+                          Copy every team into one AI-ready prompt.
+                        </span>
+                      </span>
+                    </span>
+                    <svg
+                      class="h-4 w-4 shrink-0 text-slate-500 transition-transform"
+                      [ngClass]="{ 'rotate-180': showChallengeVideoSummary }"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </button>
+
+                  <div
+                    *ngIf="showChallengeVideoSummary"
+                    id="challengeVideoSummaryPanel"
+                    class="space-y-3 border-t border-slate-200 p-3.5 dark:border-slate-700"
+                  >
+                    <p class="text-xs leading-5 text-slate-600 dark:text-slate-300">
+                      Includes all {{ videoSummarySolutions.length }} solution{{ videoSummarySolutions.length === 1 ? '' : 's' }}, their titles, team members, descriptions, published content, Strategy Reviews, and saved step work.
+                    </p>
+                    <button
+                      type="button"
+                      (click)="generateChallengeVideoScriptPrompt()"
+                      [disabled]="isGeneratingChallengeVideoScriptPrompt"
+                      class="inline-flex w-full items-center justify-center rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      {{
+                        isGeneratingChallengeVideoScriptPrompt
+                          ? "Collecting team work…"
+                          : challengeVideoScriptPrompt
+                            ? "Regenerate prompt"
+                            : "Generate video script prompt"
+                      }}
+                    </button>
+
+                    <div *ngIf="challengeVideoScriptPrompt" class="space-y-2">
+                      <textarea
+                        [ngModel]="challengeVideoScriptPrompt"
+                        readonly
+                        rows="12"
+                        aria-label="Challenge video script prompt"
+                        class="w-full resize-y rounded-lg border border-slate-300 bg-white px-2.5 py-2 font-mono text-[11px] leading-4 text-slate-800 shadow-inner focus:outline-none focus:ring-2 focus:ring-violet-500/60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                      ></textarea>
+                      <p class="text-[10px] leading-4 text-slate-500 dark:text-slate-400">
+                        {{ challengeVideoScriptPrompt.length | number }} characters · Ready to paste into your video-script workflow
+                      </p>
+                      <button
+                        type="button"
+                        (click)="copyChallengeVideoScriptPrompt()"
+                        class="inline-flex w-full items-center justify-center rounded-lg border border-violet-300 bg-white px-3 py-2 text-xs font-bold text-violet-700 transition hover:bg-violet-50 dark:border-violet-800 dark:bg-slate-900 dark:text-violet-200 dark:hover:bg-violet-950"
+                      >
+                        {{ challengeVideoScriptPromptCopied ? "Copied!" : "Copy full prompt" }}
+                      </button>
+                    </div>
+
+                    <p
+                      *ngIf="challengeVideoScriptPromptError"
+                      class="text-xs leading-5 text-rose-600 dark:text-rose-300"
+                    >
+                      {{ challengeVideoScriptPromptError }}
+                    </p>
+                  </div>
+                </section>
+
                 <!-- Tools groups -->
                 <div class="space-y-6 pt-2">
                   <!-- Challenges Group -->
