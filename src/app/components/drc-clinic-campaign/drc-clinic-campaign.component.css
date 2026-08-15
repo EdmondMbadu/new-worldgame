@@ -200,7 +200,7 @@ button:focus-visible {
   padding: 150px clamp(20px, 4vw, 72px) 122px;
 }
 
-.hero__image,
+.hero__scene,
 .hero__shade,
 .hero__grid {
   position: absolute;
@@ -209,18 +209,34 @@ button:focus-visible {
   height: 100%;
 }
 
-.hero__image {
+.hero__scene {
   z-index: -4;
+  overflow: hidden;
+  background: #09131d;
+}
+
+.hero__image {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: 58% center;
-  filter: saturate(0.82) contrast(1.04);
+  object-position: 62% center;
+  transform: scale(1.005);
+  transition:
+    opacity 1050ms cubic-bezier(0.22, 1, 0.36, 1),
+    clip-path 1450ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1450ms ease,
+    transform 1700ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hero__shade {
   z-index: -3;
   background:
-    linear-gradient(90deg, rgba(3, 7, 11, 0.94) 0%, rgba(3, 7, 11, 0.74) 39%, rgba(3, 7, 11, 0.1) 76%),
-    linear-gradient(0deg, rgba(3, 7, 11, 0.9) 0%, transparent 34%, rgba(3, 7, 11, 0.24) 100%);
+    linear-gradient(90deg, rgba(3, 7, 11, 0.95) 0%, rgba(3, 7, 11, 0.76) 40%, rgba(3, 7, 11, 0.18) 78%),
+    linear-gradient(0deg, rgba(3, 7, 11, 0.92) 0%, transparent 37%, rgba(3, 7, 11, 0.28) 100%);
+  transition: background 1200ms ease;
 }
 
 .hero__grid {
@@ -234,7 +250,9 @@ button:focus-visible {
 }
 
 .hero__content {
-  width: min(760px, 74vw);
+  position: relative;
+  z-index: 1;
+  width: min(850px, 78vw);
 }
 
 .eyebrow,
@@ -295,6 +313,7 @@ button:focus-visible {
 
 .hero__actions {
   display: flex;
+  align-items: flex-start;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 30px;
@@ -350,6 +369,8 @@ button:focus-visible {
   right: 6%;
   width: 30vw;
   height: 42vh;
+  opacity: 0.42;
+  transition: opacity 900ms ease;
 }
 
 .network-line {
@@ -357,6 +378,9 @@ button:focus-visible {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--mission-amber), rgba(255, 255, 255, 0.45));
   transform-origin: left center;
+  filter: grayscale(1);
+  opacity: 0.28;
+  transition: filter 800ms ease, opacity 800ms ease;
 }
 
 .network-line--one {
@@ -381,26 +405,24 @@ button:focus-visible {
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 50%;
   box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.06);
+  transition:
+    background 650ms ease,
+    border-color 650ms ease,
+    box-shadow 650ms ease;
 }
 
 .network-node--online {
   left: 8%;
   top: 66%;
-  border-color: var(--mission-amber);
-  background: var(--mission-amber);
-  box-shadow: 0 0 0 7px rgba(246, 183, 60, 0.18), 0 0 24px rgba(246, 183, 60, 0.8);
-  animation: node-pulse 2.4s ease-out infinite;
+  border-color: rgba(255, 255, 255, 0.42);
+  background: transparent;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.04);
 }
 
 .network-node--two { left: 42%; top: 47%; }
 .network-node--three { left: 63%; top: 27%; }
 .network-node--four { left: 78%; top: 38%; }
 .network-node--five { left: 90%; top: 48%; }
-
-@keyframes node-pulse {
-  0%, 35% { box-shadow: 0 0 0 7px rgba(246, 183, 60, 0.18), 0 0 24px rgba(246, 183, 60, 0.8); }
-  100% { box-shadow: 0 0 0 18px transparent, 0 0 6px rgba(246, 183, 60, 0.2); }
-}
 
 .chapter {
   padding: clamp(80px, 10vw, 150px) clamp(20px, 4vw, 72px);
@@ -1309,13 +1331,13 @@ button:focus-visible {
   }
 
   .hero {
-    min-height: 920px;
+    min-height: 1260px;
     align-items: center;
-    padding: 120px 20px 220px;
+    padding: 120px 20px 340px;
   }
 
   .hero__image {
-    object-position: 67% center;
+    object-position: 72% center;
   }
 
   .hero__shade {
@@ -1332,8 +1354,7 @@ button:focus-visible {
     font-size: clamp(4.7rem, 22vw, 7rem);
   }
 
-  .hero__actions,
-  .hero__actions a {
+  .hero__actions {
     width: 100%;
   }
 

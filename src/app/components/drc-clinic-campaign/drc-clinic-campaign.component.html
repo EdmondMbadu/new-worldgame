@@ -71,12 +71,41 @@
     </a>
   </section>
 
-  <section class="hero" aria-labelledby="campaign-title">
-    <img
-      class="hero__image"
-      src="assets/campaigns/drc-clinics/ndingi-desired-state.png"
-      [alt]="tr('Concept image of planned improvements to Ndingi Clinic, including solar panels', 'Image conceptuelle des améliorations prévues pour la Clinique de Ndingi, notamment des panneaux solaires')"
-    />
+  <section
+    class="hero"
+    [class.hero--powered]="isClinicPowerOn"
+    [class.hero--transitioning]="isClinicPowerTransitioning"
+    aria-labelledby="campaign-title"
+  >
+    <div
+      class="hero__scene"
+      role="img"
+      [attr.aria-label]="powerSceneDescription"
+      [attr.aria-busy]="!isPowerSceneReady"
+    >
+      <img
+        class="hero__image hero__image--off"
+        [src]="powerOffImage"
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        (load)="markPowerImageLoaded('off')"
+        (error)="markPowerImageError()"
+      />
+      <img
+        class="hero__image hero__image--on"
+        [src]="powerOnImage"
+        alt=""
+        loading="eager"
+        decoding="async"
+        (load)="markPowerImageLoaded('on')"
+        (error)="markPowerImageError()"
+      />
+      <div class="hero__light-bloom" aria-hidden="true"></div>
+      <div class="hero__energy-wave" aria-hidden="true"></div>
+      <div class="hero__power-flare" aria-hidden="true"></div>
+    </div>
     <div class="hero__shade"></div>
     <div class="hero__grid" aria-hidden="true"></div>
     <div class="hero__network" aria-hidden="true">
@@ -90,8 +119,8 @@
     </div>
 
     <div class="hero__content">
-      <p class="eyebrow">{{ tr('Democratic Republic of the Congo // One clinic powered', 'République démocratique du Congo // Un centre électrifié') }}</p>
-      <p class="visualization-label">{{ tr('Concept image: planned clinic improvements', 'Image conceptuelle : améliorations prévues') }}</p>
+      <p class="eyebrow">{{ tr('Democratic Republic of the Congo // Power the next clinic', 'République démocratique du Congo // Électrifier le prochain centre') }}</p>
+      <p class="visualization-label">{{ tr('Interactive concept demonstration // Try the switch', 'Démonstration conceptuelle interactive // Essayez l’interrupteur') }}</p>
       <h1 id="campaign-title">{{ tr('Reliable power', 'Une énergie fiable') }}<br />{{ tr('for lifesaving care.', 'pour des soins vitaux.') }}</h1>
       <p class="hero__subhead">{{ tr('Power the next 15 clinics in the DRC.', 'Électrifier les 15 prochains centres de santé en RDC.') }}</p>
       <p class="hero__copy">
@@ -101,18 +130,66 @@
         ) }}
       </p>
       <div class="hero__actions">
+        <div class="power-control">
+          <button
+            type="button"
+            class="power-switch"
+            role="switch"
+            [class.power-switch--on]="isClinicPowerOn"
+            [attr.aria-checked]="isClinicPowerOn"
+            [attr.aria-label]="tr(isClinicPowerOn ? 'Turn the clinic power off' : 'Turn the clinic power on', isClinicPowerOn ? 'Couper l’électricité du centre' : 'Mettre le centre sous tension')"
+            [disabled]="!isPowerSceneReady || powerImageError"
+            (click)="toggleClinicPower()"
+          >
+            <span class="power-switch__copy">
+              <small>{{ tr('Power the next clinic', 'Électrifier le prochain centre') }}</small>
+              <strong>
+                {{ tr(
+                  !isPowerSceneReady ? 'Preparing the switch…' : isClinicPowerOn ? 'Clinic lights are on' : 'Turn clinic power on',
+                  !isPowerSceneReady ? 'Préparation de l’interrupteur…' : isClinicPowerOn ? 'Le centre est éclairé' : 'Mettre le centre sous tension'
+                ) }}
+              </strong>
+            </span>
+            <span class="power-switch__track" aria-hidden="true">
+              <span class="power-switch__state power-switch__state--off">OFF</span>
+              <span class="power-switch__state power-switch__state--on">ON</span>
+              <span class="power-switch__knob"><i></i></span>
+            </span>
+          </button>
+          <div class="power-control__meta">
+            <span>{{ tr('Simulation only', 'Simulation uniquement') }}</span>
+            <button
+              type="button"
+              class="power-sound-toggle"
+              [attr.aria-pressed]="isPowerSoundEnabled"
+              (click)="togglePowerSound()"
+            >
+              <i aria-hidden="true"></i>
+              {{ tr(isPowerSoundEnabled ? 'Sound on' : 'Sound off', isPowerSoundEnabled ? 'Son activé' : 'Son désactivé') }}
+            </button>
+          </div>
+        </div>
         <a
-          class="mission-button"
+          *ngIf="isClinicPowerOn"
+          class="mission-button hero__donation-button"
           [href]="donationUrl"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {{ tr('Power the next clinic', 'Électrifier le prochain centre') }} <span aria-hidden="true">→</span>
+          {{ tr('Help power a real clinic', 'Aider à électrifier un vrai centre') }} <span aria-hidden="true">→</span>
         </a>
         <a class="ghost-button" href="#field-proof" (click)="scrollToSection('field-proof', $event)">
           {{ tr('See what we accomplished', 'Voir ce que nous avons réalisé') }} <span aria-hidden="true">↘</span>
         </a>
       </div>
+      <p
+        class="power-status"
+        [class.power-status--on]="isClinicPowerOn"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <span aria-hidden="true"></span>{{ powerStatusMessage }}
+      </p>
     </div>
 
     <div class="telemetry" [attr.aria-label]="tr('Project progress', 'Avancement du projet')">
