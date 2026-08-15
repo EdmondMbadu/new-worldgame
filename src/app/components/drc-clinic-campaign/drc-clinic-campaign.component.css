@@ -115,7 +115,7 @@ button:focus-visible {
 
 .mission-header nav {
   display: flex;
-  gap: clamp(20px, 3vw, 48px);
+  gap: clamp(16px, 2vw, 32px);
 }
 
 .mission-header nav a,
@@ -1191,7 +1191,7 @@ button:focus-visible {
   color: var(--mission-white);
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1240px) {
   .mission-header {
     grid-template-columns: 1fr auto;
   }
@@ -1199,6 +1199,9 @@ button:focus-visible {
   .mission-header nav {
     display: none;
   }
+}
+
+@media (max-width: 1100px) {
 
   .proof-layout,
   .system-layout,

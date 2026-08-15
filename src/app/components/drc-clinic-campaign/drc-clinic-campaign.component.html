@@ -1,19 +1,19 @@
 <main class="campaign-shell">
-  <header class="mission-header" [attr.aria-label]="tr('Campaign navigation', 'Navigation de la campagne')">
+  <header class="mission-header" [attr.aria-label]="tr('Project navigation', 'Navigation du projet')">
     <a class="brand" routerLink="/" [attr.aria-label]="tr('Global Solutions Lab home', 'Accueil Global Solutions Lab')">
       <img src="assets/img/gsl-logo.png" alt="" width="46" height="46" />
       <span>
         <strong>Global Solutions Lab</strong>
-        <small>{{ tr('DRC clinic power mission', 'Mission énergie-santé en RDC') }}</small>
+        <small>{{ tr('DRC clinic power project', 'Projet solaire des centres en RDC') }}</small>
       </span>
     </a>
 
-    <nav [attr.aria-label]="tr('Campaign sections', 'Sections de la campagne')">
+    <nav [attr.aria-label]="tr('Project sections', 'Sections du projet')">
       <a href="#video" (click)="scrollToSection('video', $event)">{{ tr('Watch', 'Voir') }}</a>
-      <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">{{ tr('Field proof', 'Preuve terrain') }}</a>
+      <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">{{ tr('Work completed', 'Travaux réalisés') }}</a>
       <a href="#geography" (click)="scrollToSection('geography', $event)">{{ tr('DRC map', 'Carte RDC') }}</a>
       <a href="#clinics" (click)="scrollToSection('clinics', $event)">{{ tr('Five clinics', 'Cinq centres') }}</a>
-      <a href="#ledger" (click)="scrollToSection('ledger', $event)">{{ tr('Ledger', 'Budget') }}</a>
+      <a href="#ledger" (click)="scrollToSection('ledger', $event)">{{ tr('Budget', 'Budget') }}</a>
     </nav>
 
     <div class="header-actions">
@@ -49,16 +49,16 @@
     <div class="video-opening__grid" aria-hidden="true"></div>
 
     <div *ngIf="!isVideoPlaying" class="video-opening__content">
-      <p class="eyebrow">{{ tr('Watch the mission // Video briefing', 'Voir la mission // Présentation vidéo') }}</p>
-      <h1 id="video-title">{{ tr('Power changes what is possible.', 'L’énergie change ce qui devient possible.') }}</h1>
+      <p class="eyebrow">{{ tr('Watch the project // Short film', 'Voir le projet // Court métrage') }}</p>
+      <h1 id="video-title">{{ tr('Reliable power improves patient care.', 'Une électricité fiable améliore les soins.') }}</h1>
       <p>
         {{ tr(
-          'See why reliable electricity is the missing clinical infrastructure—and how the DRC team plans to power the next 15 facilities.',
-          'Découvrez pourquoi une électricité fiable est l’infrastructure clinique manquante — et comment l’équipe de la RDC prévoit d’alimenter les 15 prochains centres.'
+          'See why clinics need reliable electricity—and how the DRC Health Clinic Electrification Team plans to bring power to the next 15 clinics.',
+          'Découvrez pourquoi les centres de santé ont besoin d’une électricité fiable et comment l’équipe d’électrification des centres de santé en RDC prévoit d’alimenter les 15 prochains centres.'
         ) }}
       </p>
       <div class="video-opening__actions">
-        <button type="button" class="video-play" (click)="playVideo()" [attr.aria-label]="tr('Play campaign film', 'Lire le film de la campagne')">
+        <button type="button" class="video-play" (click)="playVideo()" [attr.aria-label]="tr('Play project film', 'Lire le film du projet')">
           <span aria-hidden="true">▶</span>
           <strong>{{ tr('Play the film', 'Voir le film') }}</strong>
         </button>
@@ -75,7 +75,7 @@
     <img
       class="hero__image"
       src="assets/campaigns/drc-clinics/ndingi-desired-state.png"
-      [alt]="tr('Desired-state visualization of Ndingi Clinic with a refurbished exterior and solar panels', 'Visualisation de la Clinique de Ndingi rénovée et équipée de panneaux solaires')"
+      [alt]="tr('Concept image of planned improvements to Ndingi Clinic, including solar panels', 'Image conceptuelle des améliorations prévues pour la Clinique de Ndingi, notamment des panneaux solaires')"
     />
     <div class="hero__shade"></div>
     <div class="hero__grid" aria-hidden="true"></div>
@@ -90,14 +90,14 @@
     </div>
 
     <div class="hero__content">
-      <p class="eyebrow">{{ tr('Democratic Republic of the Congo // Field proven', 'République démocratique du Congo // Éprouvé sur le terrain') }}</p>
-      <p class="visualization-label">{{ tr('Desired-state visualization', 'Visualisation de l’état souhaité') }}</p>
-      <h1 id="campaign-title">{{ tr('Infrastructure', 'Une infrastructure') }}<br />{{ tr('for life.', 'pour la vie.') }}</h1>
+      <p class="eyebrow">{{ tr('Democratic Republic of the Congo // One clinic powered', 'République démocratique du Congo // Un centre électrifié') }}</p>
+      <p class="visualization-label">{{ tr('Concept image: planned clinic improvements', 'Image conceptuelle : améliorations prévues') }}</p>
+      <h1 id="campaign-title">{{ tr('Reliable power', 'Une énergie fiable') }}<br />{{ tr('for lifesaving care.', 'pour des soins vitaux.') }}</h1>
       <p class="hero__subhead">{{ tr('Power the next 15 clinics in the DRC.', 'Électrifier les 15 prochains centres de santé en RDC.') }}</p>
       <p class="hero__copy">
         {{ tr(
-          'From Kongo Central outward, reliable solar energy means safer births, protected vaccines, working equipment, and care after dark.',
-          'À partir du Kongo Central, une énergie solaire fiable signifie des accouchements plus sûrs, des vaccins protégés, des équipements fonctionnels et des soins après la tombée de la nuit.'
+          'Starting in Kongo Central, reliable solar energy means safer births, protected vaccines, working equipment, and care after dark.',
+          'En commençant par le Kongo Central, une énergie solaire fiable permet des accouchements plus sûrs, protège les vaccins, alimente les équipements et rend possibles les soins après la tombée de la nuit.'
         ) }}
       </p>
       <div class="hero__actions">
@@ -107,37 +107,37 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          {{ tr('Activate the next clinic', 'Activer le prochain centre') }} <span aria-hidden="true">→</span>
+          {{ tr('Power the next clinic', 'Électrifier le prochain centre') }} <span aria-hidden="true">→</span>
         </a>
         <a class="ghost-button" href="#field-proof" (click)="scrollToSection('field-proof', $event)">
-          {{ tr('Explore the field proof', 'Voir la preuve terrain') }} <span aria-hidden="true">↘</span>
+          {{ tr('See what we accomplished', 'Voir ce que nous avons réalisé') }} <span aria-hidden="true">↘</span>
         </a>
       </div>
     </div>
 
-    <div class="telemetry" [attr.aria-label]="tr('Campaign status', 'État de la campagne')">
-      <div><small>{{ tr('Node 01', 'Nœud 01') }}</small><strong class="online-text">{{ tr('Online', 'En service') }}</strong></div>
-      <div><small>{{ tr('Pilot capacity', 'Capacité pilote') }}</small><strong>2.0 kW</strong></div>
-      <div><small>{{ tr('Documented network', 'Réseau documenté') }}</small><strong>{{ tr('5 clinics', '5 centres') }}</strong></div>
-      <div><small>{{ tr('Network mission', 'Mission réseau') }}</small><strong>{{ tr('15 clinics', '15 centres') }}</strong></div>
-      <div><small>{{ tr('Mission capital', 'Capital de mission') }}</small><strong>$230K</strong></div>
+    <div class="telemetry" [attr.aria-label]="tr('Project progress', 'Avancement du projet')">
+      <div><small>{{ tr('Clinic 01', 'Centre 01') }}</small><strong class="online-text">{{ tr('Solar power installed', 'Énergie solaire installée') }}</strong></div>
+      <div><small>{{ tr('Installed solar power', 'Puissance solaire installée') }}</small><strong>2.0 kW</strong></div>
+      <div><small>{{ tr('Clinics identified', 'Centres identifiés') }}</small><strong>{{ tr('5 clinics', '5 centres') }}</strong></div>
+      <div><small>{{ tr('Clinics to power', 'Centres à électrifier') }}</small><strong>{{ tr('15 clinics', '15 centres') }}</strong></div>
+      <div><small>{{ tr('Fundraising goal', 'Objectif de collecte') }}</small><strong>$230K</strong></div>
     </div>
   </section>
 
   <section id="field-proof" class="chapter proof-section">
-    <div class="chapter-label"><span>/01</span> {{ tr('Field proof', 'Preuve terrain') }}</div>
+    <div class="chapter-label"><span>/01</span> {{ tr('What we accomplished', 'Ce que nous avons réalisé') }}</div>
     <div class="proof-layout">
       <div class="proof-heading">
-        <p class="eyebrow">{{ tr('One place. Three honest views.', 'Un lieu. Trois regards sincères.') }}</p>
-        <h2>{{ tr('The night', 'La nuit où') }}<br />{{ tr('Ndingi changed.', 'Ndingi a changé.') }}</h2>
+        <p class="eyebrow">{{ tr('Ndingi Clinic: before, completed work, and future plans', 'Clinique de Ndingi : avant, travaux réalisés et projets futurs') }}</p>
+        <h2>{{ tr('Ndingi', 'Ndingi') }}<br />{{ tr('has reliable power.', 'dispose d’une énergie fiable.') }}</h2>
         <p>
           {{ tr(
-            'The page separates documentary evidence from the desired-state visualization. Donors can see what existed, what was completed, and what the long-term standard can become.',
-            'Cette page distingue les preuves documentaires de la visualisation de l’état souhaité. Les donateurs peuvent voir la situation initiale, les travaux réalisés et la norme visée à long terme.'
+            'These images show Ndingi Clinic before the work, after solar power was installed, and a concept image of possible future improvements.',
+            'Ces images montrent la Clinique de Ndingi avant les travaux, après l’installation de l’énergie solaire, ainsi qu’une image conceptuelle des améliorations futures possibles.'
           ) }}
         </p>
         <a [href]="solutionUrl" class="text-link" target="_blank" rel="noopener noreferrer">
-          {{ tr('Open the complete project record', 'Ouvrir le dossier complet du projet') }} <span aria-hidden="true">↗</span>
+          {{ tr('Read the full project report', 'Lire le rapport complet du projet') }} <span aria-hidden="true">↗</span>
         </a>
       </div>
 
@@ -159,7 +159,7 @@
             [attr.aria-pressed]="proofView === 'before'"
             (click)="setProofView('before')"
           >
-            <span>01</span> {{ tr('Before', 'Avant') }}
+            <span>01</span> {{ tr('Before solar power', 'Avant l’énergie solaire') }}
           </button>
           <button
             type="button"
@@ -167,7 +167,7 @@
             [attr.aria-pressed]="proofView === 'after'"
             (click)="setProofView('after')"
           >
-            <span>02</span> {{ tr('Pilot complete', 'Projet réalisé') }}
+            <span>02</span> {{ tr('Work completed', 'Travaux réalisés') }}
           </button>
           <button
             type="button"
@@ -175,24 +175,24 @@
             [attr.aria-pressed]="proofView === 'desired'"
             (click)="setProofView('desired')"
           >
-            <span>03</span> {{ tr('Desired state', 'État souhaité') }}
+            <span>03</span> {{ tr('Future plan', 'Projet futur') }}
           </button>
         </div>
       </div>
     </div>
 
-    <div class="field-timeline" [attr.aria-label]="tr('Implementation sequence', 'Séquence de mise en œuvre')">
-      <span>{{ tr('Assess', 'Évaluer') }}</span><i>→</i><span>{{ tr('Transport', 'Transporter') }}</span><i>→</i><span>{{ tr('Install', 'Installer') }}</span
-      ><i>→</i><span>{{ tr('Commission', 'Mettre en service') }}</span><i>→</i><span>{{ tr('Monitor', 'Suivre') }}</span>
+    <div class="field-timeline" [attr.aria-label]="tr('Steps to power a clinic', 'Étapes pour électrifier un centre')">
+      <span>{{ tr('Assess clinic needs', 'Évaluer les besoins') }}</span><i>→</i><span>{{ tr('Deliver equipment', 'Livrer le matériel') }}</span><i>→</i><span>{{ tr('Install solar power', 'Installer le solaire') }}</span
+      ><i>→</i><span>{{ tr('Test the system', 'Tester le système') }}</span><i>→</i><span>{{ tr('Track results', 'Suivre les résultats') }}</span>
     </div>
 
-    <div class="proof-assets" [attr.aria-label]="tr('Project evidence and presentations', 'Preuves et présentations du projet')">
+    <div class="proof-assets" [attr.aria-label]="tr('Project reports and presentations', 'Rapports et présentations du projet')">
       <a [href]="solutionUrl" target="_blank" rel="noopener noreferrer">
         <span>01</span>
         <div>
-          <small>{{ tr('Proven origin', 'Origine éprouvée') }}</small>
-          <strong>{{ tr('The original successful GSL project', 'Le projet GSL initial couronné de succès') }}</strong>
-          <p>{{ tr('See the solution record that launched the Ndingi pilot.', 'Consultez le dossier de solution à l’origine du projet pilote de Ndingi.') }}</p>
+          <small>{{ tr('Original project', 'Projet initial') }}</small>
+          <strong>{{ tr('The successful Ndingi Clinic project', 'Le projet réussi de la Clinique de Ndingi') }}</strong>
+          <p>{{ tr('Read how the Ndingi Clinic solar project began.', 'Découvrez comment le projet solaire de la Clinique de Ndingi a commencé.') }}</p>
         </div>
         <i aria-hidden="true">↗</i>
       </a>
@@ -200,8 +200,8 @@
         <span>02</span>
         <div>
           <small>{{ tr('Recent team presentation', 'Présentation récente de l’équipe') }}</small>
-          <strong>{{ tr('Electrification Scale-Up Project — Phase Two', 'Projet d’électrification à grande échelle — Phase 2') }}</strong>
-          <p>{{ tr('Open the 17-slide presentation outlining the proof, priorities, and scale-up strategy.', 'Ouvrez la présentation de 17 diapositives sur les résultats, les priorités et la stratégie de déploiement.') }}</p>
+          <strong>{{ tr('Plan to Power More Clinics — Phase Two', 'Plan pour électrifier davantage de centres — Phase 2') }}</strong>
+          <p>{{ tr('See the 17-slide plan, including completed work, clinic priorities, and next steps.', 'Consultez le plan de 17 diapositives présentant les travaux réalisés, les priorités des centres et les prochaines étapes.') }}</p>
         </div>
         <i aria-hidden="true">↗</i>
       </a>
@@ -209,27 +209,27 @@
   </section>
 
   <section id="geography" class="chapter geography-section">
-    <div class="chapter-label"><span>/02</span> {{ tr('Mission geography', 'Géographie de la mission') }}</div>
+    <div class="chapter-label"><span>/02</span> {{ tr('Where we work', 'Où nous travaillons') }}</div>
     <div class="geography-layout">
       <div class="geography-copy">
-        <p class="eyebrow">{{ tr('Africa scale-up // DRC active now', 'Déploiement africain // RDC active maintenant') }}</p>
-        <h2>{{ tr('Active in the DRC.', 'Actif en RDC.') }}<br />{{ tr('Built for Africa.', 'Pensé pour l’Afrique.') }}</h2>
+        <p class="eyebrow">{{ tr('Starting in the DRC // More African countries can follow', 'Départ en RDC // D’autres pays africains pourront suivre') }}</p>
+        <h2>{{ tr('Working in the DRC.', 'Nous travaillons en RDC.') }}<br />{{ tr('Ready to help more clinics.', 'Prêts à aider davantage de centres.') }}</h2>
         <p>
           {{ tr(
-            'The work is active today in the Democratic Republic of the Congo. The long-term system is designed to expand across Africa as each new country, partner, and clinic is verified.',
-            'Le travail est aujourd’hui actif en République démocratique du Congo. Le système à long terme est conçu pour s’étendre à travers l’Afrique à mesure que chaque nouveau pays, partenaire et centre est vérifié.'
+            'The team is currently working in the Democratic Republic of the Congo. We will work in other African countries only after local partners and clinic needs are confirmed.',
+            'L’équipe travaille actuellement en République démocratique du Congo. Nous travaillerons dans d’autres pays africains uniquement après avoir confirmé les partenaires locaux et les besoins des centres de santé.'
           ) }}
         </p>
-        <div class="geography-facts" [attr.aria-label]="tr('Campaign geography facts', 'Données géographiques de la campagne')">
-          <div><span>{{ tr('Active country', 'Pays actif') }}</span><strong>{{ tr('DR Congo', 'RD Congo') }}</strong></div>
-          <div><span>{{ tr('Expansion horizon', 'Horizon d’expansion') }}</span><strong>{{ tr('Africa', 'Afrique') }}</strong></div>
-          <div><span>{{ tr('Named facilities', 'Établissements identifiés') }}</span><strong>05</strong></div>
+        <div class="geography-facts" [attr.aria-label]="tr('Project locations', 'Lieux du projet')">
+          <div><span>{{ tr('Country where we work', 'Pays où nous travaillons') }}</span><strong>{{ tr('DR Congo', 'RD Congo') }}</strong></div>
+          <div><span>{{ tr('Region for future clinics', 'Région des futurs centres') }}</span><strong>{{ tr('Africa', 'Afrique') }}</strong></div>
+          <div><span>{{ tr('Clinics identified', 'Centres identifiés') }}</span><strong>05</strong></div>
         </div>
       </div>
 
       <figure class="drc-map-card">
         <div class="drc-map-card__hud" aria-hidden="true">
-          <span>{{ tr('AFRICA // EXPANSION HORIZON', 'AFRIQUE // HORIZON D’EXPANSION') }}</span><span>{{ tr('DRC // ACTIVE NOW', 'RDC // ACTIVE MAINTENANT') }}</span>
+          <span>{{ tr('AFRICA // FUTURE CLINICS', 'AFRIQUE // FUTURS CENTRES') }}</span><span>{{ tr('DRC // WORK UNDERWAY', 'RDC // TRAVAUX EN COURS') }}</span>
         </div>
         <svg
           #drcMap
@@ -240,32 +240,32 @@
         >
           <title id="drc-map-title">{{ tr('Map of Africa with the Democratic Republic of the Congo highlighted', 'Carte de l’Afrique avec la République démocratique du Congo mise en évidence') }}</title>
           <desc id="drc-map-description">
-            {{ tr('Africa is shown as the expansion horizon, with the DRC highlighted as the active country.', 'L’Afrique est présentée comme horizon d’expansion, avec la RDC mise en évidence comme pays actif.') }}
+            {{ tr('The map highlights the DRC, where the team is currently working, and shows the rest of Africa as a possible future region.', 'La carte met en évidence la RDC, où l’équipe travaille actuellement, et présente le reste de l’Afrique comme une région future possible.') }}
           </desc>
         </svg>
         <div class="map-legend" aria-hidden="true">
-          <span><i class="map-legend__active"></i>{{ tr('Active deployment', 'Déploiement actif') }}</span>
-          <span><i class="map-legend__future"></i>{{ tr('Expansion horizon', 'Horizon d’expansion') }}</span>
+          <span><i class="map-legend__active"></i>{{ tr('Work underway', 'Travaux en cours') }}</span>
+          <span><i class="map-legend__future"></i>{{ tr('Future countries', 'Pays futurs') }}</span>
         </div>
         <figcaption>
-          <strong>{{ tr('DRC active now', 'RDC active maintenant') }}</strong>
-          <span>{{ tr('Africa is the scale-up horizon. New countries will activate only when partnerships and clinic data are verified.', 'L’Afrique est l’horizon de déploiement. De nouveaux pays seront activés uniquement lorsque les partenariats et les données des centres seront vérifiés.') }}</span>
+          <strong>{{ tr('Work underway in the DRC', 'Travaux en cours en RDC') }}</strong>
+          <span>{{ tr('We plan to work in other African countries after local partners and clinic needs are confirmed.', 'Nous prévoyons de travailler dans d’autres pays africains après confirmation des partenaires locaux et des besoins des centres.') }}</span>
         </figcaption>
       </figure>
     </div>
   </section>
 
   <section id="clinics" class="chapter clinic-section">
-    <div class="chapter-label"><span>/03</span> {{ tr('Five clinic profiles', 'Cinq profils de centres') }}</div>
+    <div class="chapter-label"><span>/03</span> {{ tr('Five clinics', 'Cinq centres') }}</div>
     <div class="section-intro">
       <div>
-        <p class="eyebrow">{{ tr('Current deployment set', 'Ensemble de déploiement actuel') }}</p>
-        <h2>{{ tr('Five clinics.', 'Cinq centres.') }}<br />{{ tr('One living network.', 'Un réseau vivant.') }}</h2>
+        <p class="eyebrow">{{ tr('Clinics identified', 'Centres identifiés') }}</p>
+        <h2>{{ tr('Five clinics.', 'Cinq centres.') }}<br />{{ tr('Clear next steps.', 'Des prochaines étapes claires.') }}</h2>
       </div>
       <p>
         {{ tr(
-          'One completed pilot and four named facilities now form the visible deployment set. Documentary photo groups are shown as received; power requirements remain clearly marked for field verification.',
-          'Un projet pilote achevé et quatre établissements identifiés constituent désormais le déploiement visible. Les séries de photos documentaires sont présentées telles que reçues ; les besoins électriques restent clairement signalés pour vérification sur le terrain.'
+          'One clinic now has solar power. Four additional clinics have been identified and photographed. Their electricity needs will be confirmed during on-site visits.',
+          'Un centre dispose maintenant de l’énergie solaire. Quatre autres centres ont été identifiés et photographiés. Leurs besoins en électricité seront confirmés lors de visites sur place.'
         ) }}
       </p>
     </div>
@@ -297,7 +297,7 @@
           <div class="clinic-detail__media">
             <img
               [src]="selectedClinicPhoto"
-              [alt]="clinicName(selectedClinic) + tr(', documentary photograph ', ', photographie documentaire ') + (selectedPhotoIndex + 1)"
+              [alt]="clinicName(selectedClinic) + tr(', clinic photo ', ', photo du centre ') + (selectedPhotoIndex + 1)"
             />
             <span>{{ clinicStageLabel(selectedClinic) }}</span>
             <small>{{ selectedPhotoIndex + 1 }} / {{ selectedClinic.images.length }}</small>
@@ -331,7 +331,7 @@
         </div>
 
         <div class="clinic-detail__copy">
-          <p class="eyebrow">{{ tr('Clinic node', 'Nœud de santé') }} {{ selectedClinic.index }}</p>
+          <p class="eyebrow">{{ tr('Clinic', 'Centre') }} {{ selectedClinic.index }}</p>
           <h3>{{ clinicName(selectedClinic) }}</h3>
           <p>{{ clinicDescription(selectedClinic) }}</p>
           <dl>
@@ -340,11 +340,11 @@
               <dd>{{ clinicStageLabel(selectedClinic) }}</dd>
             </div>
             <div>
-              <dt>{{ tr('Capacity', 'Capacité') }}</dt>
+              <dt>{{ tr('Power system', 'Système électrique') }}</dt>
               <dd>{{ clinicCapacity(selectedClinic) }}</dd>
             </div>
             <div>
-              <dt>{{ tr('Next milestone', 'Prochaine étape') }}</dt>
+              <dt>{{ tr('Next step', 'Prochaine étape') }}</dt>
               <dd>{{ clinicMilestone(selectedClinic) }}</dd>
             </div>
           </dl>
@@ -354,67 +354,67 @@
   </section>
 
   <section id="system" class="chapter system-section">
-    <div class="chapter-label"><span>/04</span> {{ tr('System', 'Système') }}</div>
+    <div class="chapter-label"><span>/04</span> {{ tr('How the solar system works', 'Fonctionnement du système solaire') }}</div>
     <div class="system-layout">
       <div>
-        <p class="eyebrow">{{ tr('Energy becomes capability', 'L’énergie devient capacité') }}</p>
-        <h2>{{ tr('From sunlight', 'Du soleil') }}<br />{{ tr('to care.', 'aux soins.') }}</h2>
+        <p class="eyebrow">{{ tr('How solar power supports care', 'Comment l’énergie solaire soutient les soins') }}</p>
+        <h2>{{ tr('From sunlight', 'Du soleil') }}<br />{{ tr('to clinic electricity.', 'à l’électricité du centre.') }}</h2>
       </div>
-      <div class="system-flow" [attr.aria-label]="tr('Solar power system stages', 'Étapes du système d’énergie solaire')">
+      <div class="system-flow" [attr.aria-label]="tr('How solar power reaches the clinic', 'Comment l’énergie solaire alimente le centre')">
         <article>
-          <span>01</span><strong>{{ tr('Solar array', 'Panneaux solaires') }}</strong><small>{{ tr('Clean energy captured', 'Énergie propre captée') }}</small>
+          <span>01</span><strong>{{ tr('Solar panels', 'Panneaux solaires') }}</strong><small>{{ tr('Turn sunlight into electricity', 'Transforment le soleil en électricité') }}</small>
         </article>
         <i aria-hidden="true">→</i>
         <article>
-          <span>02</span><strong>{{ tr('Storage', 'Stockage') }}</strong><small>{{ tr('Hybrid night reliability', 'Fiabilité nocturne hybride') }}</small>
+          <span>02</span><strong>{{ tr('Batteries', 'Batteries') }}</strong><small>{{ tr('Store power for use at night', 'Stockent l’énergie pour la nuit') }}</small>
         </article>
         <i aria-hidden="true">→</i>
         <article>
-          <span>03</span><strong>{{ tr('Clinic power', 'Énergie du centre') }}</strong><small>{{ tr('Equipment and lighting', 'Équipements et éclairage') }}</small>
+          <span>03</span><strong>{{ tr('Clinic electricity', 'Électricité du centre') }}</strong><small>{{ tr('Powers equipment and lights', 'Alimente les équipements et l’éclairage') }}</small>
         </article>
         <i aria-hidden="true">→</i>
         <article>
-          <span>04</span><strong>{{ tr('Care after dark', 'Soins après la nuit') }}</strong><small>{{ tr('Continuity when it matters', 'Continuité au moment crucial') }}</small>
+          <span>04</span><strong>{{ tr('Care after dark', 'Soins après la tombée de la nuit') }}</strong><small>{{ tr('Keeps care running at night', 'Permet de poursuivre les soins la nuit') }}</small>
         </article>
       </div>
     </div>
     <div class="system-film">
       <figure>
         <img src="assets/campaigns/drc-clinics/ndingi-solar-installation.png" [alt]="tr('Solar panels prepared at Ndingi Clinic', 'Panneaux solaires préparés à la Clinique de Ndingi')" />
-        <figcaption>{{ tr('Solar array // field installation', 'Panneaux solaires // installation terrain') }}</figcaption>
+        <figcaption>{{ tr('Solar panels ready for installation', 'Panneaux solaires prêts à être installés') }}</figcaption>
       </figure>
       <figure>
-        <img src="assets/campaigns/drc-clinics/ndingi-commissioning.png" [alt]="tr('Local team commissioning the clinic power system', 'Équipe locale mettant en service le système électrique du centre')" />
-        <figcaption>{{ tr('Local team // commissioning', 'Équipe locale // mise en service') }}</figcaption>
+        <img src="assets/campaigns/drc-clinics/ndingi-commissioning.png" [alt]="tr('Local team testing the clinic power system', 'Équipe locale testant le système électrique du centre')" />
+        <figcaption>{{ tr('Local team tests the new system', 'L’équipe locale teste le nouveau système') }}</figcaption>
       </figure>
       <figure>
         <img src="assets/campaigns/drc-clinics/ndingi-care-after-dark.png" [alt]="tr('Ndingi Clinic interior illuminated at night', 'Intérieur de la Clinique de Ndingi éclairé la nuit')" />
-        <figcaption>{{ tr('Clinic interior // power online', 'Intérieur du centre // énergie en service') }}</figcaption>
+        <figcaption>{{ tr('Ndingi Clinic has electricity at night', 'La Clinique de Ndingi dispose d’électricité la nuit') }}</figcaption>
       </figure>
     </div>
   </section>
 
   <section id="ledger" class="chapter ledger-section">
-    <div class="chapter-label"><span>/05</span> {{ tr('Capital ledger', 'Budget de la mission') }}</div>
+    <div class="chapter-label"><span>/05</span> {{ tr('Project budget', 'Budget du projet') }}</div>
     <div class="ledger-grid">
       <div class="ledger-total">
-        <p class="eyebrow">{{ tr('Mission capital', 'Capital de mission') }}</p>
+        <p class="eyebrow">{{ tr('Fundraising goal', 'Objectif de collecte') }}</p>
         <strong>$230,000</strong>
-        <span>{{ tr('Campaign goal', 'Objectif de la campagne') }}</span>
+        <span>{{ tr('Goal to power 15 clinics', 'Objectif pour électrifier 15 centres') }}</span>
         <p>
           {{ tr(
-            'The detailed working estimate is $15,376.24 per clinic. Public totals should be connected to verified payment and expenditure records.',
-            'L’estimation détaillée est de 15 376,24 $ par centre. Les totaux publics doivent être reliés à des registres vérifiés de paiements et de dépenses.'
+            'The estimated cost is $15,376.24 for each clinic. As the project moves forward, we will publish confirmed payments and expenses.',
+            'Le coût estimé est de 15 376,24 $ par centre. Au fur et à mesure de l’avancement du projet, nous publierons les paiements et les dépenses confirmés.'
           ) }}
         </p>
       </div>
       <div class="ledger-lines">
-        <div><span>{{ tr('Solar + storage', 'Solaire + stockage') }}</span><strong>$9,203.40</strong></div>
+        <div><span>{{ tr('Solar panels and batteries', 'Panneaux solaires et batteries') }}</span><strong>$9,203.40</strong></div>
         <div><span>{{ tr('Clinic equipment', 'Équipement du centre') }}</span><strong>$1,230.00</strong></div>
-        <div><span>{{ tr('Field logistics', 'Logistique terrain') }}</span><strong>$1,095.00</strong></div>
-        <div><span>{{ tr('Local implementation team', 'Équipe locale de mise en œuvre') }}</span><strong>$2,450.00</strong></div>
-        <div><span>{{ tr('Contingency', 'Imprévus') }}</span><strong>$1,397.84</strong></div>
-        <div class="ledger-lines__total"><span>{{ tr('Estimated per clinic', 'Estimation par centre') }}</span><strong>$15,376.24</strong></div>
+        <div><span>{{ tr('Transport and delivery', 'Transport et livraison') }}</span><strong>$1,095.00</strong></div>
+        <div><span>{{ tr('Local installation team', 'Équipe locale d’installation') }}</span><strong>$2,450.00</strong></div>
+        <div><span>{{ tr('Emergency reserve', 'Réserve pour imprévus') }}</span><strong>$1,397.84</strong></div>
+        <div class="ledger-lines__total"><span>{{ tr('Estimated cost per clinic', 'Coût estimé par centre') }}</span><strong>$15,376.24</strong></div>
       </div>
       <div class="ledger-actions">
         <a
@@ -423,24 +423,24 @@
           target="_blank"
           rel="noopener noreferrer"
         >
-          {{ tr('Contribute to the network', 'Contribuer au réseau') }} <span aria-hidden="true">→</span>
+          {{ tr('Donate to power clinics', 'Faire un don pour électrifier les centres') }} <span aria-hidden="true">→</span>
         </a>
         <a class="ghost-button" href="mailto:sponsors@newworld-game.org?subject=DRC clinic sponsorship inquiry">
-          {{ tr('Fund a full clinic', 'Financer un centre complet') }} <span aria-hidden="true">↗</span>
+          {{ tr('Sponsor a complete clinic', 'Financer un centre complet') }} <span aria-hidden="true">↗</span>
         </a>
-        <small>{{ tr('Every deployed clinic will carry a public milestone and reporting record.', 'Chaque centre déployé disposera d’une étape publique et d’un registre de suivi.') }}</small>
+        <small>{{ tr('For each clinic, we will publish the work completed and a progress report.', 'Pour chaque centre, nous publierons les travaux réalisés et un rapport d’avancement.') }}</small>
       </div>
     </div>
   </section>
 
   <section class="closing-section">
-    <img src="assets/campaigns/drc-clinics/drc-closing-dawn-v1.png" [alt]="tr('Desired-state visualization of an illuminated solar-powered clinic at dawn', 'Visualisation de l’état souhaité d’un centre de santé solaire éclairé à l’aube')" />
+    <img src="assets/campaigns/drc-clinics/drc-closing-dawn-v1.png" [alt]="tr('Concept image of a solar-powered clinic with its lights on at dawn', 'Image conceptuelle d’un centre alimenté par l’énergie solaire et éclairé à l’aube')" />
     <div></div>
     <article>
-      <span class="closing-visual-label">{{ tr('Desired-state visualization', 'Visualisation de l’état souhaité') }}</span>
-      <p class="eyebrow">{{ tr('The next node is waiting', 'Le prochain nœud attend') }}</p>
+      <span class="closing-visual-label">{{ tr('Concept image: clinic powered at dawn', 'Image conceptuelle : centre éclairé à l’aube') }}</span>
+      <p class="eyebrow">{{ tr('The next clinic is waiting for power', 'Le prochain centre attend l’électricité') }}</p>
       <h2>{{ tr('When care cannot wait,', 'Quand les soins ne peuvent attendre,') }}<br />{{ tr('power cannot fail.', 'l’énergie ne peut faillir.') }}</h2>
-      <p>{{ tr('One clinic is online. Four more facilities are now documented by name and photograph. Fifteen remain the mission.', 'Un centre est en service. Quatre autres établissements sont désormais documentés par leur nom et leurs photographies. Quinze restent l’objectif de la mission.') }}</p>
+      <p>{{ tr('Solar power is installed at one clinic. Four more clinics have been identified and photographed. Our goal is to power 15 clinics.', 'L’énergie solaire est installée dans un centre. Quatre autres centres ont été identifiés et photographiés. Notre objectif est d’électrifier 15 centres.') }}</p>
       <a
         class="mission-button"
         [href]="donationUrl"
@@ -459,10 +459,10 @@
     </div>
     <p>
       {{ tr(
-        'EarthGame is a 501(c)(3) nonprofit organization. This prototype uses a clearly labeled desired-state visualization alongside documentary images.',
-        'EarthGame est une organisation à but non lucratif 501(c)(3). Ce prototype utilise une visualisation clairement identifiée de l’état souhaité aux côtés d’images documentaires.'
+        'EarthGame is a 501(c)(3) nonprofit organization. The concept images on this page show proposed improvements. All other clinic photos show current or completed work.',
+        'EarthGame est une organisation à but non lucratif 501(c)(3). Les images conceptuelles de cette page présentent les améliorations proposées. Toutes les autres photos montrent l’état actuel des centres ou les travaux réalisés.'
       ) }}
     </p>
-    <a href="mailto:contact@newworld-game.org">{{ tr('Contact the campaign team', 'Contacter l’équipe de campagne') }} ↗</a>
+    <a href="mailto:contact@newworld-game.org">{{ tr('Contact the project team', 'Contacter l’équipe du projet') }} ↗</a>
   </footer>
 </main>

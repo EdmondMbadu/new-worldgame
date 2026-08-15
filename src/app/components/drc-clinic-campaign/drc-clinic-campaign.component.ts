@@ -76,21 +76,21 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       location: 'Ndingi · Tshela Territory · Kongo Central',
       locationFr: 'Ndingi · Territoire de Tshela · Kongo Central',
       stage: 'online',
-      stageLabel: 'Online',
-      stageLabelFr: 'En service',
+      stageLabel: 'Solar power installed',
+      stageLabelFr: 'Énergie solaire installée',
       images: [
         'assets/campaigns/drc-clinics/ndingi-after.png',
         'assets/campaigns/drc-clinics/ndingi-solar-installation.png',
         'assets/campaigns/drc-clinics/ndingi-care-after-dark.png',
       ],
       description:
-        'The field-proven pilot now powers the maternity ward, laboratory, inpatient rooms, consultation office, and operating room.',
+        'Solar power now serves the maternity ward, laboratory, inpatient rooms, consultation office, and operating room.',
       descriptionFr:
-        'Le projet pilote éprouvé sur le terrain alimente désormais la maternité, le laboratoire, les chambres, le cabinet de consultation et la salle d’opération.',
-      nextMilestone: 'First-year performance report',
-      nextMilestoneFr: 'Rapport de performance de la première année',
-      capacity: '2.0 kW pilot',
-      capacityFr: 'Projet pilote de 2,0 kW',
+        'L’énergie solaire alimente désormais la maternité, le laboratoire, les chambres, le cabinet de consultation et la salle d’opération.',
+      nextMilestone: 'Publish the first-year results report',
+      nextMilestoneFr: 'Publier le rapport des résultats de la première année',
+      capacity: '2.0 kW solar system',
+      capacityFr: 'Système solaire de 2,0 kW',
     },
     {
       id: 'nganga-tsanga',
@@ -100,47 +100,47 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       location: '17 km from Tsanga Nord · Democratic Republic of the Congo',
       locationFr: 'À 17 km de Tsanga Nord · République démocratique du Congo',
       stage: 'verification',
-      stageLabel: 'Field verification',
-      stageLabelFr: 'Vérification terrain',
+      stageLabel: 'Site visit needed',
+      stageLabelFr: 'Visite sur place nécessaire',
       images: ['assets/campaigns/drc-clinics/nganga-tsanga-01.jpg'],
       description:
-        'Field photography documents the existing CEAC eye-care facility. The next step is to verify its electrical baseline, priority medical loads, and installation scope.',
+        'The team has received a photo of this CEAC eye-care clinic. Next, it will visit the clinic, check the existing electricity supply, list the medical equipment that needs power, and plan the solar installation.',
       descriptionFr:
-        'Les photographies de terrain documentent le centre de soins oculaires CEAC existant. La prochaine étape consiste à vérifier son état électrique, ses besoins médicaux prioritaires et le périmètre de l’installation.',
-      nextMilestone: 'Complete energy and site assessment',
-      nextMilestoneFr: 'Finaliser l’évaluation énergétique et du site',
+        'L’équipe a reçu une photo de ce centre de soins oculaires CEAC. Elle doit maintenant visiter le centre, vérifier l’alimentation électrique existante, dresser la liste des équipements médicaux à alimenter et planifier l’installation solaire.',
+      nextMilestone: 'Visit the clinic and document its electricity needs',
+      nextMilestoneFr: 'Visiter le centre et documenter ses besoins en électricité',
     },
     {
       id: 'nsioni',
       index: '03',
       name: 'Centre de santé ophtalmologique CEAC Nsioni',
       nameFr: 'Centre de santé ophtalmologique CEAC Nsioni',
-      location: 'Democratic Republic of the Congo · Coordinates in verification',
-      locationFr: 'République démocratique du Congo · Coordonnées en cours de vérification',
+      location: 'Democratic Republic of the Congo · Exact location to be confirmed',
+      locationFr: 'République démocratique du Congo · Lieu exact à confirmer',
       stage: 'verification',
-      stageLabel: 'Field verification',
-      stageLabelFr: 'Vérification terrain',
+      stageLabel: 'Site visit needed',
+      stageLabelFr: 'Visite sur place nécessaire',
       images: [
         'assets/campaigns/drc-clinics/nsioni-01.jpg',
         'assets/campaigns/drc-clinics/nsioni-02.jpg',
       ],
       description:
-        'Two documentary views establish the clinic identity and present condition. System sizing will follow a verified inventory of clinical equipment and operating hours.',
+        'The team has received two photos showing this clinic and its current condition. Next, it will confirm the location and list the medical equipment, lighting, and hours of operation that require electricity.',
       descriptionFr:
-        'Deux vues documentaires établissent l’identité et l’état actuel du centre. Le dimensionnement du système suivra un inventaire vérifié des équipements cliniques et des horaires de fonctionnement.',
-      nextMilestone: 'Verify location and priority loads',
-      nextMilestoneFr: 'Vérifier le lieu et les charges prioritaires',
+        'L’équipe a reçu deux photos montrant ce centre et son état actuel. Elle doit maintenant confirmer le lieu et dresser la liste des équipements médicaux, de l’éclairage et des horaires nécessitant de l’électricité.',
+      nextMilestone: 'Confirm the location and document electricity needs',
+      nextMilestoneFr: 'Confirmer le lieu et documenter les besoins en électricité',
     },
     {
       id: 'kiobo-kwimba',
       index: '04',
       name: 'Centre de santé CEAC Kiobo–Kwimba',
       nameFr: 'Centre de santé CEAC Kiobo–Kwimba',
-      location: 'Democratic Republic of the Congo · Coordinates in verification',
-      locationFr: 'République démocratique du Congo · Coordonnées en cours de vérification',
+      location: 'Democratic Republic of the Congo · Exact location to be confirmed',
+      locationFr: 'République démocratique du Congo · Lieu exact à confirmer',
       stage: 'assessment',
-      stageLabel: 'Photo assessment',
-      stageLabelFr: 'Évaluation photo',
+      stageLabel: 'Photos received',
+      stageLabelFr: 'Photos reçues',
       images: [
         'assets/campaigns/drc-clinics/kiobo-kwimba-01.jpg',
         'assets/campaigns/drc-clinics/kiobo-kwimba-02.jpg',
@@ -149,11 +149,11 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
         'assets/campaigns/drc-clinics/kiobo-kwimba-05.jpg',
       ],
       description:
-        'The five-image field set records the exterior, treatment spaces, and current building condition. A technical visit will convert this evidence into a clinic-specific power design.',
+        'The team has received five photos showing the clinic exterior, treatment rooms, and current building condition. Next, a technical team will visit and decide what solar equipment the clinic needs.',
       descriptionFr:
-        'La série de cinq images documente l’extérieur, les espaces de soins et l’état actuel du bâtiment. Une visite technique transformera ces données en une conception électrique propre au centre.',
-      nextMilestone: 'Conduct technical site survey',
-      nextMilestoneFr: 'Réaliser l’étude technique du site',
+        'L’équipe a reçu cinq photos montrant l’extérieur du centre, les salles de soins et l’état actuel du bâtiment. Une équipe technique doit maintenant visiter le centre et déterminer l’équipement solaire nécessaire.',
+      nextMilestone: 'Visit the clinic and plan the solar installation',
+      nextMilestoneFr: 'Visiter le centre et planifier l’installation solaire',
     },
     {
       id: 'mont-sinai',
@@ -163,19 +163,19 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       location: 'Boma · Kongo Central · Democratic Republic of the Congo',
       locationFr: 'Boma · Kongo Central · République démocratique du Congo',
       stage: 'assessment',
-      stageLabel: 'Photo assessment',
-      stageLabelFr: 'Évaluation photo',
+      stageLabel: 'Photos received',
+      stageLabelFr: 'Photos reçues',
       images: [
         'assets/campaigns/drc-clinics/mont-sinai-01.jpg',
         'assets/campaigns/drc-clinics/mont-sinai-02.jpg',
         'assets/campaigns/drc-clinics/mont-sinai-03.jpg',
       ],
       description:
-        'The Boma photo set documents a larger hospital campus. Its system must be scoped from verified essential-care circuits and an on-site energy assessment before funding is assigned.',
+        'The photos show a larger hospital in Boma. The team must visit the hospital, identify which rooms and medical equipment need reliable electricity, and estimate the cost before funding is assigned.',
       descriptionFr:
-        'La série de photos de Boma documente un centre hospitalier plus vaste. Son système doit être défini à partir des circuits de soins essentiels vérifiés et d’une évaluation énergétique sur place avant l’attribution des fonds.',
-      nextMilestone: 'Map essential circuits and power demand',
-      nextMilestoneFr: 'Cartographier les circuits essentiels et la demande électrique',
+        'Les photos montrent un hôpital plus vaste à Boma. L’équipe doit visiter l’hôpital, identifier les salles et les équipements médicaux qui ont besoin d’une électricité fiable, puis estimer le coût avant l’attribution des fonds.',
+      nextMilestone: 'Visit the hospital and document its electricity needs',
+      nextMilestoneFr: 'Visiter l’hôpital et documenter ses besoins en électricité',
     },
   ];
 
@@ -188,24 +188,24 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   readonly proofImages = {
     before: {
       src: 'assets/campaigns/drc-clinics/ndingi-before.jpg',
-      label: 'Before electrification',
+      label: 'Before solar power',
       labelFr: 'Avant l’électrification',
-      note: 'Documentary photograph',
-      noteFr: 'Photographie documentaire',
+      note: 'Photo taken at the clinic',
+      noteFr: 'Photo prise au centre',
     },
     after: {
       src: 'assets/campaigns/drc-clinics/ndingi-after.png',
-      label: 'Pilot completed',
-      labelFr: 'Projet pilote réalisé',
-      note: 'Documentary photograph',
-      noteFr: 'Photographie documentaire',
+      label: 'Solar power installed',
+      labelFr: 'Énergie solaire installée',
+      note: 'Photo taken at the clinic',
+      noteFr: 'Photo prise au centre',
     },
     desired: {
       src: 'assets/campaigns/drc-clinics/ndingi-desired-state.png',
-      label: 'Desired state',
-      labelFr: 'État souhaité',
-      note: 'Clearly labeled visualization',
-      noteFr: 'Visualisation clairement identifiée',
+      label: 'Possible future improvements',
+      labelFr: 'Améliorations futures possibles',
+      note: 'Concept image, not a current photo',
+      noteFr: 'Image conceptuelle, pas une photo actuelle',
     },
   };
 
@@ -262,8 +262,8 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   clinicCapacity(clinic: ClinicProfile): string {
     return this.currentLanguage === 'fr'
-      ? clinic.capacityFr || 'Après l’évaluation énergétique'
-      : clinic.capacity || 'After energy assessment';
+      ? clinic.capacityFr || 'À déterminer après la visite sur place'
+      : clinic.capacity || 'To be determined after the site visit';
   }
 
   get videoSource(): string {
@@ -407,7 +407,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
         label.setAttribute('x', String(x + 20));
         label.setAttribute('y', String(y + 4));
         label.setAttribute('class', 'drc-map__label');
-        label.textContent = 'DRC // ACTIVE NOW';
+        label.textContent = 'DRC // WORK UNDERWAY';
         svg.appendChild(label);
       }
     } catch {
@@ -425,8 +425,8 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     this.meta.updateTag({
       name: 'description',
       content: this.tr(
-        'A field-proven mission to bring reliable solar power to rural health clinics in the Democratic Republic of Congo.',
-        'Une mission éprouvée sur le terrain pour apporter une énergie solaire fiable aux centres de santé ruraux de la République démocratique du Congo.'
+        'A project to bring reliable solar power to 15 health clinics in the Democratic Republic of the Congo.',
+        'Un projet visant à fournir une énergie solaire fiable à 15 centres de santé en République démocratique du Congo.'
       ),
     });
   }
