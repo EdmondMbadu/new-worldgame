@@ -17,6 +17,24 @@
     </nav>
 
     <div class="header-actions">
+      <button
+        type="button"
+        class="header-power-switch"
+        role="switch"
+        [class.header-power-switch--on]="isClinicPowerOn"
+        [attr.aria-checked]="isClinicPowerOn"
+        [attr.aria-label]="tr(isClinicPowerOn ? 'Turn clinic power off' : 'Turn clinic power on', isClinicPowerOn ? 'Couper l’électricité du centre' : 'Mettre le centre sous tension')"
+        [disabled]="!isPowerSceneReady || powerImageError"
+        (click)="toggleClinicPower()"
+      >
+        <span class="header-power-switch__label">
+          <small>{{ tr('Clinic power', 'Électricité') }}</small>
+          <strong>{{ isClinicPowerOn ? 'ON' : 'OFF' }}</strong>
+        </span>
+        <span class="header-power-switch__track" aria-hidden="true">
+          <span class="header-power-switch__knob"><i></i></span>
+        </span>
+      </button>
       <div class="language-toggle" role="group" [attr.aria-label]="tr('Choose language', 'Choisir la langue')">
         <button type="button" [class.active]="currentLanguage === 'en'" [attr.aria-pressed]="currentLanguage === 'en'" (click)="setLanguage('en')">EN</button>
         <span aria-hidden="true">/</span>
@@ -33,7 +51,13 @@
     </div>
   </header>
 
-  <section id="video" class="video-opening" [class.video-opening--playing]="isVideoPlaying" aria-labelledby="video-title">
+  <section
+    id="video"
+    class="video-opening"
+    [class.video-opening--playing]="isVideoPlaying"
+    [class.video-opening--powered]="isClinicPowerOn"
+    aria-labelledby="video-title"
+  >
     <video
       #campaignVideo
       [src]="videoSource"
@@ -45,6 +69,29 @@
       (pause)="isVideoPlaying = false"
       (ended)="isVideoPlaying = false"
     ></video>
+    <div class="video-opening__power-scene" aria-hidden="true">
+      <img
+        class="video-opening__power-image video-opening__power-image--off"
+        [src]="powerOffImage"
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        (load)="markPowerImageLoaded('off')"
+        (error)="markPowerImageError()"
+      />
+      <img
+        class="video-opening__power-image video-opening__power-image--on"
+        [src]="powerOnImage"
+        alt=""
+        loading="eager"
+        fetchpriority="high"
+        decoding="async"
+        (load)="markPowerImageLoaded('on')"
+        (error)="markPowerImageError()"
+      />
+      <div class="video-opening__power-bloom"></div>
+    </div>
     <div class="video-opening__shade" aria-hidden="true"></div>
     <div class="video-opening__grid" aria-hidden="true"></div>
 
@@ -63,142 +110,19 @@
           <strong>{{ tr('Play the film', 'Voir le film') }}</strong>
         </button>
         <span class="video-language">{{ currentLanguage === 'fr' ? 'VERSION FRANÇAISE' : 'ENGLISH VERSION' }}</span>
+        <a class="video-plan-link" [href]="presentationUrl" target="_blank" rel="noopener noreferrer">
+          <span>
+            <small>{{ tr('Recent team presentation', 'Présentation récente de l’équipe') }}</small>
+            <strong>{{ tr('View the 17-slide project plan', 'Voir le plan du projet en 17 diapositives') }}</strong>
+          </span>
+          <i aria-hidden="true">↗</i>
+        </a>
       </div>
     </div>
 
     <a class="video-source-link" [href]="videoPage" target="_blank" rel="noopener noreferrer">
       {{ tr('Open on GSL News', 'Ouvrir sur GSL News') }} <span aria-hidden="true">↗</span>
     </a>
-  </section>
-
-  <section
-    class="hero"
-    [class.hero--powered]="isClinicPowerOn"
-    [class.hero--transitioning]="isClinicPowerTransitioning"
-    aria-labelledby="campaign-title"
-  >
-    <div
-      class="hero__scene"
-      role="img"
-      [attr.aria-label]="powerSceneDescription"
-      [attr.aria-busy]="!isPowerSceneReady"
-    >
-      <img
-        class="hero__image hero__image--off"
-        [src]="powerOffImage"
-        alt=""
-        loading="eager"
-        fetchpriority="high"
-        decoding="async"
-        (load)="markPowerImageLoaded('off')"
-        (error)="markPowerImageError()"
-      />
-      <img
-        class="hero__image hero__image--on"
-        [src]="powerOnImage"
-        alt=""
-        loading="eager"
-        decoding="async"
-        (load)="markPowerImageLoaded('on')"
-        (error)="markPowerImageError()"
-      />
-      <div class="hero__light-bloom" aria-hidden="true"></div>
-      <div class="hero__energy-wave" aria-hidden="true"></div>
-      <div class="hero__power-flare" aria-hidden="true"></div>
-    </div>
-    <div class="hero__shade"></div>
-    <div class="hero__grid" aria-hidden="true"></div>
-    <div class="hero__network" aria-hidden="true">
-      <span class="network-line network-line--one"></span>
-      <span class="network-line network-line--two"></span>
-      <span class="network-node network-node--online"></span>
-      <span class="network-node network-node--two"></span>
-      <span class="network-node network-node--three"></span>
-      <span class="network-node network-node--four"></span>
-      <span class="network-node network-node--five"></span>
-    </div>
-
-    <div class="hero__content">
-      <p class="eyebrow">{{ tr('Democratic Republic of the Congo // Power the next clinic', 'République démocratique du Congo // Électrifier le prochain centre') }}</p>
-      <p class="visualization-label">{{ tr('Ndingi Clinic // Interactive lighting demonstration', 'Clinique de Ndingi // Démonstration interactive de l’éclairage') }}</p>
-      <h1 id="campaign-title">{{ tr('Reliable power', 'Une énergie fiable') }}<br />{{ tr('for lifesaving care.', 'pour des soins vitaux.') }}</h1>
-      <p class="hero__subhead">{{ tr('Power the next 15 clinics in the DRC.', 'Électrifier les 15 prochains centres de santé en RDC.') }}</p>
-      <p class="hero__copy">
-        {{ tr(
-          'Starting in Kongo Central, reliable solar energy means safer births, protected vaccines, working equipment, and care after dark.',
-          'En commençant par le Kongo Central, une énergie solaire fiable permet des accouchements plus sûrs, protège les vaccins, alimente les équipements et rend possibles les soins après la tombée de la nuit.'
-        ) }}
-      </p>
-      <div class="hero__actions">
-        <div class="power-control">
-          <button
-            type="button"
-            class="power-switch"
-            role="switch"
-            [class.power-switch--on]="isClinicPowerOn"
-            [attr.aria-checked]="isClinicPowerOn"
-            [attr.aria-label]="tr(isClinicPowerOn ? 'Turn the clinic power off' : 'Turn the clinic power on', isClinicPowerOn ? 'Couper l’électricité du centre' : 'Mettre le centre sous tension')"
-            [disabled]="!isPowerSceneReady || powerImageError"
-            (click)="toggleClinicPower()"
-          >
-            <span class="power-switch__copy">
-              <small>{{ tr('Power the next clinic', 'Électrifier le prochain centre') }}</small>
-              <strong>
-                {{ tr(
-                  !isPowerSceneReady ? 'Preparing the switch…' : isClinicPowerOn ? 'Clinic lights are on' : 'Turn clinic power on',
-                  !isPowerSceneReady ? 'Préparation de l’interrupteur…' : isClinicPowerOn ? 'Le centre est éclairé' : 'Mettre le centre sous tension'
-                ) }}
-              </strong>
-            </span>
-            <span class="power-switch__track" aria-hidden="true">
-              <span class="power-switch__state power-switch__state--off">OFF</span>
-              <span class="power-switch__state power-switch__state--on">ON</span>
-              <span class="power-switch__knob"><i></i></span>
-            </span>
-          </button>
-          <div class="power-control__meta">
-            <span>{{ tr('Simulation only', 'Simulation uniquement') }}</span>
-            <button
-              type="button"
-              class="power-sound-toggle"
-              [attr.aria-pressed]="isPowerSoundEnabled"
-              (click)="togglePowerSound()"
-            >
-              <i aria-hidden="true"></i>
-              {{ tr(isPowerSoundEnabled ? 'Sound on' : 'Sound off', isPowerSoundEnabled ? 'Son activé' : 'Son désactivé') }}
-            </button>
-          </div>
-        </div>
-        <a
-          *ngIf="isClinicPowerOn"
-          class="mission-button hero__donation-button"
-          [href]="donationUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {{ tr('Help power a real clinic', 'Aider à électrifier un vrai centre') }} <span aria-hidden="true">→</span>
-        </a>
-        <a class="ghost-button" href="#field-proof" (click)="scrollToSection('field-proof', $event)">
-          {{ tr('See what we accomplished', 'Voir ce que nous avons réalisé') }} <span aria-hidden="true">↘</span>
-        </a>
-      </div>
-      <p
-        class="power-status"
-        [class.power-status--on]="isClinicPowerOn"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <span aria-hidden="true"></span>{{ powerStatusMessage }}
-      </p>
-    </div>
-
-    <div class="telemetry" [attr.aria-label]="tr('Project progress', 'Avancement du projet')">
-      <div><small>{{ tr('Clinic 01', 'Centre 01') }}</small><strong class="online-text">{{ tr('Solar power installed', 'Énergie solaire installée') }}</strong></div>
-      <div><small>{{ tr('Installed solar power', 'Puissance solaire installée') }}</small><strong>2.0 kW</strong></div>
-      <div><small>{{ tr('Clinics identified', 'Centres identifiés') }}</small><strong>{{ tr('5 clinics', '5 centres') }}</strong></div>
-      <div><small>{{ tr('Current funding phase', 'Phase de financement actuelle') }}</small><strong>{{ tr('10 clinics', '10 centres') }}</strong></div>
-      <div><small>{{ tr('Approx. fundraising per clinic', 'Collecte estimée par centre') }}</small><strong>$15.5K</strong></div>
-    </div>
   </section>
 
   <section id="field-proof" class="chapter proof-section">

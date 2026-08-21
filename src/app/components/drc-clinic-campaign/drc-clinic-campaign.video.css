@@ -10,6 +10,7 @@
 }
 
 .video-opening video,
+.video-opening__power-scene,
 .video-opening__shade,
 .video-opening__grid {
   position: absolute;
@@ -19,10 +20,72 @@
 }
 
 .video-opening video {
-  z-index: -3;
+  z-index: -4;
   object-fit: cover;
   object-position: center 34%;
   background: #03070b;
+}
+
+.video-opening__power-scene {
+  z-index: -3;
+  overflow: hidden;
+  opacity: 1;
+  background: #03070b;
+  transition: opacity 320ms ease;
+}
+
+.video-opening__power-image,
+.video-opening__power-bloom {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.video-opening__power-image {
+  object-fit: cover;
+  object-position: center 34%;
+  transition:
+    opacity 1100ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1650ms cubic-bezier(0.16, 1, 0.3, 1),
+    clip-path 1450ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.video-opening__power-image--off {
+  opacity: 1;
+  filter: saturate(0.9) brightness(0.88) contrast(1.06);
+}
+
+.video-opening__power-image--on {
+  opacity: 0;
+  clip-path: circle(0% at 70% 48%);
+  filter: saturate(1.04) brightness(1.04) contrast(1.04);
+  transform: scale(1.025);
+}
+
+.video-opening--powered .video-opening__power-image--off {
+  opacity: 0.12;
+  transform: scale(1.01);
+}
+
+.video-opening--powered .video-opening__power-image--on {
+  opacity: 1;
+  clip-path: circle(145% at 70% 48%);
+  transform: scale(1.002);
+}
+
+.video-opening__power-bloom {
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 67% 50%, rgba(255, 255, 248, 0.36) 0, rgba(218, 239, 255, 0.12) 20%, transparent 44%),
+    linear-gradient(0deg, rgba(226, 242, 255, 0.08), transparent 42%);
+  mix-blend-mode: screen;
+  transition: opacity 1250ms 220ms ease;
+}
+
+.video-opening--powered .video-opening__power-bloom {
+  opacity: 0.88;
 }
 
 .video-opening--playing video {
@@ -56,7 +119,8 @@
 }
 
 .video-opening--playing .video-opening__shade,
-.video-opening--playing .video-opening__grid {
+.video-opening--playing .video-opening__grid,
+.video-opening--playing .video-opening__power-scene {
   opacity: 0;
 }
 
@@ -118,6 +182,7 @@
 
 .video-play strong,
 .video-language,
+.video-plan-link,
 .video-source-link {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.875rem;
@@ -132,6 +197,51 @@
 
 .video-language { color: var(--mission-amber); }
 
+.video-plan-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1 1 300px;
+  gap: 22px;
+  min-height: 60px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 2px;
+  background: rgba(5, 9, 13, 0.52);
+  color: var(--mission-white);
+  text-decoration: none;
+  backdrop-filter: blur(12px);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.video-plan-link:hover {
+  border-color: var(--mission-amber);
+  background: rgba(5, 9, 13, 0.72);
+  transform: translateY(-2px);
+}
+
+.video-plan-link > span {
+  display: grid;
+  gap: 5px;
+}
+
+.video-plan-link small {
+  color: var(--mission-amber);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+}
+
+.video-plan-link strong {
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.video-plan-link i {
+  color: var(--mission-amber);
+  font-size: 1.1rem;
+  font-style: normal;
+}
+
 .video-source-link {
   position: absolute;
   right: clamp(20px, 4vw, 72px);
@@ -141,3 +251,11 @@
 }
 
 .video-source-link:hover { color: var(--mission-amber); }
+
+@media (max-width: 760px) {
+  .video-plan-link {
+    width: 100%;
+    min-height: 72px;
+    flex: 0 0 auto;
+  }
+}

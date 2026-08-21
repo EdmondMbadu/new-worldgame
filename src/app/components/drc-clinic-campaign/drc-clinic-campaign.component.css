@@ -1301,6 +1301,10 @@ button:focus-visible {
     object-position: 64% center;
   }
 
+  .video-opening__power-image {
+    object-position: 64% center;
+  }
+
   .video-opening__shade {
     background:
       linear-gradient(0deg, rgba(3, 7, 11, 0.97) 0%, rgba(3, 7, 11, 0.38) 72%, rgba(3, 7, 11, 0.32) 100%),
@@ -1477,6 +1481,12 @@ button:focus-visible {
 
   .closing-section > div {
     background: linear-gradient(0deg, rgba(5, 9, 13, 0.98), rgba(5, 9, 13, 0.2));
+  }
+}
+
+@media (max-width: 560px) {
+  .brand span {
+    display: none;
   }
 }
 

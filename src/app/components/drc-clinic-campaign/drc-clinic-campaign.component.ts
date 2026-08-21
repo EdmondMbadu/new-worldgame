@@ -3,7 +3,6 @@ import {
   Component,
   ElementRef,
   Inject,
-  OnDestroy,
   OnInit,
   PLATFORM_ID,
   ViewChild,
@@ -50,7 +49,7 @@ interface ClinicProfile {
   ],
   standalone: false,
 })
-export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   @ViewChild('drcMap') private drcMap?: ElementRef<SVGSVGElement>;
   @ViewChild('campaignVideo') private campaignVideo?: ElementRef<HTMLVideoElement>;
 
@@ -60,9 +59,9 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
   readonly presentationUrl =
     'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/ndingi%2FNDINGI%20Clinic%20Electrification%20Scale-Up%20Project%20DAY%204.pptx.pdf?alt=media&token=c60bb41a-d6d7-4b6b-bc94-32f6c51735e8';
   readonly achievedMasterImage = 'assets/campaigns/drc-clinics/ndingi-achieved-master-v1.jpg';
-  readonly videoThumbnail = this.achievedMasterImage;
   readonly powerOffImage = 'assets/campaigns/drc-clinics/ndingi-achieved-power-off-v1.jpg';
   readonly powerOnImage = 'assets/campaigns/drc-clinics/ndingi-achieved-power-on-v1.jpg';
+  readonly videoThumbnail = this.powerOnImage;
   readonly videoPages: Record<Language, string> = {
     en: 'https://globalsolutionlab.com/nwg-news?v=ux8SCCU6hH3WYwBznYrE',
     fr: 'https://globalsolutionlab.com/nwg-news?v=DVsh6rzPOrOngXEOv8Z4',
@@ -189,14 +188,10 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
   currentLanguage: Language = 'en';
   isVideoPlaying = false;
   proofView: 'before' | 'after' = 'after';
-  isClinicPowerOn = false;
-  isClinicPowerTransitioning = false;
-  isPowerSoundEnabled = true;
+  isClinicPowerOn = true;
   powerOffImageLoaded = false;
   powerOnImageLoaded = false;
   powerImageError = false;
-
-  private powerTransitionTimer?: number;
 
   readonly proofImages = {
     before: {
@@ -223,12 +218,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
 
   ngOnInit(): void {
     this.updateDocumentMetadata();
-  }
-
-  ngOnDestroy(): void {
-    if (isPlatformBrowser(this.platformId) && this.powerTransitionTimer) {
-      window.clearTimeout(this.powerTransitionTimer);
-    }
   }
 
   setLanguage(language: Language): void {
@@ -262,32 +251,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
 
   toggleClinicPower(): void {
     if (!this.isPowerSceneReady || this.powerImageError) return;
-
-    const poweringOn = !this.isClinicPowerOn;
-    this.isClinicPowerOn = poweringOn;
-    this.isClinicPowerTransitioning = true;
-
-    if (isPlatformBrowser(this.platformId)) {
-      if (this.powerTransitionTimer) {
-        window.clearTimeout(this.powerTransitionTimer);
-      }
-
-      if (poweringOn && this.isPowerSoundEnabled) {
-        this.playPowerOnSound();
-      }
-
-      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      this.powerTransitionTimer = window.setTimeout(
-        () => (this.isClinicPowerTransitioning = false),
-        reducedMotion ? 20 : 1650
-      );
-    } else {
-      this.isClinicPowerTransitioning = false;
-    }
-  }
-
-  togglePowerSound(): void {
-    this.isPowerSoundEnabled = !this.isPowerSoundEnabled;
+    this.isClinicPowerOn = !this.isClinicPowerOn;
   }
 
   tr(english: string, french: string): string {
@@ -330,50 +294,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
 
   get isPowerSceneReady(): boolean {
     return this.powerOffImageLoaded && this.powerOnImageLoaded;
-  }
-
-  get powerSceneDescription(): string {
-    if (this.isClinicPowerOn) {
-      return this.tr(
-        'Lighting demonstration of Ndingi Clinic illuminated by reliable solar power at blue hour',
-        'Démonstration de l’éclairage de la Clinique de Ndingi alimentée par une énergie solaire fiable à l’heure bleue'
-      );
-    }
-
-    return this.tr(
-      'Lighting demonstration of the same Ndingi Clinic before its electricity is switched on',
-      'Démonstration de la même Clinique de Ndingi avant la mise sous tension'
-    );
-  }
-
-  get powerStatusMessage(): string {
-    if (this.powerImageError) {
-      return this.tr(
-        'The interactive demonstration could not be loaded.',
-        'La démonstration interactive n’a pas pu être chargée.'
-      );
-    }
-
-    if (!this.isPowerSceneReady) {
-      return this.tr('Preparing the clinic…', 'Préparation du centre…');
-    }
-
-    if (this.isClinicPowerTransitioning && this.isClinicPowerOn) {
-      return this.tr(
-        'Power is reaching the clinic…',
-        'L’électricité arrive au centre…'
-      );
-    }
-
-    return this.isClinicPowerOn
-      ? this.tr(
-          'Demonstration complete: the clinic has light.',
-          'Démonstration terminée : le centre est éclairé.'
-        )
-      : this.tr(
-          'The clinic is waiting for power.',
-          'Le centre attend l’électricité.'
-        );
   }
 
   get proofLabel(): string {
@@ -514,57 +434,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
       }
     } catch {
       svg.setAttribute('data-map-status', 'unavailable');
-    }
-  }
-
-  private playPowerOnSound(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    try {
-      const audioWindow = window as typeof window & {
-        webkitAudioContext?: typeof AudioContext;
-      };
-      const AudioContextClass = window.AudioContext || audioWindow.webkitAudioContext;
-      if (!AudioContextClass) return;
-
-      const context = new AudioContextClass();
-      const master = context.createGain();
-      const now = context.currentTime;
-
-      master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.32, now + 0.035);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.92);
-      master.connect(context.destination);
-
-      [
-        { frequency: 164.81, start: 0, duration: 0.52, volume: 0.055 },
-        { frequency: 246.94, start: 0.12, duration: 0.58, volume: 0.04 },
-        { frequency: 329.63, start: 0.28, duration: 0.62, volume: 0.032 },
-      ].forEach(({ frequency, start, duration, volume }) => {
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        const beginsAt = now + start;
-        const endsAt = beginsAt + duration;
-
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(frequency, beginsAt);
-        oscillator.frequency.exponentialRampToValueAtTime(frequency * 1.012, endsAt);
-        gain.gain.setValueAtTime(0.0001, beginsAt);
-        gain.gain.exponentialRampToValueAtTime(volume, beginsAt + 0.045);
-        gain.gain.exponentialRampToValueAtTime(0.0001, endsAt);
-        oscillator.connect(gain);
-        gain.connect(master);
-        oscillator.start(beginsAt);
-        oscillator.stop(endsAt + 0.02);
-      });
-
-      if (context.state === 'suspended') {
-        void context.resume();
-      }
-
-      window.setTimeout(() => void context.close(), 1200);
-    } catch {
-      // The visual demonstration remains fully usable if audio is unavailable.
     }
   }
 

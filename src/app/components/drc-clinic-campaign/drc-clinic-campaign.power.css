@@ -1,409 +1,122 @@
-.hero__image--off {
-  opacity: 1;
-  filter: saturate(0.9) brightness(0.9) contrast(1.06);
-}
-
-.hero__image--on {
-  z-index: 1;
-  opacity: 0;
-  clip-path: circle(0% at 76% 51%);
-  filter: saturate(1.05) brightness(1.04) contrast(1.04);
-  transform: scale(1.035);
-}
-
-.hero--powered .hero__image--off {
-  opacity: 0.12;
-  transform: scale(1.015);
-}
-
-.hero--powered .hero__image--on {
-  opacity: 1;
-  clip-path: circle(145% at 76% 51%);
-  transform: scale(1.005);
-}
-
-.hero__light-bloom,
-.hero__energy-wave,
-.hero__power-flare {
-  position: absolute;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.hero__light-bloom {
-  inset: 0;
-  opacity: 0;
-  background:
-    radial-gradient(circle at 65% 52%, rgba(255, 255, 248, 0.38) 0, rgba(218, 239, 255, 0.14) 18%, transparent 42%),
-    linear-gradient(0deg, rgba(226, 242, 255, 0.08), transparent 40%);
-  mix-blend-mode: screen;
-  transition: opacity 1250ms 260ms ease;
-}
-
-.hero--powered .hero__light-bloom {
-  opacity: 0.92;
-}
-
-.hero__energy-wave {
-  top: 51%;
-  left: 76%;
-  width: min(42vw, 670px);
-  aspect-ratio: 1;
-  border: 1px solid rgba(255, 211, 122, 0.78);
-  border-radius: 50%;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.12);
-}
-
-.hero--powered.hero--transitioning .hero__energy-wave {
-  animation: clinic-energy-wave 1450ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.hero__power-flare {
-  top: 0;
-  bottom: 0;
-  left: -34%;
-  width: 20%;
-  opacity: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 226, 158, 0.2), transparent);
-  filter: blur(12px);
-  transform: skewX(-12deg);
-}
-
-.hero--powered.hero--transitioning .hero__power-flare {
-  animation: clinic-power-flare 1250ms 80ms ease-out both;
-}
-
-.hero--powered .hero__shade {
-  background:
-    linear-gradient(90deg, rgba(3, 7, 11, 0.95) 0%, rgba(3, 7, 11, 0.72) 39%, rgba(3, 7, 11, 0.04) 78%),
-    linear-gradient(0deg, rgba(3, 7, 11, 0.88) 0%, transparent 38%, rgba(3, 7, 11, 0.18) 100%);
-}
-
-.power-control {
-  width: min(420px, 100%);
-}
-
-.power-switch {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 116px;
-  align-items: center;
-  width: 100%;
-  min-height: 78px;
-  padding: 11px 12px 11px 18px;
-  overflow: hidden;
-  border: 1px solid rgba(246, 183, 60, 0.78);
-  border-radius: 3px;
-  background: rgba(5, 9, 13, 0.88);
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 16px 44px rgba(0, 0, 0, 0.26);
-  color: var(--mission-white);
-  cursor: pointer;
-  text-align: left;
-  transition:
-    border-color 220ms ease,
-    background 450ms ease,
-    box-shadow 450ms ease,
-    transform 180ms ease;
-}
-
-.power-switch::before {
-  position: absolute;
-  inset: 0;
-  content: "";
-  opacity: 0;
-  background: linear-gradient(110deg, transparent 15%, rgba(246, 183, 60, 0.18) 50%, transparent 84%);
-  transform: translateX(-100%);
-}
-
-.power-switch:hover:not(:disabled) {
-  border-color: var(--mission-amber);
-  transform: translateY(-2px);
-}
-
-.power-switch:hover:not(:disabled)::before {
-  opacity: 1;
-  transform: translateX(100%);
-  transition: transform 700ms ease, opacity 160ms ease;
-}
-
-.power-switch:disabled {
-  cursor: progress;
-  opacity: 0.72;
-}
-
-.power-switch--on {
-  border-color: rgba(97, 211, 166, 0.9);
-  background: rgba(7, 25, 22, 0.9);
-  box-shadow:
-    inset 0 0 0 1px rgba(97, 211, 166, 0.1),
-    0 0 32px rgba(47, 155, 115, 0.22),
-    0 16px 44px rgba(0, 0, 0, 0.24);
-}
-
-.power-switch__copy {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  gap: 5px;
-  min-width: 0;
-}
-
-.power-switch__copy small,
-.power-switch__copy strong,
-.power-control__meta,
-.power-status {
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-}
-
-.power-switch__copy small {
-  color: var(--mission-amber);
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  line-height: 1.25;
-  text-transform: uppercase;
-}
-
-.power-switch--on .power-switch__copy small {
-  color: #61d3a6;
-}
-
-.power-switch__copy strong {
-  font-size: 1.02rem;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
-}
-
-.power-switch__track {
-  position: relative;
-  display: block;
-  width: 108px;
-  height: 48px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  background: #151a1e;
-  box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.52);
-  transition:
-    border-color 400ms ease,
-    background 400ms ease,
-    box-shadow 400ms ease;
-}
-
-.power-switch--on .power-switch__track {
-  border-color: rgba(97, 211, 166, 0.72);
-  background: rgba(47, 155, 115, 0.28);
-  box-shadow:
-    inset 0 4px 14px rgba(0, 0, 0, 0.36),
-    0 0 24px rgba(97, 211, 166, 0.18);
-}
-
-.power-switch__state {
-  position: absolute;
-  top: 50%;
-  color: #a9b1b6;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  transform: translateY(-50%);
-  transition: opacity 250ms ease, color 250ms ease;
-}
-
-.power-switch__state--off { right: 13px; }
-.power-switch__state--on { left: 13px; color: #9ee8cb; opacity: 0; }
-.power-switch--on .power-switch__state--off { opacity: 0; }
-.power-switch--on .power-switch__state--on { opacity: 1; }
-
-.power-switch__knob {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #30383e;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.48);
-  transition:
-    background 500ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 500ms ease,
-    transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.power-switch__knob i {
-  position: relative;
-  display: block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid #d2d7da;
-  border-radius: 50%;
-}
-
-.power-switch__knob i::before {
-  position: absolute;
-  top: -5px;
-  left: 50%;
-  width: 2px;
-  height: 9px;
-  border: 2px solid #30383e;
-  background: #d2d7da;
-  content: "";
-  transform: translateX(-50%);
-}
-
-.power-switch--on .power-switch__knob {
-  background: var(--mission-amber);
-  box-shadow:
-    0 0 0 7px rgba(246, 183, 60, 0.1),
-    0 0 24px rgba(246, 183, 60, 0.7);
-  transform: translateX(61px);
-}
-
-.power-switch--on .power-switch__knob i { border-color: #17120a; }
-.power-switch--on .power-switch__knob i::before { border-color: var(--mission-amber); background: #17120a; }
-
-.power-control__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 9px 3px 0;
-  color: #aab3b9;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1.3;
-  text-transform: uppercase;
-}
-
-.power-sound-toggle {
+.header-power-switch {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 2px;
-  border: 0;
-  background: transparent;
-  color: inherit;
+  gap: 11px;
+  min-height: 46px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 2px;
+  background: rgba(5, 9, 13, 0.7);
+  color: var(--mission-white);
   cursor: pointer;
-  font: inherit;
-  letter-spacing: inherit;
-  text-transform: inherit;
+  transition:
+    border-color 220ms ease,
+    background 350ms ease,
+    box-shadow 350ms ease;
 }
 
-.power-sound-toggle i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #657078;
-  box-shadow: 0 0 0 3px rgba(101, 112, 120, 0.15);
+.header-power-switch:hover:not(:disabled) { border-color: var(--mission-amber); }
+.header-power-switch:disabled { cursor: progress; opacity: 0.58; }
+
+.header-power-switch--on {
+  border-color: rgba(97, 211, 166, 0.74);
+  background: rgba(7, 25, 22, 0.82);
+  box-shadow: 0 0 22px rgba(47, 155, 115, 0.18);
 }
 
-.power-sound-toggle[aria-pressed="true"] i {
-  background: var(--mission-amber);
-  box-shadow: 0 0 0 3px rgba(246, 183, 60, 0.16);
+.header-power-switch__label {
+  display: grid;
+  gap: 1px;
+  text-align: left;
 }
 
-.hero__donation-button {
-  min-height: 78px;
-  animation: donation-button-arrives 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.header-power-switch__label small,
+.header-power-switch__label strong {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
-.power-status {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 22px;
-  margin: 13px 0 0;
-  color: #b7c0c5;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
+.header-power-switch__label small {
+  color: #aab3b9;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
-.power-status > span {
+.header-power-switch__label strong {
+  margin-top: 4px;
+  color: var(--mission-amber);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+.header-power-switch--on .header-power-switch__label strong { color: #61d3a6; }
+
+.header-power-switch__track {
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 26px;
   flex: 0 0 auto;
-  width: 8px;
-  height: 8px;
-  border: 1px solid #9aa3a8;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: #151a1e;
+  box-shadow: inset 0 3px 9px rgba(0, 0, 0, 0.5);
+  transition: border-color 350ms ease, background 350ms ease;
+}
+
+.header-power-switch--on .header-power-switch__track {
+  border-color: rgba(97, 211, 166, 0.72);
+  background: rgba(47, 155, 115, 0.3);
+}
+
+.header-power-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  transition: background 350ms ease, border-color 350ms ease, box-shadow 350ms ease;
+  background: #525d65;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition:
+    background 450ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 450ms ease,
+    transform 450ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.power-status--on { color: #b9f0da; }
-
-.power-status--on > span {
-  border-color: #61d3a6;
-  background: #61d3a6;
-  box-shadow: 0 0 12px rgba(97, 211, 166, 0.7);
+.header-power-switch__knob i {
+  width: 6px;
+  height: 6px;
+  border: 1px solid #edf0f2;
+  border-radius: 50%;
 }
 
-@keyframes clinic-energy-wave {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.12); }
-  18% { opacity: 0.85; }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.65); }
-}
-
-@keyframes clinic-power-flare {
-  0% { left: 32%; opacity: 0; }
-  28% { opacity: 1; }
-  100% { left: 102%; opacity: 0; }
-}
-
-@keyframes donation-button-arrives {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.hero--powered .hero__network { opacity: 1; }
-.hero--powered .network-line { filter: none; opacity: 1; }
-
-.hero--powered .network-node--online {
-  border-color: var(--mission-amber);
+.header-power-switch--on .header-power-switch__knob {
   background: var(--mission-amber);
-  box-shadow: 0 0 0 7px rgba(246, 183, 60, 0.18), 0 0 24px rgba(246, 183, 60, 0.8);
-  animation: node-pulse 2.4s ease-out infinite;
+  box-shadow: 0 0 14px rgba(246, 183, 60, 0.72);
+  transform: translateX(20px);
 }
 
-.hero--powered .network-node:not(.network-node--online) {
-  border-color: rgba(255, 255, 255, 0.82);
-  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.09);
-}
-
-@keyframes node-pulse {
-  0%, 35% { box-shadow: 0 0 0 7px rgba(246, 183, 60, 0.18), 0 0 24px rgba(246, 183, 60, 0.8); }
-  100% { box-shadow: 0 0 0 18px transparent, 0 0 6px rgba(246, 183, 60, 0.2); }
-}
+.header-power-switch--on .header-power-switch__knob i { border-color: #17120a; }
 
 @media (max-width: 760px) {
-  .hero__actions a,
-  .power-control,
-  .power-switch { width: 100%; }
-
-  .power-switch {
-    grid-template-columns: minmax(0, 1fr) 108px;
-    min-height: 82px;
-    padding-left: 14px;
+  .header-power-switch {
+    min-height: 40px;
+    padding: 6px;
   }
 
-  .power-switch__track { width: 102px; }
-  .power-switch--on .power-switch__knob { transform: translateX(55px); }
-  .power-control__meta { align-items: flex-start; font-size: 0.8rem; }
-  .hero__donation-button { min-height: 58px; }
-  .power-status { font-size: 0.82rem; line-height: 1.45; }
-
-  .hero__energy-wave {
-    top: 42%;
-    left: 72%;
-    width: 84vw;
-  }
-
-  .hero__light-bloom {
-    background:
-      radial-gradient(circle at 72% 42%, rgba(255, 255, 248, 0.42) 0, rgba(218, 239, 255, 0.14) 18%, transparent 46%),
-      linear-gradient(0deg, rgba(226, 242, 255, 0.08), transparent 42%);
+  .header-power-switch__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
