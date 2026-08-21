@@ -21,8 +21,12 @@
 .video-opening video {
   z-index: -3;
   object-fit: cover;
-  object-position: center;
+  object-position: center 34%;
   background: #03070b;
+}
+
+.video-opening--playing video {
+  object-position: center;
 }
 
 .video-opening__shade {

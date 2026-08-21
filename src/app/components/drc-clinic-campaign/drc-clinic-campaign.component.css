@@ -478,7 +478,7 @@ button:focus-visible {
 
 .proof-viewer__image-wrap {
   position: relative;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   border: 1px solid var(--mission-line);
   background: var(--mission-panel);
@@ -516,7 +516,7 @@ button:focus-visible {
 
 .proof-switcher {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   border: 1px solid var(--mission-line);
   border-top: 0;
 }
@@ -848,6 +848,7 @@ button:focus-visible {
 .clinic-detail__placeholder {
   position: relative;
   overflow: hidden;
+  aspect-ratio: 3 / 2;
   min-height: 310px;
   border-bottom: 0;
 }
@@ -1179,8 +1180,8 @@ button:focus-visible {
 
 .closing-section > img {
   object-fit: cover;
-  object-position: center 42%;
-  filter: saturate(0.72) contrast(1.1);
+  object-position: center 34%;
+  filter: saturate(0.98) brightness(1.02) contrast(1.04);
 }
 
 .closing-section > div {
@@ -1395,7 +1396,7 @@ button:focus-visible {
   }
 
   .proof-viewer__image-wrap {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 2;
   }
 
   .proof-switcher {

@@ -59,9 +59,10 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
     'https://globalsolutionlab.com/solution-view/o0eqjssL6yn1qZVqAY60';
   readonly presentationUrl =
     'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/ndingi%2FNDINGI%20Clinic%20Electrification%20Scale-Up%20Project%20DAY%204.pptx.pdf?alt=media&token=c60bb41a-d6d7-4b6b-bc94-32f6c51735e8';
-  readonly videoThumbnail = 'assets/campaigns/drc-clinics/drc-video-thumbnail-v1.png';
-  readonly powerOffImage = 'assets/campaigns/drc-clinics/drc-clinic-power-off-v1.jpg';
-  readonly powerOnImage = 'assets/campaigns/drc-clinics/drc-clinic-power-on-v1.jpg';
+  readonly achievedMasterImage = 'assets/campaigns/drc-clinics/ndingi-achieved-master-v1.jpg';
+  readonly videoThumbnail = this.achievedMasterImage;
+  readonly powerOffImage = 'assets/campaigns/drc-clinics/ndingi-achieved-power-off-v1.jpg';
+  readonly powerOnImage = 'assets/campaigns/drc-clinics/ndingi-achieved-power-on-v1.jpg';
   readonly videoPages: Record<Language, string> = {
     en: 'https://globalsolutionlab.com/nwg-news?v=ux8SCCU6hH3WYwBznYrE',
     fr: 'https://globalsolutionlab.com/nwg-news?v=DVsh6rzPOrOngXEOv8Z4',
@@ -83,7 +84,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
       stageLabel: 'Solar power installed',
       stageLabelFr: 'Énergie solaire installée',
       images: [
-        'assets/campaigns/drc-clinics/ndingi-after.png',
+        this.achievedMasterImage,
         'assets/campaigns/drc-clinics/ndingi-solar-installation.png',
         'assets/campaigns/drc-clinics/ndingi-care-after-dark.png',
       ],
@@ -187,7 +188,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
   selectedPhotoIndex = 0;
   currentLanguage: Language = 'en';
   isVideoPlaying = false;
-  proofView: 'before' | 'after' | 'desired' = 'desired';
+  proofView: 'before' | 'after' = 'after';
   isClinicPowerOn = false;
   isClinicPowerTransitioning = false;
   isPowerSoundEnabled = true;
@@ -206,18 +207,11 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
       noteFr: 'Photo prise au centre',
     },
     after: {
-      src: 'assets/campaigns/drc-clinics/ndingi-after.png',
+      src: this.achievedMasterImage,
       label: 'Solar power installed',
       labelFr: 'Énergie solaire installée',
-      note: 'Photo taken at the clinic',
-      noteFr: 'Photo prise au centre',
-    },
-    desired: {
-      src: 'assets/campaigns/drc-clinics/ndingi-desired-state.png',
-      label: 'Possible future improvements',
-      labelFr: 'Améliorations futures possibles',
-      note: 'Concept image, not a current photo',
-      noteFr: 'Image conceptuelle, pas une photo actuelle',
+      note: 'Approved image of completed work',
+      noteFr: 'Image approuvée des travaux réalisés',
     },
   };
 
@@ -341,14 +335,14 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
   get powerSceneDescription(): string {
     if (this.isClinicPowerOn) {
       return this.tr(
-        'Interactive concept image of a DRC clinic illuminated by reliable solar power at blue hour',
-        'Image conceptuelle interactive d’un centre de santé en RDC éclairé par une énergie solaire fiable à l’heure bleue'
+        'Lighting demonstration of Ndingi Clinic illuminated by reliable solar power at blue hour',
+        'Démonstration de l’éclairage de la Clinique de Ndingi alimentée par une énergie solaire fiable à l’heure bleue'
       );
     }
 
     return this.tr(
-      'Interactive concept image of the same DRC clinic before its electricity is switched on',
-      'Image conceptuelle interactive du même centre de santé en RDC avant la mise sous tension'
+      'Lighting demonstration of the same Ndingi Clinic before its electricity is switched on',
+      'Démonstration de la même Clinique de Ndingi avant la mise sous tension'
     );
   }
 
@@ -425,7 +419,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit, OnDest
     });
   }
 
-  setProofView(view: 'before' | 'after' | 'desired'): void {
+  setProofView(view: 'before' | 'after'): void {
     this.proofView = view;
   }
 

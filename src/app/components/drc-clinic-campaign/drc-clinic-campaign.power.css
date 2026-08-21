@@ -1,13 +1,13 @@
 .hero__image--off {
   opacity: 1;
-  filter: saturate(0.68) brightness(0.72) contrast(1.12);
+  filter: saturate(0.9) brightness(0.9) contrast(1.06);
 }
 
 .hero__image--on {
   z-index: 1;
   opacity: 0;
   clip-path: circle(0% at 76% 51%);
-  filter: saturate(1.28) brightness(1.02) contrast(1.08);
+  filter: saturate(1.05) brightness(1.04) contrast(1.04);
   transform: scale(1.035);
 }
 
@@ -34,8 +34,8 @@
   inset: 0;
   opacity: 0;
   background:
-    radial-gradient(circle at 78% 49%, rgba(255, 205, 102, 0.46) 0, rgba(246, 183, 60, 0.16) 15%, transparent 37%),
-    linear-gradient(0deg, rgba(246, 183, 60, 0.11), transparent 36%);
+    radial-gradient(circle at 65% 52%, rgba(255, 255, 248, 0.38) 0, rgba(218, 239, 255, 0.14) 18%, transparent 42%),
+    linear-gradient(0deg, rgba(226, 242, 255, 0.08), transparent 40%);
   mix-blend-mode: screen;
   transition: opacity 1250ms 260ms ease;
 }
@@ -403,7 +403,7 @@
 
   .hero__light-bloom {
     background:
-      radial-gradient(circle at 72% 42%, rgba(255, 205, 102, 0.5) 0, rgba(246, 183, 60, 0.16) 17%, transparent 45%),
-      linear-gradient(0deg, rgba(246, 183, 60, 0.1), transparent 40%);
+      radial-gradient(circle at 72% 42%, rgba(255, 255, 248, 0.42) 0, rgba(218, 239, 255, 0.14) 18%, transparent 46%),
+      linear-gradient(0deg, rgba(226, 242, 255, 0.08), transparent 42%);
   }
 }

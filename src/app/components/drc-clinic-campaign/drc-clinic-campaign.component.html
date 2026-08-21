@@ -120,7 +120,7 @@
 
     <div class="hero__content">
       <p class="eyebrow">{{ tr('Democratic Republic of the Congo // Power the next clinic', 'République démocratique du Congo // Électrifier le prochain centre') }}</p>
-      <p class="visualization-label">{{ tr('Interactive concept demonstration // Try the switch', 'Démonstration conceptuelle interactive // Essayez l’interrupteur') }}</p>
+      <p class="visualization-label">{{ tr('Ndingi Clinic // Interactive lighting demonstration', 'Clinique de Ndingi // Démonstration interactive de l’éclairage') }}</p>
       <h1 id="campaign-title">{{ tr('Reliable power', 'Une énergie fiable') }}<br />{{ tr('for lifesaving care.', 'pour des soins vitaux.') }}</h1>
       <p class="hero__subhead">{{ tr('Power the next 15 clinics in the DRC.', 'Électrifier les 15 prochains centres de santé en RDC.') }}</p>
       <p class="hero__copy">
@@ -205,12 +205,12 @@
     <div class="chapter-label"><span>/01</span> {{ tr('What we accomplished', 'Ce que nous avons réalisé') }}</div>
     <div class="proof-layout">
       <div class="proof-heading">
-        <p class="eyebrow">{{ tr('Ndingi Clinic: before, completed work, and future plans', 'Clinique de Ndingi : avant, travaux réalisés et projets futurs') }}</p>
+        <p class="eyebrow">{{ tr('Ndingi Clinic: before and completed work', 'Clinique de Ndingi : avant et travaux réalisés') }}</p>
         <h2>{{ tr('Ndingi', 'Ndingi') }}<br />{{ tr('has reliable power.', 'dispose d’une énergie fiable.') }}</h2>
         <p>
           {{ tr(
-            'These images show Ndingi Clinic before the work, after solar power was installed, and a concept image of possible future improvements.',
-            'Ces images montrent la Clinique de Ndingi avant les travaux, après l’installation de l’énergie solaire, ainsi qu’une image conceptuelle des améliorations futures possibles.'
+            'These images show Ndingi Clinic before the work and after reliable solar power was installed.',
+            'Ces images montrent la Clinique de Ndingi avant les travaux et après l’installation d’une énergie solaire fiable.'
           ) }}
         </p>
         <a [href]="solutionUrl" class="text-link" target="_blank" rel="noopener noreferrer">
@@ -245,14 +245,6 @@
             (click)="setProofView('after')"
           >
             <span>02</span> {{ tr('Work completed', 'Travaux réalisés') }}
-          </button>
-          <button
-            type="button"
-            [class.active]="proofView === 'desired'"
-            [attr.aria-pressed]="proofView === 'desired'"
-            (click)="setProofView('desired')"
-          >
-            <span>03</span> {{ tr('Future plan', 'Projet futur') }}
           </button>
         </div>
       </div>
@@ -374,7 +366,7 @@
           <div class="clinic-detail__media">
             <img
               [src]="selectedClinicPhoto"
-              [alt]="clinicName(selectedClinic) + tr(', clinic photo ', ', photo du centre ') + (selectedPhotoIndex + 1)"
+              [alt]="clinicName(selectedClinic) + tr(', clinic image ', ', image du centre ') + (selectedPhotoIndex + 1)"
             />
             <span>{{ clinicStageLabel(selectedClinic) }}</span>
             <small>{{ selectedPhotoIndex + 1 }} / {{ selectedClinic.images.length }}</small>
@@ -382,22 +374,22 @@
               *ngIf="selectedClinic.images.length > 1"
               class="clinic-detail__controls"
               role="group"
-              [attr.aria-label]="tr('Clinic photograph controls', 'Commandes des photographies du centre')"
+              [attr.aria-label]="tr('Clinic image controls', 'Commandes des images du centre')"
             >
-              <button type="button" (click)="showPreviousClinicPhoto()" [attr.aria-label]="tr('Previous photograph', 'Photographie précédente')">←</button>
-              <button type="button" (click)="showNextClinicPhoto()" [attr.aria-label]="tr('Next photograph', 'Photographie suivante')">→</button>
+              <button type="button" (click)="showPreviousClinicPhoto()" [attr.aria-label]="tr('Previous image', 'Image précédente')">←</button>
+              <button type="button" (click)="showNextClinicPhoto()" [attr.aria-label]="tr('Next image', 'Image suivante')">→</button>
             </div>
           </div>
           <div
             *ngIf="selectedClinic.images.length > 1"
             class="clinic-thumbnails"
-            [attr.aria-label]="tr('Clinic photographs', 'Photographies du centre')"
+            [attr.aria-label]="tr('Clinic images', 'Images du centre')"
           >
             <button
               *ngFor="let image of selectedClinic.images; let imageIndex = index"
               type="button"
               [class.active]="selectedPhotoIndex === imageIndex"
-              [attr.aria-label]="tr('Show photograph ', 'Afficher la photographie ') + (imageIndex + 1) + tr(' of ', ' de ') + clinicName(selectedClinic)"
+              [attr.aria-label]="tr('Show image ', 'Afficher l’image ') + (imageIndex + 1) + tr(' of ', ' de ') + clinicName(selectedClinic)"
               [attr.aria-pressed]="selectedPhotoIndex === imageIndex"
               (click)="selectClinicPhoto(imageIndex)"
             >
@@ -511,10 +503,10 @@
   </section>
 
   <section class="closing-section">
-    <img src="assets/campaigns/drc-clinics/drc-closing-dawn-v1.png" [alt]="tr('Concept image of a solar-powered clinic with its lights on at dawn', 'Image conceptuelle d’un centre alimenté par l’énergie solaire et éclairé à l’aube')" />
+    <img [src]="powerOnImage" [alt]="tr('Ndingi Clinic illuminated by reliable solar power at blue hour', 'Clinique de Ndingi éclairée par une énergie solaire fiable à l’heure bleue')" />
     <div></div>
     <article>
-      <span class="closing-visual-label">{{ tr('Concept image: clinic powered at dawn', 'Image conceptuelle : centre éclairé à l’aube') }}</span>
+      <span class="closing-visual-label">{{ tr('Ndingi Clinic // Reliable power in action', 'Clinique de Ndingi // Une énergie fiable en action') }}</span>
       <p class="eyebrow">{{ tr('The next clinic is waiting for power', 'Le prochain centre attend l’électricité') }}</p>
       <h2>{{ tr('When care cannot wait,', 'Quand les soins ne peuvent attendre,') }}<br />{{ tr('power cannot fail.', 'l’énergie ne peut faillir.') }}</h2>
       <p>{{ tr('Solar power is installed at one clinic. Four more clinics have been identified and photographed. Our goal is to power 15 clinics.', 'L’énergie solaire est installée dans un centre. Quatre autres centres ont été identifiés et photographiés. Notre objectif est d’électrifier 15 centres.') }}</p>
@@ -536,8 +528,8 @@
     </div>
     <p>
       {{ tr(
-        'EarthGame is a 501(c)(3) nonprofit organization. The concept images on this page show proposed improvements. All other clinic photos show current or completed work.',
-        'EarthGame est une organisation à but non lucratif 501(c)(3). Les images conceptuelles de cette page présentent les améliorations proposées. Toutes les autres photos montrent l’état actuel des centres ou les travaux réalisés.'
+        'EarthGame is a 501(c)(3) nonprofit organization. The central Ndingi image is the approved visualization of completed work; its dark and illuminated versions are a lighting demonstration. Supporting clinic photographs document current conditions or completed work.',
+        'EarthGame est une organisation à but non lucratif 501(c)(3). L’image centrale de Ndingi est la visualisation approuvée des travaux réalisés ; ses versions sombre et éclairée constituent une démonstration de l’éclairage. Les photographies complémentaires documentent l’état actuel des centres ou les travaux réalisés.'
       ) }}
     </p>
     <a href="mailto:contact@newworld-game.org">{{ tr('Contact the project team', 'Contacter l’équipe du projet') }} ↗</a>
