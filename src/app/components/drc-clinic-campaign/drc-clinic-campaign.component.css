@@ -873,6 +873,11 @@ button:focus-visible {
   text-transform: uppercase;
 }
 
+.clinic-detail__media > span[data-stage='ready'] {
+  background: var(--mission-amber);
+  color: var(--mission-black);
+}
+
 .clinic-detail__media > small {
   position: absolute;
   top: 18px;

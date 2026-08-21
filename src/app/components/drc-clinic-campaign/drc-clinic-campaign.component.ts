@@ -103,16 +103,16 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       nameFr: 'Centre de santé ophtalmologique CEAC / Nganga–Tsanga',
       location: '17 km from Tsanga Nord · Democratic Republic of the Congo',
       locationFr: 'À 17 km de Tsanga Nord · République démocratique du Congo',
-      stage: 'verification',
-      stageLabel: 'Site visit needed',
-      stageLabelFr: 'Visite sur place nécessaire',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
       images: ['assets/campaigns/drc-clinics/nganga-tsanga-01.jpg'],
       description:
-        'The team has received a photo of this CEAC eye-care clinic. Next, it will visit the clinic, check the existing electricity supply, list the medical equipment that needs power, and plan the solar installation.',
+        'The clinic has been visited and documented. The next step is to confirm the final system size and schedule the solar installation.',
       descriptionFr:
-        'L’équipe a reçu une photo de ce centre de soins oculaires CEAC. Elle doit maintenant visiter le centre, vérifier l’alimentation électrique existante, dresser la liste des équipements médicaux à alimenter et planifier l’installation solaire.',
-      nextMilestone: 'Visit the clinic and document its electricity needs',
-      nextMilestoneFr: 'Visiter le centre et documenter ses besoins en électricité',
+        'Le centre a été visité et documenté. La prochaine étape consiste à confirmer la taille finale du système et à programmer l’installation solaire.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
     },
     {
       id: 'nsioni',
@@ -121,19 +121,19 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       nameFr: 'Centre de santé ophtalmologique CEAC Nsioni',
       location: 'Democratic Republic of the Congo · Exact location to be confirmed',
       locationFr: 'République démocratique du Congo · Lieu exact à confirmer',
-      stage: 'verification',
-      stageLabel: 'Site visit needed',
-      stageLabelFr: 'Visite sur place nécessaire',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
       images: [
         'assets/campaigns/drc-clinics/nsioni-01.jpg',
         'assets/campaigns/drc-clinics/nsioni-02.jpg',
       ],
       description:
-        'The team has received two photos showing this clinic and its current condition. Next, it will confirm the location and list the medical equipment, lighting, and hours of operation that require electricity.',
+        'The clinic has been visited and photographed. The next step is to confirm the final system size and schedule the solar installation.',
       descriptionFr:
-        'L’équipe a reçu deux photos montrant ce centre et son état actuel. Elle doit maintenant confirmer le lieu et dresser la liste des équipements médicaux, de l’éclairage et des horaires nécessitant de l’électricité.',
-      nextMilestone: 'Confirm the location and document electricity needs',
-      nextMilestoneFr: 'Confirmer le lieu et documenter les besoins en électricité',
+        'Le centre a été visité et photographié. La prochaine étape consiste à confirmer la taille finale du système et à programmer l’installation solaire.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
     },
     {
       id: 'kiobo-kwimba',
@@ -142,9 +142,9 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       nameFr: 'Centre de santé CEAC Kiobo–Kwimba',
       location: 'Democratic Republic of the Congo · Exact location to be confirmed',
       locationFr: 'République démocratique du Congo · Lieu exact à confirmer',
-      stage: 'assessment',
-      stageLabel: 'Photos received',
-      stageLabelFr: 'Photos reçues',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
       images: [
         'assets/campaigns/drc-clinics/kiobo-kwimba-01.jpg',
         'assets/campaigns/drc-clinics/kiobo-kwimba-02.jpg',
@@ -153,11 +153,11 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
         'assets/campaigns/drc-clinics/kiobo-kwimba-05.jpg',
       ],
       description:
-        'The team has received five photos showing the clinic exterior, treatment rooms, and current building condition. Next, a technical team will visit and decide what solar equipment the clinic needs.',
+        'The clinic has been visited and documented through five photographs of its exterior, treatment rooms, and current condition. It is ready for final system sizing and installation scheduling.',
       descriptionFr:
-        'L’équipe a reçu cinq photos montrant l’extérieur du centre, les salles de soins et l’état actuel du bâtiment. Une équipe technique doit maintenant visiter le centre et déterminer l’équipement solaire nécessaire.',
-      nextMilestone: 'Visit the clinic and plan the solar installation',
-      nextMilestoneFr: 'Visiter le centre et planifier l’installation solaire',
+        'Le centre a été visité et documenté grâce à cinq photographies de son extérieur, de ses salles de soins et de son état actuel. Il est prêt pour le dimensionnement final du système et la programmation de l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
     },
     {
       id: 'mont-sinai',
@@ -166,20 +166,162 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       nameFr: 'Centre Hospitalier Mont Sinaï',
       location: 'Boma · Kongo Central · Democratic Republic of the Congo',
       locationFr: 'Boma · Kongo Central · République démocratique du Congo',
-      stage: 'assessment',
-      stageLabel: 'Photos received',
-      stageLabelFr: 'Photos reçues',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
       images: [
         'assets/campaigns/drc-clinics/mont-sinai-01.jpg',
         'assets/campaigns/drc-clinics/mont-sinai-02.jpg',
         'assets/campaigns/drc-clinics/mont-sinai-03.jpg',
       ],
       description:
-        'The photos show a larger hospital in Boma. The team must visit the hospital, identify which rooms and medical equipment need reliable electricity, and estimate the cost before funding is assigned.',
+        'The hospital has been visited and photographed. The team can now confirm the rooms and medical equipment to be powered, finalize the system size, and schedule installation.',
       descriptionFr:
-        'Les photos montrent un hôpital plus vaste à Boma. L’équipe doit visiter l’hôpital, identifier les salles et les équipements médicaux qui ont besoin d’une électricité fiable, puis estimer le coût avant l’attribution des fonds.',
-      nextMilestone: 'Visit the hospital and document its electricity needs',
-      nextMilestoneFr: 'Visiter l’hôpital et documenter ses besoins en électricité',
+        'L’hôpital a été visité et photographié. L’équipe peut maintenant confirmer les salles et les équipements médicaux à alimenter, finaliser la taille du système et programmer l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
+    },
+    {
+      id: 'tsasa-mbambi',
+      index: '06',
+      name: 'Centre de santé Tsasa Mbambi',
+      nameFr: 'Centre de santé Tsasa Mbambi',
+      location: 'Village de Kimbenza Khutu · Tsundi-Sud Sector · Lukula Territory',
+      locationFr: 'Village de Kimbenza Khutu · Secteur de Tsundi-Sud · Territoire de Lukula',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
+      images: [
+        'assets/campaigns/drc-clinics/tsasa-mbambi-01.jpg',
+        'assets/campaigns/drc-clinics/tsasa-mbambi-02.jpg',
+      ],
+      description:
+        'The visit documented the Tsasa Mbambi clinic and its maternity building in Kimbenza Khutu. The clinic is ready for final solar system sizing and installation scheduling.',
+      descriptionFr:
+        'La visite a documenté le centre Tsasa Mbambi et son bâtiment de maternité à Kimbenza Khutu. Le centre est prêt pour le dimensionnement final du système solaire et la programmation de l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
+    },
+    {
+      id: 'mami',
+      index: '07',
+      name: 'Centre de Santé Communautaire Mami',
+      nameFr: 'Centre de Santé Communautaire Mami',
+      location: 'Village de Mao · Boma Bungu Sector · Moanda Territory',
+      locationFr: 'Village de Mao · Secteur de Boma Bungu · Territoire de Moanda',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
+      images: [
+        'assets/campaigns/drc-clinics/mami-01.jpg',
+        'assets/campaigns/drc-clinics/mami-02.jpg',
+        'assets/campaigns/drc-clinics/mami-03.jpg',
+        'assets/campaigns/drc-clinics/mami-04.jpg',
+        'assets/campaigns/drc-clinics/mami-05.jpg',
+        'assets/campaigns/drc-clinics/mami-06.jpg',
+      ],
+      description:
+        'The visit documented the community clinic, its buildings, and the surrounding community in the village of Mao. It is ready for final solar system sizing and installation scheduling.',
+      descriptionFr:
+        'La visite a documenté le centre communautaire, ses bâtiments et la communauté environnante dans le village de Mao. Il est prêt pour le dimensionnement final du système solaire et la programmation de l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
+    },
+    {
+      id: 'kungu-mbambi',
+      index: '08',
+      name: 'Centre de santé Kungu Mbambi',
+      nameFr: 'Centre de santé Kungu Mbambi',
+      location: 'Democratic Republic of the Congo · Exact location to be confirmed',
+      locationFr: 'République démocratique du Congo · Lieu exact à confirmer',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
+      images: [
+        'assets/campaigns/drc-clinics/kungu-mbambi-01.jpg',
+        'assets/campaigns/drc-clinics/kungu-mbambi-02.jpg',
+        'assets/campaigns/drc-clinics/kungu-mbambi-03.jpg',
+      ],
+      description:
+        'The visit documented the Kungu Mbambi clinic across three buildings. The clinic is ready for final solar system sizing and installation scheduling.',
+      descriptionFr:
+        'La visite a documenté le centre Kungu Mbambi dans trois bâtiments. Le centre est prêt pour le dimensionnement final du système solaire et la programmation de l’installation.',
+      nextMilestone: 'Confirm the location, solar system size, and installation schedule',
+      nextMilestoneFr: 'Confirmer le lieu, la taille du système solaire et le calendrier d’installation',
+    },
+    {
+      id: 'kanzi',
+      index: '09',
+      name: 'Centre de Santé de Référence de Kanzi',
+      nameFr: 'Centre de Santé de Référence de Kanzi',
+      location: 'Moanda Territory · Democratic Republic of the Congo',
+      locationFr: 'Territoire de Moanda · République démocratique du Congo',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
+      images: [
+        'assets/campaigns/drc-clinics/kanzi-01.jpg',
+        'assets/campaigns/drc-clinics/kanzi-02.jpg',
+        'assets/campaigns/drc-clinics/kanzi-03.jpg',
+        'assets/campaigns/drc-clinics/kanzi-04.jpg',
+        'assets/campaigns/drc-clinics/kanzi-05.jpg',
+        'assets/campaigns/drc-clinics/kanzi-06.jpg',
+        'assets/campaigns/drc-clinics/kanzi-07.jpg',
+        'assets/campaigns/drc-clinics/kanzi-08.jpg',
+        'assets/campaigns/drc-clinics/kanzi-09.jpg',
+      ],
+      description:
+        'The visit documented the Kanzi referral clinic and its wider health campus in Moanda Territory. It is ready for final solar system sizing and installation scheduling.',
+      descriptionFr:
+        'La visite a documenté le centre de référence de Kanzi et l’ensemble de son site de santé dans le territoire de Moanda. Il est prêt pour le dimensionnement final du système solaire et la programmation de l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
+    },
+    {
+      id: 'tabernacle',
+      index: '10',
+      name: 'Centre de Santé Communautaire Tabernacle',
+      nameFr: 'Centre de Santé Communautaire Tabernacle',
+      location: 'Mbangu Quarter · Boma · Kongo Central',
+      locationFr: 'Quartier Mbangu · Boma · Kongo Central',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
+      images: [
+        'assets/campaigns/drc-clinics/tabernacle-01.jpg',
+        'assets/campaigns/drc-clinics/tabernacle-02.jpg',
+        'assets/campaigns/drc-clinics/tabernacle-03.jpg',
+      ],
+      description:
+        'The visit documented the Tabernacle community clinic in Boma, including the exterior and patient entrance. It is ready for final solar system sizing and installation scheduling.',
+      descriptionFr:
+        'La visite a documenté le centre communautaire Tabernacle à Boma, notamment l’extérieur et l’entrée des patients. Il est prêt pour le dimensionnement final du système solaire et la programmation de l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
+    },
+    {
+      id: 'mao',
+      index: '11',
+      name: 'Centre de Santé de Mao',
+      nameFr: 'Centre de Santé de Mao',
+      location: 'Village de Mao · Democratic Republic of the Congo',
+      locationFr: 'Village de Mao · République démocratique du Congo',
+      stage: 'ready',
+      stageLabel: 'Visited — ready for electrification',
+      stageLabelFr: 'Visité — prêt pour l’électrification',
+      images: [
+        'assets/campaigns/drc-clinics/mao-01.jpg',
+        'assets/campaigns/drc-clinics/mao-02.jpg',
+        'assets/campaigns/drc-clinics/mao-03.jpg',
+        'assets/campaigns/drc-clinics/mao-04.jpg',
+        'assets/campaigns/drc-clinics/mao-05.jpg',
+      ],
+      description:
+        'The visit documented the Mao clinic and its place within the village. The clinic is ready for final solar system sizing and installation scheduling.',
+      descriptionFr:
+        'La visite a documenté le centre de Mao et sa place dans le village. Le centre est prêt pour le dimensionnement final du système solaire et la programmation de l’installation.',
+      nextMilestone: 'Confirm the solar system size and schedule installation',
+      nextMilestoneFr: 'Confirmer la taille du système solaire et programmer l’installation',
     },
   ];
 
@@ -280,8 +422,8 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   clinicCapacity(clinic: ClinicProfile): string {
     return this.currentLanguage === 'fr'
-      ? clinic.capacityFr || 'À déterminer après la visite sur place'
-      : clinic.capacity || 'To be determined after the site visit';
+      ? clinic.capacityFr || 'Taille finale du système à confirmer'
+      : clinic.capacity || 'Final system size to be confirmed';
   }
 
   get videoSource(): string {

@@ -12,7 +12,7 @@
       <a href="#video" (click)="scrollToSection('video', $event)">{{ tr('Watch', 'Voir') }}</a>
       <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">{{ tr('Work completed', 'Travaux réalisés') }}</a>
       <a href="#geography" (click)="scrollToSection('geography', $event)">{{ tr('DRC map', 'Carte RDC') }}</a>
-      <a href="#clinics" (click)="scrollToSection('clinics', $event)">{{ tr('Five clinics', 'Cinq centres') }}</a>
+      <a href="#clinics" (click)="scrollToSection('clinics', $event)">{{ tr('10 clinics ready', '10 centres prêts') }}</a>
       <a href="#ledger" (click)="scrollToSection('ledger', $event)">{{ tr('Budget', 'Budget') }}</a>
     </nav>
 
@@ -216,7 +216,7 @@
         <div class="geography-facts" [attr.aria-label]="tr('Project locations', 'Lieux du projet')">
           <div><span>{{ tr('Country where we work', 'Pays où nous travaillons') }}</span><strong>{{ tr('DR Congo', 'RD Congo') }}</strong></div>
           <div><span>{{ tr('Region for future clinics', 'Région des futurs centres') }}</span><strong>{{ tr('Africa', 'Afrique') }}</strong></div>
-          <div><span>{{ tr('Clinics identified', 'Centres identifiés') }}</span><strong>05</strong></div>
+          <div><span>{{ tr('Clinics visited and ready', 'Centres visités et prêts') }}</span><strong>10</strong></div>
         </div>
       </div>
 
@@ -249,16 +249,16 @@
   </section>
 
   <section id="clinics" class="chapter clinic-section">
-    <div class="chapter-label"><span>/03</span> {{ tr('Five clinics', 'Cinq centres') }}</div>
+    <div class="chapter-label"><span>/03</span> {{ tr('Ten clinics ready', 'Dix centres prêts') }}</div>
     <div class="section-intro">
       <div>
-        <p class="eyebrow">{{ tr('Clinics identified', 'Centres identifiés') }}</p>
-        <h2>{{ tr('Five clinics.', 'Cinq centres.') }}<br />{{ tr('Clear next steps.', 'Des prochaines étapes claires.') }}</h2>
+        <p class="eyebrow">{{ tr('Clinic visits completed', 'Visites des centres terminées') }}</p>
+        <h2>{{ tr('One clinic powered.', 'Un centre électrifié.') }}<br />{{ tr('Ten clinics ready next.', 'Dix centres prêts pour la suite.') }}</h2>
       </div>
       <p>
         {{ tr(
-          'One clinic now has solar power. Four additional clinics have been identified and photographed. Their electricity needs will be confirmed during on-site visits.',
-          'Un centre dispose maintenant de l’énergie solaire. Quatre autres centres ont été identifiés et photographiés. Leurs besoins en électricité seront confirmés lors de visites sur place.'
+          'Ndingi Clinic now has reliable solar power. Ten additional clinics have been visited, photographed, and are ready for the next electrification phase.',
+          'Le centre de Ndingi dispose maintenant d’une énergie solaire fiable. Dix autres centres ont été visités et photographiés et sont prêts pour la prochaine phase d’électrification.'
         ) }}
       </p>
     </div>
@@ -292,7 +292,7 @@
               [src]="selectedClinicPhoto"
               [alt]="clinicName(selectedClinic) + tr(', clinic image ', ', image du centre ') + (selectedPhotoIndex + 1)"
             />
-            <span>{{ clinicStageLabel(selectedClinic) }}</span>
+            <span [attr.data-stage]="selectedClinic.stage">{{ clinicStageLabel(selectedClinic) }}</span>
             <small>{{ selectedPhotoIndex + 1 }} / {{ selectedClinic.images.length }}</small>
             <div
               *ngIf="selectedClinic.images.length > 1"
@@ -433,7 +433,7 @@
       <span class="closing-visual-label">{{ tr('Ndingi Clinic // Reliable power in action', 'Clinique de Ndingi // Une énergie fiable en action') }}</span>
       <p class="eyebrow">{{ tr('The next clinic is waiting for power', 'Le prochain centre attend l’électricité') }}</p>
       <h2>{{ tr('When care cannot wait,', 'Quand les soins ne peuvent attendre,') }}<br />{{ tr('power cannot fail.', 'l’énergie ne peut faillir.') }}</h2>
-      <p>{{ tr('Solar power is installed at one clinic. Four more clinics have been identified and photographed. Our goal is to power 15 clinics.', 'L’énergie solaire est installée dans un centre. Quatre autres centres ont été identifiés et photographiés. Notre objectif est d’électrifier 15 centres.') }}</p>
+      <p>{{ tr('Solar power is installed at Ndingi Clinic. Ten more clinics have been visited and are ready for electrification. Our goal is to power 15 clinics.', 'L’énergie solaire est installée au centre de Ndingi. Dix autres centres ont été visités et sont prêts pour l’électrification. Notre objectif est d’électrifier 15 centres.') }}</p>
       <a
         class="mission-button"
         [href]="donationUrl"
