@@ -236,99 +236,175 @@
     </div>
   </section>
 
-  <section id="clinics" class="chapter clinic-section">
-    <div class="chapter-label"><span>/03</span> {{ tr('Ten clinics ready', 'Dix centres prêts') }}</div>
-    <div class="section-intro">
+  <section id="clinics" class="chapter clinic-explorer" aria-labelledby="clinic-explorer-title">
+    <div class="clinic-explorer__heading">
       <div>
+        <div class="chapter-label"><span>/03</span> {{ tr('Clinic network', 'Réseau de centres') }}</div>
         <p class="eyebrow">{{ tr('Clinic visits completed', 'Visites des centres terminées') }}</p>
-        <h2>{{ tr('One clinic powered.', 'Un centre électrifié.') }}<br />{{ tr('Ten clinics ready next.', 'Dix centres prêts pour la suite.') }}</h2>
+        <h2 id="clinic-explorer-title">
+          {{ tr('One clinic powered. Ten ready next.', 'Un centre électrifié. Dix prêts pour la suite.') }}
+        </h2>
+        <p>
+          {{ tr(
+            'Explore each clinic’s location, needs, field evidence, and path to reliable power.',
+            'Explorez le lieu, les besoins, les preuves de terrain et le parcours vers une énergie fiable de chaque centre.'
+          ) }}
+        </p>
       </div>
-      <p>
-        {{ tr(
-          'Ndingi Clinic now has reliable solar power. Ten additional clinics have been visited, photographed, and are ready for the next electrification phase.',
-          'Le centre de Ndingi dispose maintenant d’une énergie solaire fiable. Dix autres centres ont été visités et photographiés et sont prêts pour la prochaine phase d’électrification.'
-        ) }}
-      </p>
+
+      <div class="clinic-explorer__summary" [attr.aria-label]="tr('Clinic network summary', 'Résumé du réseau de centres')">
+        <div><strong>{{ onlineClinicCount | number:'2.0-0' }}</strong><span data-stage="online">{{ tr('Online', 'En ligne') }}</span></div>
+        <div><strong>{{ readyClinicCount | number:'2.0-0' }}</strong><span data-stage="ready">{{ tr('Ready', 'Prêts') }}</span></div>
+        <div><strong>{{ clinics.length | number:'2.0-0' }}</strong><span>{{ tr('Clinics documented', 'Centres documentés') }}</span></div>
+      </div>
     </div>
 
-    <div class="clinic-console">
-      <div class="clinic-list" role="list" [attr.aria-label]="tr('Clinic profiles', 'Profils des centres')">
-        <button
-          *ngFor="let clinic of clinics"
-          type="button"
-          role="listitem"
-          class="clinic-row"
-          [class.selected]="selectedClinic.id === clinic.id"
-          (click)="selectClinic(clinic)"
-        >
-          <span class="clinic-row__index">{{ clinic.index }}</span>
-          <span class="clinic-row__main">
-            <strong>{{ clinicName(clinic) }}</strong>
-            <small>{{ clinicLocation(clinic) }}</small>
-          </span>
-          <span class="status" [attr.data-stage]="clinic.stage">
-            <i aria-hidden="true"></i>{{ clinicStageLabel(clinic) }}
-          </span>
-          <span aria-hidden="true">→</span>
-        </button>
-      </div>
+    <div class="clinic-explorer__console">
+      <aside class="clinic-directory" [attr.aria-label]="tr('Clinic directory', 'Répertoire des centres')">
+        <div class="clinic-directory__header">
+          <strong>{{ tr('Clinic directory', 'Répertoire des centres') }}</strong>
+          <span>{{ clinics.length }} {{ tr('locations', 'lieux') }}</span>
+        </div>
 
-      <article class="clinic-detail" aria-live="polite">
-        <div class="clinic-detail__gallery">
-          <div class="clinic-detail__media">
-            <img
-              [src]="selectedClinicPhoto"
-              [alt]="clinicName(selectedClinic) + tr(', clinic image ', ', image du centre ') + (selectedPhotoIndex + 1)"
-            />
-            <span [attr.data-stage]="selectedClinic.stage">{{ clinicStageLabel(selectedClinic) }}</span>
-            <small>{{ selectedPhotoIndex + 1 }} / {{ selectedClinic.images.length }}</small>
-            <div
-              *ngIf="selectedClinic.images.length > 1"
-              class="clinic-detail__controls"
-              role="group"
-              [attr.aria-label]="tr('Clinic image controls', 'Commandes des images du centre')"
-            >
-              <button type="button" (click)="showPreviousClinicPhoto()" [attr.aria-label]="tr('Previous image', 'Image précédente')">←</button>
-              <button type="button" (click)="showNextClinicPhoto()" [attr.aria-label]="tr('Next image', 'Image suivante')">→</button>
-            </div>
-          </div>
-          <div
-            *ngIf="selectedClinic.images.length > 1"
-            class="clinic-thumbnails"
-            [attr.aria-label]="tr('Clinic images', 'Images du centre')"
+        <div class="clinic-directory__filters" role="group" [attr.aria-label]="tr('Filter clinics', 'Filtrer les centres')">
+          <button type="button" [class.active]="clinicFilter === 'all'" [attr.aria-pressed]="clinicFilter === 'all'" (click)="setClinicFilter('all')">
+            {{ tr('All', 'Tous') }} <span>{{ clinics.length }}</span>
+          </button>
+          <button type="button" [class.active]="clinicFilter === 'online'" [attr.aria-pressed]="clinicFilter === 'online'" (click)="setClinicFilter('online')">
+            {{ tr('Online', 'En ligne') }} <span>{{ onlineClinicCount }}</span>
+          </button>
+          <button type="button" [class.active]="clinicFilter === 'ready'" [attr.aria-pressed]="clinicFilter === 'ready'" (click)="setClinicFilter('ready')">
+            {{ tr('Ready', 'Prêts') }} <span>{{ readyClinicCount }}</span>
+          </button>
+        </div>
+
+        <div class="clinic-directory__list">
+          <button
+            *ngFor="let clinic of visibleClinics"
+            type="button"
+            class="clinic-directory__row"
+            [class.selected]="selectedClinic.id === clinic.id"
+            [attr.aria-current]="selectedClinic.id === clinic.id ? 'true' : null"
+            (click)="selectClinic(clinic)"
           >
-            <button
-              *ngFor="let image of selectedClinic.images; let imageIndex = index"
-              type="button"
-              [class.active]="selectedPhotoIndex === imageIndex"
-              [attr.aria-label]="tr('Show image ', 'Afficher l’image ') + (imageIndex + 1) + tr(' of ', ' de ') + clinicName(selectedClinic)"
-              [attr.aria-pressed]="selectedPhotoIndex === imageIndex"
-              (click)="selectClinicPhoto(imageIndex)"
-            >
-              <img [src]="image" alt="" />
-              <span>{{ imageIndex + 1 }}</span>
-            </button>
+            <span class="clinic-directory__index">{{ clinic.index }}</span>
+            <span class="clinic-directory__identity">
+              <strong>{{ clinicName(clinic) }}</strong>
+              <small>{{ clinicLocation(clinic) }}</small>
+            </span>
+            <span class="clinic-directory__status" [attr.data-stage]="clinic.stage">
+              <i aria-hidden="true"></i>{{ clinicDirectoryStage(clinic) }}
+            </span>
+          </button>
+        </div>
+
+        <button
+          *ngIf="filteredClinics.length > 6"
+          type="button"
+          class="clinic-directory__more"
+          [attr.aria-expanded]="showAllClinics"
+          (click)="toggleClinicDirectory()"
+        >
+          <span *ngIf="!showAllClinics">{{ tr('View', 'Voir') }} {{ remainingClinicCount }} {{ tr('more', 'de plus') }}</span>
+          <span *ngIf="showAllClinics">{{ tr('Show fewer', 'Afficher moins') }}</span>
+          <i aria-hidden="true">{{ showAllClinics ? '↑' : '↓' }}</i>
+        </button>
+      </aside>
+
+      <article class="clinic-profile" aria-live="polite">
+        <div class="clinic-profile__overview">
+          <div class="clinic-profile__copy">
+            <div class="clinic-profile__kicker">
+              <span>{{ tr('Clinic', 'Centre') }} {{ selectedClinic.index }}</span>
+              <i>//</i>
+              <strong [attr.data-stage]="selectedClinic.stage">{{ clinicStageLabel(selectedClinic) }}</strong>
+            </div>
+            <h3>{{ clinicName(selectedClinic) }}</h3>
+            <p class="clinic-profile__location"><i aria-hidden="true"></i>{{ clinicLocation(selectedClinic) }}</p>
+            <p class="clinic-profile__description">{{ clinicDescription(selectedClinic) }}</p>
+            <span class="clinic-profile__stage" [attr.data-stage]="selectedClinic.stage">{{ clinicStageLabel(selectedClinic) }}</span>
+
+            <dl class="clinic-profile__facts">
+              <div>
+                <dt>{{ tr('People served', 'Personnes desservies') }}</dt>
+                <dd class="pending">{{ clinicPeopleServed() }}</dd>
+              </div>
+              <div>
+                <dt>{{ tr('Power system', 'Système électrique') }}</dt>
+                <dd>{{ clinicCapacity(selectedClinic) }}</dd>
+              </div>
+              <div>
+                <dt>{{ tr('Care areas', 'Services de soins') }}</dt>
+                <dd>{{ clinicCareAreaCount() }}</dd>
+              </div>
+              <div class="clinic-profile__project-status">
+                <dt>{{ tr('Project status', 'Statut du projet') }}</dt>
+                <dd [attr.data-stage]="selectedClinic.stage">{{ clinicDirectoryStage(selectedClinic) }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div class="clinic-media">
+            <div class="clinic-media__hero">
+              <img
+                [src]="selectedClinicPhoto"
+                [alt]="clinicName(selectedClinic) + tr(', clinic image ', ', image du centre ') + (selectedPhotoIndex + 1)"
+              />
+              <div class="clinic-media__controls">
+                <span>{{ tr('Photo', 'Photo') }} {{ selectedPhotoIndex + 1 | number:'2.0-0' }} / {{ selectedClinic.images.length | number:'2.0-0' }}</span>
+                <div *ngIf="selectedClinic.images.length > 1" role="group" [attr.aria-label]="tr('Clinic image controls', 'Commandes des images du centre')">
+                  <button type="button" (click)="showPreviousClinicPhoto()" [attr.aria-label]="tr('Previous image', 'Image précédente')">←</button>
+                  <button type="button" (click)="showNextClinicPhoto()" [attr.aria-label]="tr('Next image', 'Image suivante')">→</button>
+                </div>
+                <a href="#video" (click)="scrollToSection('video', $event)">{{ tr('Watch project film', 'Voir le film du projet') }} <i aria-hidden="true">▶</i></a>
+              </div>
+            </div>
+
+            <div class="clinic-media__strip" [attr.aria-label]="tr('Clinic media', 'Médias du centre')">
+              <button
+                *ngFor="let image of selectedClinicSupportingImages"
+                type="button"
+                (click)="selectClinicPhoto(image.index)"
+                [attr.aria-label]="tr('Show ', 'Afficher ') + clinicMediaLabel(image.index)"
+              >
+                <img [src]="image.src" alt="" />
+                <span>{{ clinicMediaLabel(image.index) }}</span>
+              </button>
+              <button type="button" class="clinic-media__video" (click)="scrollToSection('video', $event)">
+                <img [src]="videoThumbnail" alt="" />
+                <i aria-hidden="true">▶</i>
+                <span>{{ tr('Field video', 'Vidéo de terrain') }}</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="clinic-detail__copy">
-          <p class="eyebrow">{{ tr('Clinic', 'Centre') }} {{ selectedClinic.index }}</p>
-          <h3>{{ clinicName(selectedClinic) }}</h3>
-          <p>{{ clinicDescription(selectedClinic) }}</p>
-          <dl>
-            <div>
-              <dt>{{ tr('Status', 'Statut') }}</dt>
-              <dd>{{ clinicStageLabel(selectedClinic) }}</dd>
-            </div>
-            <div>
-              <dt>{{ tr('Power system', 'Système électrique') }}</dt>
-              <dd>{{ clinicCapacity(selectedClinic) }}</dd>
-            </div>
-            <div>
-              <dt>{{ tr('Next step', 'Prochaine étape') }}</dt>
-              <dd>{{ clinicMilestone(selectedClinic) }}</dd>
-            </div>
-          </dl>
+        <div class="clinic-profile__evidence">
+          <section class="clinic-impact" [attr.aria-labelledby]="'clinic-impact-' + selectedClinic.id">
+            <h4 [id]="'clinic-impact-' + selectedClinic.id">{{ tr('Care impact', 'Impact sur les soins') }}</h4>
+            <ng-container *ngIf="selectedClinicCareAreas.length; else careAreasPending">
+              <div *ngFor="let area of selectedClinicCareAreas">
+                <span>{{ area }}</span>
+                <small [attr.data-stage]="selectedClinic.stage"><i aria-hidden="true"></i>{{ clinicDirectoryStage(selectedClinic) }}</small>
+              </div>
+            </ng-container>
+            <ng-template #careAreasPending>
+              <p>{{ tr('The clinic care-area inventory will be published after field verification.', 'L’inventaire des services de soins sera publié après vérification sur le terrain.') }}</p>
+              <span class="clinic-impact__pending">{{ tr('Field inventory pending', 'Inventaire de terrain en attente') }}</span>
+            </ng-template>
+          </section>
+
+          <section class="clinic-voices" [attr.aria-labelledby]="'clinic-voices-' + selectedClinic.id">
+            <h4 [id]="'clinic-voices-' + selectedClinic.id">{{ tr('Clinic voices', 'Voix du centre') }}</h4>
+            <span>{{ tr('Field interview to be published', 'Entretien de terrain à publier') }}</span>
+            <blockquote>
+              {{ tr(
+                'Verified clinic testimony will appear here after field approval.',
+                'Un témoignage vérifié du centre apparaîtra ici après validation du terrain.'
+              ) }}
+            </blockquote>
+            <small>{{ tr('Photo, video & quote source attached', 'Sources photo, vidéo et citation jointes') }}</small>
+          </section>
         </div>
       </article>
     </div>

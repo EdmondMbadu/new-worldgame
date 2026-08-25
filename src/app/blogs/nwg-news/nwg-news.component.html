@@ -64,6 +64,28 @@
       </div>
     </section>
 
+    <section
+      *ngIf="isVideoCatalogLoading && !mainVideo"
+      class="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      aria-live="polite">
+      <div class="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-teal-100 border-t-teal-600 dark:border-slate-700 dark:border-t-teal-300"></div>
+      <p class="mt-4 text-sm font-bold text-slate-700 dark:text-slate-200">
+        Loading video briefing…
+      </p>
+    </section>
+
+    <section
+      *ngIf="requestedVideoUnavailable && !mainVideo"
+      class="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-12 text-center shadow-sm dark:border-amber-300/20 dark:bg-amber-400/10"
+      role="alert">
+      <h2 class="text-lg font-extrabold text-amber-950 dark:text-amber-100">
+        This video briefing is not available yet
+      </h2>
+      <p class="mt-2 text-sm text-amber-800 dark:text-amber-200">
+        Please refresh the page in a moment. The requested link has been preserved.
+      </p>
+    </section>
+
     <section *ngIf="mainVideo" class="grid gap-7 xl:grid-cols-[minmax(0,1fr)_420px]">
       <div class="min-w-0">
         <div class="mb-3 min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-4">

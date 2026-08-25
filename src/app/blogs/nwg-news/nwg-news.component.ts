@@ -72,11 +72,13 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   uploadProgress: number | null = null;
   replaceUploadProgress: number | null = null;
 
-  mainVideo!: Video;
+  mainVideo: Video | null = null;
   previousVideos: Video[] = [];
   allVideos: Video[] = [];
   safeHeroEmbedUrl: SafeResourceUrl | null = null;
   defaultVideoId = '';
+  isVideoCatalogLoading = true;
+  requestedVideoUnavailable = false;
 
   videoForm = {
     title: '',
@@ -182,6 +184,9 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   private newsSub?: Subscription;
   private newsSettingsSub?: Subscription;
   private routeSub?: Subscription;
+  private hasLoadedAdminVideos = false;
+  private hasLoadedNewsSettings = false;
+  private requestedVideoWaitTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
     public auth: AuthService,
@@ -212,17 +217,33 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newsSub = this.afs
       .collection<Video>(this.newsCollection)
       .valueChanges({ idField: 'id' })
-      .subscribe((videos) => {
-        this.adminVideos = videos.map((video) => this.normalizeVideo(video));
-        this.refreshVideosFromSources();
+      .subscribe({
+        next: (videos) => {
+          this.adminVideos = videos.map((video) => this.normalizeVideo(video));
+          this.hasLoadedAdminVideos = true;
+          this.refreshVideosFromSources();
+        },
+        error: (error) => {
+          console.error('Could not load GSL news videos', error);
+          this.hasLoadedAdminVideos = true;
+          this.refreshVideosFromSources();
+        },
       });
 
     this.newsSettingsSub = this.afs
       .doc<NewsVideoSettings>(this.newsSettingsDocument)
       .valueChanges()
-      .subscribe((settings) => {
-        this.defaultVideoId = (settings?.defaultVideoId || '').trim();
-        this.refreshVideosFromSources();
+      .subscribe({
+        next: (settings) => {
+          this.defaultVideoId = (settings?.defaultVideoId || '').trim();
+          this.hasLoadedNewsSettings = true;
+          this.refreshVideosFromSources();
+        },
+        error: (error) => {
+          console.error('Could not load GSL news settings', error);
+          this.hasLoadedNewsSettings = true;
+          this.refreshVideosFromSources();
+        },
       });
 
     this.routeSub = this.route.queryParamMap.subscribe(() => {
@@ -241,6 +262,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.newsSub?.unsubscribe();
     this.newsSettingsSub?.unsubscribe();
     this.routeSub?.unsubscribe();
+    this.clearRequestedVideoWaitTimer();
   }
 
   selectVideo(vid: Video) {
@@ -565,15 +587,47 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
       ...this.curatedVideos.map((video) => this.normalizeVideo(video)),
     ]);
 
-    if (!this.allVideos.length) return;
+    const requestedId = (this.route.snapshot.queryParamMap.get('v') || '').trim();
 
-    const requestedId = this.route.snapshot.queryParamMap.get('v');
+    if (requestedId) {
+      const requestedVideo = this.allVideos.find((video) => video.id === requestedId);
+      if (requestedVideo) {
+        this.clearRequestedVideoWaitTimer();
+        this.isVideoCatalogLoading = false;
+        this.requestedVideoUnavailable = false;
+        this.setMainVideo(requestedVideo, false);
+        return;
+      }
+
+      // A `v` link is an explicit selection. Never start a default video while
+      // Firestore is still resolving that document; doing so causes the wrong
+      // briefing to play before the requested upload arrives from the server.
+      this.clearMainVideo();
+      this.isVideoCatalogLoading = true;
+      this.requestedVideoUnavailable = false;
+      if (this.hasLoadedAdminVideos) {
+        this.startRequestedVideoWaitTimer();
+      }
+      return;
+    }
+
+    this.clearRequestedVideoWaitTimer();
+    this.requestedVideoUnavailable = false;
+    if (!this.hasLoadedAdminVideos || !this.hasLoadedNewsSettings) {
+      this.isVideoCatalogLoading = true;
+      this.clearMainVideo();
+      return;
+    }
+
     const candidate =
-      this.allVideos.find((v) => v.id === requestedId) ||
-      this.allVideos.find((v) => v.id === this.defaultVideoId) ||
+      this.allVideos.find((video) => video.id === this.defaultVideoId) ||
       this.allVideos[0];
-
-    this.setMainVideo(candidate, false);
+    this.isVideoCatalogLoading = false;
+    if (candidate) {
+      this.setMainVideo(candidate, false);
+    } else {
+      this.clearMainVideo();
+    }
   }
 
   private sortVideos(videos: Video[]): Video[] {
@@ -588,18 +642,19 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private setMainVideo(vid: Video, updateUrl: boolean) {
-    this.mainVideo = this.normalizeVideo(vid);
-    this.safeHeroEmbedUrl = this.mainVideo.youtubeId
+    const mainVideo = this.normalizeVideo(vid);
+    this.mainVideo = mainVideo;
+    this.safeHeroEmbedUrl = mainVideo.youtubeId
       ? this.sanitizer.bypassSecurityTrustResourceUrl(
-          `https://www.youtube.com/embed/${this.mainVideo.youtubeId}?autoplay=1&rel=0&modestbranding=1`
+          `https://www.youtube.com/embed/${mainVideo.youtubeId}?autoplay=1&rel=0&modestbranding=1`
         )
       : null;
-    this.previousVideos = this.allVideos.filter((v) => v.id !== this.mainVideo.id);
+    this.previousVideos = this.allVideos.filter((v) => v.id !== mainVideo.id);
 
     if (updateUrl) {
       this.router.navigate([], {
         relativeTo: this.route,
-        queryParams: { v: this.mainVideo.id },
+        queryParams: { v: mainVideo.id },
         queryParamsHandling: 'merge',
         replaceUrl: true,
       });
@@ -607,6 +662,32 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     setTimeout(() => this.autoPlayWithAudio(), 0);
+  }
+
+  private clearMainVideo() {
+    const videoElement = this.heroVideo?.nativeElement;
+    videoElement?.pause();
+    this.mainVideo = null;
+    this.safeHeroEmbedUrl = null;
+    this.previousVideos = [...this.allVideos];
+    this.showUnmute = false;
+  }
+
+  private startRequestedVideoWaitTimer() {
+    if (this.requestedVideoWaitTimer) return;
+    this.requestedVideoWaitTimer = setTimeout(() => {
+      this.requestedVideoWaitTimer = undefined;
+      if (!this.mainVideo && this.route.snapshot.queryParamMap.get('v')) {
+        this.isVideoCatalogLoading = false;
+        this.requestedVideoUnavailable = true;
+      }
+    }, 8000);
+  }
+
+  private clearRequestedVideoWaitTimer() {
+    if (!this.requestedVideoWaitTimer) return;
+    clearTimeout(this.requestedVideoWaitTimer);
+    this.requestedVideoWaitTimer = undefined;
   }
 
   private normalizeVideo(video: Video): Video {

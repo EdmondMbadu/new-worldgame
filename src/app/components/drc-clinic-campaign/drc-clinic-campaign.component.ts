@@ -18,6 +18,7 @@ type ClinicStage =
   | 'ready';
 
 type Language = 'en' | 'fr';
+type ClinicFilter = 'all' | 'online' | 'ready';
 
 interface ClinicProfile {
   id: string;
@@ -36,6 +37,8 @@ interface ClinicProfile {
   nextMilestoneFr: string;
   capacity?: string;
   capacityFr?: string;
+  careAreas?: string[];
+  careAreasFr?: string[];
 }
 
 @Component({
@@ -47,6 +50,7 @@ interface ClinicProfile {
     './drc-clinic-campaign.evidence.css',
     './drc-clinic-campaign.power.css',
     './drc-clinic-campaign.donation.css',
+    './drc-clinic-campaign.clinics.css',
   ],
   standalone: false,
 })
@@ -92,6 +96,20 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
       nextMilestoneFr: 'Publier le rapport des résultats de la première année',
       capacity: '2.0 kW solar system',
       capacityFr: 'Système solaire de 2,0 kW',
+      careAreas: [
+        'Maternity',
+        'Laboratory',
+        'Inpatient rooms',
+        'Consultation',
+        'Operating room',
+      ],
+      careAreasFr: [
+        'Maternité',
+        'Laboratoire',
+        'Chambres d’hospitalisation',
+        'Consultation',
+        'Salle d’opération',
+      ],
     },
     {
       id: 'nganga-tsanga',
@@ -324,6 +342,8 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   selectedClinic = this.clinics[0];
   selectedPhotoIndex = 0;
+  clinicFilter: ClinicFilter = 'all';
+  showAllClinics = false;
   currentLanguage: Language = 'en';
   isVideoPlaying = false;
   isClinicPowerOn = true;
@@ -512,6 +532,19 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     this.selectedPhotoIndex = 0;
   }
 
+  setClinicFilter(filter: ClinicFilter): void {
+    this.clinicFilter = filter;
+    this.showAllClinics = false;
+    const clinics = this.filteredClinics;
+    if (!clinics.includes(this.selectedClinic) && clinics.length) {
+      this.selectClinic(clinics[0]);
+    }
+  }
+
+  toggleClinicDirectory(): void {
+    this.showAllClinics = !this.showAllClinics;
+  }
+
   selectClinicPhoto(index: number): void {
     this.selectedPhotoIndex = index;
   }
@@ -537,6 +570,67 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   get selectedClinicPhoto(): string {
     return this.selectedClinic.images[this.selectedPhotoIndex];
+  }
+
+  get onlineClinicCount(): number {
+    return this.clinics.filter((clinic) => clinic.stage === 'online').length;
+  }
+
+  get readyClinicCount(): number {
+    return this.clinics.filter((clinic) => clinic.stage === 'ready').length;
+  }
+
+  get filteredClinics(): ClinicProfile[] {
+    if (this.clinicFilter === 'all') return this.clinics;
+    return this.clinics.filter((clinic) => clinic.stage === this.clinicFilter);
+  }
+
+  get visibleClinics(): ClinicProfile[] {
+    return this.showAllClinics
+      ? this.filteredClinics
+      : this.filteredClinics.slice(0, 6);
+  }
+
+  get remainingClinicCount(): number {
+    return Math.max(0, this.filteredClinics.length - 6);
+  }
+
+  get selectedClinicCareAreas(): string[] {
+    return this.currentLanguage === 'fr'
+      ? this.selectedClinic.careAreasFr || []
+      : this.selectedClinic.careAreas || [];
+  }
+
+  get selectedClinicSupportingImages(): Array<{ src: string; index: number }> {
+    return this.selectedClinic.images
+      .map((src, index) => ({ src, index }))
+      .filter((image) => image.index !== this.selectedPhotoIndex)
+      .slice(0, 2);
+  }
+
+  clinicDirectoryStage(clinic: ClinicProfile): string {
+    if (clinic.stage === 'online') return this.tr('Online', 'En ligne');
+    if (clinic.stage === 'ready') return this.tr('Ready', 'Prêt');
+    return this.clinicStageLabel(clinic);
+  }
+
+  clinicPeopleServed(): string {
+    return this.tr('Verified count pending', 'Chiffre vérifié en attente');
+  }
+
+  clinicCareAreaCount(): string {
+    const count = this.selectedClinicCareAreas.length;
+    return count ? String(count) : this.tr('Pending', 'En attente');
+  }
+
+  clinicMediaLabel(index: number): string {
+    if (this.selectedClinic.id === 'ndingi' && index === 1) {
+      return this.tr('Installation', 'Installation');
+    }
+    if (this.selectedClinic.id === 'ndingi' && index === 2) {
+      return this.tr('Care after dark', 'Soins après la tombée de la nuit');
+    }
+    return `${this.tr('Field photo', 'Photo de terrain')} ${index + 1}`;
   }
 
   private async renderDrcMap(): Promise<void> {
