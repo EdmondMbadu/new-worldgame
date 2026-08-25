@@ -18,7 +18,6 @@ type ClinicStage =
   | 'ready';
 
 type Language = 'en' | 'fr';
-type ClinicFilter = 'all' | 'online' | 'ready';
 
 interface ClinicProfile {
   id: string;
@@ -342,7 +341,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   selectedClinic = this.clinics[0];
   selectedPhotoIndex = 0;
-  clinicFilter: ClinicFilter = 'all';
   showAllClinics = false;
   currentLanguage: Language = 'en';
   isVideoPlaying = false;
@@ -532,13 +530,20 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     this.selectedPhotoIndex = 0;
   }
 
-  setClinicFilter(filter: ClinicFilter): void {
-    this.clinicFilter = filter;
-    this.showAllClinics = false;
-    const clinics = this.filteredClinics;
-    if (!clinics.includes(this.selectedClinic) && clinics.length) {
-      this.selectClinic(clinics[0]);
-    }
+  showPreviousClinic(): void {
+    const index = this.clinics.findIndex(
+      (clinic) => clinic.id === this.selectedClinic.id
+    );
+    this.selectClinic(
+      this.clinics[(index - 1 + this.clinics.length) % this.clinics.length]
+    );
+  }
+
+  showNextClinic(): void {
+    const index = this.clinics.findIndex(
+      (clinic) => clinic.id === this.selectedClinic.id
+    );
+    this.selectClinic(this.clinics[(index + 1) % this.clinics.length]);
   }
 
   toggleClinicDirectory(): void {
@@ -580,21 +585,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     return this.clinics.filter((clinic) => clinic.stage === 'ready').length;
   }
 
-  get filteredClinics(): ClinicProfile[] {
-    if (this.clinicFilter === 'all') return this.clinics;
-    return this.clinics.filter((clinic) => clinic.stage === this.clinicFilter);
-  }
-
-  get visibleClinics(): ClinicProfile[] {
-    return this.showAllClinics
-      ? this.filteredClinics
-      : this.filteredClinics.slice(0, 6);
-  }
-
-  get remainingClinicCount(): number {
-    return Math.max(0, this.filteredClinics.length - 6);
-  }
-
   get selectedClinicCareAreas(): string[] {
     return this.currentLanguage === 'fr'
       ? this.selectedClinic.careAreasFr || []
@@ -616,6 +606,19 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   clinicPeopleServed(): string {
     return this.tr('Verified count pending', 'Chiffre vérifié en attente');
+  }
+
+  clinicEssentialDescription(clinic: ClinicProfile): string {
+    if (clinic.stage === 'online') {
+      return this.tr(
+        'Reliable solar power now supports five essential care areas.',
+        'Une énergie solaire fiable soutient désormais cinq services de soins essentiels.'
+      );
+    }
+    return this.tr(
+      'Visited and documented. Ready for final solar system sizing and installation scheduling.',
+      'Visité et documenté. Prêt pour le dimensionnement final du système solaire et la programmation de l’installation.'
+    );
   }
 
   clinicCareAreaCount(): string {
