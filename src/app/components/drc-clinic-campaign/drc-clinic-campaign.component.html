@@ -120,9 +120,6 @@
       </div>
     </div>
 
-    <a class="video-source-link" [href]="videoPage" target="_blank" rel="noopener noreferrer">
-      {{ tr('Open on GSL News', 'Ouvrir sur GSL News') }} <span aria-hidden="true">↗</span>
-    </a>
   </section>
 
   <section id="field-proof" class="chapter proof-section">
@@ -142,35 +139,27 @@
         </a>
       </div>
 
-      <div class="proof-viewer">
-        <div class="proof-viewer__image-wrap">
+      <div class="proof-viewer proof-viewer--comparison">
+        <figure class="proof-viewer__image-wrap proof-viewer__image-wrap--before">
           <img
-            [src]="currentProofImage.src"
-            [alt]="proofLabel + ' — ' + clinicName(clinics[0])"
+            [src]="proofImages.before.src"
+            [alt]="tr('Ndingi Clinic before solar power was installed', 'Clinique de Ndingi avant l’installation de l’énergie solaire')"
           />
-          <div class="proof-viewer__caption">
-            <span>{{ proofLabel }}</span>
-            <small>{{ proofNote }}</small>
-          </div>
-        </div>
-        <div class="proof-switcher" role="group" [attr.aria-label]="tr('Choose a clinic view', 'Choisir une vue du centre')">
-          <button
-            type="button"
-            [class.active]="proofView === 'before'"
-            [attr.aria-pressed]="proofView === 'before'"
-            (click)="setProofView('before')"
-          >
-            <span>01</span> {{ tr('Before solar power', 'Avant l’énergie solaire') }}
-          </button>
-          <button
-            type="button"
-            [class.active]="proofView === 'after'"
-            [attr.aria-pressed]="proofView === 'after'"
-            (click)="setProofView('after')"
-          >
-            <span>02</span> {{ tr('Work completed', 'Travaux réalisés') }}
-          </button>
-        </div>
+          <figcaption class="proof-viewer__caption">
+            <span><b>01</b> {{ tr('Before', 'Avant') }}</span>
+            <small>{{ tr('Before solar power', 'Avant l’énergie solaire') }}</small>
+          </figcaption>
+        </figure>
+        <figure class="proof-viewer__image-wrap proof-viewer__image-wrap--after">
+          <img
+            [src]="proofImages.after.src"
+            [alt]="tr('Ndingi Clinic after reliable solar power was installed', 'Clinique de Ndingi après l’installation d’une énergie solaire fiable')"
+          />
+          <figcaption class="proof-viewer__caption">
+            <span><b>02</b> {{ tr('After', 'Après') }}</span>
+            <small>{{ tr('Reliable solar power installed', 'Énergie solaire fiable installée') }}</small>
+          </figcaption>
+        </figure>
       </div>
     </div>
 

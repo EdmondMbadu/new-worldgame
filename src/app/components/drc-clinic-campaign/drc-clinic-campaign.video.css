@@ -182,8 +182,7 @@
 
 .video-play strong,
 .video-language,
-.video-plan-link,
-.video-source-link {
+.video-plan-link {
   font-family: "IBM Plex Mono", ui-monospace, monospace;
   font-size: 0.875rem;
   letter-spacing: 0.09em;
@@ -241,16 +240,6 @@
   font-size: 1.1rem;
   font-style: normal;
 }
-
-.video-source-link {
-  position: absolute;
-  right: clamp(20px, 4vw, 72px);
-  bottom: 30px;
-  color: #aeb7bc;
-  text-decoration: none;
-}
-
-.video-source-link:hover { color: var(--mission-amber); }
 
 @media (max-width: 760px) {
   .video-plan-link {

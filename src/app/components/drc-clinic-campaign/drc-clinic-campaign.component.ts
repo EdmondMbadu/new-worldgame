@@ -62,10 +62,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   readonly powerOffImage = 'assets/campaigns/drc-clinics/ndingi-achieved-power-off-v1.jpg';
   readonly powerOnImage = 'assets/campaigns/drc-clinics/ndingi-achieved-power-on-v1.jpg';
   readonly videoThumbnail = this.powerOnImage;
-  readonly videoPages: Record<Language, string> = {
-    en: 'https://globalsolutionlab.com/nwg-news?v=ux8SCCU6hH3WYwBznYrE',
-    fr: 'https://globalsolutionlab.com/nwg-news?v=DVsh6rzPOrOngXEOv8Z4',
-  };
   readonly videoSources: Record<Language, string> = {
     en: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/nwgNewsVideos%2Fvideos%2F2026%2Fux8SCCU6hH3WYwBznYrE-drc-health-clinis-v1.mp4?alt=media&token=1f5c043b-45e6-4bee-a0a4-0306ab96bef0',
     fr: 'https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/nwgNewsVideos%2Fvideos%2F2026%2FDVsh6rzPOrOngXEOv8Z4-drc-clinics-french.mp4?alt=media&token=f06bc90d-bf2f-46e1-b05c-284b514ef1d1',
@@ -329,7 +325,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   selectedPhotoIndex = 0;
   currentLanguage: Language = 'en';
   isVideoPlaying = false;
-  proofView: 'before' | 'after' = 'after';
   isClinicPowerOn = true;
   powerOffImageLoaded = false;
   powerOnImageLoaded = false;
@@ -430,22 +425,8 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     return this.videoSources[this.currentLanguage];
   }
 
-  get videoPage(): string {
-    return this.videoPages[this.currentLanguage];
-  }
-
   get isPowerSceneReady(): boolean {
     return this.powerOffImageLoaded && this.powerOnImageLoaded;
-  }
-
-  get proofLabel(): string {
-    const image = this.currentProofImage;
-    return this.currentLanguage === 'fr' ? image.labelFr : image.label;
-  }
-
-  get proofNote(): string {
-    const image = this.currentProofImage;
-    return this.currentLanguage === 'fr' ? image.noteFr : image.note;
   }
 
   ngAfterViewInit(): void {
@@ -481,13 +462,6 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     });
   }
 
-  setProofView(view: 'before' | 'after'): void {
-    this.proofView = view;
-  }
-
-  get currentProofImage() {
-    return this.proofImages[this.proofView];
-  }
 
   get selectedClinicPhoto(): string {
     return this.selectedClinic.images[this.selectedPhotoIndex];

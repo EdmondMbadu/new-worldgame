@@ -474,13 +474,22 @@ button:focus-visible {
 
 .proof-viewer {
   min-width: 0;
+  align-self: start;
+}
+
+.proof-viewer--comparison {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  background: var(--mission-line);
 }
 
 .proof-viewer__image-wrap {
   position: relative;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 4 / 3;
+  margin: 0;
   overflow: hidden;
-  border: 1px solid var(--mission-line);
   background: var(--mission-panel);
 }
 
@@ -488,6 +497,10 @@ button:focus-visible {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.proof-viewer__image-wrap--before img {
+  object-position: center 37%;
 }
 
 .proof-viewer__caption {
@@ -514,47 +527,10 @@ button:focus-visible {
   font-size: inherit;
 }
 
-.proof-switcher {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  border: 1px solid var(--mission-line);
-  border-top: 0;
-}
-
-.proof-switcher button {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 58px;
-  padding: 0 16px;
-  border: 0;
-  border-right: 1px solid var(--mission-line);
-  background: transparent;
-  color: #aab4ba;
-  cursor: pointer;
-  font-family: "IBM Plex Mono", ui-monospace, monospace;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
-  text-align: left;
-  text-transform: uppercase;
-}
-
-.proof-switcher button:last-child {
-  border-right: 0;
-}
-
-.proof-switcher button span {
-  color: #66727a;
-}
-
-.proof-switcher button:hover,
-.proof-switcher button.active {
-  background: rgba(246, 183, 60, 0.08);
-  color: var(--mission-white);
-}
-
-.proof-switcher button.active span {
+.proof-viewer__caption b {
+  margin-right: 8px;
   color: var(--mission-amber);
+  font-weight: 500;
 }
 
 .field-timeline {
@@ -1329,12 +1305,6 @@ button:focus-visible {
     flex-direction: column;
   }
 
-  .video-source-link {
-    right: 20px;
-    bottom: 28px;
-    left: 20px;
-  }
-
   .video-opening--playing {
     min-height: 100svh;
     padding: 70px 0 0;
@@ -1404,17 +1374,8 @@ button:focus-visible {
     font-size: clamp(3.8rem, 18vw, 5.5rem);
   }
 
-  .proof-viewer__image-wrap {
-    aspect-ratio: 3 / 2;
-  }
-
-  .proof-switcher {
+  .proof-viewer--comparison {
     grid-template-columns: 1fr;
-  }
-
-  .proof-switcher button {
-    border-right: 0;
-    border-bottom: 1px solid var(--mission-line);
   }
 
   .field-timeline {
