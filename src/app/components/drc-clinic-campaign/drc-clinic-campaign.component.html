@@ -42,9 +42,8 @@
       </div>
       <a
         class="mission-button mission-button--small"
-        [href]="donationUrl"
-        target="_blank"
-        rel="noopener noreferrer"
+        href="#donate"
+        (click)="scrollToSection('donate', $event)"
       >
         {{ tr('Donate', 'Faire un don') }} <span aria-hidden="true">→</span>
       </a>
@@ -397,9 +396,8 @@
       <div class="ledger-actions">
         <a
           class="mission-button"
-          [href]="donationUrl"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="#donate"
+          (click)="scrollToSection('donate', $event)"
         >
           {{ tr('Donate to power clinics', 'Faire un don pour électrifier les centres') }} <span aria-hidden="true">→</span>
         </a>
@@ -407,6 +405,150 @@
           {{ tr('Sponsor a complete clinic', 'Financer un centre complet') }} <span aria-hidden="true">↗</span>
         </a>
         <small>{{ tr('For each clinic, we will publish the work completed and a progress report.', 'Pour chaque centre, nous publierons les travaux réalisés et un rapport d’avancement.') }}</small>
+      </div>
+    </div>
+  </section>
+
+  <section id="donate" class="donation-section" aria-labelledby="donation-title">
+    <div class="chapter-label"><span>/06</span> {{ tr('Power the next clinic', 'Électrifier le prochain centre') }}</div>
+
+    <div class="donation-layout">
+      <div class="donation-story">
+        <p class="eyebrow">{{ tr('Your gift becomes reliable power', 'Votre don devient une énergie fiable') }}</p>
+        <h2 id="donation-title">
+          {{ tr('Choose the amount.', 'Choisissez le montant.') }}<br />
+          {{ tr('Help keep care running.', 'Aidez les soins à continuer.') }}
+        </h2>
+        <p class="donation-story__intro">
+          {{ tr(
+            'Every contribution moves the next clinic closer to reliable solar power—after dark, during emergencies, and every day.',
+            'Chaque contribution rapproche le prochain centre d’une énergie solaire fiable — la nuit, en situation d’urgence et chaque jour.'
+          ) }}
+        </p>
+
+        <div class="donation-impact" [attr.aria-label]="tr('Examples of donation impact', 'Exemples d’impact des dons')">
+          <div>
+            <span class="donation-impact__icon donation-impact__icon--panel" aria-hidden="true"><i></i></span>
+            <strong>$50</strong>
+            <span>//</span>
+            <small>{{ tr('Support the next installation', 'Soutenir la prochaine installation') }}</small>
+          </div>
+          <div>
+            <span class="donation-impact__icon donation-impact__icon--equipment" aria-hidden="true"><i></i></span>
+            <strong>$500</strong>
+            <span>//</span>
+            <small>{{ tr('Move equipment on site', 'Acheminer l’équipement sur place') }}</small>
+          </div>
+          <div>
+            <span class="donation-impact__icon donation-impact__icon--clinic" aria-hidden="true"><i></i></span>
+            <strong>$15.5K</strong>
+            <span>//</span>
+            <small>{{ tr('Approx. power for one clinic', 'Énergie estimée pour un centre') }}</small>
+          </div>
+        </div>
+
+        <svg class="donation-energy-line" viewBox="0 0 720 150" aria-hidden="true" focusable="false">
+          <path class="donation-energy-line__ground" d="M0 128 C80 112 128 134 190 116 S310 132 380 112 S510 130 720 102" />
+          <path class="donation-energy-line__power" d="M62 103 C160 102 178 121 252 97 S390 101 472 74 S586 84 668 48" />
+          <g class="donation-energy-line__nodes">
+            <circle cx="62" cy="103" r="5" />
+            <circle cx="252" cy="97" r="5" />
+            <circle cx="472" cy="74" r="5" />
+            <circle cx="668" cy="48" r="5" />
+          </g>
+          <g class="donation-energy-line__clinic">
+            <path d="M620 55 V112 H704 V55 L662 30 Z" />
+            <path d="M651 112 V84 H674 V112 M653 57 H671 M662 48 V67 M632 73 H645 M680 73 H693" />
+          </g>
+          <g class="donation-energy-line__panel">
+            <path d="M20 77 H112 L100 112 H8 Z M38 77 L31 112 M65 77 L62 112 M91 77 L92 112 M15 94 H106 M59 112 V130 M39 130 H79" />
+          </g>
+        </svg>
+      </div>
+
+      <div class="donation-console">
+        <div class="donation-console__header">
+          <strong>{{ tr('Select your contribution', 'Choisissez votre contribution') }}</strong>
+          <span><i aria-hidden="true"></i>{{ tr('Secure donation', 'Don sécurisé') }}</span>
+        </div>
+
+        <div class="donation-presets" role="group" [attr.aria-label]="tr('Suggested donation amounts', 'Montants de don suggérés')">
+          <button
+            *ngFor="let amount of donationPresets"
+            type="button"
+            [class.active]="isDonationInputValid && donationAmount === amount"
+            [attr.aria-pressed]="isDonationInputValid && donationAmount === amount"
+            (click)="selectDonationAmount(amount)"
+          >
+            ${{ amount }}
+          </button>
+        </div>
+
+        <output class="donation-console__amount" for="donation-slider donation-custom-amount">
+          {{ formattedDonationAmount }}
+        </output>
+
+        <div class="donation-slider-wrap">
+          <span>{{ tr('Increments of $50', 'Par tranches de 50 $') }}</span>
+          <input
+            id="donation-slider"
+            class="donation-slider"
+            type="range"
+            [min]="donationMinimum"
+            [max]="donationSliderMaximum"
+            [step]="donationStep"
+            [value]="donationSliderValue"
+            [style.--donation-progress]="donationSliderProgress"
+            [attr.aria-label]="tr('Donation amount slider', 'Curseur du montant du don')"
+            [attr.aria-valuetext]="formattedDonationAmount"
+            (input)="updateDonationFromSlider($event)"
+          />
+          <div class="donation-slider__labels" aria-hidden="true">
+            <span>$50</span><span>$500</span><span>$5,000+</span>
+          </div>
+        </div>
+
+        <div class="donation-custom">
+          <label for="donation-custom-amount">{{ tr('Or enter an amount', 'Ou saisissez un montant') }}</label>
+          <div class="donation-custom__field" [class.donation-custom__field--invalid]="!isDonationInputValid">
+            <span aria-hidden="true">$</span>
+            <input
+              id="donation-custom-amount"
+              type="number"
+              inputmode="numeric"
+              [min]="donationMinimum"
+              [max]="donationInputMaximum"
+              step="1"
+              [value]="donationAmountInput"
+              [attr.aria-invalid]="!isDonationInputValid"
+              [attr.aria-describedby]="!isDonationInputValid ? 'donation-amount-error' : 'donation-amount-note'"
+              (input)="updateDonationFromInput($event)"
+            />
+            <strong>USD</strong>
+          </div>
+          <small *ngIf="!isDonationInputValid" id="donation-amount-error" class="donation-custom__error" role="alert">
+            {{ tr('Enter a whole-dollar amount from $50 to $10,000.', 'Saisissez un montant entier compris entre 50 $ et 10 000 $.') }}
+          </small>
+        </div>
+
+        <a
+          class="donation-submit"
+          [class.donation-submit--disabled]="!isDonationInputValid"
+          [attr.href]="isDonationInputValid ? donationCheckoutUrl : null"
+          [attr.aria-disabled]="!isDonationInputValid"
+          target="_blank"
+          rel="noopener noreferrer"
+          (click)="guardDonationCheckout($event)"
+        >
+          <span>{{ tr('Continue to secure donation', 'Continuer vers le don sécurisé') }}</span>
+          <strong>{{ formattedDonationAmount }}</strong>
+          <i aria-hidden="true">→</i>
+        </a>
+
+        <div id="donation-amount-note" class="donation-trust">
+          <p>{{ tr('Review your gift on Stripe before payment.', 'Vérifiez votre don sur Stripe avant le paiement.') }}</p>
+          <span><i aria-hidden="true"></i>{{ tr('EarthGame is a 501(c)(3) nonprofit', 'EarthGame est une organisation 501(c)(3)') }}</span>
+        </div>
       </div>
     </div>
   </section>

@@ -46,6 +46,7 @@ interface ClinicProfile {
     './drc-clinic-campaign.video.css',
     './drc-clinic-campaign.evidence.css',
     './drc-clinic-campaign.power.css',
+    './drc-clinic-campaign.donation.css',
   ],
   standalone: false,
 })
@@ -329,6 +330,13 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   powerOffImageLoaded = false;
   powerOnImageLoaded = false;
   powerImageError = false;
+  readonly donationPresets = [50, 100, 250, 500];
+  readonly donationMinimum = 50;
+  readonly donationSliderMaximum = 5000;
+  readonly donationInputMaximum = 10000;
+  readonly donationStep = 50;
+  donationAmount = 250;
+  donationAmountInput = '250';
 
   readonly proofImages = {
     before: {
@@ -391,6 +399,31 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     this.isClinicPowerOn = !this.isClinicPowerOn;
   }
 
+  selectDonationAmount(amount: number): void {
+    this.donationAmount = amount;
+    this.donationAmountInput = String(amount);
+  }
+
+  updateDonationFromSlider(event: Event): void {
+    const amount = Number((event.target as HTMLInputElement).value);
+    this.selectDonationAmount(amount);
+  }
+
+  updateDonationFromInput(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.donationAmountInput = value;
+
+    if (this.isDonationInputValid) {
+      this.donationAmount = Number(value);
+    }
+  }
+
+  guardDonationCheckout(event: Event): void {
+    if (!this.isDonationInputValid) {
+      event.preventDefault();
+    }
+  }
+
   tr(english: string, french: string): string {
     return this.currentLanguage === 'fr' ? french : english;
   }
@@ -427,6 +460,45 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   get isPowerSceneReady(): boolean {
     return this.powerOffImageLoaded && this.powerOnImageLoaded;
+  }
+
+  get isDonationInputValid(): boolean {
+    const amount = Number(this.donationAmountInput);
+    return (
+      this.donationAmountInput.trim() !== '' &&
+      Number.isInteger(amount) &&
+      amount >= this.donationMinimum &&
+      amount <= this.donationInputMaximum
+    );
+  }
+
+  get formattedDonationAmount(): string {
+    if (!this.isDonationInputValid) return '$—';
+    return `$${this.donationAmount.toLocaleString('en-US')}`;
+  }
+
+  get donationSliderValue(): number {
+    return Math.min(
+      Math.max(this.donationAmount, this.donationMinimum),
+      this.donationSliderMaximum
+    );
+  }
+
+  get donationSliderProgress(): string {
+    const range = this.donationSliderMaximum - this.donationMinimum;
+    return `${((this.donationSliderValue - this.donationMinimum) / range) * 100}%`;
+  }
+
+  get donationCheckoutUrl(): string {
+    const separator = this.donationUrl.includes('?') ? '&' : '?';
+    const params = new URLSearchParams({
+      locale: this.currentLanguage,
+      utm_source: 'newworld-game',
+      utm_medium: 'campaign-page',
+      utm_campaign: 'drc-clinics',
+      utm_content: `amount-${this.donationAmount}`,
+    });
+    return `${this.donationUrl}${separator}${params.toString()}`;
   }
 
   ngAfterViewInit(): void {
