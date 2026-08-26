@@ -39,7 +39,7 @@
   max-width: 790px;
   margin: 18px 0 0;
   font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
-  font-size: clamp(4rem, 5.3vw, 6.6rem);
+  font-size: var(--campaign-major-title-size);
   font-stretch: condensed;
   font-weight: 500;
   letter-spacing: -0.05em;
@@ -494,7 +494,7 @@
   }
 
   .donation-story h2 {
-    font-size: clamp(4rem, 18vw, 5.5rem);
+    font-size: var(--campaign-major-title-size);
   }
 
   .donation-impact > div {

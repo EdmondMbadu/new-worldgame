@@ -36,7 +36,7 @@
   max-width: 920px;
   margin: 0;
   color: #e7dfd3;
-  font-size: clamp(3.35rem, 5.8vw, 6.8rem);
+  font-size: var(--campaign-major-title-size);
   line-height: 0.9;
   letter-spacing: -0.035em;
 }
@@ -488,7 +488,7 @@
 }
 
 @media (max-width: 620px) {
-  .clinic-explorer__heading h2 { font-size: clamp(3.2rem, 16vw, 5rem); }
+  .clinic-explorer__heading h2 { font-size: var(--campaign-major-title-size); }
   .clinic-explorer__summary { grid-template-columns: repeat(3, 1fr); }
   .clinic-explorer__summary > div { min-height: 59px; padding: 0 11px; }
   .clinic-explorer__summary strong { font-size: 1.7rem; }

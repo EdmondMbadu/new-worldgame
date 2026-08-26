@@ -132,7 +132,7 @@
   max-width: 900px;
   margin: 18px 0 0;
   font-family: "Arial Narrow", "Roboto Condensed", Impact, sans-serif;
-  font-size: clamp(4.6rem, 8.4vw, 9rem);
+  font-size: var(--campaign-major-title-size);
   font-stretch: condensed;
   font-weight: 500;
   letter-spacing: -0.055em;

@@ -20,6 +20,7 @@
   --mission-blue: #3f8fb7;
   --mission-amber: #f6b73c;
   --mission-online: #2f9b73;
+  --campaign-major-title-size: clamp(3.015rem, 5.22vw, 6.12rem);
   min-width: 0;
   overflow: hidden;
   background:
@@ -292,7 +293,7 @@ button:focus-visible {
 }
 
 .hero h1 {
-  font-size: clamp(5rem, 10vw, 10.5rem);
+  font-size: var(--campaign-major-title-size);
 }
 
 .hero__subhead {
@@ -448,7 +449,7 @@ button:focus-visible {
 .section-intro h2,
 .system-layout h2,
 .closing-section h2 {
-  font-size: clamp(4rem, 7.4vw, 8rem);
+  font-size: var(--campaign-major-title-size);
 }
 
 .proof-heading > p:not(.eyebrow),
@@ -571,7 +572,7 @@ button:focus-visible {
 
 .geography-copy h2 {
   margin-top: 14px;
-  font-size: clamp(4rem, 7vw, 7.5rem);
+  font-size: var(--campaign-major-title-size);
 }
 
 .geography-copy > p:not(.eyebrow) {
@@ -1236,6 +1237,7 @@ button:focus-visible {
 
 @media (max-width: 760px) {
   .campaign-shell {
+    --campaign-major-title-size: clamp(2.88rem, 14.4vw, 4.5rem);
     background-size: 40px 100%;
   }
 
@@ -1297,7 +1299,7 @@ button:focus-visible {
   }
 
   .video-opening__content h1 {
-    font-size: clamp(4rem, 19vw, 6rem);
+    font-size: var(--campaign-major-title-size);
   }
 
   .video-opening__actions {
@@ -1331,7 +1333,7 @@ button:focus-visible {
   }
 
   .hero h1 {
-    font-size: clamp(4.7rem, 22vw, 7rem);
+    font-size: var(--campaign-major-title-size);
   }
 
   .hero__actions {
@@ -1371,7 +1373,7 @@ button:focus-visible {
   .geography-copy h2,
   .system-layout h2,
   .closing-section h2 {
-    font-size: clamp(3.8rem, 18vw, 5.5rem);
+    font-size: var(--campaign-major-title-size);
   }
 
   .proof-viewer--comparison {
