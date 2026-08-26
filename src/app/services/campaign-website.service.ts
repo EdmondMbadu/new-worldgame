@@ -3,6 +3,23 @@ import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { firstValueFrom, take } from 'rxjs';
 
 export type CampaignWebsiteStatus = 'draft' | 'published' | 'unpublished';
+export type CampaignWebsiteGoal = 'awareness' | 'partners' | 'funding' | 'volunteers';
+
+export interface CampaignWebsiteMetrics {
+  views: number;
+  shares: number;
+  supporters: number;
+  connections: number;
+}
+
+export interface CampaignConnection {
+  id: string;
+  name: string;
+  email: string;
+  reason: string;
+  message: string;
+  createdAtMs: number;
+}
 
 export interface CampaignWebsiteState {
   campaignId: string;
@@ -18,6 +35,15 @@ export interface CampaignWebsiteState {
   canEdit: boolean;
   canPublish: boolean;
   liveUrl: string;
+  sourceType: 'pasted' | 'uploaded' | 'generated';
+  generationBrief: string;
+  generationGoal: CampaignWebsiteGoal;
+  generationTone: string;
+  generationFocusAreas: string[];
+  sourceWarning: string;
+  strategyReviewAvailable: boolean;
+  metrics: CampaignWebsiteMetrics;
+  recentConnections: CampaignConnection[];
   updatedAtMs: number;
   publishedAtMs: number;
 }
@@ -38,6 +64,8 @@ export interface PublishedCampaignResult {
   description?: string;
   contentHash?: string;
   redirectTo?: string;
+  supportCount?: number;
+  imageUrl?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -67,6 +95,23 @@ export class CampaignWebsiteService {
     return this.call<CampaignDraftResult>('saveCampaignDraft', input);
   }
 
+  generateDraft(input: {
+    solutionId: string;
+    title: string;
+    description: string;
+    slug: string;
+    brief: string;
+    goal: CampaignWebsiteGoal;
+    tone: string;
+    focusAreas: string[];
+  }): Promise<CampaignDraftResult & {
+    title: string;
+    description: string;
+    sourceWarning: string;
+  }> {
+    return this.call('generateCampaignDraft', input);
+  }
+
   publish(solutionId: string, slug: string): Promise<{
     success: boolean;
     status: CampaignWebsiteStatus;
@@ -86,6 +131,24 @@ export class CampaignWebsiteService {
 
   getPublished(slug: string): Promise<PublishedCampaignResult> {
     return this.call<PublishedCampaignResult>('getPublishedCampaignWebsite', { slug });
+  }
+
+  engage(input: {
+    slug: string;
+    action: 'view' | 'support' | 'share' | 'connect';
+    visitorId: string;
+    channel?: string;
+    name?: string;
+    email?: string;
+    reason?: string;
+    message?: string;
+  }): Promise<{
+    success: boolean;
+    recorded?: boolean;
+    supported?: boolean;
+    supportCount?: number;
+  }> {
+    return this.call('engageCampaignWebsite', input);
   }
 
   private call<T>(name: string, data: unknown): Promise<T> {

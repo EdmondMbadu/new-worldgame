@@ -2,6 +2,9 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import {
+  CampaignConnection,
+  CampaignWebsiteGoal,
+  CampaignWebsiteMetrics,
   CampaignWebsiteService,
   CampaignWebsiteState,
 } from '../services/campaign-website.service';
@@ -13,17 +16,41 @@ import {
   standalone: false,
 })
 export class CampaignStudioComponent implements OnInit, OnDestroy {
+  editorMode: 'ai' | 'html' = 'ai';
   solutionId = '';
   solutionTitle = '';
   title = '';
   description = '';
+  generationBrief = '';
+  websiteGoal: CampaignWebsiteGoal = 'awareness';
+  websiteTone = 'Hopeful and credible';
+  readonly focusOptions = [
+    'The challenge',
+    'How it works',
+    'Community impact',
+    'Evidence & results',
+    'Ways to help',
+  ];
+  selectedFocusAreas = ['The challenge', 'How it works', 'Community impact'];
   slug = '';
   html = '';
   status: 'draft' | 'published' | 'unpublished' = 'draft';
   hasUnpublishedChanges = false;
   canPublish = false;
   liveUrl = '';
+  sourceWarning = '';
+  strategyReviewAvailable = false;
+  metrics: CampaignWebsiteMetrics = {
+    views: 0,
+    shares: 0,
+    supporters: 0,
+    connections: 0,
+  };
+  recentConnections: CampaignConnection[] = [];
+  previewDevice: 'desktop' | 'tablet' | 'mobile' = 'desktop';
+  detailsOpen = false;
   loading = true;
+  generating = false;
   saving = false;
   publishing = false;
   unpublishing = false;
@@ -36,7 +63,7 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   sourceBytes = 0;
   sanitizedBytes = 0;
   private previewObjectUrl = '';
-  private sourceType: 'pasted' | 'uploaded' | 'generated' = 'pasted';
+  sourceType: 'pasted' | 'uploaded' | 'generated' = 'pasted';
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -68,6 +95,68 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
 
   get canSave(): boolean {
     return !!this.html.trim() && !!this.slug.trim() && !!this.title.trim() && !this.saving;
+  }
+
+  get canGenerate(): boolean {
+    return !!this.generationBrief.trim() && !!this.slug.trim() && !!this.title.trim() && !this.generating;
+  }
+
+  get briefCharacters(): number {
+    return this.generationBrief.length;
+  }
+
+  get campaignEmailUrl(): string {
+    const url = this.liveUrl || `${window.location.origin}${this.campaignPath}`;
+    const body = `${this.description ? `${this.description}\n\n` : ''}${url}`;
+    return `mailto:?subject=${encodeURIComponent(this.title)}&body=${encodeURIComponent(body)}`;
+  }
+
+  selectEditorMode(mode: 'ai' | 'html'): void {
+    this.editorMode = mode;
+    this.clearMessages();
+  }
+
+  toggleFocusArea(area: string): void {
+    this.selectedFocusAreas = this.selectedFocusAreas.includes(area)
+      ? this.selectedFocusAreas.filter((item) => item !== area)
+      : [...this.selectedFocusAreas, area];
+  }
+
+  isFocusSelected(area: string): boolean {
+    return this.selectedFocusAreas.includes(area);
+  }
+
+  async requestGeneration(): Promise<void> {
+    if (!this.canGenerate) return;
+    this.generating = true;
+    this.clearMessages();
+    try {
+      const result = await this.campaignWebsites.generateDraft({
+        solutionId: this.solutionId,
+        title: this.title,
+        description: this.description,
+        slug: this.slug,
+        brief: this.generationBrief,
+        goal: this.websiteGoal,
+        tone: this.websiteTone,
+        focusAreas: this.selectedFocusAreas,
+      });
+      this.slug = result.slug;
+      this.title = result.title || this.title;
+      this.description = result.description || this.description;
+      this.html = result.sanitizedHtml;
+      this.sourceType = 'generated';
+      this.sourceBytes = result.sourceBytes;
+      this.sanitizedBytes = result.sanitizedBytes;
+      this.sourceWarning = result.sourceWarning || this.sourceWarning;
+      this.hasUnpublishedChanges = true;
+      this.setPreview(result.sanitizedHtml);
+      this.successMessage = 'Your grounded campaign draft is ready to review.';
+    } catch (error: any) {
+      this.errorMessage = this.errorText(error, 'The website could not be generated.');
+    } finally {
+      this.generating = false;
+    }
   }
 
   async checkSlug(): Promise<void> {
@@ -173,6 +262,23 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
     window.open(this.previewObjectUrl, '_blank', 'noopener,noreferrer');
   }
 
+  async shareLiveSite(): Promise<void> {
+    const url = this.liveUrl || `${window.location.origin}${this.campaignPath}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: this.title, text: this.description, url });
+        return;
+      } catch (error: any) {
+        if (error?.name === 'AbortError') return;
+      }
+    }
+    await this.copyUrl();
+  }
+
+  setPreviewDevice(device: 'desktop' | 'tablet' | 'mobile'): void {
+    this.previewDevice = device;
+  }
+
   onHtmlChanged(): void {
     this.sourceType = 'pasted';
     this.hasUnpublishedChanges = true;
@@ -204,6 +310,7 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
     }
     this.html = await file.text();
     this.sourceType = 'uploaded';
+    this.editorMode = 'html';
     this.hasUnpublishedChanges = true;
     this.successMessage = `${file.name} is ready to save and preview.`;
     input.value = '';
@@ -225,8 +332,24 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
     this.solutionTitle = state.solutionTitle;
     this.title = state.title || state.solutionTitle;
     this.description = state.description || '';
+    this.generationBrief = this.defaultGenerationBrief(
+      state.solutionTitle,
+      state.description
+    );
+    if (state.generationBrief) this.generationBrief = state.generationBrief;
     this.slug = state.slug || this.slugify(state.solutionTitle);
     this.html = state.html || '';
+    this.sourceType = state.sourceType || (this.html.trim() ? 'pasted' : 'generated');
+    this.editorMode = this.sourceType === 'generated' || !this.html.trim() ? 'ai' : 'html';
+    this.websiteGoal = state.generationGoal || 'awareness';
+    this.websiteTone = state.generationTone || 'Hopeful and credible';
+    this.selectedFocusAreas = state.generationFocusAreas?.length
+      ? state.generationFocusAreas
+      : this.selectedFocusAreas;
+    this.sourceWarning = state.sourceWarning || '';
+    this.strategyReviewAvailable = state.strategyReviewAvailable;
+    this.metrics = state.metrics || this.metrics;
+    this.recentConnections = state.recentConnections || [];
     this.status = state.status || 'draft';
     this.hasUnpublishedChanges = state.hasUnpublishedChanges;
     this.canPublish = state.canPublish;
@@ -267,6 +390,14 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '')
       .slice(0, 60) || 'solution-campaign';
+  }
+
+  private defaultGenerationBrief(solutionTitle: string, summary: string): string {
+    const solution = solutionTitle || 'this solution';
+    const context = summary?.trim()
+      ? ` Use this existing summary as context: ${summary.trim()}`
+      : '';
+    return `Create a compelling campaign website for ${solution}. Explain the problem in clear, human language, show how the solution works, and make its potential impact feel concrete. Use a hopeful, credible tone with a strong opening message, a concise story, proof or outcomes where available, and a clear call to action for people who want to support or share the work.${context}`;
   }
 
   private clearMessages(): void {

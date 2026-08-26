@@ -5,7 +5,7 @@
     </a>
     <div class="campaign-studio__brand">Global Solutions Lab</div>
     <div class="campaign-studio__status" [attr.data-status]="status">
-      {{ status }}<span *ngIf="hasUnpublishedChanges"> · draft changes</span>
+      {{ status }}<span *ngIf="hasUnpublishedChanges"> · changes</span>
     </div>
   </header>
 
@@ -17,12 +17,9 @@
   <div *ngIf="!loading" class="campaign-studio__shell">
     <section class="campaign-studio__intro">
       <div>
-        <p class="campaign-studio__eyebrow">Solution website</p>
-        <h1>Make your solution public.</h1>
-        <p>
-          Paste a complete static HTML page, choose a memorable address, preview it safely,
-          and publish without adding the page to the main application bundle.
-        </p>
+        <p class="campaign-studio__eyebrow">Website studio</p>
+        <h1>Build a campaign website for your solution.</h1>
+        <p>Turn the work you have already completed into a clear, campaign-ready website.</p>
       </div>
       <div class="campaign-studio__solution">
         <span>Active solution</span>
@@ -31,142 +28,230 @@
     </section>
 
     <div *ngIf="successMessage" class="campaign-studio__notice campaign-studio__notice--success" role="status">
-      {{ successMessage }}
+      <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>{{ successMessage }}
     </div>
     <div *ngIf="errorMessage" class="campaign-studio__notice campaign-studio__notice--error" role="alert">
-      {{ errorMessage }}
+      <span class="material-symbols-outlined" aria-hidden="true">error</span>{{ errorMessage }}
+    </div>
+    <div *ngIf="sourceWarning" class="campaign-studio__notice campaign-studio__notice--warning" role="status">
+      <span class="material-symbols-outlined" aria-hidden="true">sync_problem</span>{{ sourceWarning }}
     </div>
 
-    <section class="campaign-studio__workspace">
-      <div class="campaign-studio__editor">
-        <div class="campaign-studio__step">
-          <span>01</span>
-          <div><strong>Content</strong><small>Paste or upload a single HTML file</small></div>
-        </div>
-
-        <label class="campaign-studio__field">
-          <span>Website title</span>
-          <input [(ngModel)]="title" (ngModelChange)="onMetadataChanged()" maxlength="120" placeholder="Name your campaign website" />
-        </label>
-
-        <label class="campaign-studio__field">
-          <span>Search and sharing description</span>
-          <textarea [(ngModel)]="description" (ngModelChange)="onMetadataChanged()" maxlength="320" rows="3" placeholder="A concise description of the solution and its purpose"></textarea>
-        </label>
-
-        <div class="campaign-studio__html-label">
-          <div>
-            <strong>HTML</strong>
-            <small>{{ htmlKilobytes }} KB · static HTML only · use embedded or HTTPS-hosted images</small>
-          </div>
-          <label class="campaign-studio__upload">
-            Upload .html
-            <input type="file" accept=".html,text/html" (change)="onFileSelected($event)" />
-          </label>
-        </div>
-        <textarea
-          class="campaign-studio__code"
-          [(ngModel)]="html"
-          (ngModelChange)="onHtmlChanged()"
-          spellcheck="false"
-          placeholder="<!doctype html>&#10;<html>…</html>"
-          aria-label="Campaign HTML"
-        ></textarea>
-
-        <div class="campaign-studio__step campaign-studio__step--address">
-          <span>02</span>
-          <div><strong>Address</strong><small>Choose the public campaign URL</small></div>
-        </div>
-
-        <div class="campaign-studio__slug">
-          <span>/campaigns/</span>
-          <input
-            [(ngModel)]="slug"
-            (ngModelChange)="onSlugChanged()"
-            (blur)="checkSlug()"
-            maxlength="60"
-            aria-label="Campaign URL"
-            placeholder="your-url"
-          />
-          <button type="button" (click)="checkSlug()" [disabled]="checkingSlug || !slug">
-            {{ checkingSlug ? 'Checking…' : 'Check' }}
-          </button>
-        </div>
-        <p
-          *ngIf="slugFeedback"
-          class="campaign-studio__slug-feedback"
-          [class.campaign-studio__slug-feedback--available]="slugAvailable"
-        >{{ slugFeedback }}</p>
-
-        <div class="campaign-studio__actions">
-          <button
-            type="button"
-            class="campaign-studio__button campaign-studio__button--secondary"
-            (click)="saveDraft()"
-            [disabled]="!canSave || publishing"
-          >{{ saving ? 'Saving…' : 'Save & preview' }}</button>
-          <button
-            type="button"
-            class="campaign-studio__button campaign-studio__button--primary"
-            (click)="publish()"
-            [disabled]="!canPublish || !canSave || publishing"
-          >{{ publishing ? 'Publishing…' : status === 'published' ? 'Publish update' : 'Publish website' }}</button>
-        </div>
-        <p *ngIf="!canPublish" class="campaign-studio__permission">
-          Team members can prepare drafts. The solution owner or an administrator publishes them.
-        </p>
+    <section class="campaign-studio__workspace-card">
+      <div class="campaign-studio__mode-tabs" role="group" aria-label="Website source">
+        <button
+          type="button"
+          [class.campaign-studio__mode-tab--active]="editorMode === 'ai'"
+          [attr.aria-pressed]="editorMode === 'ai'"
+          (click)="selectEditorMode('ai')"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+          Generate with AI <em>Recommended</em>
+        </button>
+        <button
+          type="button"
+          [class.campaign-studio__mode-tab--active]="editorMode === 'html'"
+          [attr.aria-pressed]="editorMode === 'html'"
+          (click)="selectEditorMode('html')"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">code</span>
+          Use your own HTML
+        </button>
       </div>
 
-      <aside class="campaign-studio__preview">
-        <div class="campaign-studio__preview-header">
-          <div>
-            <span>03</span>
-            <strong>Safe preview</strong>
+      <div class="campaign-studio__workspace">
+        <section class="campaign-studio__editor" aria-label="Website editor">
+          <div class="campaign-studio__panel-heading">
+            <div>
+              <p>{{ editorMode === 'ai' ? 'Create with AI' : 'Custom website' }}</p>
+              <h2>{{ editorMode === 'ai' ? 'Shape the story' : 'Add your website source' }}</h2>
+            </div>
+            <span class="campaign-studio__draft-badge">{{ sourceType }}</span>
           </div>
-          <div class="campaign-studio__preview-tools">
-            <small>Scripts disabled</small>
+
+          <ng-container *ngIf="editorMode === 'ai'; else customHtmlEditor">
+            <div class="campaign-studio__context-note">
+              <span class="material-symbols-outlined" aria-hidden="true">database</span>
+              <div>
+                <strong>Built from your solution</strong>
+                <p>
+                  {{ strategyReviewAvailable
+                    ? 'Strategy Review is the primary source, supported by your answers from Steps 1–4.'
+                    : 'Your answers from Steps 1–4 will provide the source material.' }}
+                </p>
+              </div>
+            </div>
+
+            <label class="campaign-studio__field campaign-studio__field--brief">
+              <span>Website brief <em>Pre-filled</em></span>
+              <textarea
+                [(ngModel)]="generationBrief"
+                maxlength="1200"
+                rows="6"
+                placeholder="Describe the campaign website you want."
+              ></textarea>
+              <small>{{ briefCharacters }} / 1,200</small>
+            </label>
+
+            <div class="campaign-studio__preferences">
+              <label class="campaign-studio__field">
+                <span>Goal</span>
+                <select [(ngModel)]="websiteGoal">
+                  <option value="awareness">Build awareness</option>
+                  <option value="partners">Attract partners</option>
+                  <option value="funding">Raise support</option>
+                  <option value="volunteers">Mobilize volunteers</option>
+                </select>
+              </label>
+              <label class="campaign-studio__field">
+                <span>Tone</span>
+                <select [(ngModel)]="websiteTone">
+                  <option>Hopeful and credible</option>
+                  <option>Bold and urgent</option>
+                  <option>Warm and community-led</option>
+                  <option>Clear and evidence-driven</option>
+                </select>
+              </label>
+            </div>
+
+            <fieldset class="campaign-studio__focus">
+              <legend>Emphasize</legend>
+              <div>
+                <button
+                  *ngFor="let area of focusOptions"
+                  type="button"
+                  [class.campaign-studio__focus-chip--active]="isFocusSelected(area)"
+                  [attr.aria-pressed]="isFocusSelected(area)"
+                  (click)="toggleFocusArea(area)"
+                ><span aria-hidden="true">{{ isFocusSelected(area) ? '✓' : '+' }}</span>{{ area }}</button>
+              </div>
+            </fieldset>
+
             <button
               type="button"
-              (click)="openFullPreview()"
-              [disabled]="!previewUrl"
+              class="campaign-studio__generate"
+              [disabled]="!canGenerate"
+              (click)="requestGeneration()"
             >
-              <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
-              Open full-page preview
+              <span *ngIf="!generating" class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+              <span *ngIf="generating" class="campaign-studio__mini-spinner" aria-hidden="true"></span>
+              {{ generating ? 'Creating your grounded draft…' : previewUrl ? 'Regenerate website' : 'Generate website' }}
             </button>
-          </div>
-        </div>
-        <div class="campaign-studio__browser-bar">
-          <i></i><i></i><i></i><span>{{ campaignPath }}</span>
-        </div>
-        <iframe
-          *ngIf="previewUrl; else previewEmpty"
-          [src]="previewUrl"
-          title="Campaign website preview"
-          sandbox=""
-          referrerpolicy="no-referrer"
-        ></iframe>
-        <ng-template #previewEmpty>
-          <div class="campaign-studio__preview-empty">
-            <span aria-hidden="true">⌘</span>
-            <strong>Save your draft to preview it</strong>
-            <p>The server will sanitize the HTML before it appears here.</p>
-          </div>
-        </ng-template>
+          </ng-container>
 
-        <div *ngIf="status === 'published'" class="campaign-studio__live">
-          <div>
-            <span>Live website</span>
-            <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">{{ liveUrl || campaignPath }}</a>
+          <ng-template #customHtmlEditor>
+            <label class="campaign-studio__dropzone">
+              <span class="campaign-studio__dropzone-icon material-symbols-outlined" aria-hidden="true">upload_file</span>
+              <strong>Upload a complete HTML file</strong>
+              <small>One static .html file, up to 750 KB</small>
+              <span class="campaign-studio__upload-button">Choose file</span>
+              <input type="file" accept=".html,text/html" (change)="onFileSelected($event)" />
+            </label>
+
+            <div class="campaign-studio__divider"><span>or paste your code</span></div>
+            <div class="campaign-studio__html-label">
+              <div><strong>HTML source</strong><small>{{ htmlKilobytes }} KB · scripts are removed</small></div>
+              <span [class.campaign-studio__file-state--ready]="html.trim()">{{ html.trim() ? 'Ready' : 'Empty' }}</span>
+            </div>
+            <textarea
+              class="campaign-studio__code"
+              [(ngModel)]="html"
+              (ngModelChange)="onHtmlChanged()"
+              spellcheck="false"
+              placeholder="<!doctype html>&#10;<html>…</html>"
+              aria-label="Campaign HTML"
+            ></textarea>
+          </ng-template>
+
+          <div class="campaign-studio__details" [class.campaign-studio__details--open]="detailsOpen">
+            <button type="button" class="campaign-studio__details-toggle" (click)="detailsOpen = !detailsOpen" [attr.aria-expanded]="detailsOpen">
+              <span class="material-symbols-outlined" aria-hidden="true">{{ detailsOpen ? 'expand_less' : 'expand_more' }}</span>
+              <span><strong>Website details</strong><small>Title, description and public address</small></span>
+            </button>
+            <div *ngIf="detailsOpen" class="campaign-studio__details-fields">
+              <label class="campaign-studio__field">
+                <span>Website title</span>
+                <input [(ngModel)]="title" (ngModelChange)="onMetadataChanged()" maxlength="120" placeholder="Name your campaign website" />
+              </label>
+              <label class="campaign-studio__field">
+                <span>Search and sharing description</span>
+                <textarea [(ngModel)]="description" (ngModelChange)="onMetadataChanged()" maxlength="320" rows="3" placeholder="A concise description of the solution"></textarea>
+              </label>
+              <label class="campaign-studio__field"><span>Public address</span></label>
+              <div class="campaign-studio__slug">
+                <span>/campaigns/</span>
+                <input [(ngModel)]="slug" (ngModelChange)="onSlugChanged()" (blur)="checkSlug()" maxlength="60" aria-label="Campaign URL" placeholder="your-url" />
+                <button type="button" (click)="checkSlug()" [disabled]="checkingSlug || !slug">{{ checkingSlug ? 'Checking…' : 'Check' }}</button>
+              </div>
+              <p *ngIf="slugFeedback" class="campaign-studio__slug-feedback" [class.campaign-studio__slug-feedback--available]="slugAvailable">{{ slugFeedback }}</p>
+            </div>
           </div>
-          <div class="campaign-studio__live-actions">
-            <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">Open live website</a>
-            <button type="button" (click)="copyUrl()">Copy URL</button>
-            <button type="button" (click)="unpublish()" [disabled]="unpublishing">
-              {{ unpublishing ? 'Unpublishing…' : 'Unpublish' }}
+
+          <div class="campaign-studio__actions" *ngIf="previewUrl || editorMode === 'html'">
+            <button type="button" class="campaign-studio__button campaign-studio__button--secondary" (click)="saveDraft()" [disabled]="!canSave || publishing">
+              {{ saving ? 'Saving…' : 'Save draft' }}
+            </button>
+            <button type="button" class="campaign-studio__button campaign-studio__button--primary" (click)="publish()" [disabled]="!canPublish || !canSave || publishing">
+              {{ publishing ? 'Publishing…' : status === 'published' ? 'Publish update' : 'Publish website' }}
             </button>
           </div>
+          <p *ngIf="!canPublish && (previewUrl || editorMode === 'html')" class="campaign-studio__permission">Team members can prepare drafts. The solution owner or an administrator publishes them.</p>
+        </section>
+
+        <aside class="campaign-studio__preview" aria-label="Website preview">
+          <div class="campaign-studio__preview-header">
+            <div><strong>Website preview</strong><small>{{ previewUrl ? 'Sanitized draft' : 'Your draft will appear here' }}</small></div>
+            <div class="campaign-studio__preview-tools">
+              <div class="campaign-studio__devices" role="group" aria-label="Preview size">
+                <button type="button" [class.active]="previewDevice === 'desktop'" (click)="setPreviewDevice('desktop')" aria-label="Desktop preview"><span class="material-symbols-outlined">desktop_windows</span></button>
+                <button type="button" [class.active]="previewDevice === 'tablet'" (click)="setPreviewDevice('tablet')" aria-label="Tablet preview"><span class="material-symbols-outlined">tablet_mac</span></button>
+                <button type="button" [class.active]="previewDevice === 'mobile'" (click)="setPreviewDevice('mobile')" aria-label="Mobile preview"><span class="material-symbols-outlined">smartphone</span></button>
+              </div>
+              <button type="button" class="campaign-studio__open-preview" (click)="openFullPreview()" [disabled]="!previewUrl" aria-label="Open full-page preview"><span class="material-symbols-outlined">open_in_new</span></button>
+            </div>
+          </div>
+          <div class="campaign-studio__browser-bar"><i></i><i></i><i></i><span>{{ campaignPath }}</span></div>
+          <div class="campaign-studio__preview-stage" [attr.data-device]="previewDevice">
+            <iframe *ngIf="previewUrl; else previewEmpty" [src]="previewUrl" title="Campaign website preview" sandbox="" referrerpolicy="no-referrer"></iframe>
+            <ng-template #previewEmpty>
+              <div class="campaign-studio__preview-empty">
+                <div class="campaign-studio__preview-mock" aria-hidden="true"><span></span><span></span><span></span><button></button></div>
+                <span class="material-symbols-outlined" aria-hidden="true">auto_awesome</span>
+                <strong>Your campaign will take shape here</strong>
+                <p>Generate a grounded first draft or add your own HTML.</p>
+              </div>
+            </ng-template>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section *ngIf="status === 'published'" class="campaign-studio__published">
+      <div class="campaign-studio__published-head">
+        <div><p>Live campaign</p><h2>Your website is ready to travel.</h2><a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">{{ liveUrl || campaignPath }}</a></div>
+        <div class="campaign-studio__published-actions">
+          <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">Open live website</a>
+          <button type="button" (click)="copyUrl()">Copy link</button>
+          <button type="button" (click)="shareLiveSite()">Share</button>
+          <a [href]="campaignEmailUrl">Email</a>
+          <button type="button" class="danger" (click)="unpublish()" [disabled]="unpublishing">{{ unpublishing ? 'Unpublishing…' : 'Unpublish' }}</button>
         </div>
-      </aside>
+      </div>
+
+      <div class="campaign-studio__metrics" aria-label="Campaign performance">
+        <div><span class="material-symbols-outlined">visibility</span><strong>{{ metrics.views }}</strong><small>Visitors</small></div>
+        <div><span class="material-symbols-outlined">ios_share</span><strong>{{ metrics.shares }}</strong><small>Shares</small></div>
+        <div><span class="material-symbols-outlined">favorite</span><strong>{{ metrics.supporters }}</strong><small>Supporters</small></div>
+        <div><span class="material-symbols-outlined">forum</span><strong>{{ metrics.connections }}</strong><small>Connections</small></div>
+      </div>
+
+      <div *ngIf="recentConnections.length" class="campaign-studio__connections">
+        <div class="campaign-studio__connections-title"><div><p>Recent connections</p><h3>People who want to help</h3></div><span>Private to the solution team</span></div>
+        <article *ngFor="let connection of recentConnections">
+          <div><strong>{{ connection.name }}</strong><a [href]="'mailto:' + connection.email">{{ connection.email }}</a></div>
+          <span>{{ connection.reason }}</span><p>{{ connection.message }}</p>
+        </article>
+      </div>
     </section>
   </div>
 </main>

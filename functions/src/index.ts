@@ -43,6 +43,8 @@ export {
 } from './solution-moderation';
 export {
   checkCampaignSlugAvailability,
+  engageCampaignWebsite,
+  generateCampaignDraft,
   getCampaignWebsite,
   getPublishedCampaignWebsite,
   publishCampaignWebsite,

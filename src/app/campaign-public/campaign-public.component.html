@@ -1,28 +1,58 @@
 <main class="campaign-public">
   <div *ngIf="loading" class="campaign-public__state" role="status">
-    <span class="campaign-public__spinner" aria-hidden="true"></span>
-    <h1>Opening campaign</h1>
-    <p>Loading the published website…</p>
+    <span class="campaign-public__spinner" aria-hidden="true"></span><h1>Opening campaign</h1><p>Loading the published website…</p>
   </div>
 
   <div *ngIf="!loading && (notFound || errorMessage)" class="campaign-public__state">
     <p class="campaign-public__eyebrow">Global Solutions Lab</p>
     <h1>{{ notFound ? 'Campaign not found' : 'Campaign temporarily unavailable' }}</h1>
-    <p>
-      {{ notFound
-        ? 'This campaign is unavailable or has not been published yet.'
-        : errorMessage }}
-    </p>
+    <p>{{ notFound ? 'This campaign is unavailable or has not been published yet.' : errorMessage }}</p>
     <a routerLink="/">Return home</a>
   </div>
 
-  <iframe
-    *ngIf="!loading && pageUrl"
-    class="campaign-public__frame"
-    [src]="pageUrl"
-    title="Published campaign website"
-    sandbox=""
-    referrerpolicy="strict-origin-when-cross-origin"
-  ></iframe>
-</main>
+  <ng-container *ngIf="!loading && pageUrl">
+    <iframe class="campaign-public__frame" [src]="pageUrl" [title]="title + ' campaign website'" sandbox="allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+    <footer class="campaign-public__dock" aria-label="Campaign actions">
+      <div class="campaign-public__brand"><strong>{{ title }}</strong><span>Global Solutions Lab campaign</span></div>
+      <div class="campaign-public__actions">
+        <button type="button" (click)="toggleSupport()" [attr.aria-pressed]="supported"><span class="material-symbols-outlined">favorite</span><span class="label">Support</span><small>{{ supportCount }}</small></button>
+        <button type="button" (click)="showShare = true"><span class="material-symbols-outlined">ios_share</span>Share</button>
+        <button type="button" class="primary" (click)="showConnect = true"><span class="material-symbols-outlined">forum</span>Connect</button>
+      </div>
+    </footer>
+  </ng-container>
 
+  <div class="campaign-public__backdrop" *ngIf="showShare" role="dialog" aria-modal="true" aria-labelledby="share-title" (click)="closeDialogs()">
+    <section class="campaign-public__dialog" (click)="$event.stopPropagation()">
+      <button class="campaign-public__close" type="button" (click)="closeDialogs()" aria-label="Close">×</button>
+      <p class="campaign-public__eyebrow">Share this campaign</p><h2 id="share-title">Help this solution travel further.</h2>
+      <p>Choose where to share it. The campaign title and public link are ready.</p>
+      <div class="campaign-public__share-grid">
+        <button class="wide" type="button" (click)="copyLink()">Copy campaign link</button>
+        <button type="button" (click)="nativeShare()">Share from this device</button>
+        <a [href]="shareHref('email')" (click)="trackShare('email')">Email a friend</a>
+        <a target="_blank" rel="noopener" [href]="shareHref('linkedin')" (click)="trackShare('linkedin')">LinkedIn</a>
+        <a target="_blank" rel="noopener" [href]="shareHref('facebook')" (click)="trackShare('facebook')">Facebook</a>
+        <a target="_blank" rel="noopener" [href]="shareHref('x')" (click)="trackShare('x')">X</a>
+        <a target="_blank" rel="noopener" [href]="shareHref('whatsapp')" (click)="trackShare('whatsapp')">WhatsApp</a>
+      </div>
+    </section>
+  </div>
+
+  <div class="campaign-public__backdrop" *ngIf="showConnect" role="dialog" aria-modal="true" aria-labelledby="connect-title" (click)="closeDialogs()">
+    <section class="campaign-public__dialog" (click)="$event.stopPropagation()">
+      <button class="campaign-public__close" type="button" (click)="closeDialogs()" aria-label="Close">×</button>
+      <p class="campaign-public__eyebrow">Connect with the team</p><h2 id="connect-title">Start a useful conversation.</h2>
+      <p>Your message will be available privately to the solution team.</p>
+      <form (ngSubmit)="submitConnection()">
+        <label><span>I’m interested in</span><select name="reason" [(ngModel)]="connection.reason"><option value="partnership">Partnership</option><option value="funding">Funding or support</option><option value="volunteering">Volunteering</option><option value="pilot">Pilot or adoption</option><option value="feedback">Sharing feedback</option></select></label>
+        <label><span>Name</span><input name="name" [(ngModel)]="connection.name" maxlength="100" autocomplete="name" required></label>
+        <label><span>Email</span><input name="email" [(ngModel)]="connection.email" type="email" maxlength="200" autocomplete="email" required></label>
+        <label><span>Message</span><textarea name="message" [(ngModel)]="connection.message" maxlength="1500" required placeholder="Tell the team how you would like to connect."></textarea></label>
+        <small>Your contact information is shared only with this solution’s team.</small>
+        <button class="campaign-public__submit" type="submit" [disabled]="connecting">{{ connecting ? 'Sending…' : 'Send message' }}</button>
+        <p class="campaign-public__form-status" role="status">{{ connectionStatus }}</p>
+      </form>
+    </section>
+  </div>
+</main>
