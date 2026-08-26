@@ -190,6 +190,31 @@
       </div>
     </section>
 
+    <section *ngIf="vm.shell.hasSolution" class="mt-8">
+      <a
+        [routerLink]="websiteStudioRoute"
+        class="slp-card group grid gap-6 overflow-hidden p-7 transition duration-200 hover:-translate-y-0.5 hover:border-[color:var(--slp-primary)] sm:grid-cols-[auto_minmax(0,1fr)_auto] sm:items-center sm:p-8"
+      >
+        <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--slp-primary)] text-white shadow-lg shadow-emerald-900/15">
+          <span class="material-symbols-outlined text-3xl">language</span>
+        </div>
+        <div class="min-w-0">
+          <p class="slp-mono text-[0.68rem] uppercase tracking-[0.22em] text-[color:var(--slp-primary)]">
+            First-party publishing
+          </p>
+          <h2 class="mt-2 text-2xl font-semibold">Create your solution website</h2>
+          <p class="mt-2 max-w-3xl text-sm leading-7 text-[color:var(--slp-muted)]">
+            Paste or upload a static HTML page, preview it safely, and publish it at a custom
+            <strong>/campaigns/your-url</strong> address without adding it to the main application bundle.
+          </p>
+        </div>
+        <span class="inline-flex items-center justify-center gap-2 rounded-full bg-[color:var(--slp-primary)] px-5 py-3 text-sm font-semibold text-white">
+          Open website studio
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </span>
+      </a>
+    </section>
+
     <section class="mt-8 grid gap-6 2xl:grid-cols-[1.6fr_0.72fr]">
       <div>
         <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

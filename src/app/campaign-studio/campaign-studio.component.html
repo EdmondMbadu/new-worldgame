@@ -1,0 +1,161 @@
+<main class="campaign-studio">
+  <header class="campaign-studio__header">
+    <a [routerLink]="['/solution-launch', solutionId]" class="campaign-studio__back">
+      <span aria-hidden="true">←</span> Solution Launch
+    </a>
+    <div class="campaign-studio__brand">Global Solutions Lab</div>
+    <div class="campaign-studio__status" [attr.data-status]="status">
+      {{ status }}<span *ngIf="hasUnpublishedChanges"> · draft changes</span>
+    </div>
+  </header>
+
+  <section *ngIf="loading" class="campaign-studio__loading" role="status">
+    <span class="campaign-studio__spinner" aria-hidden="true"></span>
+    Opening website studio…
+  </section>
+
+  <div *ngIf="!loading" class="campaign-studio__shell">
+    <section class="campaign-studio__intro">
+      <div>
+        <p class="campaign-studio__eyebrow">Solution website</p>
+        <h1>Make your solution public.</h1>
+        <p>
+          Paste a complete static HTML page, choose a memorable address, preview it safely,
+          and publish without adding the page to the main application bundle.
+        </p>
+      </div>
+      <div class="campaign-studio__solution">
+        <span>Active solution</span>
+        <strong>{{ solutionTitle || title }}</strong>
+      </div>
+    </section>
+
+    <div *ngIf="successMessage" class="campaign-studio__notice campaign-studio__notice--success" role="status">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="campaign-studio__notice campaign-studio__notice--error" role="alert">
+      {{ errorMessage }}
+    </div>
+
+    <section class="campaign-studio__workspace">
+      <div class="campaign-studio__editor">
+        <div class="campaign-studio__step">
+          <span>01</span>
+          <div><strong>Content</strong><small>Paste or upload a single HTML file</small></div>
+        </div>
+
+        <label class="campaign-studio__field">
+          <span>Website title</span>
+          <input [(ngModel)]="title" (ngModelChange)="onMetadataChanged()" maxlength="120" placeholder="Name your campaign website" />
+        </label>
+
+        <label class="campaign-studio__field">
+          <span>Search and sharing description</span>
+          <textarea [(ngModel)]="description" (ngModelChange)="onMetadataChanged()" maxlength="320" rows="3" placeholder="A concise description of the solution and its purpose"></textarea>
+        </label>
+
+        <div class="campaign-studio__html-label">
+          <div>
+            <strong>HTML</strong>
+            <small>{{ htmlKilobytes }} KB · static HTML only · use embedded or HTTPS-hosted images</small>
+          </div>
+          <label class="campaign-studio__upload">
+            Upload .html
+            <input type="file" accept=".html,text/html" (change)="onFileSelected($event)" />
+          </label>
+        </div>
+        <textarea
+          class="campaign-studio__code"
+          [(ngModel)]="html"
+          (ngModelChange)="onHtmlChanged()"
+          spellcheck="false"
+          placeholder="<!doctype html>&#10;<html>…</html>"
+          aria-label="Campaign HTML"
+        ></textarea>
+
+        <div class="campaign-studio__step campaign-studio__step--address">
+          <span>02</span>
+          <div><strong>Address</strong><small>Choose the public campaign URL</small></div>
+        </div>
+
+        <div class="campaign-studio__slug">
+          <span>/campaigns/</span>
+          <input
+            [(ngModel)]="slug"
+            (ngModelChange)="onSlugChanged()"
+            (blur)="checkSlug()"
+            maxlength="60"
+            aria-label="Campaign URL"
+            placeholder="your-url"
+          />
+          <button type="button" (click)="checkSlug()" [disabled]="checkingSlug || !slug">
+            {{ checkingSlug ? 'Checking…' : 'Check' }}
+          </button>
+        </div>
+        <p
+          *ngIf="slugFeedback"
+          class="campaign-studio__slug-feedback"
+          [class.campaign-studio__slug-feedback--available]="slugAvailable"
+        >{{ slugFeedback }}</p>
+
+        <div class="campaign-studio__actions">
+          <button
+            type="button"
+            class="campaign-studio__button campaign-studio__button--secondary"
+            (click)="saveDraft()"
+            [disabled]="!canSave || publishing"
+          >{{ saving ? 'Saving…' : 'Save & preview' }}</button>
+          <button
+            type="button"
+            class="campaign-studio__button campaign-studio__button--primary"
+            (click)="publish()"
+            [disabled]="!canPublish || !canSave || publishing"
+          >{{ publishing ? 'Publishing…' : status === 'published' ? 'Publish update' : 'Publish website' }}</button>
+        </div>
+        <p *ngIf="!canPublish" class="campaign-studio__permission">
+          Team members can prepare drafts. The solution owner or an administrator publishes them.
+        </p>
+      </div>
+
+      <aside class="campaign-studio__preview">
+        <div class="campaign-studio__preview-header">
+          <div>
+            <span>03</span>
+            <strong>Safe preview</strong>
+          </div>
+          <small>Scripts disabled</small>
+        </div>
+        <div class="campaign-studio__browser-bar">
+          <i></i><i></i><i></i><span>{{ campaignPath }}</span>
+        </div>
+        <iframe
+          *ngIf="previewUrl; else previewEmpty"
+          [src]="previewUrl"
+          title="Campaign website preview"
+          sandbox=""
+          referrerpolicy="no-referrer"
+        ></iframe>
+        <ng-template #previewEmpty>
+          <div class="campaign-studio__preview-empty">
+            <span aria-hidden="true">⌘</span>
+            <strong>Save your draft to preview it</strong>
+            <p>The server will sanitize the HTML before it appears here.</p>
+          </div>
+        </ng-template>
+
+        <div *ngIf="status === 'published'" class="campaign-studio__live">
+          <div>
+            <span>Live website</span>
+            <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">{{ liveUrl || campaignPath }}</a>
+          </div>
+          <div class="campaign-studio__live-actions">
+            <button type="button" (click)="copyUrl()">Copy URL</button>
+            <button type="button" (click)="unpublish()" [disabled]="unpublishing">
+              {{ unpublishing ? 'Unpublishing…' : 'Unpublish' }}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+</main>

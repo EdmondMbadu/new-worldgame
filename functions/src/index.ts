@@ -41,6 +41,15 @@ export {
   setSolutionPublicationStatus,
   updateSolutionModerationPolicy,
 } from './solution-moderation';
+export {
+  checkCampaignSlugAvailability,
+  getCampaignWebsite,
+  getPublishedCampaignWebsite,
+  publishCampaignWebsite,
+  saveCampaignDraft,
+  serveCampaignPage,
+  unpublishCampaignWebsite,
+} from './campaign-pages';
 
 // read the key you stored with: firebase functions:config:set gemini.key="YOUR_KEY"
 const GEMINI_KEY = functions.config()['gemini'].key;

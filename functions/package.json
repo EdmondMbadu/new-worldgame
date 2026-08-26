@@ -4,6 +4,7 @@
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test:moderation": "npm run build && node --test test/solution-moderation-core.test.js",
+    "test:campaign": "npm run build && node --test test/campaign-pages.test.js",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",
     "start": "npm run shell",
@@ -34,11 +35,13 @@
     "mime-types": "^3.0.1",
     "pdf-parse": "^1.1.1",
     "pptxgenjs": "^4.0.1",
+    "sanitize-html": "2.17.5",
     "stripe": "^17.7.0",
     "twilio": "^5.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.19.19",
+    "@types/sanitize-html": "^2.16.1",
     "typescript": "^5.9.3"
   },
   "overrides": {

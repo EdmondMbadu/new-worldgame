@@ -233,6 +233,21 @@ service cloud.firestore {
       allow read, create, update, delete: if false;
     }
 
+    // Campaign website drafts, immutable versions, and public slug routing are
+    // managed only by authenticated Cloud Functions. Public pages are served
+    // through the Hosting renderer, never by exposing these documents.
+    match /campaignPages/{campaignId} {
+      allow read, create, update, delete: if false;
+
+      match /versions/{versionId} {
+        allow read, create, update, delete: if false;
+      }
+    }
+
+    match /campaignRoutes/{slug} {
+      allow read, create, update, delete: if false;
+    }
+
     // Challenge-space prompt templates are readable by signed-in solution
     // participants. All mutations go through admin-authorized callable
     // functions, which also validate the stable answer-key schema and write
@@ -273,7 +288,9 @@ service cloud.firestore {
         && topLevelCollection != 'publicCommunitySolutions'
         && topLevelCollection != 'solutionModerationQueue'
         && topLevelCollection != 'solutionModerationPolicies'
-        && topLevelCollection != 'solutionModerationCache';
+        && topLevelCollection != 'solutionModerationCache'
+        && topLevelCollection != 'campaignPages'
+        && topLevelCollection != 'campaignRoutes';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
@@ -283,7 +300,9 @@ service cloud.firestore {
         && topLevelCollection != 'publicCommunitySolutions'
         && topLevelCollection != 'solutionModerationQueue'
         && topLevelCollection != 'solutionModerationPolicies'
-        && topLevelCollection != 'solutionModerationCache';
+        && topLevelCollection != 'solutionModerationCache'
+        && topLevelCollection != 'campaignPages'
+        && topLevelCollection != 'campaignRoutes';
     }
   }
 }

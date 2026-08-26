@@ -1,0 +1,75 @@
+:host,
+.campaign-public {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  background: #07110f;
+}
+
+.campaign-public__frame {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  border: 0;
+  background: #fff;
+}
+
+.campaign-public__state {
+  min-height: 100vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 32px;
+  color: #f3faf6;
+  text-align: center;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.campaign-public__state h1,
+.campaign-public__state p {
+  margin: 0;
+}
+
+.campaign-public__state h1 {
+  font-size: clamp(2rem, 6vw, 4rem);
+}
+
+.campaign-public__state p {
+  max-width: 36rem;
+  color: #a8beb5;
+  line-height: 1.7;
+}
+
+.campaign-public__state a {
+  margin-top: 10px;
+  color: #07110f;
+  background: #62d6aa;
+  padding: 12px 18px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.campaign-public__eyebrow {
+  color: #62d6aa !important;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.campaign-public__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(98, 214, 170, 0.2);
+  border-top-color: #62d6aa;
+  border-radius: 50%;
+  animation: campaign-spin 800ms linear infinite;
+}
+
+@keyframes campaign-spin {
+  to { transform: rotate(360deg); }
+}
+

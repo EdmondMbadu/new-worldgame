@@ -1,0 +1,28 @@
+<main class="campaign-public">
+  <div *ngIf="loading" class="campaign-public__state" role="status">
+    <span class="campaign-public__spinner" aria-hidden="true"></span>
+    <h1>Opening campaign</h1>
+    <p>Loading the published website…</p>
+  </div>
+
+  <div *ngIf="!loading && (notFound || errorMessage)" class="campaign-public__state">
+    <p class="campaign-public__eyebrow">Global Solutions Lab</p>
+    <h1>{{ notFound ? 'Campaign not found' : 'Campaign temporarily unavailable' }}</h1>
+    <p>
+      {{ notFound
+        ? 'This campaign is unavailable or has not been published yet.'
+        : errorMessage }}
+    </p>
+    <a routerLink="/">Return home</a>
+  </div>
+
+  <iframe
+    *ngIf="!loading && pageUrl"
+    class="campaign-public__frame"
+    [src]="pageUrl"
+    title="Published campaign website"
+    sandbox=""
+    referrerpolicy="strict-origin-when-cross-origin"
+  ></iframe>
+</main>
+

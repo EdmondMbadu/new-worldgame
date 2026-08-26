@@ -39,12 +39,31 @@ service firebase.storage {
       allow delete: if signedIn();
     }
 
+    // Raw drafts and published campaign artifacts are server-managed. The
+    // public renderer streams approved HTML with strict response headers.
+    match /campaign-drafts/{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    match /campaign-published/{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    match /campaign-assets/{allPaths=**} {
+      allow read, write: if false;
+    }
+
     match /{topLevel}/{allPaths=**} {
-      allow read: if true;
+      allow read: if topLevel != 'campaign-drafts'
+        && topLevel != 'campaign-published'
+        && topLevel != 'campaign-assets';
       allow write: if signedIn()
         && topLevel != 'solutions'
         && topLevel != 'nwgNewsVideos'
-        && topLevel != 'avatarIntroVideos';
+        && topLevel != 'avatarIntroVideos'
+        && topLevel != 'campaign-drafts'
+        && topLevel != 'campaign-published'
+        && topLevel != 'campaign-assets';
     }
   }
 }

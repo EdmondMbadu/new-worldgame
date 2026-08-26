@@ -89,6 +89,17 @@
     ],
     "rewrites": [
       {
+        "source": "/campaigns/power-drc-clinics",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/campaigns/**",
+        "function": {
+          "functionId": "serveCampaignPage",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
