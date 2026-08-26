@@ -174,6 +174,7 @@ interface SlpBaseContext {
     fund: any[] | string;
     partner: any[] | string;
     reach: any[] | string;
+    website: any[] | string;
     dashboard: any[] | string;
     details: any[] | string;
     documents: any[] | string;
@@ -749,6 +750,12 @@ export class SlpContextService {
         lane: 'reach',
         route: context.routes.reach,
       },
+      {
+        label: 'Website Launch',
+        description: 'Build, preview, and publish a website at your own campaign address.',
+        icon: 'language',
+        route: context.routes.website,
+      },
     ];
   }
 
@@ -800,6 +807,7 @@ export class SlpContextService {
       { label: 'Fund', icon: 'payments', lane: 'fund', route: routes.fund },
       { label: 'Partner', icon: 'handshake', lane: 'partner', route: routes.partner },
       { label: 'Reach', icon: 'person_search', lane: 'reach', route: routes.reach },
+      { label: 'Website Launch', icon: 'language', route: routes.website },
     ];
   }
 
@@ -811,6 +819,7 @@ export class SlpContextService {
         fund: '/fund',
         partner: '/partner',
         reach: '/reach',
+        website: '/get-started',
         dashboard: '/get-started',
         details: '/get-started',
         documents: '/blogs/solution-libraries',
@@ -831,6 +840,7 @@ export class SlpContextService {
       fund: ['/solution-launch', solutionId, 'fund'],
       partner: ['/solution-launch', solutionId, 'partner'],
       reach: ['/solution-launch', solutionId, 'reach'],
+      website: ['/solution-launch', solutionId, 'site'],
       dashboard: ['/dashboard', solutionId],
       details: ['/solution-details', solutionId],
       documents: ['/document-files', solutionId],

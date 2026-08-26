@@ -168,6 +168,11 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
     }
   }
 
+  openFullPreview(): void {
+    if (!this.previewObjectUrl) return;
+    window.open(this.previewObjectUrl, '_blank', 'noopener,noreferrer');
+  }
+
   onHtmlChanged(): void {
     this.sourceType = 'pasted';
     this.hasUnpublishedChanges = true;

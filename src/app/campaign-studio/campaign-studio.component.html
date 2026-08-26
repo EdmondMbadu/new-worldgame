@@ -123,7 +123,17 @@
             <span>03</span>
             <strong>Safe preview</strong>
           </div>
-          <small>Scripts disabled</small>
+          <div class="campaign-studio__preview-tools">
+            <small>Scripts disabled</small>
+            <button
+              type="button"
+              (click)="openFullPreview()"
+              [disabled]="!previewUrl"
+            >
+              <span class="material-symbols-outlined" aria-hidden="true">open_in_new</span>
+              Open full-page preview
+            </button>
+          </div>
         </div>
         <div class="campaign-studio__browser-bar">
           <i></i><i></i><i></i><span>{{ campaignPath }}</span>
@@ -149,6 +159,7 @@
             <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">{{ liveUrl || campaignPath }}</a>
           </div>
           <div class="campaign-studio__live-actions">
+            <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">Open live website</a>
             <button type="button" (click)="copyUrl()">Copy URL</button>
             <button type="button" (click)="unpublish()" [disabled]="unpublishing">
               {{ unpublishing ? 'Unpublishing…' : 'Unpublish' }}

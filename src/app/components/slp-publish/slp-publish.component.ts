@@ -197,12 +197,6 @@ export class SlpPublishComponent implements OnInit, OnDestroy {
     return this.currentLocationLabel;
   }
 
-  get websiteStudioRoute(): any[] | string {
-    return this.solutionId
-      ? ['/solution-launch', this.solutionId, 'site']
-      : '/get-started';
-  }
-
   async applyLocation(): Promise<void> {
     const city = this.city.trim();
     const region = this.region.trim();
