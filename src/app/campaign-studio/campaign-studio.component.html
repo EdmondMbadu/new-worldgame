@@ -1,11 +1,68 @@
+<div class="campaign-studio__app" [class.campaign-studio__app--rail-expanded]="sidebarExpanded">
+  <aside class="campaign-studio__rail" aria-label="Solution navigation">
+    <a routerLink="/home" class="campaign-studio__rail-brand" title="Global Solutions Lab home" aria-label="Global Solutions Lab home">
+      <img src="assets/img/gsl-logo.png" alt="" aria-hidden="true" />
+      <span>Global Solutions Lab</span>
+    </a>
+
+    <nav class="campaign-studio__rail-nav">
+      <a routerLink="/home" title="Home">
+        <span class="material-symbols-outlined" aria-hidden="true">home</span><span>Home</span>
+      </a>
+      <a [routerLink]="['/dashboard', solutionId]" title="Solution workspace">
+        <span class="material-symbols-outlined" aria-hidden="true">dashboard</span><span>Workspace</span>
+      </a>
+      <a [routerLink]="['/solution-launch', solutionId]" title="Solution Launch">
+        <span class="material-symbols-outlined" aria-hidden="true">rocket_launch</span><span>Solution Launch</span>
+      </a>
+      <a [routerLink]="['/solution-launch', solutionId, 'site']" class="campaign-studio__rail-active" aria-current="page" title="Website Studio">
+        <span class="material-symbols-outlined" aria-hidden="true">language</span><span>Website Studio</span>
+      </a>
+      <a [routerLink]="['/solution-view', solutionId]" title="Public solution preview">
+        <span class="material-symbols-outlined" aria-hidden="true">visibility</span><span>Public preview</span>
+      </a>
+    </nav>
+
+    <button type="button" class="campaign-studio__rail-toggle" (click)="sidebarExpanded = !sidebarExpanded" [attr.aria-expanded]="sidebarExpanded" aria-label="Toggle navigation labels">
+      <span class="material-symbols-outlined" aria-hidden="true">{{ sidebarExpanded ? 'left_panel_close' : 'left_panel_open' }}</span>
+      <span>{{ sidebarExpanded ? 'Collapse' : 'Expand' }}</span>
+    </button>
+  </aside>
+
 <main class="campaign-studio">
   <header class="campaign-studio__header">
     <a [routerLink]="['/solution-launch', solutionId]" class="campaign-studio__back">
       <span aria-hidden="true">←</span> Solution Launch
     </a>
     <div class="campaign-studio__brand">Global Solutions Lab</div>
-    <div class="campaign-studio__status" [attr.data-status]="status">
-      {{ status }}<span *ngIf="hasUnpublishedChanges"> · changes</span>
+    <div class="campaign-studio__header-actions">
+      <div class="campaign-studio__status" [attr.data-status]="status">
+        {{ status }}<span *ngIf="hasUnpublishedChanges"> · changes</span>
+      </div>
+      <div class="campaign-studio__account">
+        <button type="button" class="campaign-studio__account-trigger" (click)="toggleUserMenu()" [attr.aria-expanded]="showUserMenu" aria-haspopup="menu" aria-label="Open account menu">
+          <span class="campaign-studio__account-avatar">
+            <img *ngIf="profilePicturePath; else accountInitials" [src]="profilePicturePath" [alt]="userDisplayName" />
+            <ng-template #accountInitials><span>{{ userInitials }}</span></ng-template>
+          </span>
+          <span class="campaign-studio__account-name">{{ userDisplayName }}</span>
+          <span class="material-symbols-outlined campaign-studio__account-chevron" aria-hidden="true">expand_more</span>
+        </button>
+
+        <div *ngIf="showUserMenu" class="campaign-studio__account-menu" role="menu">
+          <div class="campaign-studio__account-summary">
+            <strong>{{ userDisplayName }}</strong>
+            <span>{{ currentUser?.email }}</span>
+          </div>
+          <nav>
+            <a routerLink="/profile" (click)="closeUserMenu()" role="menuitem"><span class="material-symbols-outlined" aria-hidden="true">person</span>Profile</a>
+            <a [routerLink]="['/dashboard', solutionId]" (click)="closeUserMenu()" role="menuitem"><span class="material-symbols-outlined" aria-hidden="true">dashboard</span>Solution workspace</a>
+            <a routerLink="/blogs/instructions" (click)="closeUserMenu()" role="menuitem"><span class="material-symbols-outlined" aria-hidden="true">description</span>Instructions</a>
+            <a routerLink="/operating-manual" (click)="closeUserMenu()" role="menuitem"><span class="material-symbols-outlined" aria-hidden="true">menu_book</span>Operating manual</a>
+          </nav>
+          <button type="button" (click)="logOut()" role="menuitem"><span class="material-symbols-outlined" aria-hidden="true">logout</span>Log out</button>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -255,3 +312,4 @@
     </section>
   </div>
 </main>
+</div>

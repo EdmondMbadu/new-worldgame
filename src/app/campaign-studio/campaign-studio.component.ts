@@ -1,4 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import {
@@ -8,6 +13,8 @@ import {
   CampaignWebsiteService,
   CampaignWebsiteState,
 } from '../services/campaign-website.service';
+import { User } from '../models/user';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-campaign-studio',
@@ -49,6 +56,8 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   recentConnections: CampaignConnection[] = [];
   previewDevice: 'desktop' | 'tablet' | 'mobile' = 'desktop';
   detailsOpen = false;
+  sidebarExpanded = false;
+  showUserMenu = false;
   loading = true;
   generating = false;
   saving = false;
@@ -68,7 +77,8 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly campaignWebsites: CampaignWebsiteService,
-    private readonly sanitizer: DomSanitizer
+    private readonly sanitizer: DomSanitizer,
+    public readonly auth: AuthService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -112,6 +122,53 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   get campaignEmailUrl(): string {
     const body = `${this.description ? `${this.description}\n\n` : ''}${this.campaignUrl}`;
     return `mailto:?subject=${encodeURIComponent(this.title)}&body=${encodeURIComponent(body)}`;
+  }
+
+  get currentUser(): User | null {
+    const user = this.auth.currentUser as User | undefined;
+    return user?.email ? user : null;
+  }
+
+  get profilePicturePath(): string {
+    return this.currentUser?.profilePicture?.downloadURL || '';
+  }
+
+  get userDisplayName(): string {
+    const firstName = this.currentUser?.firstName?.trim() || '';
+    const lastName = this.currentUser?.lastName?.trim() || '';
+    return `${firstName} ${lastName}`.trim() || this.currentUser?.email || 'Account';
+  }
+
+  get userInitials(): string {
+    const firstName = this.currentUser?.firstName?.trim() || '';
+    const lastName = this.currentUser?.lastName?.trim() || '';
+    const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.trim();
+    return (initials || this.currentUser?.email?.charAt(0) || 'A').toUpperCase();
+  }
+
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+  }
+
+  closeUserMenu(): void {
+    this.showUserMenu = false;
+  }
+
+  logOut(): void {
+    this.closeUserMenu();
+    this.auth.logout();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.showUserMenu) return;
+    const target = event.target as Element | null;
+    if (!target?.closest('.campaign-studio__account')) this.closeUserMenu();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.closeUserMenu();
   }
 
   selectEditorMode(mode: 'ai' | 'html'): void {
