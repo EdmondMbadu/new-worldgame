@@ -89,6 +89,10 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
     return `/campaigns/${this.slug || 'your-url'}`;
   }
 
+  get campaignUrl(): string {
+    return new URL(this.campaignPath, window.location.origin).toString();
+  }
+
   get htmlKilobytes(): string {
     return (new Blob([this.html]).size / 1024).toFixed(1);
   }
@@ -106,8 +110,7 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   }
 
   get campaignEmailUrl(): string {
-    const url = this.liveUrl || `${window.location.origin}${this.campaignPath}`;
-    const body = `${this.description ? `${this.description}\n\n` : ''}${url}`;
+    const body = `${this.description ? `${this.description}\n\n` : ''}${this.campaignUrl}`;
     return `mailto:?subject=${encodeURIComponent(this.title)}&body=${encodeURIComponent(body)}`;
   }
 
@@ -218,7 +221,10 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
       const result = await this.campaignWebsites.publish(this.solutionId, this.slug);
       this.status = 'published';
       this.slug = result.slug;
-      this.liveUrl = result.liveUrl;
+      this.liveUrl = new URL(
+        `/campaigns/${result.slug}`,
+        window.location.origin
+      ).toString();
       this.hasUnpublishedChanges = false;
       this.successMessage = 'Your campaign website is live.';
     } catch (error: any) {
@@ -248,7 +254,7 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   }
 
   async copyUrl(): Promise<void> {
-    const value = this.liveUrl || `${window.location.origin}${this.campaignPath}`;
+    const value = this.campaignUrl;
     try {
       await navigator.clipboard.writeText(value);
       this.successMessage = 'Campaign URL copied.';
@@ -263,7 +269,7 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
   }
 
   async shareLiveSite(): Promise<void> {
-    const url = this.liveUrl || `${window.location.origin}${this.campaignPath}`;
+    const url = this.campaignUrl;
     if (navigator.share) {
       try {
         await navigator.share({ title: this.title, text: this.description, url });
@@ -353,7 +359,7 @@ export class CampaignStudioComponent implements OnInit, OnDestroy {
     this.status = state.status || 'draft';
     this.hasUnpublishedChanges = state.hasUnpublishedChanges;
     this.canPublish = state.canPublish;
-    this.liveUrl = state.liveUrl;
+    this.liveUrl = state.status === 'published' ? this.campaignUrl : '';
     if (state.sanitizedHtml) this.setPreview(state.sanitizedHtml);
   }
 

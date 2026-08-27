@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const {
   normalizeCampaignSlug,
+  resolveCampaignRequestOrigin,
   sanitizeCampaignHtml,
 } = require('../lib/campaign-pages');
 const {
@@ -18,6 +19,36 @@ test('normalizes campaign slugs to lowercase kebab case', () => {
     'clean-water-philadelphia'
   );
   assert.equal(normalizeCampaignSlug('Already---Clean'), 'already-clean');
+});
+
+test('uses the incoming hosting domain for campaign links', () => {
+  assert.equal(
+    resolveCampaignRequestOrigin({
+      protocol: 'http',
+      headers: {
+        'x-forwarded-host': 'globalsolutionslab.org',
+        'x-forwarded-proto': 'https',
+      },
+    }),
+    'https://globalsolutionslab.org'
+  );
+  assert.equal(
+    resolveCampaignRequestOrigin({
+      protocol: 'http',
+      headers: { host: 'localhost:4200' },
+    }),
+    'http://localhost:4200'
+  );
+  assert.equal(
+    resolveCampaignRequestOrigin({
+      protocol: 'https',
+      headers: {
+        host: 'us-central1-project.cloudfunctions.net',
+        origin: 'https://www.globalsolutionslab.org',
+      },
+    }, true),
+    'https://www.globalsolutionslab.org'
+  );
 });
 
 test('removes executable and embedded content from campaign HTML', () => {
@@ -108,14 +139,14 @@ test('detects numeric claims that are not present in source material', () => {
 test('renders the public engagement shell around sandboxed campaign content', () => {
   const html = renderCampaignPublicShell({
     slug: 'clean-water',
-    publicUrl: 'https://new-world-game.org/campaigns/clean-water',
+    publicUrl: 'https://newworld-game.org/campaigns/clean-water',
     title: 'Clean Water',
     description: 'A safer-water campaign.',
     supportCount: 7,
     nonce: 'testnonce',
   });
   assert.match(html, /src="\/campaigns\/clean-water\/content"/);
-  assert.match(html, /https:\/\/new-world-game\.org\/campaigns\/clean-water/);
+  assert.match(html, /https:\/\/newworld-game\.org\/campaigns\/clean-water/);
   assert.match(html, /allow-top-navigation-by-user-activation/);
   assert.match(html, /id="support-button"/);
   assert.match(html, /Email a friend/);

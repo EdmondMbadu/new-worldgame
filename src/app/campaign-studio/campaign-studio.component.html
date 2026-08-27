@@ -228,9 +228,9 @@
 
     <section *ngIf="status === 'published'" class="campaign-studio__published">
       <div class="campaign-studio__published-head">
-        <div><p>Live campaign</p><h2>Your website is ready to travel.</h2><a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">{{ liveUrl || campaignPath }}</a></div>
+        <div><p>Live campaign</p><h2>Your website is ready to travel.</h2><a [href]="campaignUrl" target="_blank" rel="noopener">{{ campaignUrl }}</a></div>
         <div class="campaign-studio__published-actions">
-          <a [href]="liveUrl || campaignPath" target="_blank" rel="noopener">Open live website</a>
+          <a [href]="campaignUrl" target="_blank" rel="noopener">Open live website</a>
           <button type="button" (click)="copyUrl()">Copy link</button>
           <button type="button" (click)="shareLiveSite()">Share</button>
           <a [href]="campaignEmailUrl">Email</a>

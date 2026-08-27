@@ -26,7 +26,7 @@ const MAX_SLUG_LENGTH = 60;
 const APP_BASE_URL =
   ((functions.config() as any)?.app?.base_url as string) ||
   process.env['APP_BASE_URL'] ||
-  'https://new-world-game.org';
+  'https://newworld-game.org';
 
 const RESERVED_SLUGS = new Set([
   'admin',
@@ -289,8 +289,47 @@ const authorizeSolution = async (
   return { solution, canEdit, canPublish };
 };
 
-const campaignLiveUrl = (slug: string): string =>
-  `${APP_BASE_URL.replace(/\/$/, '')}/campaigns/${slug}`;
+const campaignLiveUrl = (slug: string, origin = APP_BASE_URL): string =>
+  `${origin.replace(/\/$/, '')}/campaigns/${encodeURIComponent(slug)}`;
+
+export const resolveCampaignRequestOrigin = (request?: {
+  protocol?: string;
+  headers?: Record<string, string | string[] | undefined>;
+  get?: (name: string) => string | undefined;
+}, preferBrowserOrigin = false): string => {
+  if (preferBrowserOrigin) {
+    const browserOrigin = cleanText(request?.headers?.['origin'], 300);
+    try {
+      const parsedOrigin = new URL(browserOrigin);
+      if (
+        ['http:', 'https:'].includes(parsedOrigin.protocol) &&
+        parsedOrigin.origin === browserOrigin.replace(/\/$/, '')
+      ) {
+        return parsedOrigin.origin;
+      }
+    } catch {
+      // Fall through to the hosting/proxy headers.
+    }
+  }
+  const forwardedHost = cleanText(request?.headers?.['x-forwarded-host'], 300)
+    .split(',')[0]
+    .trim();
+  const directHost = cleanText(request?.get?.('host') || request?.headers?.['host'], 300)
+    .split(',')[0]
+    .trim();
+  const host = forwardedHost || directHost;
+  if (!/^[a-z0-9.-]+(?::\d{1,5})?$/i.test(host)) {
+    return APP_BASE_URL.replace(/\/$/, '');
+  }
+  const forwardedProtocol = cleanText(request?.headers?.['x-forwarded-proto'], 30)
+    .split(',')[0]
+    .trim()
+    .toLowerCase();
+  const protocol = forwardedProtocol === 'https' || request?.protocol === 'https'
+    ? 'https'
+    : 'http';
+  return `${protocol}://${host}`;
+};
 
 const campaignMetrics = (value: any): CampaignMetrics => ({
   views: Math.max(0, Number(value?.views || 0)),
@@ -505,7 +544,9 @@ export const getCampaignWebsite = functions.https.onCall(async (data: any, conte
     hasUnpublishedChanges: page['hasUnpublishedChanges'] === true,
     canEdit: authorization.canEdit,
     canPublish: authorization.canPublish,
-    liveUrl: slug && page['status'] === 'published' ? campaignLiveUrl(slug) : '',
+    liveUrl: slug && page['status'] === 'published'
+      ? campaignLiveUrl(slug, resolveCampaignRequestOrigin(context.rawRequest, true))
+      : '',
     sourceType: cleanText(page['draftSourceType'], 30) || (html ? 'pasted' : 'generated'),
     generationBrief: cleanText(
       storedSettings['brief'] || buildDefaultCampaignBrief(
@@ -540,7 +581,10 @@ export const checkCampaignSlugAvailability = functions.https.onCall(
     return {
       slug,
       available: !snapshot.exists || route.campaignId === solutionId,
-      liveUrl: campaignLiveUrl(slug),
+      liveUrl: campaignLiveUrl(
+        slug,
+        resolveCampaignRequestOrigin(context.rawRequest, true)
+      ),
     };
   }
 );
@@ -804,7 +848,10 @@ export const publishCampaignWebsite = functions.https.onCall(async (data: any, c
     success: true,
     status: 'published',
     slug,
-    liveUrl: campaignLiveUrl(slug),
+    liveUrl: campaignLiveUrl(
+      slug,
+      resolveCampaignRequestOrigin(context.rawRequest, true)
+    ),
     publishedVersionId: draftVersionId,
   };
 });
@@ -901,7 +948,7 @@ const campaignVisitorHash = (
 
 const notifyCampaignOwner = async (
   campaignId: string,
-  campaignSlug: string,
+  campaignUrl: string,
   connection: { name: string; email: string; reason: string; message: string }
 ): Promise<void> => {
   try {
@@ -915,8 +962,8 @@ const notifyCampaignOwner = async (
       from: 'newworld@newworld-game.org',
       replyTo: connection.email,
       subject: `${connection.name} wants to connect about your campaign`,
-      text: `${connection.name} (${connection.email}) is interested in ${connection.reason}.\n\n${connection.message}\n\nCampaign: ${campaignLiveUrl(campaignSlug)}`,
-      html: `<p><strong>${escapeHtml(connection.name)}</strong> (${escapeHtml(connection.email)}) is interested in <strong>${escapeHtml(connection.reason)}</strong>.</p><p>${escapeHtml(connection.message).replace(/\n/g, '<br>')}</p><p><a href="${escapeHtml(campaignLiveUrl(campaignSlug))}">View the published campaign</a></p>`,
+      text: `${connection.name} (${connection.email}) is interested in ${connection.reason}.\n\n${connection.message}\n\nCampaign: ${campaignUrl}`,
+      html: `<p><strong>${escapeHtml(connection.name)}</strong> (${escapeHtml(connection.email)}) is interested in <strong>${escapeHtml(connection.reason)}</strong>.</p><p>${escapeHtml(connection.message).replace(/\n/g, '<br>')}</p><p><a href="${escapeHtml(campaignUrl)}">View the published campaign</a></p>`,
     });
   } catch (error) {
     functions.logger.warn('Campaign connection email could not be sent.', {
@@ -1047,12 +1094,20 @@ const campaignEngagement = async (
         'metrics.connections': admin.firestore.FieldValue.increment(1),
       });
     });
-    await notifyCampaignOwner(campaignId, String(campaign.slug || ''), {
-      name,
-      email,
-      reason,
-      message,
-    });
+    const campaignSlug = String(campaign.slug || '');
+    await notifyCampaignOwner(
+      campaignId,
+      campaignLiveUrl(
+        campaignSlug,
+        resolveCampaignRequestOrigin(request, true)
+      ),
+      {
+        name,
+        email,
+        reason,
+        message,
+      }
+    );
     return { success: true };
   }
 
@@ -1116,7 +1171,7 @@ export const serveCampaignPage = functions
           return;
         }
         const origin = cleanText(request.headers.origin, 300);
-        const expectedOrigin = `${request.protocol}://${request.get('host')}`;
+        const expectedOrigin = resolveCampaignRequestOrigin(request);
         if (origin && origin !== expectedOrigin && origin !== APP_BASE_URL.replace(/\/$/, '')) {
           response.status(403).json({ message: 'This request could not be verified.' });
           return;
@@ -1161,7 +1216,10 @@ export const serveCampaignPage = functions
       const nonce = randomUUID().replace(/-/g, '');
       const shell = renderCampaignPublicShell({
         slug: campaign.slug,
-        publicUrl: campaignLiveUrl(campaign.slug),
+        publicUrl: campaignLiveUrl(
+          campaign.slug,
+          resolveCampaignRequestOrigin(request)
+        ),
         title: campaign.title || 'Global Solutions Lab campaign',
         description: campaign.description || 'Discover and support this solution.',
         supportCount: campaign.supportCount,
