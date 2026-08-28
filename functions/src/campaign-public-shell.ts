@@ -8,6 +8,8 @@ export interface CampaignShellInput {
   nonce: string;
 }
 
+export const CAMPAIGN_PUBLIC_SHELL_VERSION = '2026-08-27-gsl-favicon';
+
 const escapeHtml = (value: unknown): string =>
   String(value || '')
     .replace(/&/g, '&amp;')
@@ -47,6 +49,8 @@ export const renderCampaignPublicShell = (input: CampaignShellInput): string => 
   <meta property="og:type" content="website">
   <meta property="og:url" content="${escapeHtml(publicUrl)}">
   ${imageMeta}
+  <link rel="icon" type="image/png" sizes="160x160" href="/assets/img/gsl-logo.png">
+  <link rel="apple-touch-icon" href="/assets/img/gsl-logo.png">
   <link rel="canonical" href="${escapeHtml(publicUrl)}">
   <style nonce="${escapeHtml(input.nonce)}">
     :root{--ink:#10211b;--green:#087c5b;--green-dark:#075c45;--mint:#dff7ed;--cream:#f7f4ec;--line:#d9e2dd;--muted:#68756f;--white:#fff}

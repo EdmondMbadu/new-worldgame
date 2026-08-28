@@ -16,7 +16,10 @@ import {
   renderGeneratedCampaignHtml,
   richTextToPlainText,
 } from './campaign-generation';
-import { renderCampaignPublicShell } from './campaign-public-shell';
+import {
+  CAMPAIGN_PUBLIC_SHELL_VERSION,
+  renderCampaignPublicShell,
+} from './campaign-public-shell';
 
 const MAX_HTML_BYTES = 750 * 1024;
 const MAX_TITLE_LENGTH = 120;
@@ -1226,7 +1229,9 @@ export const serveCampaignPage = functions
         imageUrl: campaign.imageUrl,
         nonce,
       });
-      const etag = `"${contentHash(`${campaign.contentHash}|${campaign.supportCount}`)}"`;
+      const etag = `"${contentHash(
+        `${campaign.contentHash}|${campaign.supportCount}|${CAMPAIGN_PUBLIC_SHELL_VERSION}`
+      )}"`;
       response.set({
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'public, max-age=30, s-maxage=30, must-revalidate',

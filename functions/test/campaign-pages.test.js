@@ -146,6 +146,11 @@ test('renders the public engagement shell around sandboxed campaign content', ()
     nonce: 'testnonce',
   });
   assert.match(html, /src="\/campaigns\/clean-water\/content"/);
+  assert.match(
+    html,
+    /<link rel="icon" type="image\/png" sizes="160x160" href="\/assets\/img\/gsl-logo\.png">/
+  );
+  assert.match(html, /<link rel="apple-touch-icon" href="\/assets\/img\/gsl-logo\.png">/);
   assert.match(html, /https:\/\/newworld-game\.org\/campaigns\/clean-water/);
   assert.match(html, /allow-top-navigation-by-user-activation/);
   assert.match(html, /id="support-button"/);
