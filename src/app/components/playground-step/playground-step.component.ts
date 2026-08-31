@@ -38,6 +38,7 @@ import {
   acknowledgeConflictStep,
   buildStrategyReviewFromSteps,
   createStrategyReviewSyncMetadata,
+  rebaseStrategyReviewConflicts,
   reconcileStrategyReview,
   resolveStrategyReviewConflict,
   strategyReviewPlainText,
@@ -163,6 +164,7 @@ export class PlaygroundStepComponent implements OnInit, OnDestroy {
   private strategySyncMetadata?: StrategyReviewSyncMetadata;
   private pendingStrategyReconciliation?: StrategyReviewReconciliation;
   private pendingStrategyDraft = '';
+  private strategyReviewSaveQueue: Promise<void> = Promise.resolve();
   private strategyInitializationStarted = false;
   private strategyReconciliationTimer?: ReturnType<typeof setTimeout>;
   private strategyReconciliationInFlight = false;
@@ -457,6 +459,28 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     const now = Date.now();
     const timeSinceLastEdit = now - this.lastLocalEditTime;
     const userIsTyping = timeSinceLastEdit < this.TYPING_COOLDOWN_MS;
+    const previousStrategyReview = String(
+      this.currentSolution.strategyReview || ''
+    );
+    const previousPendingConflictKeys = (
+      this.currentSolution.strategyReviewSyncMetadata
+        ?.pendingConflictStepKeys || []
+    ).join('|');
+    const incomingPendingConflictKeys = (
+      data.strategyReviewSyncMetadata?.pendingConflictStepKeys || []
+    ).join('|');
+    const strategyReviewProgressChanged =
+      this.isStrategyReviewStep &&
+      ((data.strategyReview !== undefined &&
+        String(data.strategyReview || '') !== previousStrategyReview) ||
+        (data.strategyReviewSyncStatus !== undefined &&
+          data.strategyReviewSyncStatus !==
+            this.currentSolution.strategyReviewSyncStatus) ||
+        (data.strategyReviewConflictCount !== undefined &&
+          Number(data.strategyReviewConflictCount || 0) !==
+            Number(this.currentSolution.strategyReviewConflictCount || 0)) ||
+        (data.strategyReviewSyncMetadata !== undefined &&
+          incomingPendingConflictKeys !== previousPendingConflictKeys));
     const previousStepsHash = strategyReviewStepsHash(
       strategyReviewSourceAnswers(this.currentSolution.status)
     );
@@ -486,7 +510,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     
     // If user is actively typing, don't overwrite their content
     if (userIsTyping) {
-      if (sourceStepsChanged) {
+      if (sourceStepsChanged || strategyReviewProgressChanged) {
         this.scheduleStrategyReconciliation(this.TYPING_COOLDOWN_MS + 150);
       }
       return;
@@ -513,13 +537,14 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         if (data.strategyReview !== this.strategyReview) {
           this.strategyReview = data.strategyReview;
           this.lastSavedStrategyReview = data.strategyReview;
+          this.syncPendingStrategyDraftWithCurrentReview();
         }
       }
     } finally {
       // Reset flag after a short delay to allow Angular change detection
       setTimeout(() => {
         this.isReceivingRemoteUpdate = false;
-        if (sourceStepsChanged) {
+        if (sourceStepsChanged || strategyReviewProgressChanged) {
           this.scheduleStrategyReconciliation();
         }
       }, 100);
@@ -695,11 +720,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
           : importedHtml;
       this.lastLocalEditTime = Date.now();
       this.cdRef.detectChanges();
-      await this.solution.saveSolutionStrategyReview(
-        this.solutionId,
-        this.strategyReview
-      );
-      this.lastSavedStrategyReview = this.strategyReview || '';
+      await this.persistStrategyReviewDraft(this.strategyReview);
       return;
     }
 
@@ -832,10 +853,8 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         this.strategyReviewSelected &&
         this.strategyReview !== this.lastSavedStrategyReview
       ) {
-        this.solution
-          .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
+        this.persistStrategyReviewDraft(this.strategyReview)
           .then(() => {
-            this.lastSavedStrategyReview = this.strategyReview || '';
             this.saveSuccess = true;
           })
           .catch((error) => {
@@ -896,10 +915,8 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         this.strategyReviewSelected &&
         this.strategyReview !== this.lastSavedStrategyReview
       ) {
-        this.solution
-          .saveSolutionStrategyReview(this.solutionId, this.strategyReview)
+        this.persistStrategyReviewDraft(this.strategyReview)
           .then(() => {
-            this.lastSavedStrategyReview = this.strategyReview || '';
             // this.saveSuccess = true;
           })
           .catch((error) => {
@@ -1197,10 +1214,15 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.resolvingStrategyConflict = true;
     this.savingStrategyConflictStep = conflict.stepKey;
     try {
+      await this.flushStrategyReviewDraftBeforeDecision();
+      const latestConflict =
+        this.strategyConflicts.find(
+          (item) => item.stepKey === conflict.stepKey
+        ) || conflict;
       const previousReview = this.strategyReview;
       const nextDraft = resolveStrategyReviewConflict(
         this.pendingStrategyDraft,
-        conflict,
+        latestConflict,
         resolution
       );
       const outcome =
@@ -1210,7 +1232,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
             ? 'replaced'
             : 'merged';
       const remainingConflicts = this.strategyConflicts.filter(
-        (item) => item.stepKey !== conflict.stepKey
+        (item) => item.stepKey !== latestConflict.stepKey
       );
       const previousMetadata =
         this.pendingStrategyReconciliation.nextMetadata;
@@ -1223,7 +1245,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
       const acknowledgedMetadata = acknowledgeConflictStep(
         previousMetadata,
         this.currentSolution.status,
-        conflict.stepKey,
+        latestConflict.stepKey,
         outcome,
         this.getStrategyHeadingMap()
       );
@@ -1263,7 +1285,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
         remainingConflicts.length;
       this.pendingStrategyDraft = nextDraft;
       this.strategyConflicts = remainingConflicts;
-      delete this.expandedStrategyConflictSteps[conflict.stepKey];
+      delete this.expandedStrategyConflictSteps[latestConflict.stepKey];
 
       if (remainingConflicts.length) {
         this.pendingStrategyReconciliation = {
@@ -1277,7 +1299,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
           remainingConflicts.length
         } ${
           remainingConflicts.length === 1 ? 'section remains' : 'sections remain'
-        }. You can safely leave and return later.`;
+        }. Continue editing, review another section, or return later.`;
       } else {
         this.pendingStrategyReconciliation = undefined;
         this.pendingStrategyDraft = '';
@@ -1319,6 +1341,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
 
     this.resolvingStrategyConflict = true;
     try {
+      await this.flushStrategyReviewDraftBeforeDecision();
       const recoveryAlreadyCreated =
         this.pendingStrategyReconciliation.nextMetadata
           .reconciliationRecoveryCreated || false;
@@ -1570,6 +1593,70 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     }, delay);
   }
 
+  private persistStrategyReviewDraft(review: string): Promise<void> {
+    const requestedReview = String(review || '');
+    const queuedSave = this.strategyReviewSaveQueue
+      .catch(() => undefined)
+      .then(async () => {
+        if (requestedReview === this.lastSavedStrategyReview) {
+          if (this.strategyReview === requestedReview) {
+            this.syncPendingStrategyDraftWithCurrentReview();
+          }
+          return;
+        }
+
+        await this.solution.saveSolutionStrategyReview(
+          this.solutionId,
+          requestedReview
+        );
+
+        // A newer keystroke may have arrived while this save was in flight.
+        // Only mark the editor clean when the saved value is still current.
+        if (this.strategyReview === requestedReview) {
+          this.lastSavedStrategyReview = requestedReview;
+          this.currentSolution.strategyReview = requestedReview;
+          this.syncPendingStrategyDraftWithCurrentReview();
+        }
+      });
+
+    this.strategyReviewSaveQueue = queuedSave;
+    return queuedSave;
+  }
+
+  private async flushStrategyReviewDraftBeforeDecision(): Promise<void> {
+    // A failed background autosave should not permanently block future
+    // decisions. Retry the current value below when it is still unsaved.
+    await this.strategyReviewSaveQueue.catch(() => undefined);
+
+    if (this.strategyReview !== this.lastSavedStrategyReview) {
+      await this.persistStrategyReviewDraft(this.strategyReview);
+    }
+
+    this.syncPendingStrategyDraftWithCurrentReview();
+  }
+
+  private syncPendingStrategyDraftWithCurrentReview(): void {
+    if (
+      this.strategySyncState !== 'attention' ||
+      !this.pendingStrategyReconciliation
+    ) {
+      return;
+    }
+
+    const latestDraft = String(this.strategyReview || '');
+    const rebasedConflicts = rebaseStrategyReviewConflicts(
+      latestDraft,
+      this.strategyConflicts
+    );
+    this.pendingStrategyDraft = latestDraft;
+    this.strategyConflicts = rebasedConflicts;
+    this.pendingStrategyReconciliation = {
+      ...this.pendingStrategyReconciliation,
+      draftHtml: latestDraft,
+      conflicts: rebasedConflicts,
+    };
+  }
+
   private async reconcileCurrentStrategy(): Promise<void> {
     if (
       this.strategyReconciliationInFlight ||
@@ -1716,14 +1803,14 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.strategySyncNotice = progressAlreadyPersisted
       ? `Your earlier decisions are saved. ${this.strategyConflicts.length} ${
           this.strategyConflicts.length === 1 ? 'section remains' : 'sections remain'
-        }, and you can continue where you left off.`
+        }, and you can continue editing or reviewing where you left off.`
       : reconciliation.legacy
         ? `This existing draft needs a one-time review against Steps 1–4. ${this.strategyConflicts.length} ${
             this.strategyConflicts.length === 1 ? 'section needs' : 'sections need'
-          } your decision.`
+          } your decision when you are ready; you can continue editing now.`
         : `${this.strategyConflicts.length} ${
-            this.strategyConflicts.length === 1 ? 'section needs' : 'sections need'
-          } your decision. Each decision saves immediately, and unrelated draft writing will be preserved.`;
+            this.strategyConflicts.length === 1 ? 'section differs' : 'sections differ'
+          } from Steps 1–4. Review them now or later; each decision saves immediately, and unrelated draft writing will be preserved.`;
 
     if (!progressAlreadyPersisted) {
       await this.solution.saveStrategyReviewReconciliation(

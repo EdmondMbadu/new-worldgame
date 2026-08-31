@@ -302,6 +302,24 @@ export function resolveStrategyReviewConflict(
   );
 }
 
+/**
+ * Refresh the draft-side section stored on each pending conflict.
+ *
+ * Conflict reconciliation can remain pending while the full Strategy Review is
+ * edited. Keeping these section snapshots current ensures a later decision is
+ * applied to the latest draft instead of restoring wording that was visible
+ * when the conflict panel first loaded.
+ */
+export function rebaseStrategyReviewConflicts(
+  draftHtml: string,
+  conflicts: StrategyReviewConflict[]
+): StrategyReviewConflict[] {
+  return conflicts.map((conflict) => ({
+    ...conflict,
+    currentDraftHtml: findStrategyReviewSection(draftHtml, conflict.stepKey),
+  }));
+}
+
 export function acknowledgeConflictStep(
   metadata: StrategyReviewSyncMetadata,
   currentStatus: Record<string, string> | undefined,

@@ -174,8 +174,8 @@
                         <p class="font-bold">
                             {{ strategySyncState === 'attention'
                                 ? (strategyConflicts.length === 1
-                                    ? 'One section needs your decision'
-                                    : strategyConflicts.length + ' sections need your decision')
+                                    ? 'One section differs from Steps 1–4'
+                                    : strategyConflicts.length + ' sections differ from Steps 1–4')
                                 : strategySyncState === 'updated'
                                   ? 'New information was added'
                                   : strategySyncState === 'error'
@@ -194,7 +194,7 @@
                     <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-100/60 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/30">
                         <div>
                             <p class="text-xs font-semibold leading-5">
-                                Resolve each section below. Every decision is saved immediately, so you can safely leave and return later.
+                                Review these sections when you are ready. Every decision is saved immediately, so you can safely leave and return later.
                             </p>
                             <p class="mt-1 text-xs leading-5 opacity-80">
                                 Steps 1–4 will not be changed.
@@ -606,9 +606,9 @@
                     <div
                         *ngIf="isStrategyReviewStep && strategyReviewSelected && strategySyncState === 'attention'"
                         class="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm leading-5 text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-                        <span class="material-symbols-outlined mt-0.5 text-base" aria-hidden="true">lock</span>
+                        <span class="material-symbols-outlined mt-0.5 text-base" aria-hidden="true">edit_note</span>
                         <p>
-                            Your saved progress is shown below. Finish the remaining section decisions to unlock full-document editing.
+                            You can continue editing below. Review the remaining section differences now or later; they will remain tracked until you decide.
                         </p>
                     </div>
 
@@ -623,7 +623,7 @@
                     (ready)="onReady($event, i)"
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
                     [(ngModel)]="strategyReview"
-                    [disabled]="strategySyncState === 'attention'"
+                    [disabled]="resolvingStrategyConflict"
                     
                     *ngIf="isStrategyReviewStep && strategyReviewSelected"
                 

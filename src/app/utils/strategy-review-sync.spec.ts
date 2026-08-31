@@ -3,6 +3,7 @@ import {
   buildStrategyReviewFromSteps,
   createStrategyReviewSyncMetadata,
   findStrategyReviewSection,
+  rebaseStrategyReviewConflicts,
   reconcileStrategyReview,
   resolveStrategyReviewConflict,
   strategyReviewPlainText,
@@ -199,6 +200,71 @@ describe('Strategy Review reconciliation', () => {
     expect(combined).toContain('Begin with five pilot cities.');
     expect(combined).toContain('Launch globally.');
     expect(changedStatus['S3-A']).toBe('<p>Launch globally.</p>');
+  });
+
+  it('applies a deferred conflict decision to the latest manually edited draft', () => {
+    const originalDraft = buildStrategyReviewFromSteps(
+      originalStatus,
+      headings
+    );
+    const initiallyEditedDraft = originalDraft.replace(
+      '<p>Original plan</p>',
+      '<p>Begin with five pilot cities.</p>'
+    );
+    const changedStatus = {
+      ...originalStatus,
+      'S3-A': '<p>Launch globally.</p>',
+    };
+    const pending = reconcileStrategyReview(
+      changedStatus,
+      initiallyEditedDraft,
+      createStrategyReviewSyncMetadata(originalStatus, 'generated'),
+      headings
+    );
+    const latestDraft = pending.draftHtml
+      .replace('five pilot cities', 'ten pilot cities')
+      .replace('</h1>', '</h1><p>New full-document note.</p>');
+    const rebasedConflict = rebaseStrategyReviewConflicts(
+      latestDraft,
+      pending.conflicts
+    )[0];
+
+    const kept = resolveStrategyReviewConflict(
+      latestDraft,
+      rebasedConflict,
+      'keep-review'
+    );
+    const combined = resolveStrategyReviewConflict(
+      latestDraft,
+      rebasedConflict,
+      'combine'
+    );
+    const replaced = resolveStrategyReviewConflict(
+      latestDraft,
+      rebasedConflict,
+      'use-steps'
+    );
+    const deferred = reconcileStrategyReview(
+      changedStatus,
+      latestDraft,
+      pending.nextMetadata,
+      headings
+    );
+
+    expect(rebasedConflict.currentDraftHtml).toContain('ten pilot cities');
+    expect(kept).toContain('ten pilot cities');
+    expect(kept).not.toContain('five pilot cities');
+    expect(kept).toContain('New full-document note.');
+    expect(combined).toContain('ten pilot cities');
+    expect(combined).toContain('Launch globally.');
+    expect(combined).toContain('New full-document note.');
+    expect(replaced).toContain('Launch globally.');
+    expect(replaced).toContain('New full-document note.');
+    expect(deferred.state).toBe('attention');
+    expect(deferred.conflicts.map((conflict) => conflict.stepKey)).toEqual([
+      'S3',
+    ]);
+    expect(deferred.draftHtml).toContain('ten pilot cities');
   });
 
   it('acknowledges a kept draft section so the same source revision is not asked again', () => {
