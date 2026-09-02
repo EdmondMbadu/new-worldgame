@@ -190,20 +190,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.globalSolutionsLabBannerEnabled = config.enabled;
       });
 
-    // this.applyTheme();
-    // // this.darkModeInitial();
     this.setThemeModeLogo();
-
-    const darkModeInitialized = localStorage.getItem('darkModeInitialized');
-
-    if (!darkModeInitialized) {
-      // set the default to dark mode if and only if not initialized before
-      this.data.darkModeInitial();
-      console.log('dark mode initializing ...', this.dark);
-      // Mark dark mode as initialized so it doesn't run again
-      this.dark = true;
-      localStorage.setItem('darkModeInitialized', 'true');
-    }
 
     this.filteredItems = [];
 
@@ -367,14 +354,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   setThemeModeLogo() {
     try {
-      if (localStorage.getItem('theme') === 'light') {
-        this.dark = false;
-      } else {
-        this.dark = true;
-      }
+      this.dark = localStorage.getItem('theme') === 'dark';
     } catch (error) {
       console.warn('Access to localStorage denied:', error);
-      this.dark = true; // Default to dark mode if localStorage is unavailable
+      this.dark = false;
     }
   }
 
@@ -509,16 +492,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   darkMode() {
-    try {
-      localStorage.setItem('theme', 'dark');
-    } catch (error) {
-      console.warn('Access to localStorage denied:', error);
-    }
-    this.applyTheme();
-    this.dark = true;
-  }
-
-  darkModeInitial() {
     try {
       localStorage.setItem('theme', 'dark');
     } catch (error) {

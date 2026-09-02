@@ -1,861 +1,506 @@
-<div class="dark:bg-slate-900 min-h-screen">
+<div id="top" class="landing-page min-h-screen bg-white dark:bg-slate-950">
   <app-navbar></app-navbar>
 
+  <!-- HERO -->
   <section
     id="main"
-    class="relative py-16 md:pt-32 bg-white dark:bg-slate-900 overflow-hidden"
+    class="relative overflow-hidden bg-white pb-20 pt-[104px] dark:bg-slate-900 md:pb-24 md:pt-[120px]"
   >
-    <!-- add top padding so content clears fixed navbar -->
     <div
-      class="testing dark:terrain container flex flex-col-reverse lg:flex-row items-center px-24 mx-auto space-y-0 mt-30 lg:justify-between justify-center"
+      class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_30%,rgba(13,148,136,0.12),transparent_34%)] dark:bg-[radial-gradient(circle_at_78%_30%,rgba(45,212,191,0.10),transparent_34%)]"
+      aria-hidden="true"
+    ></div>
+
+    <div
+      class="relative container mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16"
     >
-      <!-- ▸ Text column ------------------------------------------------ -->
-      <div class="flex flex-col mb-32 text-center space-y-12 lg:w-1/2">
+      <div class="max-w-2xl text-center lg:text-left">
         <h1
-          class="animated-text max-w-md mt-10 dark:text-white text-worldsecond text-3xl font-extrabold md:text-4xl md:text-left"
+          class="text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl"
         >
-          <span class="typed-container">
-            <span #typedWord class="typed-word text-teal-700"></span>
-          </span>
-          <span class="block mt-2">
-            {{ 'landingHome.hero.actionLine' | translate }}
+          <span class="sr-only">{{ 'landingHome.hero.title' | translate }}</span>
+          <span aria-hidden="true">
+            <span class="typed-container">
+              <span class="typed-word text-teal-700 dark:text-teal-300">{{ typedWord }}</span>
+            </span>
+            <span class="mt-2 block">
+              {{ 'landingHome.hero.actionLine' | translate }}
+            </span>
           </span>
         </h1>
 
         <p
-          class="max-w-md text-xl italic text-center lg:text-left text-gray-400"
+          class="mx-auto mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-slate-300 lg:mx-0"
+        >
+          {{ 'landingHome.hero.description' | translate }}
+        </p>
+
+        <blockquote
+          class="mx-auto mt-7 max-w-xl border-l-2 border-teal-600 pl-4 text-left text-base italic leading-7 text-slate-500 dark:border-teal-400 dark:text-slate-400 lg:mx-0"
         >
           &ldquo;{{ 'landingHome.hero.quote' | translate }}&rdquo;
-          <span class="px-2 not-italic">
+          <cite class="ml-1 not-italic font-semibold text-slate-700 dark:text-slate-200">
             {{ 'landingHome.hero.quoteAuthor' | translate }}
-          </span>
-        </p>
+          </cite>
+        </blockquote>
 
-        <div class="flex flex-col sm:flex-row gap-3 pt-2">
-          <!-- Primary CTA -->
-          <a
-            routerLink="/get-started"
-            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 transition"
-          >
-            {{ 'landingHome.hero.cta' | translate }}
-            <svg
-              class="h-5 w-5 -rotate-45"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </a>
-
-          <!-- Schedule a Demo CTA -->
-          <a
-            routerLink="/scheduler"
-            class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition"
-          >
-            Schedule a Demo
-            <svg
-              class="h-5 w-5 -rotate-45"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
-          </a>
-
-          <!-- Secondary CTA
-          <a routerLink="/ask-bucky"
-             class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold
-                    text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70
-                    hover:bg-teal-50 dark:hover:bg-teal-900/20 transition">
-            Start solving world problems with Bucky
-            <svg class="h-5 w-5 -rotate-45" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
-            </svg>
-          </a> -->
-        </div>
-      </div>
-
-      <!-- !-- ▸ Image / globe column -->
-      <div class="order-1 lg:order-2 relative">
         <div
-          class="hidden md:block relative mx-auto w-full max-w-sm md:max-w-md lg:max-w-lg"
+          class="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start"
         >
-          <img
-            class="rotate mx-auto rounded-full ring-1 ring-black/5 dark:ring-white/10"
-            src="../../../assets/img/earth-triangle.png"
-            [attr.alt]="'landingHome.hero.imageAlt' | translate"
-          />
-        </div>
-
-        <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
-          {{ 'landingHome.hero.imageCaption' | translate }}
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── QUOTE (brought to life) ────────────────────────────── -->
-  <section
-    id="quote-nwg"
-    class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
-  >
-    <div class="container mx-auto max-w-7xl px-6">
-      <figure class="relative mx-auto max-w-4xl">
-        <!-- card -->
-        <div
-          class="relative overflow-hidden rounded-3xl bg-white/80 dark:bg-slate-900/60 ring-1 ring-slate-200/70 dark:ring-slate-800/70 p-8 md:p-12 shadow-2xl"
-        >
-          <!-- decorative quote mark -->
-          <div
-            class="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-700 text-white shadow"
+          <button
+            type="button"
+            (click)="playIntroVideo()"
+            aria-controls="intro-video-player"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-teal-700 px-6 py-3 text-base font-bold text-white shadow-lg shadow-teal-950/15 transition hover:-translate-y-0.5 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:bg-teal-600 dark:hover:bg-teal-500 dark:focus:ring-teal-800"
           >
             <svg
-              class="h-6 w-6"
+              class="h-5 w-5"
               viewBox="0 0 24 24"
               fill="currentColor"
               aria-hidden="true"
             >
-              <path
-                d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z"
-              />
+              <path d="M8 5v14l11-7z" />
             </svg>
-          </div>
+            {{ 'landingHome.hero.watchCta' | translate }}
+          </button>
 
-          <!-- main quote -->
-          <blockquote class="text-center">
-            <p
-              class="text-2xl md:text-4xl leading-tight font-semibold italic text-slate-900 dark:text-white"
+          <a
+            href="#how-it-works"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-base font-bold text-slate-800 transition hover:-translate-y-0.5 hover:border-teal-500 hover:text-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-teal-500 dark:hover:text-teal-200"
+          >
+            {{ 'landingHome.hero.howCta' | translate }}
+            <svg
+              class="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
             >
-              &ldquo;{{ 'landingHome.quote.text' | translate }}&rdquo;
-            </p>
-          </blockquote>
-
-          <!-- author -->
-          <figcaption class="mt-8 flex flex-col items-center gap-4 text-center">
-            <div class="flex items-center gap-4">
-              <img
-                class="h-12 w-12 rounded-full ring-2 ring-white/80 dark:ring-slate-900/80"
-                src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2FAnto%CC%81nio_Guterres%2C_23.03.23.jpg?alt=media&token=27007e3c-17fe-46de-9f17-26a2533ed066"
-                alt="António Guterres"
-                loading="lazy"
-              />
-              <div
-                class="flex flex-col sm:flex-row sm:items-center sm:divide-x sm:divide-slate-300/60 dark:sm:divide-slate-700/70"
-              >
-                <cite
-                  class="px-0 sm:pe-3 font-semibold text-slate-900 dark:text-white"
-                  >{{ 'landingHome.quote.name' | translate }}</cite
-                >
-                <cite class="sm:ps-3 text-slate-600 dark:text-slate-400"
-                  >{{ 'landingHome.quote.title' | translate }}</cite
-                >
-              </div>
-            </div>
-
-            <!-- supportive line -->
-            <p
-              class="mt-2 text-base md:text-lg text-slate-600 dark:text-slate-300"
-            >
-              {{ 'landingHome.quote.taglinePrefix' | translate }}
-              <span
-                class="font-semibold text-slate-900 dark:text-white"
-                >Global Solutions Lab</span
-              >.
-            </p>
-          </figcaption>
+              <path d="M12 5v14M5 12l7 7 7-7" />
+            </svg>
+          </a>
         </div>
-      </figure>
+      </div>
+
+      <div id="intro-video" class="relative mx-auto w-full max-w-2xl">
+        <div
+          class="absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-teal-400/20 via-sky-400/10 to-transparent blur-2xl"
+          aria-hidden="true"
+        ></div>
+        <div
+          class="overflow-hidden rounded-3xl border border-slate-200 bg-slate-950 p-2 shadow-2xl shadow-slate-950/20 dark:border-slate-700"
+        >
+          <div class="relative aspect-video overflow-hidden rounded-2xl">
+            <video
+              #introVideo
+              id="intro-video-player"
+              class="h-full w-full object-cover"
+              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/nwgNewsVideos%2Fvideos%2F2026%2FZ4YNQaJJX6pYYkqcoxzZ-global_solutions_lab_-_welcome_2.mp4?alt=media&amp;token=989def31-0b73-434d-9ef0-3a977c6725a0"
+              poster="assets/img/landing-intro-sofia-thumbnail.jpg"
+              title="Global Solutions Lab - Player Wanted"
+              controls
+              playsinline
+              preload="metadata"
+            >
+              Your browser does not support the video element.
+            </video>
+            <span
+              class="pointer-events-none absolute left-4 top-4 rounded-full bg-slate-950/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur"
+            >
+              {{ 'landingHome.hero.videoLabel' | translate }}
+            </span>
+          </div>
+        </div>
+        <p class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+          {{ 'landingHome.hero.videoCaption' | translate }}
+        </p>
+      </div>
     </div>
   </section>
 
-  <!-- ── INTRO VIDEO (elevated & responsive) ─────────────────── -->
+  <!-- CREDIBILITY -->
   <section
-    id="intro-video"
-    class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
+    id="credibility"
+    aria-label="Global Solutions Lab credentials"
+    class="border-y border-slate-200 bg-slate-50 py-8 dark:border-slate-800 dark:bg-slate-950"
+  >
+    <div class="container mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:gap-4 sm:px-6 lg:grid-cols-4">
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
+        <p class="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+          {{ 'landingHome.credibility.earthGameLabel' | translate }}
+        </p>
+        <p class="mt-2 text-sm font-semibold leading-6 text-slate-800 dark:text-slate-100">
+          {{ 'landingHome.credibility.earthGameText' | translate }}
+        </p>
+      </div>
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
+        <p class="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+          {{ 'landingHome.credibility.nonprofitLabel' | translate }}
+        </p>
+        <p class="mt-2 text-sm font-semibold leading-6 text-slate-800 dark:text-slate-100">
+          {{ 'landingHome.credibility.nonprofitText' | translate }}
+        </p>
+      </div>
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
+        <p class="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+          {{ 'landingHome.credibility.unLabel' | translate }}
+        </p>
+        <p class="mt-2 text-sm font-semibold leading-6 text-slate-800 dark:text-slate-100">
+          {{ 'landingHome.credibility.unText' | translate }}
+        </p>
+      </div>
+      <div class="rounded-2xl bg-white p-4 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800 sm:p-5">
+        <p class="text-xs font-bold uppercase tracking-wider text-teal-700 dark:text-teal-300">
+          {{ 'landingHome.credibility.methodLabel' | translate }}
+        </p>
+        <p class="mt-2 text-sm font-semibold leading-6 text-slate-800 dark:text-slate-100">
+          {{ 'landingHome.credibility.methodText' | translate }}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section
+    id="how-it-works"
+    class="scroll-mt-28 overflow-hidden bg-white py-20 dark:bg-slate-950 md:py-24"
   >
     <div class="container mx-auto max-w-7xl px-6">
-      <div class="grid items-center gap-12 lg:grid-cols-2">
-        <!-- Copy -->
-        <div class="space-y-6">
-          <span
-            class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
-          >
-            {{ 'landingHome.introVideo.badge' | translate }}
-          </span>
+      <header class="mx-auto max-w-3xl text-center">
+        <span
+          class="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-200 dark:bg-teal-950/40 dark:text-teal-200 dark:ring-teal-800"
+        >
+          {{ 'landingHome.howItWorks.badge' | translate }}
+        </span>
+        <h2
+          class="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white md:text-5xl"
+        >
+          {{ 'landingHome.howItWorks.title' | translate }}
+        </h2>
+        <p class="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">
+          {{ 'landingHome.howItWorks.description' | translate }}
+        </p>
+      </header>
 
-          <h2
-            class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
-          >
-            <span class="text-slate-900 dark:text-white">
-              {{ 'landingHome.introVideo.title' | translate }}
-            </span>
-          </h2>
-
-          <p
-            class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
-          >
-            {{ 'landingHome.introVideo.description' | translate }}
+      <ol class="mt-12 grid gap-6 md:grid-cols-3">
+        <li class="relative rounded-3xl border border-slate-200 bg-slate-50 p-7 dark:border-slate-800 dark:bg-slate-900">
+          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-700 text-lg font-extrabold text-white" aria-hidden="true">1</span>
+          <h3 class="mt-6 text-xl font-bold text-slate-950 dark:text-white">
+            {{ 'landingHome.howItWorks.step1Title' | translate }}
+          </h3>
+          <p class="mt-3 text-base leading-7 text-slate-600 dark:text-slate-300">
+            {{ 'landingHome.howItWorks.step1Text' | translate }}
           </p>
+        </li>
+        <li class="relative rounded-3xl border border-slate-200 bg-slate-50 p-7 dark:border-slate-800 dark:bg-slate-900">
+          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-700 text-lg font-extrabold text-white" aria-hidden="true">2</span>
+          <h3 class="mt-6 text-xl font-bold text-slate-950 dark:text-white">
+            {{ 'landingHome.howItWorks.step2Title' | translate }}
+          </h3>
+          <p class="mt-3 text-base leading-7 text-slate-600 dark:text-slate-300">
+            {{ 'landingHome.howItWorks.step2Text' | translate }}
+          </p>
+        </li>
+        <li class="relative rounded-3xl border border-slate-200 bg-slate-50 p-7 dark:border-slate-800 dark:bg-slate-900">
+          <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-700 text-lg font-extrabold text-white" aria-hidden="true">3</span>
+          <h3 class="mt-6 text-xl font-bold text-slate-950 dark:text-white">
+            {{ 'landingHome.howItWorks.step3Title' | translate }}
+          </h3>
+          <p class="mt-3 text-base leading-7 text-slate-600 dark:text-slate-300">
+            {{ 'landingHome.howItWorks.step3Text' | translate }}
+          </p>
+        </li>
+      </ol>
 
-          <!-- Optional secondary action -->
-          <div>
-            <a
-              href="https://newworld-game.org/nwg-news?v=Z4YNQaJJX6pYYkqcoxzZ"
-              target="_blank"
-              rel="noopener"
-              class="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition"
-            >
-              {{ 'landingHome.introVideo.cta' | translate }}
-              <svg
-                class="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </a>
-          </div>
-        </div>
-
-        <!-- Video: framed, glowy, perfectly responsive -->
-        <div class="relative">
-          <div
-            class="relative mx-auto w-full max-w-2xl overflow-hidden rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl"
-          >
-            <!-- maintain aspect on all screens -->
-            <div class="aspect-video">
-              <video
-                class="h-full w-full"
-                src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/nwgNewsVideos%2Fvideos%2F2026%2FZ4YNQaJJX6pYYkqcoxzZ-global_solutions_lab_-_welcome_2.mp4?alt=media&amp;token=989def31-0b73-434d-9ef0-3a977c6725a0"
-                poster="assets/img/landing-intro-sofia-thumbnail.jpg"
-                title="Global Solutions Lab - Player Wanted"
-                controls
-                playsinline
-                preload="metadata"
-              >
-                Your browser does not support the video element.
-              </video>
-            </div>
-
-            <!-- subtle decorative overlay (non-interactive) -->
-            <!-- corner label -->
-            <span
-              class="pointer-events-none absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80 ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold text-teal-700 dark:text-teal-300"
-            >
-              {{ 'landingHome.introVideo.cornerLabel' | translate }}
-            </span>
-          </div>
-
-          <!-- caption -->
-          <p
-            class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
-          >
-            {{ 'landingHome.introVideo.caption' | translate }}
+      <div class="mt-10 grid items-center gap-8 overflow-hidden rounded-3xl bg-slate-950 px-6 py-8 text-white dark:bg-slate-900 sm:px-10 lg:grid-cols-[220px_1fr]">
+        <img
+          src="../../../assets/img/earth-triangle.png"
+          [attr.alt]="'landingHome.hero.imageAlt' | translate"
+          class="rotate mx-auto w-44 rounded-full ring-1 ring-white/15 sm:w-52"
+        />
+        <div class="text-center lg:text-left">
+          <p class="text-xs font-bold uppercase tracking-[0.16em] text-teal-300">
+            {{ 'landingHome.howItWorks.humanLabel' | translate }}
+          </p>
+          <h3 class="mt-3 text-2xl font-bold md:text-3xl">
+            {{ 'landingHome.howItWorks.humanTitle' | translate }}
+          </h3>
+          <p class="mt-3 max-w-3xl text-base leading-7 text-slate-300">
+            {{ 'landingHome.howItWorks.humanText' | translate }}
           </p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── CHALLENGE (elevated) ─────────────────────────────────── -->
-  <section
-    id="challenge"
-    class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
-  >
-    <div class="container mx-auto max-w-7xl px-6">
-      <div class="grid items-center gap-12 lg:grid-cols-2">
-        <!-- Visual: framed with glow and subtle motion -->
-        <div class="relative">
-          <figure class="relative mx-auto w-full max-w-md">
-            <img
-              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2Fchallenge-landing.webp?alt=media&token=69a081df-466d-4837-b6d7-d274f61a3462"
-              [attr.alt]="'landingHome.challenge.imageAlt' | translate"
-              class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl transition-transform duration-300 hover:-translate-y-1"
-            />
-            <!-- corner tag -->
-            <span
-              class="absolute -top-3 -left-3 rounded-full bg-white/90 dark:bg-slate-900/80 ring-1 ring-slate-200/70 dark:ring-slate-800/70 px-3 py-1 text-xs font-semibold text-teal-700 dark:text-teal-300"
-            >
-              {{ 'landingHome.challenge.imageTag' | translate }}
-            </span>
-          </figure>
-        </div>
-
-        <!-- Copy -->
-        <div class="space-y-6">
-          <span
-            class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
-          >
-            {{ 'landingHome.challenge.badge' | translate }}
-          </span>
-
-          <h2
-            class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
-          >
-            <span class="text-slate-900 dark:text-white">
-              {{ 'landingHome.challenge.title' | translate }}
-            </span>
-          </h2>
-
-          <p
-            class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
-          >
-            {{ 'landingHome.challenge.description' | translate }}
-          </p>
-
-          <!-- key traits as compact chips -->
-          <div class="flex flex-wrap gap-2">
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.challenge.traits.boldness' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.challenge.traits.creativity' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.challenge.traits.collaboration' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.challenge.traits.persistence' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.challenge.traits.playfulness' | translate }}</span
-            >
-          </div>
-
-          <!-- emphasis callout -->
-          <div
-            class="relative overflow-hidden rounded-2xl p-5 ring-1 ring-slate-200/70 dark:ring-slate-800/70 bg-white/70 dark:bg-slate-900/60"
-          >
-            <p class="relative text-slate-700 dark:text-slate-200">
-              <span class="font-semibold"
-                >{{ 'landingHome.challenge.calloutTitle' | translate }}</span
-              >
-              {{ 'landingHome.challenge.calloutText' | translate }}
-            </p>
-          </div>
-
-          <!-- supportive line -->
-          <p class="max-w-xl text-slate-600 dark:text-slate-300">
-            {{ 'landingHome.challenge.support' | translate }}
-          </p>
-
-          <!-- CTA -->
-          <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
-            <a
-              routerLink="/about"
-              class="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-base font-semibold text-teal-700 dark:text-teal-300 ring-1 ring-teal-300/60 dark:ring-teal-800/70 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition"
-            >
-              {{ 'landingHome.challenge.secondaryCta' | translate }}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── SDGs SECTION ────────────────────────────────────────── -->
-  <section
-    id="sdgs"
-    class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
-  >
-    <div class="container mx-auto max-w-7xl px-6">
-      <div class="grid items-center gap-12 lg:grid-cols-2">
-        <!-- Copy -->
-        <div class="space-y-6">
-          <span
-            class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
-          >
-            {{ 'landingHome.sdgs.badge' | translate }}
-          </span>
-
-          <h2
-            class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
-          >
-            <span class="text-slate-900 dark:text-white">
-              {{ 'landingHome.sdgs.title' | translate }}
-            </span>
-          </h2>
-
-          <p
-            class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
-          >
-            {{ 'landingHome.sdgs.description' | translate }}
-          </p>
-
-          <!-- tasteful SDG badges (optional; remove if not needed) -->
-          <div class="flex flex-wrap gap-2 pt-2">
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.sdgs.badges.noPoverty' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.sdgs.badges.goodHealth' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.sdgs.badges.education' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.sdgs.badges.energy' | translate }}</span
-            >
-            <span
-              class="px-3 py-1 rounded-full text-sm ring-1 ring-slate-200/70 dark:ring-slate-700/70 text-slate-700 dark:text-slate-200"
-              >{{ 'landingHome.sdgs.badges.climate' | translate }}</span
-            >
-          </div>
-
-        </div>
-
-        <!-- Visual -->
-        <div class="relative">
-          <figure class="relative mx-auto w-full max-w-md">
-            <img
-              src="../../../assets/img/sdgs.png"
-              [attr.alt]="'landingHome.sdgs.imageAlt' | translate"
-              class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-xl transition-transform duration-300 hover:-translate-y-1"
-            />
-            <figcaption
-              class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
-            >
-              {{ 'landingHome.sdgs.imageCaption' | translate }}
-            </figcaption>
-          </figure>
-        </div>
-      </div>
-    </div>
-  </section>
-  <!-- AI COLLEAGUES -->
-  <section id="ai" class="relative overflow-hidden py-20 bg-white dark:bg-slate-950">
+  <!-- AI LAB ASSISTANTS -->
+  <section id="ai" class="bg-slate-50 py-20 dark:bg-slate-900 md:py-24">
     <div class="mx-auto max-w-7xl px-6">
       <div class="mx-auto max-w-3xl text-center">
-        <h2
-          class="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
-        >
+        <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-200 dark:bg-slate-950 dark:text-teal-200 dark:ring-teal-800">
+          {{ 'landingHome.ai.badge' | translate }}
+        </span>
+        <h2 class="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white md:text-5xl">
           {{ 'landingHome.ai.title' | translate }}
         </h2>
-        <p class="mt-3 text-lg text-slate-600 dark:text-slate-300">
+        <p class="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">
           {{ 'landingHome.ai.description' | translate }}
         </p>
       </div>
 
-      <!-- grid -->
-      <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-12 grid gap-6 sm:grid-cols-2" [ngClass]="showAllAssistants ? 'lg:grid-cols-3' : 'lg:grid-cols-4'">
         <article
-          *ngFor="let item of aiOptions"
-          class="group relative overflow-hidden rounded-3xl border border-slate-200/70 bg-white/90 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-xl dark:border-slate-800/70 dark:bg-slate-900/70 dark:ring-white/10"
+          *ngFor="let item of displayedAiOptions"
+          class="group flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-950"
         >
-          <div class="relative z-10 flex items-center gap-4">
-            <img
-              [src]="item.avatarPath"
-              [alt]="item.name"
-              class="h-14 w-14 rounded-2xl object-cover ring-2 ring-white dark:ring-slate-900"
-            />
+          <div class="flex items-center gap-4">
+            <img [src]="item.avatarPath" [alt]="item.name" class="h-14 w-14 rounded-2xl object-cover ring-2 ring-slate-100 dark:ring-slate-800" loading="lazy" />
             <div>
-              <h3 class="text-lg font-semibold text-slate-900 dark:text-white">
-                {{ item.name }}
-              </h3>
-              <p
-                class="text-xs font-semibold uppercase tracking-wide text-teal-700 dark:text-teal-300"
-              >
-                {{
-                  item.group === 'colleague'
-                    ? ('landingHome.ai.groupColleague' | translate)
-                    : ('landingHome.ai.groupElder' | translate)
-                }}
+              <h3 class="text-lg font-bold text-slate-950 dark:text-white">{{ item.name }}</h3>
+              <p class="text-xs font-bold uppercase tracking-wide text-teal-700 dark:text-teal-300">
+                {{ 'landingHome.ai.groupColleague' | translate }}
               </p>
             </div>
           </div>
 
-          <p
-            class="relative z-10 mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300"
-          >
-            {{ item.intro }}
-          </p>
+          <p class="mt-4 flex-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{{ item.intro }}</p>
 
-          <!-- SDG chips -->
-          <div class="relative z-10 mt-4 flex flex-wrap gap-2">
+          <div class="mt-4 flex flex-wrap gap-2">
             <span
               *ngFor="let n of item.sdgs"
-              class="inline-flex items-center rounded-full border border-teal-300/60 bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-700 dark:border-teal-800/60 dark:bg-teal-900/20 dark:text-teal-200"
+              class="rounded-full border border-teal-200 bg-teal-50 px-2.5 py-0.5 text-xs font-medium text-teal-800 dark:border-teal-900 dark:bg-teal-950/40 dark:text-teal-200"
             >
               {{ 'landingHome.ai.sdgLabel' | translate: { number: n } }}
             </span>
           </div>
 
-          <!-- CTA -->
-          <div class="mt-6 relative z-10">
-            <button
-              type="button"
-              (click)="openAvatar(item)"
-              class="inline-flex items-center gap-2 rounded-full bg-teal-700 hover:bg-teal-800 px-4 py-2 text-sm font-semibold text-white shadow-sm focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
-            >
-              {{ 'landingHome.ai.ask' | translate: { name: item.name } }}
-              <svg
-                class="h-4 w-4 -rotate-45"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
-            </button>
-          </div>
+          <button
+            type="button"
+            (click)="openAvatar(item)"
+            class="mt-6 inline-flex items-center justify-center gap-2 self-start rounded-full bg-teal-700 px-4 py-2 text-sm font-bold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+          >
+            {{ 'landingHome.ai.ask' | translate: { name: item.name } }}
+            <span aria-hidden="true">↗</span>
+          </button>
         </article>
       </div>
 
-      <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
-        {{ 'landingHome.ai.tip' | translate }}
-      </p>
-    </div>
-  </section>
-
-  <!-- ── TESTIMONIALS ────────────────────────────────────────── -->
-  <section
-    id="testimonials"
-    class="relative py-24 bg-white dark:bg-slate-900 overflow-hidden"
-  >
-    <div class="container mx-auto px-6 max-w-7xl">
-      <header class="text-center mb-16">
-        <h2
-          class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white"
+      <div class="mt-9 text-center">
+        <button
+          type="button"
+          (click)="toggleAssistants()"
+          [attr.aria-expanded]="showAllAssistants"
+          class="inline-flex min-h-11 items-center justify-center rounded-full border border-slate-300 bg-white px-6 py-2.5 text-sm font-bold text-slate-800 transition hover:border-teal-500 hover:text-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:hover:border-teal-500 dark:hover:text-teal-200"
         >
-          {{ 'landingHome.testimonials.title' | translate }}
-        </h2>
-        <p
-          class="mt-4 text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto"
-        >
-          {{ 'landingHome.testimonials.subtitle' | translate }}
+          {{ (showAllAssistants ? 'landingHome.ai.showFewer' : 'landingHome.ai.showAll') | translate }}
+        </button>
+        <p class="mx-auto mt-4 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400">
+          {{ 'landingHome.ai.disclaimer' | translate }}
         </p>
-      </header>
-
-      <div class="grid gap-8 lg:grid-cols-2">
-        <!-- Cynthia -->
-        <article
-          class="relative h-full overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-600 p-[1px] shadow-xl"
-        >
-          <div
-            class="relative flex h-full flex-col rounded-[calc(1.5rem-1px)] bg-white/95 p-8 dark:bg-slate-900/95 md:p-10"
-          >
-            <div
-              class="absolute -right-16 -top-16 h-52 w-52 rounded-full bg-fuchsia-300/20 blur-3xl dark:bg-fuchsia-500/10"
-              aria-hidden="true"
-            ></div>
-
-            <div class="relative flex items-start justify-between gap-4">
-              <p
-                class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-indigo-700 dark:bg-indigo-950/70 dark:text-indigo-300"
-              >
-                {{ 'landingHome.testimonials.featured.badge' | translate }}
-              </p>
-              <div
-                class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-fuchsia-600 text-lg font-bold text-white shadow-lg"
-                aria-hidden="true"
-              >
-                {{ 'landingHome.testimonials.featured.initials' | translate }}
-              </div>
-            </div>
-
-            <blockquote
-              class="relative mt-7 text-lg md:text-xl font-semibold leading-relaxed text-slate-900 dark:text-white"
-            >
-              “{{ 'landingHome.testimonials.featured.quote' | translate }}”
-            </blockquote>
-
-            <p
-              class="relative mt-5 text-base leading-7 text-slate-600 dark:text-slate-300"
-            >
-              {{ 'landingHome.testimonials.featured.summary' | translate }}
-            </p>
-
-            <div class="relative mt-auto pt-8">
-              <p class="font-bold text-indigo-700 dark:text-indigo-300">
-                {{ 'landingHome.testimonials.featured.name' | translate }}
-              </p>
-              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {{ 'landingHome.testimonials.featured.role' | translate }}
-              </p>
-
-            </div>
-          </div>
-        </article>
-
-        <!-- Sue -->
-        <article
-          class="relative h-full overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-600 p-[1px] shadow-xl"
-        >
-          <div
-            class="relative flex h-full flex-col rounded-[calc(1.5rem-1px)] bg-white/95 p-8 dark:bg-slate-900/95 md:p-10"
-          >
-            <div
-              class="absolute -left-16 -bottom-16 h-52 w-52 rounded-full bg-cyan-300/20 blur-3xl dark:bg-cyan-500/10"
-              aria-hidden="true"
-            ></div>
-
-            <div class="relative flex items-start justify-between gap-4">
-              <p
-                class="inline-flex items-center gap-2 rounded-full bg-cyan-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-cyan-800 dark:bg-cyan-950/70 dark:text-cyan-300"
-              >
-                {{ 'landingHome.testimonials.sue.badge' | translate }}
-              </p>
-              <div
-                class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-600 to-indigo-600 text-lg font-bold text-white shadow-lg"
-                aria-hidden="true"
-              >
-                {{ 'landingHome.testimonials.sue.initials' | translate }}
-              </div>
-            </div>
-
-            <blockquote
-              class="relative mt-7 text-lg md:text-xl font-semibold leading-relaxed text-slate-900 dark:text-white"
-            >
-              “{{ 'landingHome.testimonials.sue.quote' | translate }}”
-            </blockquote>
-
-            <div class="relative mt-auto pt-8">
-              <p class="font-bold text-cyan-700 dark:text-cyan-300">
-                {{ 'landingHome.testimonials.sue.name' | translate }}
-              </p>
-              <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {{ 'landingHome.testimonials.sue.role' | translate }}
-              </p>
-            </div>
-          </div>
-        </article>
       </div>
-
     </div>
   </section>
 
-  <!-- ── DESIGN SCIENCE (teal/cyan glow) ─────────────────────── -->
-  <section
-    id="design-science"
-    class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
-  >
+  <!-- IMPACT -->
+  <section id="impact" class="scroll-mt-28 bg-white py-20 dark:bg-slate-950 md:py-24">
     <div class="container mx-auto max-w-7xl px-6">
       <div class="grid items-center gap-12 lg:grid-cols-2">
-        <!-- Visual w/ halo -->
-        <div class="relative order-last lg:order-first">
-          <figure class="relative mx-auto w-full max-w-md">
-            <img
-              src="../../../assets/img/design-science.png"
-              [attr.alt]="'landingHome.design.imageCaption' | translate"
-              class="relative rounded-3xl ring-1 ring-black/5 dark:ring-white/10 shadow-2xl transition-transform duration-300 hover:-translate-y-1"
-            />
-            <figcaption
-              class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400"
-            >
-              {{ 'landingHome.design.imageCaption' | translate }}
-            </figcaption>
-          </figure>
+        <div>
+          <span class="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-200 dark:bg-teal-950/40 dark:text-teal-200 dark:ring-teal-800">
+            {{ 'landingHome.impact.badge' | translate }}
+          </span>
+          <h2 class="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white md:text-5xl">
+            {{ 'landingHome.impact.title' | translate }}
+          </h2>
+          <p class="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">
+            {{ 'landingHome.impact.description' | translate }}
+          </p>
+          <div class="mt-6 flex flex-wrap gap-2">
+            <span
+              *ngFor="let label of impactSdgs"
+              class="rounded-full border border-slate-200 px-3 py-1 text-sm font-medium text-slate-700 dark:border-slate-700 dark:text-slate-200"
+            >{{ label | translate }}</span>
+          </div>
         </div>
 
-        <!-- Copy -->
-        <div class="space-y-6">
-          <span
-            class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
-          >
-            {{ 'landingHome.design.badge' | translate }}
+        <figure class="mx-auto w-full max-w-lg">
+          <img
+            src="../../../assets/img/sdgs.png"
+            [attr.alt]="'landingHome.sdgs.imageAlt' | translate"
+            class="w-full rounded-3xl shadow-xl ring-1 ring-black/5 dark:ring-white/10"
+            loading="lazy"
+          />
+          <figcaption class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+            {{ 'landingHome.sdgs.imageCaption' | translate }}
+          </figcaption>
+        </figure>
+      </div>
+
+      <figure class="mx-auto mt-16 max-w-5xl rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center dark:border-slate-800 dark:bg-slate-900 md:p-10">
+        <svg class="mx-auto h-9 w-9 text-teal-700 dark:text-teal-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V22h8V11.17A5.17 5.17 0 0 0 7.17 6Zm12 0A5.17 5.17 0 0 0 14 11.17V22h8V11.17A5.17 5.17 0 0 0 19.17 6Z" />
+        </svg>
+        <blockquote class="mt-5 text-2xl font-semibold italic leading-tight text-slate-950 dark:text-white md:text-3xl">
+          &ldquo;{{ 'landingHome.quote.text' | translate }}&rdquo;
+        </blockquote>
+        <figcaption class="mt-6 flex items-center justify-center gap-3">
+          <img
+            class="h-11 w-11 rounded-full object-cover"
+            src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/others%2FAnto%CC%81nio_Guterres%2C_23.03.23.jpg?alt=media&amp;token=27007e3c-17fe-46de-9f17-26a2533ed066"
+            alt="António Guterres"
+            loading="lazy"
+          />
+          <span class="text-left">
+            <strong class="block text-sm text-slate-950 dark:text-white">{{ 'landingHome.quote.name' | translate }}</strong>
+            <span class="block text-xs text-slate-500 dark:text-slate-400">{{ 'landingHome.quote.title' | translate }}</span>
           </span>
+        </figcaption>
+      </figure>
 
-          <h2
-            class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
-          >
-            <span class="text-slate-900 dark:text-white">
-              {{ 'landingHome.design.title' | translate }}
-            </span>
-          </h2>
-
-          <p
-            class="max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300"
-          >
-            {{ 'landingHome.design.description' | translate }}
-            <a
-              class="text-teal-600 dark:text-teal-300 underline decoration-teal-300/60 hover:decoration-teal-500"
-              target="_blank"
-              href="https://newworld-game.org/primer"
-            >
-              Tools For Changing the World—A Design Science Primer
-            </a>
-            .
+      <div class="mt-16">
+        <header class="mx-auto max-w-3xl text-center">
+          <h3 class="text-3xl font-extrabold text-slate-950 dark:text-white md:text-4xl">
+            {{ 'landingHome.testimonials.title' | translate }}
+          </h3>
+          <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+            {{ 'landingHome.testimonials.subtitle' | translate }}
           </p>
+        </header>
 
-          <!-- CTA -->
-          <div>
-            <a
-              target="_blank"
-              href="https://newworld-game.org/primer"
-              class="group inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:focus:ring-teal-800 transition-all"
-            >
-              {{ 'landingHome.design.cta' | translate }}
-              <svg
-                class="h-4 w-4 -rotate-45 transition-transform group-hover:translate-x-0.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
+        <div class="mt-9 grid gap-6 lg:grid-cols-2">
+          <article class="rounded-3xl border border-indigo-200 bg-indigo-50/60 p-7 dark:border-indigo-900/70 dark:bg-indigo-950/20 md:p-8">
+            <p class="text-xs font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300">{{ 'landingHome.testimonials.featured.badge' | translate }}</p>
+            <blockquote class="mt-4 text-lg font-semibold leading-8 text-slate-950 dark:text-white">
+              &ldquo;{{ 'landingHome.testimonials.featured.quote' | translate }}&rdquo;
+            </blockquote>
+            <p class="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">{{ 'landingHome.testimonials.featured.summary' | translate }}</p>
+            <p class="mt-6 font-bold text-indigo-800 dark:text-indigo-300">
+              {{ 'landingHome.testimonials.featured.name' | translate }}
+              <span class="font-normal text-slate-500 dark:text-slate-400">· {{ 'landingHome.testimonials.featured.role' | translate }}</span>
+            </p>
+          </article>
+
+          <article class="rounded-3xl border border-cyan-200 bg-cyan-50/60 p-7 dark:border-cyan-900/70 dark:bg-cyan-950/20 md:p-8">
+            <p class="text-xs font-bold uppercase tracking-wider text-cyan-800 dark:text-cyan-300">{{ 'landingHome.testimonials.sue.badge' | translate }}</p>
+            <blockquote class="mt-4 text-lg font-semibold leading-8 text-slate-950 dark:text-white">
+              &ldquo;{{ 'landingHome.testimonials.sue.quote' | translate }}&rdquo;
+            </blockquote>
+            <p class="mt-6 font-bold text-cyan-900 dark:text-cyan-300">
+              {{ 'landingHome.testimonials.sue.name' | translate }}
+              <span class="font-normal text-slate-500 dark:text-slate-400">· {{ 'landingHome.testimonials.sue.role' | translate }}</span>
+            </p>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DESIGN SCIENCE -->
+  <section id="design-science" class="bg-slate-50 py-20 dark:bg-slate-900 md:py-24">
+    <div class="container mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-2">
+      <figure class="mx-auto w-full max-w-lg">
+        <img
+          src="../../../assets/img/design-science.png"
+          [attr.alt]="'landingHome.design.imageCaption' | translate"
+          class="w-full rounded-3xl shadow-xl ring-1 ring-black/5 dark:ring-white/10"
+          loading="lazy"
+        />
+        <figcaption class="mt-3 text-center text-sm text-slate-500 dark:text-slate-400">
+          {{ 'landingHome.design.imageCaption' | translate }}
+        </figcaption>
+      </figure>
+
+      <div>
+        <span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-200 dark:bg-slate-950 dark:text-teal-200 dark:ring-teal-800">{{ 'landingHome.design.badge' | translate }}</span>
+        <h2 class="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white md:text-5xl">{{ 'landingHome.design.title' | translate }}</h2>
+        <p class="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">{{ 'landingHome.design.description' | translate }}</p>
+        <a
+          target="_blank"
+          rel="noopener"
+          href="https://newworld-game.org/primer"
+          class="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-teal-700 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800"
+        >
+          {{ 'landingHome.design.cta' | translate }}
+          <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUDIENCE PATHS -->
+  <section id="explore" class="bg-white py-20 dark:bg-slate-950 md:py-24">
+    <div class="container mx-auto max-w-7xl px-6">
+      <header class="mx-auto max-w-3xl text-center">
+        <span class="inline-flex rounded-full bg-teal-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-800 ring-1 ring-teal-200 dark:bg-teal-950/40 dark:text-teal-200 dark:ring-teal-800">{{ 'landingHome.audiences.badge' | translate }}</span>
+        <h2 class="mt-5 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white md:text-5xl">{{ 'landingHome.audiences.title' | translate }}</h2>
+        <p class="mt-5 text-lg text-slate-600 dark:text-slate-300">{{ 'landingHome.audiences.description' | translate }}</p>
+      </header>
+
+      <div class="mt-12 grid gap-6 md:grid-cols-3">
+        <a routerLink="/get-started" class="group rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-800">
+          <span class="text-sm font-bold text-teal-700 dark:text-teal-300">{{ 'landingHome.audiences.individualLabel' | translate }}</span>
+          <h3 class="mt-3 text-xl font-bold text-slate-950 dark:text-white">{{ 'landingHome.audiences.individualTitle' | translate }}</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{{ 'landingHome.audiences.individualText' | translate }}</p>
+          <span class="mt-6 inline-flex font-bold text-teal-700 dark:text-teal-300">{{ 'landingHome.audiences.individualCta' | translate }} →</span>
+        </a>
+
+        <a routerLink="/landing-college" class="group rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-800">
+          <span class="text-sm font-bold text-teal-700 dark:text-teal-300">{{ 'landingHome.audiences.schoolsLabel' | translate }}</span>
+          <h3 class="mt-3 text-xl font-bold text-slate-950 dark:text-white">{{ 'landingHome.audiences.schoolsTitle' | translate }}</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{{ 'landingHome.audiences.schoolsText' | translate }}</p>
+          <span class="mt-6 inline-flex font-bold text-teal-700 dark:text-teal-300">{{ 'landingHome.audiences.schoolsCta' | translate }} →</span>
+        </a>
+
+        <a routerLink="/contact" class="group rounded-3xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-1 hover:border-teal-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-800">
+          <span class="text-sm font-bold text-teal-700 dark:text-teal-300">{{ 'landingHome.audiences.partnersLabel' | translate }}</span>
+          <h3 class="mt-3 text-xl font-bold text-slate-950 dark:text-white">{{ 'landingHome.audiences.partnersTitle' | translate }}</h3>
+          <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{{ 'landingHome.audiences.partnersText' | translate }}</p>
+          <span class="mt-6 inline-flex font-bold text-teal-700 dark:text-teal-300">{{ 'landingHome.audiences.partnersCta' | translate }} →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL ACTIONS -->
+  <section id="cta" class="bg-slate-50 py-20 text-slate-950 dark:bg-slate-950 dark:text-white md:py-24">
+    <div class="container mx-auto max-w-7xl px-6">
+      <div class="grid gap-6 lg:grid-cols-2">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-teal-700 to-emerald-800 p-8 text-white shadow-2xl shadow-teal-950/20 ring-1 ring-inset ring-white/15 md:p-10">
+          <div class="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-3xl" aria-hidden="true"></div>
+          <div class="pointer-events-none absolute -bottom-24 -left-16 h-56 w-56 rounded-full bg-emerald-300/10 blur-3xl" aria-hidden="true"></div>
+
+          <div class="relative">
+            <p class="inline-flex rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-teal-50 ring-1 ring-inset ring-white/15">{{ 'landingHome.cta.badge' | translate }}</p>
+            <h2 class="mt-5 text-3xl font-extrabold tracking-tight text-white md:text-4xl">{{ 'landingHome.cta.title' | translate }}</h2>
+            <p class="mt-4 max-w-xl text-base leading-7 text-teal-50">{{ 'landingHome.cta.description' | translate }}</p>
+            <a routerLink="/get-started" class="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-white px-7 py-3 text-base font-bold text-teal-900 shadow-lg shadow-teal-950/20 transition hover:-translate-y-0.5 hover:bg-teal-50 hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-white/40">
+              {{ 'landingHome.cta.cta' | translate }}
+              <span class="ml-2" aria-hidden="true">→</span>
             </a>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <section
-    id="explore"
-    class="relative py-16 bg-white dark:bg-slate-900 overflow-hidden border-t border-slate-200 dark:border-slate-800"
-  >
-    <div class="container mx-auto max-w-7xl px-6">
-      <div class="mx-auto max-w-3xl text-center">
-        <span
-          class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-white dark:text-teal-200 dark:bg-slate-900 dark:ring-teal-800/70"
-        >
-          Start Here
-        </span>
-        <h2
-          class="mt-4 text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white"
-        >
-          Explore Global Solutions Lab
-        </h2>
-        <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
-          Clear entry points for students, schools, partners, and others.
-        </p>
-      </div>
-
-      <div class="mt-10 grid gap-5 md:grid-cols-3">
-        <a
-          routerLink="/about"
-          class="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
-        >
-          <span class="text-sm font-semibold text-teal-700 dark:text-teal-300">About</span>
-          <h3 class="mt-3 text-xl font-bold text-slate-900 dark:text-white">Understand the mission</h3>
-          <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            See how Global Solutions Lab builds on Buckminster Fuller’s World Game and design science.
-          </p>
-        </a>
-
-        <a
-          routerLink="/global-labs"
-          class="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
-        >
-          <span class="text-sm font-semibold text-teal-700 dark:text-teal-300">Programs</span>
-          <h3 class="mt-3 text-xl font-bold text-slate-900 dark:text-white">Compare workshops and labs</h3>
-          <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Review the main learning programs, tournaments, and collaborative formats available.
-          </p>
-        </a>
-
-        <a
-          routerLink="/contact"
-          class="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900"
-        >
-          <span class="text-sm font-semibold text-teal-700 dark:text-teal-300">Contact</span>
-          <h3 class="mt-3 text-xl font-bold text-slate-900 dark:text-white">Talk to the team</h3>
-          <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Reach out about partnerships, school adoption, workshops, demos, and support.
-          </p>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── CTA: Try Global Solutions Lab ─────────────────────────────── -->
-  <section
-    id="cta"
-    class="relative py-24 bg-white dark:bg-slate-950 overflow-hidden"
-  >
-    <div class="mx-auto max-w-7xl px-6">
-      <div class="mx-auto max-w-3xl text-center">
-        <span
-          class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-teal-300/50 text-teal-700 bg-teal-50 dark:text-teal-200 dark:bg-teal-900/20 dark:ring-teal-800/70"
-        >
-          {{ 'landingHome.cta.badge' | translate }}
-        </span>
-
-        <h2
-          class="mt-4 text-4xl md:text-5xl font-extrabold tracking-tight leading-tight"
-        >
-          <span class="text-slate-900 dark:text-white">
-            {{ 'landingHome.cta.title' | translate }}
-          </span>
-        </h2>
-
-        <p
-          class="mx-auto mt-4 max-w-xl text-lg text-slate-600 dark:text-slate-300"
-        >
-          {{ 'landingHome.cta.description' | translate }}
-        </p>
-
-        <!-- CTA -->
-        <div class="mt-10">
-          <a
-            routerLink="/get-started"
-            class="group inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-white bg-teal-700 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:focus:ring-teal-800 transition-all"
-          >
-            {{ 'landingHome.cta.cta' | translate }}
-            <svg
-              class="h-5 w-5 -rotate-45 transition-transform group-hover:translate-x-0.5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M5 12h14" />
-              <path d="m12 5 7 7-7 7" />
-            </svg>
+        <div class="rounded-3xl border border-slate-200 bg-white p-8 shadow-xl dark:border-slate-700 dark:bg-slate-900 dark:shadow-2xl md:p-10">
+          <p class="text-xs font-bold uppercase tracking-[0.14em] text-teal-700 dark:text-teal-300">{{ 'landingHome.cta.partnerBadge' | translate }}</p>
+          <h2 class="mt-4 text-3xl font-extrabold tracking-tight md:text-4xl">{{ 'landingHome.cta.partnerTitle' | translate }}</h2>
+          <p class="mt-4 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300">{{ 'landingHome.cta.partnerDescription' | translate }}</p>
+          <a routerLink="/scheduler" class="mt-7 inline-flex min-h-12 items-center justify-center rounded-full border border-teal-600 px-7 py-3 text-base font-bold text-teal-800 transition hover:-translate-y-0.5 hover:bg-teal-50 focus:outline-none focus:ring-4 focus:ring-teal-300/40 dark:border-teal-400 dark:text-teal-200 dark:hover:bg-teal-400/10 dark:focus:ring-teal-400/30">
+            {{ 'landingHome.cta.scheduleCta' | translate }}
           </a>
         </div>
+      </div>
 
-        <div class="mt-12 border-t border-slate-200 pt-10 dark:border-slate-800">
-          <p class="mx-auto max-w-xl text-lg text-slate-600 dark:text-slate-300">
-            {{ 'landingHome.cta.supportDescription' | translate }}
-          </p>
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
-            class="mt-6 inline-flex items-center gap-2 rounded-full px-8 py-3 text-base font-semibold text-teal-700 ring-1 ring-teal-300/60 transition hover:bg-teal-50 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:text-teal-300 dark:ring-teal-800/70 dark:hover:bg-teal-900/20"
-          >
-            {{ 'landingHome.cta.supportCta' | translate }}
-          </a>
-        </div>
+      <div class="mt-10 text-center">
+        <p class="text-sm text-slate-600 dark:text-slate-400">{{ 'landingHome.cta.supportDescription' | translate }}</p>
+        <a
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://buy.stripe.com/8wM5lR1IK2og8r6000"
+          class="mt-3 inline-flex font-bold text-teal-700 underline decoration-teal-500 underline-offset-4 hover:text-teal-900 dark:text-teal-300 dark:decoration-teal-600 dark:hover:text-teal-200"
+        >
+          {{ 'landingHome.cta.supportCta' | translate }}
+        </a>
       </div>
     </div>
   </section>

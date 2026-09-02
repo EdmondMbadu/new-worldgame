@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   Component,
   ElementRef,
   OnDestroy,
@@ -7,6 +6,7 @@ import {
   Optional,
   ViewChild,
 } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/services/auth.service';
@@ -24,13 +24,32 @@ declare var am4themes_animated: any;
     styleUrls: ['./landing-page.component.css'],
     standalone: false
 })
-export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
-  themeSubscription?: Subscription;
+export class LandingPageComponent implements OnInit, OnDestroy {
   aiOptions: AIOption[] = [];
+  showAllAssistants = false;
+  typedWord = 'Develop';
+  readonly impactSdgs = [
+    'landingHome.sdgs.badges.noPoverty',
+    'landingHome.sdgs.badges.goodHealth',
+    'landingHome.sdgs.badges.education',
+    'landingHome.sdgs.badges.energy',
+    'landingHome.sdgs.badges.climate',
+  ];
+
+  @ViewChild('introVideo') introVideo?: ElementRef<HTMLVideoElement>;
+
+  private typingTimer?: ReturnType<typeof setTimeout>;
+  private typingWords = ['Develop', 'Design', 'Envision', 'Build', 'Share'];
+  private typingIndex = 0;
+  private typingCharIndex = 0;
+  private deleting = false;
+  private languageSubscription?: Subscription;
+
   constructor(
     private router: Router,
     private data: DataService,
     private seoService: SeoService,
+    private translate: TranslateService,
     @Optional() private avatars?: AvatarRegistryService,
     @Optional() private auth?: AuthService
   ) {}
@@ -47,50 +66,77 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.aiOptions = this.data.aiOptions;
     window.scroll(0, 0);
-    this.themeSubscription = this.data.currentTheme.subscribe((theme) => {
-      document.documentElement.style.setProperty(
-        '--cursor-color',
-        theme === 'dark' ? 'rgb(45 212 191)' : 'rgb(13 148 136)'
-      );
+
+    this.restartTypewriter();
+    this.languageSubscription = this.translate.onLangChange.subscribe(() => {
+      this.restartTypewriter();
     });
   }
 
-  @ViewChild('typedWord', { static: true }) typedWord:
-    | ElementRef<HTMLSpanElement>
-    | undefined;
+  private restartTypewriter(): void {
+    if (this.typingTimer) {
+      clearTimeout(this.typingTimer);
+    }
 
-  private typingTimer?: ReturnType<typeof setTimeout>;
-  private typingWords = ['Design', 'Write', 'Envision', 'Build', 'Share'];
-  private typingIndex = 0;
-  private typingCharIndex = 0;
-  private deleting = false;
+    const translatedWords = this.translate.instant(
+      'landingHome.hero.typedWords'
+    );
+    if (Array.isArray(translatedWords) && translatedWords.length > 0) {
+      this.typingWords = translatedWords;
+    }
 
-  ngAfterViewInit(): void {
-    this.runTypewriter();
-  }
+    this.typingIndex = 0;
+    this.typedWord = this.typingWords[0];
+    this.typingCharIndex = this.typedWord.length;
+    this.deleting = true;
 
-  private runTypewriter() {
-    if (!this.typedWord) {
+    if (
+      window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
       return;
     }
 
+    this.typingTimer = setTimeout(() => this.runTypewriter(), 1600);
+  }
+
+  private runTypewriter(): void {
     const currentWord = this.typingWords[this.typingIndex];
     this.typingCharIndex += this.deleting ? -1 : 1;
-    const nextValue = currentWord.slice(0, this.typingCharIndex);
-    this.typedWord.nativeElement.textContent = nextValue;
+    this.typedWord = currentWord.slice(0, this.typingCharIndex);
 
     let delay = this.deleting ? 110 : 230;
 
-    if (!this.deleting && nextValue === currentWord) {
+    if (!this.deleting && this.typedWord === currentWord) {
       delay = 1600;
       this.deleting = true;
-    } else if (this.deleting && nextValue === '') {
+    } else if (this.deleting && this.typedWord === '') {
       this.deleting = false;
       this.typingIndex = (this.typingIndex + 1) % this.typingWords.length;
       delay = 360;
     }
 
     this.typingTimer = setTimeout(() => this.runTypewriter(), delay);
+  }
+
+  get displayedAiOptions(): AIOption[] {
+    return this.showAllAssistants ? this.aiOptions : this.aiOptions.slice(0, 4);
+  }
+
+  playIntroVideo(): void {
+    const video = this.introVideo?.nativeElement;
+    if (!video) {
+      return;
+    }
+
+    video.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    void video.play().catch(() => {
+      // Native controls remain available if autoplay is blocked by the browser.
+    });
+  }
+
+  toggleAssistants(): void {
+    this.showAllAssistants = !this.showAllAssistants;
   }
 
   private slugify(name: string) {
@@ -111,12 +157,9 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     const avatarState = this.avatars?.getBySlug(slug) ?? ai;
     this.router.navigate(['/avatar', slug], { state: { avatar: avatarState } });
   }
-  @ViewChild('globeContainer', { static: true }) globeContainer:
-    | ElementRef
-    | undefined;
 
-  ngOnDestroy() {
-    this.themeSubscription?.unsubscribe();
+  ngOnDestroy(): void {
+    this.languageSubscription?.unsubscribe();
     if (this.typingTimer) {
       clearTimeout(this.typingTimer);
     }

@@ -1,65 +1,82 @@
-
-:root {
-    --cursor-color: rgb(15 118 110);
+.landing-page {
+  scroll-behavior: smooth;
 }
 
 .typed-container {
-    display: inline-flex;
-    align-items: baseline;
-    line-height: 1.25;
-    min-width: 9ch;      /* hold layout steady to avoid column jiggle */
-    min-height: 1.2em;   /* keep vertical space constant even when empty */
-    vertical-align: middle;
+  display: inline-flex;
+  min-height: 1.2em;
+  min-width: 9ch;
+  align-items: baseline;
+  line-height: 1.2;
+  vertical-align: middle;
 }
 
 .typed-word {
-    position: relative;
-    display: inline-block;
-    white-space: nowrap;
-    line-height: 1.25;
-    vertical-align: baseline;
+  position: relative;
+  display: inline-block;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .typed-word::after {
-    content: "";
-    position: absolute;
-    left: 100%;
-    top: 0;
-    margin-left: 4px;
-    width: 2px;
-    height: 100%;
-    background-color: var(--cursor-color, rgb(15 118 110));
-    animation: caret-blink 0.8s steps(2, end) infinite;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  width: 2px;
+  height: 100%;
+  margin-left: 4px;
+  background-color: currentColor;
+  content: '';
+  animation: caret-blink 0.8s steps(2, end) infinite;
 }
 
 @keyframes caret-blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
 }
 
-/* .rotate {
-    animation: rotation 30s infinite linear;
+.rotate {
+  animation: rotation 36s linear infinite;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
   }
-  
-  @keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(359deg);
-    }
-  } */
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-page {
+    scroll-behavior: auto;
+  }
 
   .rotate {
-    animation: rotation 30s linear forwards;
+    animation: none;
   }
-  
-  @keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+
+  .typed-word::after {
+    animation: none;
   }
-  
+}
+
+@media (max-width: 640px) {
+  .landing-page #main {
+    padding-top: 104px !important;
+  }
+
+  .landing-page #credibility {
+    padding-bottom: 32px !important;
+    padding-top: 32px !important;
+  }
+}

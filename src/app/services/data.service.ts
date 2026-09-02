@@ -324,16 +324,6 @@ export class DataService implements OnInit {
 
     return sdgs;
   }
-  darkModeInitial() {
-    try {
-      localStorage.setItem('theme', 'dark');
-    } catch (error) {
-      console.warn('Access to localStorage denied:', error);
-    }
-
-    this.applyTheme();
-  }
-
   // applyTheme() {
   //   const userTheme = localStorage.getItem('theme'); // 'light', 'dark', or null
   //   // console.log('theme ', userTheme);
@@ -419,22 +409,19 @@ export class DataService implements OnInit {
     let storedTheme: string | null = null;
     try {
       storedTheme = localStorage.getItem('theme');
+      if (localStorage.getItem('darkModeInitialized') === 'true') {
+        localStorage.removeItem('darkModeInitialized');
+        storedTheme = 'light';
+      }
     } catch (error) {
       console.warn('Access to localStorage denied:', error);
     }
 
-    this.setTheme(storedTheme);
+    this.setTheme(storedTheme || 'light');
   }
 
-  private getSystemTheme(): string {
-    // Default to system theme if localStorage theme is null
-    return window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
-  }
   setTheme(theme: string | null): void {
-    const effectiveTheme = theme || this.getSystemTheme();
+    const effectiveTheme = theme || 'light';
     this.themeSource.next(effectiveTheme);
     document.documentElement.classList.toggle(
       'dark',

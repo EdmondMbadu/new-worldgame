@@ -127,16 +127,7 @@ export class VideoCallComponent
       this.cdr.detectChanges();
     });
 
-    this.dark = true;
-    const darkModeInitialized = localStorage.getItem('darkModeInitialized');
-
-    if (!darkModeInitialized) {
-      // set the default to dark mode if and only if not initialized before
-      this.data.darkModeInitial();
-
-      // Mark dark mode as initialized so it doesn't run again
-      localStorage.setItem('darkModeInitialized', 'true');
-    }
+    this.dark = document.documentElement.classList.contains('dark');
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia({
         video: true,

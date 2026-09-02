@@ -26,6 +26,8 @@
     "login": "Se connecter",
     "home": "Accueil",
     "about": "À propos",
+    "howItWorks": "Comment ça marche",
+    "impact": "Impact",
     "schools": "Établissements",
     "communities": "Communautés",
     "globalLab": "Laboratoire mondial",
@@ -867,12 +869,43 @@
   "landingHome": {
     "hero": {
       "tagline": "Developing solutions for global and local problems.",
-      "actionLine": "solutions to world problems with people around the world.",
+      "actionLine": "des solutions audacieuses aux problèmes mondiaux et locaux importants.",
+      "typedWords": ["Développez", "Concevez", "Imaginez", "Créez", "Partagez"],
+      "title": "Développez des solutions audacieuses aux problèmes mondiaux et locaux importants.",
+      "description": "Mettez vos valeurs, votre vision et votre créativité au service de solutions concrètes, avec l’appui d’assistants de laboratoire IA et d’une démarche de Design Science.",
       "quote": "Nous sommes appelés à être les architectes de l'avenir, pas ses victimes.",
-      "quoteAuthor": "- Buckminster Fuller",
+      "quoteAuthor": "— Buckminster Fuller",
       "cta": "Commencer",
+      "watchCta": "Voir l’introduction de 2 minutes",
+      "howCta": "Découvrir le fonctionnement",
+      "videoLabel": "Introduction de 2 minutes",
+      "videoCaption": "Un bref aperçu de la manière dont Global Solutions Lab aide à transformer une idée en action concrète.",
       "imageAlt": "Illustration de la Terre",
       "imageCaption": "Un monde vivant, façonné par vos idées."
+    },
+    "credibility": {
+      "earthGameLabel": "Un programme d’EarthGame",
+      "earthGameText": "Créé par un organisme à but non lucratif de recherche et d’éducation dédié à la résolution de problèmes.",
+      "nonprofitLabel": "À but non lucratif",
+      "nonprofitText": "EarthGame est un organisme à but non lucratif 501(c)(3).",
+      "unLabel": "Nations Unies",
+      "unText": "Une ONG officiellement associée au Département de la communication globale des Nations Unies.",
+      "methodLabel": "Une méthode éprouvée",
+      "methodText": "Inspirée de la Design Science et du World Game de Buckminster Fuller."
+    },
+    "howItWorks": {
+      "badge": "Comment ça marche",
+      "title": "D’un problème qui vous tient à cœur à une solution concrète",
+      "description": "Global Solutions Lab vous offre un espace privé, une démarche claire et un accompagnement guidé par l’IA pour élaborer des réponses crédibles à des défis réels.",
+      "step1Title": "Définissez l’enjeu",
+      "step1Text": "Choisissez un problème mondial ou local, clarifiez vos valeurs et votre vision, puis comprenez les personnes et les systèmes concernés.",
+      "step2Title": "Développez la solution",
+      "step2Text": "Dirigez les assistants IA pour rechercher, tester les hypothèses, cartographier les liens et renforcer vos idées grâce à la Design Science.",
+      "step3Title": "Tracez la voie vers l’action",
+      "step3Text": "Transformez vos meilleures idées en un plan concret avec des résultats, partenaires, ressources et prochaines étapes plus clairs.",
+      "humanLabel": "Direction humaine, soutien de l’IA",
+      "humanTitle": "Votre jugement reste au cœur du Laboratoire.",
+      "humanText": "Les assistants IA élargissent vos recherches et stimulent votre réflexion. Vous définissez l’objectif, prenez les décisions et façonnez la solution pour les personnes et les lieux qu’elle doit servir."
     },
     "quote": {
       "text": "Nous ne pouvons pas construire un avenir pour nos petits-enfants avec un système pensé pour nos grands-parents.",
@@ -924,14 +957,23 @@
       "imageCaption": "Pensé pour un impact réel, en phase avec les ODD de l'ONU.",
       "imageAlt": "Graphique des Objectifs de développement durable de l'ONU"
     },
+    "impact": {
+      "badge": "Action locale • Objectifs mondiaux",
+      "title": "Conçu pour produire un impact concret et pertinent",
+      "description": "Reliez le problème qui se présente à vous aux systèmes plus vastes qui l’entourent. Global Solutions Lab aide à transformer des idées ambitieuses en moyens concrets et adaptés au contexte pour faire progresser les Objectifs de développement durable de l’ONU."
+    },
     "ai": {
+      "badge": "Recherche • Mentorat • Pensée systémique",
       "title": "Rencontrez vos assistants de laboratoire IA",
-      "description": "Ils seront vos extraordinaires chercheurs, ainsi que des mentors, stratèges et penseurs systémiques qui vous aideront à chaque étape — des premières idées à la solution mise en œuvre.",
+      "description": "Choisissez un guide dont la perspective correspond à votre travail. Vos assistants peuvent soutenir la recherche, la stratégie, la pensée systémique et le retour critique, des premières idées au plan de mise en œuvre.",
       "groupColleague": "Assistant de laboratoire IA",
       "groupElder": "Assistant de laboratoire IA",
       "ask": "Demander à {{name}}",
       "sdgLabel": "ODD {{number}}",
-      "tip": "Astuce : choisissez un assistant de laboratoire IA pour vous aider à la prochaine étape."
+      "tip": "Astuce : choisissez un assistant de laboratoire IA pour vous aider à la prochaine étape.",
+      "showAll": "Voir tous les assistants IA",
+      "showFewer": "Afficher les assistants en vedette",
+      "disclaimer": "Les assistants IA sont des guides numériques. Les personnages historiques sont des perspectives pédagogiques simulées et n’impliquent ni participation ni approbation."
     },
     "testimonials": {
       "title": "Ce que l'on en dit",
@@ -955,16 +997,37 @@
     "design": {
       "badge": "Design Science • Méthodologie",
       "title": "Design Science",
-      "description": "La Design Science est la méthodologie utilisée par Global Solutions Lab pour développer des solutions qui préservent et améliorent la vie. Elle s'inspire et repose sur les travaux de Buckminster Fuller et d'autres via le World Game et le Global Solutions Lab — fondements de la plateforme Global Solutions Lab. Pour en savoir plus, consultez",
+      "description": "Global Solutions Lab utilise la Design Science pour développer des solutions qui améliorent et préservent la vie. Inspirée des travaux de Buckminster Fuller et du World Game, cette méthode aide à comprendre les systèmes, comparer les options et concevoir des voies d’action concrètes.",
       "imageCaption": "Une méthodologie concrète pour changer le monde.",
       "cta": "Lire le primer"
     },
+    "audiences": {
+      "badge": "Choisissez votre parcours",
+      "title": "Un Laboratoire pour agir sur ce qui compte",
+      "description": "Explorez le parcours qui correspond le mieux à votre manière d’utiliser Global Solutions Lab.",
+      "individualLabel": "Particuliers et étudiants",
+      "individualTitle": "Commencez par un problème qui vous tient à cœur",
+      "individualText": "Créez un Laboratoire privé et commencez à développer une solution avec des questions guidées et le soutien de l’IA.",
+      "individualCta": "Créer votre Laboratoire",
+      "schoolsLabel": "Établissements et enseignants",
+      "schoolsTitle": "Transformez l’apprentissage en résolution appliquée",
+      "schoolsText": "Utilisez des laboratoires structurés, des défis et des formats collaboratifs avec les élèves et les communautés éducatives.",
+      "schoolsCta": "Explorer les programmes éducatifs",
+      "partnersLabel": "Organisations et partenaires",
+      "partnersTitle": "Proposez un défi ciblé à votre communauté",
+      "partnersText": "Échangez avec l’équipe sur les partenariats, ateliers, programmes personnalisés et usages institutionnels.",
+      "partnersCta": "Explorer les partenariats"
+    },
     "cta": {
       "badge": "Commencez à résoudre de vrais problèmes",
-      "title": "Essayez Global Solutions Lab",
-      "description": "Une série de questions vous sera posée. Vos réponses ouvriront la porte de votre laboratoire privé, où votre travail pourra commencer !",
+      "title": "Prêt à créer votre Laboratoire ?",
+      "description": "Quelques questions créeront votre espace privé et vous aideront à préciser votre premier défi.",
       "cta": "Commencer",
-      "supportDescription": "Maintenant que vous savez en quoi consiste le Laboratoire, votre soutien l’aidera à se développer.",
+      "partnerBadge": "Pour les établissements, organisations et partenaires",
+      "partnerTitle": "Vous souhaitez explorer GSL avec votre équipe ?",
+      "partnerDescription": "Découvrez comment Global Solutions Lab peut soutenir une classe, un programme, une communauté ou une organisation.",
+      "scheduleCta": "Planifier une démonstration",
+      "supportDescription": "Vous souhaitez rendre la résolution des problèmes mondiaux et locaux accessible à davantage de personnes ?",
       "supportCta": "Soutenir Global Solutions Lab"
     }
   },
