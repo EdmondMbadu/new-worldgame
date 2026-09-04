@@ -75,9 +75,23 @@ describe('FullDiscussionComponent room behavior', () => {
     expect(component.participationMode).toBe('mentions');
   });
 
-  it('keeps General in mentions mode', () => {
+  it('lets General use one roundtable question and then resets to mentions', async () => {
     component.setParticipationMode('roundtable');
+    expect(component.participationMode).toBe('roundtable');
+    component.participants = [
+      {
+        email: 'ai-zara@system',
+        displayName: 'Zara Nkosi',
+        isAI: true,
+        collectionKey: 'zara',
+      },
+    ];
+    spyOn(component as any, 'generateAIResponse').and.resolveTo();
+
+    await (component as any).startRoundtable('What should we prioritize?');
+
     expect(component.participationMode).toBe('mentions');
+    expect(component.activeRoom.participationMode).toBe('mentions');
   });
 
   it('creates focused rooms in one-round roundtable mode', async () => {
@@ -91,11 +105,14 @@ describe('FullDiscussionComponent room behavior', () => {
     expect(savedRoom.roundLimit).toBe(1);
   });
 
-  it('does not offer unavailable OpenAI or Anthropic agents', () => {
+  it('only offers the available Global Solutions Lab agents', () => {
     const agentNames = component.availableAIAgents.map((agent) => agent.name);
 
     expect(agentNames).not.toContain('Synthesis');
     expect(agentNames).not.toContain('Claude');
+    expect(agentNames).not.toContain('Gemini');
+    expect(agentNames).not.toContain('Grok');
+    expect(agentNames.length).toBe(15);
   });
 
   it('allows a room creator to delete a custom room', () => {

@@ -555,7 +555,9 @@
         >
           <div class="flex items-center justify-between gap-2">
             <h3 id="participation-heading" class="text-xs font-bold text-slate-800 dark:text-slate-100">AI response mode</h3>
-            <span *ngIf="activeRoomId === 'general'" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Fixed in General</span>
+            <span *ngIf="activeRoomId === 'general'" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">
+              {{ participationMode === 'roundtable' ? 'For the next question' : 'Default in General' }}
+            </span>
           </div>
 
           <div class="mt-1.5 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="AI response mode">
@@ -578,9 +580,9 @@
             <button
               type="button"
               (click)="setParticipationMode('roundtable')"
-              [disabled]="activeRoomId === 'general' || roundInProgress || roomSettingsSaving"
+              [disabled]="roundInProgress || roomSettingsSaving"
               [attr.aria-pressed]="participationMode === 'roundtable'"
-              [attr.title]="activeRoomId === 'general' ? 'Create or open a focused room to use Roundtable' : 'Every selected AI replies in order'"
+              [attr.title]="activeRoomId === 'general' ? 'Every AI replies to the next question, then General returns to mentions' : 'Every selected AI replies in order'"
               class="rounded-md px-2 py-1.5 text-center text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-45"
               [class.bg-teal-600]="participationMode === 'roundtable'"
               [class.text-white]="participationMode === 'roundtable'"
@@ -702,8 +704,8 @@
             id="composer-participation-mode"
             [(ngModel)]="participationMode"
             (ngModelChange)="updateRoomPreferences()"
-            [disabled]="roundInProgress || activeRoomId === 'general'"
-            [attr.title]="activeRoomId === 'general' ? 'General always uses Chat + mentions' : 'Choose who should answer'"
+            [disabled]="roundInProgress"
+            [attr.title]="activeRoomId === 'general' ? 'Ask all is used for one question, then General returns to mentions' : 'Choose who should answer'"
             class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-60 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200"
           >
             <option value="mentions">Chat + mentions</option>

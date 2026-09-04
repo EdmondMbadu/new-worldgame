@@ -23,33 +23,17 @@ and participation settings are room-specific.
   once per configured round. The user may stop the run after the response in
   progress. Generated AI mentions are inert and cannot recursively start agents.
 
-`#General` is fixed to Chat + mentions so a normal team message cannot
-accidentally trigger its full AI roster. New custom rooms default to Roundtable
-with one round; room members may switch a custom room between the two modes.
+`#General` defaults to Chat + mentions so a normal team message cannot
+accidentally trigger its full AI roster. A member may select Ask all AIs for one
+question; after that Roundtable finishes, General automatically returns to
+mentions. New custom rooms default to Roundtable with one round and remember
+the room's selected mode.
 
 `#General` retains all existing Global Solutions Lab personas so the old mention
 behavior remains available. A new room starts with a smaller four-agent team
 unless its creator copies the current room team. The picker only shows agents
 that are available in the product, and provider branding is omitted from the
 participant interface so the focus stays on each agent's role.
-
-## Provider configuration
-
-Provider calls are server-side. Never place API keys in Angular configuration
-or room documents. If the optional xAI participant is enabled, the Firebase
-Functions runtime configuration expects both a key and an
-administrator-selected model:
-
-```bash
-firebase functions:config:set xai.key="..." xai.model="..."
-```
-
-Deploy the functions after configuring a provider. If an external provider has
-not been configured, its room message finishes with a clear non-secret error and
-the rest of a Roundtable continues.
-
-xAI uses its Responses endpoint. The configured model value is deliberately not
-controlled by room members.
 
 ## Operational limits
 

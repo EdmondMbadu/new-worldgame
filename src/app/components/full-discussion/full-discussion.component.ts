@@ -91,8 +91,6 @@ const AI_AVATARS: AIAvatar[] = [
   { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'nelson', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Leadership, reconciliation, and coalition building.' },
   { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Nonviolent action and ethical reflection.' },
   { name: 'Mark Twain', avatarPath: '../../../assets/img/twain.jpg', collectionKey: 'twain', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'A concise, skeptical literary perspective.' },
-  { name: 'Gemini', collectionKey: 'google-gemini', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Research, comparison, and multimodal reasoning.' },
-  { name: 'Grok', collectionKey: 'xai-grok', group: 'colleague', provider: 'xai', providerLabel: 'xAI', description: 'Direct analysis and alternative viewpoints.' },
 ];
 
 const DEFAULT_AI_MEMBER_KEYS = ['zara', 'arjun', 'sofia', 'bucky'];
@@ -552,8 +550,12 @@ export class FullDiscussionComponent
   async updateRoomPreferences(): Promise<void> {
     if (this.roomSettingsSaving) return;
     if (this.activeRoomId === 'general') {
-      this.participationMode = 'mentions';
       this.roundLimit = 1;
+      this.activeRoom = {
+        ...this.activeRoom,
+        participationMode: this.participationMode,
+        roundLimit: 1,
+      };
       return;
     }
     this.roomSettingsSaving = true;
@@ -571,7 +573,6 @@ export class FullDiscussionComponent
     if (
       this.roundInProgress ||
       this.roomSettingsSaving ||
-      (this.activeRoomId === 'general' && mode !== 'mentions') ||
       this.participationMode === mode
     ) {
       return;
@@ -2170,6 +2171,15 @@ Please choose a file under 5 MB.`);
       const stopped = this.roundStopRequested;
       this.roundInProgress = false;
       this.roundStopRequested = false;
+      if (this.activeRoomId === 'general') {
+        this.participationMode = 'mentions';
+        this.roundLimit = 1;
+        this.activeRoom = {
+          ...this.activeRoom,
+          participationMode: 'mentions',
+          roundLimit: 1,
+        };
+      }
       this.roundStatusLabel = stopped
         ? 'Round stopped.'
         : `Round complete · ${this.roundCurrentTurn} AI response${this.roundCurrentTurn === 1 ? '' : 's'}`;
