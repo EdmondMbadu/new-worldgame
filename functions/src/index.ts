@@ -27,6 +27,7 @@ import {
   extractImageGenerationPrompt,
   isImageGenerationRequest,
 } from './image-request';
+import { isLikelyReportingBot } from './reporting-user-filter';
 export { translateCommunityContent } from './community-translation';
 export {
   getPublicCommunitySolution,
@@ -344,82 +345,6 @@ function buildUserSolutionStatsForAutomation(
   }
 
   return statsByEmail;
-}
-
-function hasGoalForAutomation(user: any): boolean {
-  return Boolean(String(user?.goal || '').trim());
-}
-
-function isRandomLookingNameTokenForAutomation(token: string): boolean {
-  const clean = String(token || '').replace(/[^a-zA-Z]/g, '');
-  if (clean.length < 14) return false;
-
-  const upperCount = (clean.match(/[A-Z]/g) || []).length;
-  const lowerCount = (clean.match(/[a-z]/g) || []).length;
-  if (upperCount < 3 || lowerCount < 6) return false;
-
-  const upperRatio = upperCount / clean.length;
-  const caseTransitions = clean
-    .slice(1)
-    .split('')
-    .reduce((count, char, index) => {
-      const previous = clean[index];
-      const changedCase =
-        (/[A-Z]/.test(previous) && /[a-z]/.test(char)) ||
-        (/[a-z]/.test(previous) && /[A-Z]/.test(char));
-      return count + (changedCase ? 1 : 0);
-    }, 0);
-
-  const hasGeneratedCaseMix =
-    clean.length >= 18 &&
-    upperRatio > 0.18 &&
-    upperRatio < 0.82 &&
-    caseTransitions >= 4;
-
-  const hasDenseMixedCase =
-    upperRatio > 0.25 && upperRatio < 0.75 && caseTransitions >= 3;
-
-  return hasGeneratedCaseMix || hasDenseMixedCase;
-}
-
-function hasSuspiciousNameFormatForAutomation(user: any): boolean {
-  const first = String(user?.firstName || '').trim();
-  const last = String(user?.lastName || '').trim();
-  const firstRandom = isRandomLookingNameTokenForAutomation(first);
-  const lastRandom = isRandomLookingNameTokenForAutomation(last);
-  if (firstRandom && lastRandom) return true;
-
-  const combinedLength = `${first}${last}`.replace(/[^a-zA-Z]/g, '').length;
-  return combinedLength >= 24 && (firstRandom || lastRandom);
-}
-
-function isAdminUserForAutomation(user: any): boolean {
-  const role = String(user?.role || '').trim().toLowerCase();
-  const adminFlag = String(user?.admin || '').trim().toLowerCase();
-  return adminFlag === 'true' || role === 'admin' || role === 'schooladmin';
-}
-
-function isLikelyBotForAutomation(
-  user: any,
-  statsByEmail: Map<string, UserSolutionStatsForAutomation>
-): boolean {
-  if (hasSuspiciousNameFormatForAutomation(user)) {
-    return true;
-  }
-
-  if (isAdminUserForAutomation(user)) return false;
-  if (hasGoalForAutomation(user)) return false;
-
-  const stats =
-    statsByEmail.get(normalizeEmailForAutomation(user?.email)) || {
-      started: 0,
-      submitted: 0,
-      lastTrackedEditMs: 0,
-    };
-  const hasSolutionActivity = stats.started > 0 || stats.submitted > 0;
-  if (hasSolutionActivity) return false;
-
-  return false;
 }
 
 function buildUserDirectoryForAutomation(users: any[]) {
@@ -779,9 +704,13 @@ function buildWeeklyActivityEmailData(
   const previousWeekStartMs = windowStartMs - weekMs;
   const statsByEmail = buildUserSolutionStatsForAutomation(solutions);
 
-  const reportingUsers = users.filter(
-    (user) => !isLikelyBotForAutomation(user, statsByEmail)
-  );
+  const reportingUsers = users.filter((user) => {
+    const stats = statsByEmail.get(normalizeEmailForAutomation(user?.email));
+    return !isLikelyReportingBot(user, {
+      hasSolutionActivity:
+        (stats?.started || 0) > 0 || (stats?.submitted || 0) > 0,
+    });
+  });
   const teamMemberNameByEmail = new Map<string, string>();
   reportingUsers.forEach((user) => {
     const email = normalizeEmailForAutomation(user?.email);
