@@ -21,6 +21,72 @@ describe('UserManagementComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  describe('likely bot filtering', () => {
+    const pendingCheckoutUser = (overrides: Partial<User> = {}) =>
+      ({
+        email: 'borrowed-address@example.com',
+        firstName: 'Mbcl',
+        lastName: 'Xiuzy',
+        role: 'schoolAdmin',
+        status: 'pendingPayment',
+        tempSolutionstarted: '0',
+        tempSolutionSubmitted: '0',
+        ...overrides,
+      } as User);
+
+    it('excludes an unconfirmed provisional checkout even when its name is short', () => {
+      expect(component.isLikelyBot(pendingCheckoutUser())).toBeTrue();
+    });
+
+    it('keeps a verified provisional checkout in the real-user count', () => {
+      expect(
+        component.isLikelyBot(pendingCheckoutUser({ verified: true }))
+      ).toBeFalse();
+    });
+
+    it('keeps a provisional checkout once it is linked to a school', () => {
+      expect(
+        component.isLikelyBot(
+          pendingCheckoutUser({ schoolId: 'completed-school-checkout' })
+        )
+      ).toBeFalse();
+    });
+
+    it('keeps quiet unverified users who are not abandoned checkout profiles', () => {
+      expect(
+        component.isLikelyBot(
+          pendingCheckoutUser({
+            firstName: 'Taylor',
+            lastName: 'Morgan',
+            role: 'individual',
+            status: '',
+          })
+        )
+      ).toBeFalse();
+    });
+
+    it('uses actual solution ownership as activity even when counters are stale', () => {
+      const user = pendingCheckoutUser({ email: 'maker@example.com' });
+      (component as any).userSolutionsByEmail.set('maker@example.com', [
+        { solutionId: 'active-solution' } as Solution,
+      ]);
+
+      expect(component.isLikelyBot(user)).toBeFalse();
+    });
+
+    it('lets verified users override the fallback name heuristic', () => {
+      expect(
+        component.isLikelyBot(
+          pendingCheckoutUser({
+            firstName: 'VEVEHrDRvPSiVYDAzRyJk',
+            lastName: 'DmzZMhRahLBqNObVLNzp',
+            verified: true,
+          })
+        )
+      ).toBeFalse();
+    });
+  });
+
   it('builds a video-script prompt from Strategy Review content without people or email fields', () => {
     component.allUsers = [
       {

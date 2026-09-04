@@ -1359,7 +1359,33 @@ export class UserManagementComponent implements OnInit {
   }
 
   private hasSolutionActivity(user: User): boolean {
-    return !this.hasNoActivity(user);
+    const email = this.normalizeEmail(user.email);
+    return (
+      !this.hasNoActivity(user) ||
+      (email.length > 0 &&
+        (this.userSolutionsByEmail.get(email)?.length || 0) > 0)
+    );
+  }
+
+  /**
+   * A paid school checkout creates a lightweight Auth/Firestore profile before
+   * Stripe checkout is completed. Abandoned or automated checkouts therefore
+   * look like school admins even though they never became users of the product.
+   *
+   * Keep this lifecycle check deliberately conservative: a verified email, a
+   * completed school link, a stated goal, or any solution activity is enough to
+   * keep the account in reporting.
+   */
+  private isUnconfirmedCheckoutProfile(user: User): boolean {
+    const status = (user.status || '').trim().toLowerCase();
+    if (status !== 'pendingpayment') return false;
+
+    return (
+      !(user.schoolId || '').trim() &&
+      user.verified !== true &&
+      !this.hasGoal(user) &&
+      !this.hasSolutionActivity(user)
+    );
   }
 
   private isAdminUser(user: User): boolean {
@@ -1371,13 +1397,23 @@ export class UserManagementComponent implements OnInit {
   }
 
   isLikelyBot(user: User): boolean {
+    // Positive evidence wins over name heuristics. This prevents uncommon or
+    // international names from being hidden after the person verifies or uses
+    // the product.
+    if (user.verified === true) return false;
+    if (this.hasGoal(user)) return false;
+    if (this.hasSolutionActivity(user)) return false;
+
     if (this.hasSuspiciousNameFormat(user)) {
       return true;
     }
 
+    // This must run before the admin-role allowlist. Checkout creates a
+    // provisional `schoolAdmin` record before payment, which was allowing the
+    // latest bot batch to bypass the old name-only rule.
+    if (this.isUnconfirmedCheckoutProfile(user)) return true;
+
     if (this.isAdminUser(user)) return false;
-    if (this.hasGoal(user)) return false;
-    if (this.hasSolutionActivity(user)) return false;
 
     return false;
   }
