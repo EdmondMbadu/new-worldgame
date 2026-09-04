@@ -1,14 +1,14 @@
 // tournament-details.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { switchMap, filter } from 'rxjs/operators';
+import { switchMap, take, takeUntil } from 'rxjs/operators';
 import { Tournament } from 'src/app/models/tournament';
 import { Solution } from 'src/app/models/solution';
 import { TournamentService } from 'src/app/services/tournament.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { isSolutionOwner } from 'src/app/utils/solution-ownership';
 
 @Component({
@@ -17,7 +17,7 @@ import { isSolutionOwner } from 'src/app/utils/solution-ownership';
     styleUrls: ['./tournament-details.component.css'],
     standalone: false
 })
-export class TournamentDetailsComponent implements OnInit {
+export class TournamentDetailsComponent implements OnInit, OnDestroy {
   t?: Tournament;
   completedSolutions: Solution[] = [];
   isAuthor = false;
@@ -27,6 +27,8 @@ export class TournamentDetailsComponent implements OnInit {
   solutions: Solution[] = [];
   pickerOpen = false;
   submitBusy = false;
+  isAuthenticated = false;
+  private readonly destroy$ = new Subject<void>();
 
   editing = false;
   tempTitle = '';
@@ -55,35 +57,71 @@ export class TournamentDetailsComponent implements OnInit {
   ngOnInit(): void {
     window.scrollTo(0, 0);
 
-    this.route.paramMap
-      .pipe(switchMap((p) => this.tourneySvc.getById(p.get('id')!)))
-      .subscribe((t) => {
-        if (!t) {
-          this.router.navigate(['/active-tournaments']);
-          return;
-        }
-        this.t = t;
-        this.currentWinnerId = t.winningSolution || undefined;
+    // Resolve auth once before choosing the full or public-safe data path.
+    // Anonymous visitors still receive the tournament and sanitized cards.
+    this.auth.user$
+      .pipe(take(1), takeUntil(this.destroy$))
+      .subscribe((viewer) => {
+        this.isAuthenticated = !!viewer?.uid;
 
-        /* is the logged-in user the author? */
-        this.isAuthor = t.authorId === this.auth.currentUser.uid;
+        this.route.paramMap
+          .pipe(
+            switchMap((p) => this.tourneySvc.getById(p.get('id')!)),
+            takeUntil(this.destroy$)
+          )
+          .subscribe((t) => {
+            if (!t) {
+              this.router.navigate(['/active-tournaments']);
+              return;
+            }
+            this.t = t;
+            this.currentWinnerId = t.winningSolution || undefined;
 
-        /* is deadline in the past? */
-        this.isPostDeadline = new Date() > new Date(t.deadline ?? '');
-        this.solSvc.getAuthenticatedUserAllSolutions().subscribe((sols) => {
-          this.solutions = sols.filter((s) => s.finished === 'true');
-        });
-        /* load solutions if any */
-        if (t.submittedSolutions?.length) {
-          this.solSvc.getMany(t.submittedSolutions).subscribe((sols) => {
-            this.completedSolutions = sols;
+            /* is the logged-in user the author? */
+            this.isAuthor =
+              this.isAuthenticated &&
+              t.authorId === this.auth.currentUser?.uid;
+
+            /* is deadline in the past? */
+            this.isPostDeadline = new Date() > new Date(t.deadline ?? '');
+            if (this.isAuthenticated) {
+              this.solSvc
+                .getAuthenticatedUserAllSolutions()
+                .pipe(takeUntil(this.destroy$))
+                .subscribe((sols) => {
+                  this.solutions = sols.filter((s) => s.finished === 'true');
+                });
+            } else {
+              this.solutions = [];
+            }
+            /* load solutions if any */
+            if (t.submittedSolutions?.length) {
+              const submittedSolutions$ = this.isAuthenticated
+                ? this.solSvc.getMany(t.submittedSolutions)
+                : this.solSvc.getPublicSolutionsByIds(t.submittedSolutions);
+              submittedSolutions$
+                .pipe(takeUntil(this.destroy$))
+                .subscribe((sols) => {
+                  this.completedSolutions = sols;
+                });
+            } else {
+              this.completedSolutions = [];
+            }
           });
-        }
       });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   get canEdit(): boolean {
-    return this.isAuthor && this.t?.status !== 'approved';
+    return (
+      this.isAuthenticated &&
+      this.isAuthor &&
+      this.t?.status !== 'approved'
+    );
   }
 
   get aboutText(): string {
@@ -191,10 +229,12 @@ export class TournamentDetailsComponent implements OnInit {
   }
   /* UI toggle */
   openSolutionPicker() {
+    if (!this.requireLogin()) return;
     this.pickerOpen = !this.pickerOpen;
   }
   /** AUTHOR-ONLY – upload extra reference file */
   async addReferenceFile(fileList: FileList | null) {
+    if (!this.requireLogin() || !this.isAuthor) return;
     const file = fileList?.item(0);
     if (!file || file.size > 20_000_000) {
       return;
@@ -215,7 +255,7 @@ export class TournamentDetailsComponent implements OnInit {
   }
   /* user clicked a solution chip */
   async attachSolution(sol: Solution) {
-    if (this.submitBusy) {
+    if (!this.requireLogin() || this.submitBusy) {
       return;
     }
     this.submitBusy = true;
@@ -249,14 +289,16 @@ export class TournamentDetailsComponent implements OnInit {
 
   /** NAV */
   submitFinishedSolution() {
+    if (!this.requireLogin()) return;
     this.router.navigate(['/submit-solution', this.t!.tournamentId]);
   }
   createNewSolution() {
+    if (!this.requireLogin()) return;
     this.router.navigate(['/create-solution']);
   }
 
   async unsubmitSolution(sol: Solution) {
-    if (this.submitBusy) {
+    if (!this.requireLogin() || !this.canUnsubmit(sol) || this.submitBusy) {
       return;
     }
     this.submitBusy = true;
@@ -290,6 +332,7 @@ export class TournamentDetailsComponent implements OnInit {
   /* Replace the helper with this */
   canUnsubmit(sol: Solution): boolean {
     return (
+      this.isAuthenticated &&
       !this.isPostDeadline && // ⬅️ must still be open
       (this.isAuthor || // tournament owner
         isSolutionOwner(sol, this.auth.currentUser)) // solution owner
@@ -297,7 +340,7 @@ export class TournamentDetailsComponent implements OnInit {
   }
   /*  New: choose / clear winner  */
   async chooseWinner(sol: Solution) {
-    if (!this.isAuthor || !this.isPostDeadline) {
+    if (!this.requireLogin() || !this.isAuthor || !this.isPostDeadline) {
       alert('You are not the author or the deadline is not yet set');
       return;
     }
@@ -312,7 +355,7 @@ export class TournamentDetailsComponent implements OnInit {
   }
 
   async clearWinner() {
-    if (!this.isAuthor || !this.isPostDeadline) {
+    if (!this.requireLogin() || !this.isAuthor || !this.isPostDeadline) {
       return;
     }
 
@@ -320,7 +363,7 @@ export class TournamentDetailsComponent implements OnInit {
     this.currentWinnerId = undefined;
   }
   async deleteTournament() {
-    if (!this.canEdit) return;
+    if (!this.requireLogin() || !this.canEdit) return;
     if (!confirm('Delete this tournament? This cannot be undone.')) return;
 
     await this.tourneySvc.deleteTournament(this.t!.tournamentId!);
@@ -354,5 +397,21 @@ export class TournamentDetailsComponent implements OnInit {
       default:
         return 'bg-gray-500';
     }
+  }
+
+  solutionViewRoute(solution: Solution): any[] {
+    return this.isAuthenticated
+      ? ['/solution-view', solution.solutionId]
+      : ['/solution-preview', solution.solutionId];
+  }
+
+  private requireLogin(): boolean {
+    if (this.isAuthenticated && this.auth.currentUser?.uid) return true;
+
+    const returnUrl = this.router.url;
+    this.auth.setRedirectUrl(returnUrl);
+    sessionStorage.setItem('redirectTo', returnUrl);
+    void this.router.navigate(['/login']);
+    return false;
   }
 }

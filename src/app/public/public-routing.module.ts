@@ -65,6 +65,7 @@ import { SlpPartnerComponent } from '../components/slp-partner/slp-partner.compo
 import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
 import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
 import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/drc-clinic-campaign.component';
+import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -165,6 +166,10 @@ const routes: Routes = [
   {
     path: 'campaigns/power-drc-clinics',
     component: DrcClinicCampaignComponent,
+  },
+  {
+    path: 'tournament-details/:id',
+    component: TournamentDetailsComponent,
   },
 ];
 

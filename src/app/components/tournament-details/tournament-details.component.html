@@ -4,9 +4,9 @@
     [showMoreOrLess]="true"
     [sideBarSmall]="true"
     [sideBarBig]="false"
-    [email]="this.auth.currentUser.email"
-    [firstName]="this.auth.currentUser.firstName"
-    [lastName]="this.auth.currentUser.lastName"
+    [email]="this.auth.currentUser?.email || ''"
+    [firstName]="this.auth.currentUser?.firstName || ''"
+    [lastName]="this.auth.currentUser?.lastName || ''"
     [path]="'home'"
     [currentPageTournament]="true"
   >
@@ -49,7 +49,7 @@
                 (click)="openSolutionPicker()"
                 class="inline-flex min-h-[3.25rem] items-center justify-center gap-2 rounded-xl bg-amber-400 px-6 py-3 text-base font-extrabold text-slate-950 shadow-lg transition hover:-translate-y-0.5 hover:bg-amber-300"
               >
-                Submit a completed solution <span aria-hidden="true">→</span>
+                {{ isAuthenticated ? "Submit a completed solution" : "Log in to submit a solution" }} <span aria-hidden="true">→</span>
               </button>
               <button type="button" (click)="scrollToDetails()" class="inline-flex min-h-[3.25rem] items-center justify-center rounded-xl border border-white/25 bg-white/10 px-6 py-3 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20">
                 See tournament details
@@ -174,7 +174,7 @@
             </p>
           </div>
           <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="inline-flex shrink-0 items-center justify-center rounded-xl bg-teal-700 px-5 py-3 font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-teal-800">
-            + Add your solution
+            {{ isAuthenticated ? "+ Add your solution" : "Log in to submit" }}
           </button>
         </div>
 
@@ -187,7 +187,7 @@
           <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-2xl dark:bg-teal-950/50">💡</div>
           <h3 class="mt-5 text-xl font-bold text-slate-950 dark:text-white">No solutions have been submitted yet</h3>
           <p class="mx-auto mt-2 max-w-lg text-slate-600 dark:text-slate-300">Completed solutions can be entered here before the tournament deadline.</p>
-          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-extrabold text-slate-950 transition hover:bg-amber-300">Submit a completed solution</button>
+          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="mt-6 rounded-xl bg-amber-400 px-6 py-3 font-extrabold text-slate-950 transition hover:bg-amber-300">{{ isAuthenticated ? "Submit a completed solution" : "Log in to submit a solution" }}</button>
         </div>
 
         <div *ngIf="completedSolutions.length > 0" class="mt-10 grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -196,7 +196,18 @@
             <button *ngIf="isAuthor && isPostDeadline" type="button" (click)="currentWinnerId === sol.solutionId ? clearWinner() : chooseWinner(sol)" class="absolute right-4 top-4 z-20 rounded-full bg-emerald-700 px-3 py-1 text-xs font-bold text-white shadow hover:bg-emerald-800">
               {{ currentWinnerId === sol.solutionId ? "Clear winner" : "Choose winner" }}
             </button>
-            <app-solution [solution]="sol" [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }"></app-solution>
+            <a [routerLink]="solutionViewRoute(sol)" class="group block overflow-hidden rounded-xl" [ngStyle]="{ 'animation-delay': i * 100 + 'ms' }">
+              <img
+                [src]="sol.image || '../../../assets/img/generic-image.jpg'"
+                [alt]="sol.title || 'Submitted solution'"
+                class="h-48 w-full object-cover"
+              />
+              <div class="p-5">
+                <h3 class="text-xl font-black text-slate-950 transition group-hover:text-teal-700 dark:text-white dark:group-hover:text-teal-300">{{ sol.title || "Untitled solution" }}</h3>
+                <p *ngIf="sol.description" class="mt-2 line-clamp-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{{ sol.description }}</p>
+                <span class="mt-5 inline-flex items-center text-sm font-bold text-teal-700 dark:text-teal-300">View solution <span class="ml-1" aria-hidden="true">→</span></span>
+              </div>
+            </a>
             <div *ngIf="canUnsubmit(sol)" class="px-3 pb-3 pt-2 text-right">
               <button type="button" (click)="unsubmitSolution(sol)" class="text-sm font-semibold text-rose-700 underline-offset-4 hover:underline dark:text-rose-400">Remove submission</button>
             </div>
@@ -300,8 +311,8 @@
         <h2 class="mx-auto mt-4 max-w-3xl text-3xl font-black tracking-tight sm:text-5xl">Bring your strongest solution forward.</h2>
         <p class="mx-auto mt-5 max-w-2xl whitespace-pre-line text-base leading-8 text-teal-50/85 sm:text-lg">{{ closingCallToAction }}</p>
         <div class="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="rounded-xl bg-amber-400 px-7 py-3.5 text-base font-extrabold text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-300">Submit a completed solution</button>
-          <button *ngIf="!isPostDeadline" type="button" (click)="createNewSolution()" class="rounded-xl border border-white/25 bg-white/10 px-7 py-3.5 text-base font-bold text-white transition hover:bg-white/20">Create a new solution</button>
+          <button *ngIf="!isPostDeadline" type="button" (click)="openSolutionPicker()" class="rounded-xl bg-amber-400 px-7 py-3.5 text-base font-extrabold text-slate-950 transition hover:-translate-y-0.5 hover:bg-amber-300">{{ isAuthenticated ? "Submit a completed solution" : "Log in to submit a solution" }}</button>
+          <button *ngIf="!isPostDeadline && isAuthenticated" type="button" (click)="createNewSolution()" class="rounded-xl border border-white/25 bg-white/10 px-7 py-3.5 text-base font-bold text-white transition hover:bg-white/20">Create a new solution</button>
           <p *ngIf="isPostDeadline" class="rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-bold">Submissions are closed</p>
         </div>
       </div>

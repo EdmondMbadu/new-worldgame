@@ -36,7 +36,6 @@ import { ListFinishedSolutionsComponent } from '../components/list-finished-solu
 import { DiscoverComponent } from '../components/discover/discover.component';
 import { GameComponent } from '../game/game/game.component';
 import { CreateTournamentComponent } from '../components/create-tournament/create-tournament.component';
-import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
 import { ActiveTournamentsComponent } from '../components/active-tournaments/active-tournaments.component';
 import { TournamentWinComponent } from '../components/tournament-win/tournament-win.component';
 import { YourTournamentsComponent } from '../components/your-tournaments/your-tournaments.component';
@@ -92,7 +91,6 @@ import { ProblemListCardModule } from './problem-list-card.module';
     DiscoverComponent,
     GameComponent,
     CreateTournamentComponent,
-    TournamentDetailsComponent,
     ActiveTournamentsComponent,
     TournamentWinComponent,
     YourTournamentsComponent,

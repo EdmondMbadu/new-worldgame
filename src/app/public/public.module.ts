@@ -72,6 +72,7 @@ import { SlpTargetingModalComponent } from '../components/slp-targeting-modal/sl
 import { SlpLocationPickerComponent } from '../components/slp-location-picker/slp-location-picker.component';
 import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
 import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/drc-clinic-campaign.component';
+import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
 
 @NgModule({
   declarations: [
@@ -142,6 +143,7 @@ import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/dr
     SlpLocationPickerComponent,
     DymaxionComponent,
     DrcClinicCampaignComponent,
+    TournamentDetailsComponent,
   ],
   imports: [
     CommonModule,

@@ -21,6 +21,27 @@ service cloud.firestore {
       allow create, update, delete: if isPlatformAdmin();
     }
 
+    // Approved tournament pages are public, but every mutation still requires
+    // an authenticated account. Authors and platform admins manage tournament
+    // content; signed-in entrants may only change the submissions list.
+    match /tournaments/{tournamentId} {
+      allow read: if resource.data.status == 'approved' || isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.authorId == request.auth.uid;
+      allow update: if isSignedIn()
+        && (
+          isPlatformAdmin()
+          || resource.data.authorId == request.auth.uid
+          || request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['submittedSolutions'])
+        );
+      allow delete: if isSignedIn()
+        && (
+          isPlatformAdmin()
+          || resource.data.authorId == request.auth.uid
+        );
+    }
+
     match /gsl-workshop-announcement-signups/{signupId} {
       allow read, delete: if isPlatformAdmin();
       allow create, update: if request.time < timestamp.date(2028, 11, 3)
@@ -331,6 +352,7 @@ service cloud.firestore {
       // update your rules.
       allow read: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'gsl-workshop-announcement-signups'
+        && topLevelCollection != 'tournaments'
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
         && topLevelCollection != 'publicCommunitySolutions'
@@ -342,6 +364,7 @@ service cloud.firestore {
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
+        && topLevelCollection != 'tournaments'
         && topLevelCollection != 'gsl-workshop-announcement-signups'
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'

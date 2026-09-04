@@ -1576,6 +1576,51 @@ export class SolutionService {
       )
       .valueChanges();
   }
+
+  /**
+   * Loads only the sanitized card projections that Firestore permits anonymous
+   * visitors to read. Requested order is retained so tournament entries do not
+   * jump around when switching between signed-in and public views.
+   */
+  getPublicSolutionsByIds(ids: string[]): Observable<Solution[]> {
+    const requestedIds = Array.from(
+      new Set((ids || []).map((id) => String(id || '').trim()).filter(Boolean))
+    );
+    if (!requestedIds.length) return of([] as Solution[]);
+
+    const chunks: string[][] = [];
+    for (let index = 0; index < requestedIds.length; index += 30) {
+      chunks.push(requestedIds.slice(index, index + 30));
+    }
+
+    return combineLatest(
+      chunks.map((chunk) =>
+        this.afs
+          .collection<Solution>('publicCommunitySolutions', (ref) =>
+            ref.where('solutionId', 'in', chunk)
+          )
+          .valueChanges({ idField: 'solutionId' })
+      )
+    ).pipe(
+      map((groups) => {
+        const byId = new Map(
+          groups
+            .flat()
+            .filter((solution) => !!solution.solutionId)
+            .map((solution) => [solution.solutionId!, solution])
+        );
+        return requestedIds.reduce<Solution[]>((ordered, id) => {
+          const solution = byId.get(id);
+          if (solution) ordered.push(solution);
+          return ordered;
+        }, []);
+      }),
+      catchError((error) => {
+        console.error('Unable to load public tournament solutions.', error);
+        return of([] as Solution[]);
+      })
+    );
+  }
   // solution.service.ts
   getSolutionsByIds(ids: string[]) {
     if (!ids.length) return of([]);

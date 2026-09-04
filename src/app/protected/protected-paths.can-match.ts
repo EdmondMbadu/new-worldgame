@@ -25,7 +25,6 @@ const PROTECTED_PATHS = new Set<string>([
   'join-tournament',
   'tournament-winner',
   'create-tournament',
-  'tournament-details',
   'active-tournaments',
   'your-tournaments',
   'past-tournaments',

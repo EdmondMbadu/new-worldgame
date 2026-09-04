@@ -72,4 +72,22 @@ describe('SolutionService', () => {
       'lower-liked',
     ]);
   });
+
+  it('loads public tournament cards from sanitized projections in requested order', async () => {
+    collectionValues = [
+      { solutionId: 'second', title: 'Second' },
+      { solutionId: 'first', title: 'First' },
+    ];
+
+    const solutions = await firstValueFrom(
+      service.getPublicSolutionsByIds(['first', 'second'])
+    );
+
+    expect(collectionName).toBe('publicCommunitySolutions');
+    expect(where).toHaveBeenCalledWith('solutionId', 'in', ['first', 'second']);
+    expect(solutions.map((solution) => solution.solutionId)).toEqual([
+      'first',
+      'second',
+    ]);
+  });
 });
