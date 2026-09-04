@@ -24,7 +24,7 @@
       class="discussion-panel flex flex-col mx-auto md:rounded-lg shadow-lg overflow-hidden 
              dark:bg-slate-900 bg-white 
              dark:text-white text-slate-800 
-             mt-20 w-full max-w-5xl h-[calc(100vh-5rem)] min-h-0"
+             mt-20 w-full max-w-[90rem] h-[calc(100vh-5rem)] min-h-0"
     >
       <!-- Top bar / header -->
       <div class="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3
@@ -62,13 +62,45 @@
           <span class="inline-flex min-w-0 items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 shadow-sm dark:border-violet-400/20 dark:bg-violet-400/10">
             <span class="grid h-5 w-5 shrink-0 place-content-center rounded-md bg-violet-100 text-xs font-black text-violet-700 dark:bg-violet-400/20 dark:text-violet-200" aria-hidden="true">#</span>
             <span class="truncate text-sm font-bold text-violet-950 dark:text-violet-100">
-              team-discussion <span class="text-violet-400 dark:text-violet-500" aria-hidden="true">·</span> {{ currentSolution.title }}
+              {{ activeRoom.name }} <span class="text-violet-400 dark:text-violet-500" aria-hidden="true">·</span> {{ currentSolution.title }}
             </span>
           </span>
         </div>
   
         <!-- Right side: actions (Join call, Close, etc.) -->
         <div class="ml-auto flex items-center space-x-2">
+          <button
+            *ngIf="isRoomFeatureAvailable"
+            type="button"
+            (click)="openAddAI()"
+            [disabled]="roundInProgress"
+            class="inline-flex rounded-lg border border-teal-200 bg-teal-50 px-2.5 py-2 text-sm font-semibold text-teal-800 transition hover:bg-teal-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200 dark:hover:bg-teal-900 sm:px-3"
+          >
+            <span class="sm:hidden">+ AI</span><span class="hidden sm:inline">+ Add AI</span>
+          </button>
+          <button
+            *ngIf="isRoomFeatureAvailable"
+            type="button"
+            (click)="openCreateRoom()"
+            [disabled]="roundInProgress"
+            class="inline-flex rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 sm:px-3"
+            aria-label="Create a new room"
+          >
+            <span class="sm:hidden">+ Room</span><span class="hidden sm:inline">New room</span>
+          </button>
+          <button
+            *ngIf="canDeleteRoom(activeRoom)"
+            type="button"
+            (click)="deleteRoom(activeRoom, $event)"
+            [disabled]="roundInProgress"
+            class="grid h-9 w-9 place-content-center rounded-lg border border-red-200 bg-white text-red-600 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:bg-slate-800 dark:text-red-300 dark:hover:bg-red-950/50"
+            aria-label="Delete this room"
+            title="Delete this room"
+          >
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 10v6m4-6v6" />
+            </svg>
+          </button>
                   <a *ngIf="meetingUrl; else defaultCall"
           [href]="meetingUrl" target="_blank" rel="noopener"
           class="bg-teal-600 hover:bg-teal-700 px-4 py-2 rounded-md
@@ -94,47 +126,99 @@
         </div>
       </div>
   
-      <!-- Optional pinned/intro area -->
-      <div class="shrink-0 border-b border-slate-200 px-4 py-2 text-sm
-                  dark:border-slate-800 dark:bg-slate-900 bg-white
-                  dark:text-gray-300 text-gray-600"
-      >
-        {{ introMessage }}
-        <a
-          class="text-blue-400 underline"
-          target="_blank"
-          href="https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt"
-        >
-          Advanced Search
-        </a>
-      </div>
-
-      <!-- Mention Rules Banner -->
-      <div class="mx-4 my-2 shrink-0 p-3 rounded-lg
-                  dark:bg-slate-800 bg-slate-50
-                  border dark:border-slate-700 border-slate-200">
-        <div class="flex items-start space-x-2">
-          <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <div class="text-sm dark:text-slate-200 text-slate-700">
-            <p class="font-semibold mb-1">Mention Tips:</p>
-            <ul class="list-disc list-inside space-y-0.5 text-xs dark:text-slate-300 text-slate-600">
-              <li>Type <span class="font-mono bg-slate-200 dark:bg-slate-700 px-1 rounded">&#64;everyone</span> to notify all participants in this discussion</li>
-              <li>Type <span class="font-mono bg-slate-200 dark:bg-slate-700 px-1 rounded">&#64;</span> followed by a name to mention a specific person — they'll receive an email notification</li>
-              <li>Type <span class="font-mono bg-slate-200 dark:bg-slate-700 px-1 rounded">&#64;</span> followed by an AI name (e.g., Einstein, Zara) to get AI assistance in the conversation</li>
-            </ul>
-          </div>
+      <div class="flex shrink-0 items-start gap-3 border-b border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-300">
+        <span class="mt-0.5 grid h-5 w-5 shrink-0 place-content-center rounded-full bg-emerald-100 font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300" aria-hidden="true">i</span>
+        <div class="min-w-0 flex-1">
+          <p class="font-semibold text-slate-800 dark:text-slate-100">
+            {{ participationMode === 'roundtable' ? 'Roundtable mode' : 'Chat + mentions' }}
+          </p>
+          <p>{{ participationHelpText }}</p>
         </div>
+        <a
+          class="hidden shrink-0 font-semibold text-teal-700 underline decoration-teal-300 underline-offset-2 hover:text-teal-900 dark:text-teal-300 sm:inline"
+          target="_blank"
+          rel="noopener"
+          href="https://chat.openai.com/g/g-1NcFZO67Z-new-world-game-impact-hub-gpt"
+        >Advanced Search</a>
       </div>
   
       <div class="flex min-h-0 flex-1 overflow-hidden border-t border-slate-200 dark:border-slate-700">
+      <aside
+        *ngIf="isRoomFeatureAvailable"
+        class="hidden h-full w-56 shrink-0 overflow-y-auto border-r border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/70 md:block"
+        aria-label="Discussion rooms"
+      >
+        <div class="mb-2 flex items-center justify-between px-2">
+          <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Rooms</p>
+          <button
+            type="button"
+            (click)="openCreateRoom()"
+            [disabled]="roundInProgress"
+            class="grid h-7 w-7 place-content-center rounded-lg text-lg text-slate-500 transition hover:bg-white hover:text-teal-700 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800 dark:hover:text-teal-300"
+            aria-label="Create a new room"
+            title="New room"
+          >+</button>
+        </div>
+
+        <ul class="space-y-1">
+          <li *ngFor="let room of displayRooms; trackBy: trackByRoom">
+            <div
+              class="group/room flex w-full items-center rounded-lg text-sm font-semibold transition"
+              [class.bg-violet-100]="room.id === activeRoomId"
+              [class.text-violet-800]="room.id === activeRoomId"
+              [class.dark:bg-violet-400]="room.id === activeRoomId"
+              [class.dark:bg-opacity-10]="room.id === activeRoomId"
+              [class.dark:text-violet-200]="room.id === activeRoomId"
+              [class.text-slate-700]="room.id !== activeRoomId"
+              [class.hover:bg-white]="room.id !== activeRoomId"
+              [class.dark:text-slate-300]="room.id !== activeRoomId"
+              [class.dark:hover:bg-slate-800]="room.id !== activeRoomId"
+            >
+              <button
+                type="button"
+                (click)="selectRoom(room)"
+                [disabled]="roundInProgress && room.id !== activeRoomId"
+                class="flex min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-left disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <span class="text-base text-slate-400" aria-hidden="true">#</span>
+                <span class="min-w-0 flex-1 truncate">{{ room.name }}</span>
+                <span
+                  *ngIf="room.id === 'general'"
+                  class="text-[9px] font-bold uppercase tracking-wide text-slate-400"
+                  title="General cannot be deleted"
+                >Default</span>
+              </button>
+              <button
+                *ngIf="canDeleteRoom(room)"
+                type="button"
+                (click)="deleteRoom(room, $event)"
+                class="mr-1 grid h-6 w-6 shrink-0 place-content-center rounded-md text-slate-400 opacity-0 transition hover:bg-red-50 hover:text-red-600 focus:opacity-100 group-hover/room:opacity-100 dark:hover:bg-red-950/50 dark:hover:text-red-300"
+                [attr.aria-label]="'Delete room ' + room.name"
+                title="Delete room"
+              >
+                <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 10v6m4-6v6" />
+                </svg>
+              </button>
+            </div>
+          </li>
+        </ul>
+
+        <p class="mt-4 rounded-lg border border-slate-200 bg-white p-2.5 text-[11px] leading-relaxed text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+          #General keeps the original solution discussion and cannot be deleted. Room creators and solution admins can delete custom rooms.
+        </p>
+      </aside>
       <!-- Main chat area. Use flex-1 to occupy remaining space. -->
       <div
         id="chatboxDiscussion"
         #chatScroller
         class="discussion-messages min-h-0 flex-1 overflow-y-auto px-4 py-4 space-y-2"
       >
+        <div *ngIf="!comments.length" class="mx-auto mt-12 max-w-md rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-900">
+          <span class="mx-auto grid h-11 w-11 place-content-center rounded-xl bg-violet-100 text-xl font-black text-violet-700 dark:bg-violet-950 dark:text-violet-200">#</span>
+          <h2 class="mt-3 text-base font-bold text-slate-900 dark:text-white">Start #{{ activeRoom.name }}</h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ activeRoom.description || 'Share a question, mention one AI, or switch to Roundtable so every room AI can contribute.' }}</p>
+        </div>
         <ng-container *ngFor="let comment of comments; let i=index; trackBy: trackByComment">
 
           <!-- Day divider -->
@@ -281,7 +365,7 @@
                   <svg class="w-3 h-3 mr-0.5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M13 7H7v6h6V7z M7 2a1 1 0 00-1 1v1H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H7zm0 2h6v1H7V4zm8 4v8H5V8h10z"/>
                   </svg>
-                  AI Avatar
+                  AI
                 </span>
                 <!-- Show time/date if needed -->
                 <span class="text-xs dark:text-gray-400 text-gray-500">
@@ -414,97 +498,134 @@
          <div #bottomAnchor></div>
       </div>
 
-      <aside class="hidden h-full w-72 shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 lg:block">
-        <div class="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-              Online Now
-            </p>
-            <h2 class="text-sm font-bold text-slate-900 dark:text-white">
-              {{ onlineParticipants.length }} teammate{{ onlineParticipants.length === 1 ? '' : 's' }}
-            </h2>
-          </div>
-          <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+      <aside class="hidden h-full w-80 shrink-0 overflow-y-auto border-l border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950 lg:block">
+        <div class="mb-3">
+          <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Room members</p>
+          <h2 class="mt-0.5 truncate text-base font-bold text-slate-900 dark:text-white"># {{ activeRoom.name }}</h2>
         </div>
 
-        <ul *ngIf="onlineParticipants.length; else noOnlineParticipants" class="space-y-2">
-          <li
-            *ngFor="let participant of onlineParticipants; trackBy: trackByParticipant"
-            class="relative rounded-lg bg-white p-2 ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800"
-          >
-            <div
-              *ngIf="getParticipantRoute(participant) as participantRoute; else staticOnlineParticipant"
-              class="comment-author-trigger relative"
-            >
-              <a
-                [routerLink]="participantRoute"
-                class="flex items-center gap-3 rounded-md outline-none transition hover:bg-emerald-50 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:hover:bg-emerald-950/40 dark:focus-visible:ring-offset-slate-800"
-                [attr.aria-label]="'View profile for ' + getParticipantDisplayName(participant)"
-              >
-                <span class="relative shrink-0">
-                  <img
-                    *ngIf="getParticipantAvatar(participant); else participantInitial"
-                    [src]="getParticipantAvatar(participant)"
-                    [alt]="getParticipantDisplayName(participant)"
-                    class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200 transition hover:ring-2 hover:ring-emerald-400 dark:ring-slate-700"
-                  />
-                  <ng-template #participantInitial>
-                    <span class="grid h-9 w-9 place-content-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-800 transition hover:ring-2 hover:ring-emerald-400 dark:bg-emerald-950 dark:text-emerald-200">
-                      {{ getInitial(getParticipantDisplayName(participant)) }}
-                    </span>
-                  </ng-template>
-                  <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"></span>
-                </span>
-                <span class="min-w-0">
-                  <span class="block truncate text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ getParticipantDisplayName(participant) }}
-                  </span>
-                  <span *ngIf="participant.email" class="block truncate text-xs text-slate-500 dark:text-slate-400">
-                    {{ participant.email }}
-                  </span>
-                </span>
-              </a>
-              <ng-container
-                [ngTemplateOutlet]="participantPreview"
-                [ngTemplateOutletContext]="{ $implicit: participant }"
-              ></ng-container>
-            </div>
-
-            <ng-template #staticOnlineParticipant>
-              <div class="flex items-center gap-3">
-                <div class="relative shrink-0">
-                  <img
-                    *ngIf="getParticipantAvatar(participant); else staticParticipantInitial"
-                    [src]="getParticipantAvatar(participant)"
-                    [alt]="participant.displayName"
-                    class="h-9 w-9 rounded-full object-cover ring-1 ring-slate-200 dark:ring-slate-700"
-                  />
-                  <ng-template #staticParticipantInitial>
-                    <div class="grid h-9 w-9 place-content-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
-                      {{ getInitial(participant.displayName) }}
-                    </div>
-                  </ng-template>
-                  <span class="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-800"></span>
-                </div>
-                <div class="min-w-0">
-                  <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                    {{ participant.displayName }}
-                  </p>
-                  <p *ngIf="participant.email" class="truncate text-xs text-slate-500 dark:text-slate-400">
-                    {{ participant.email }}
-                  </p>
-                </div>
+        <section
+          class="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 shadow-sm dark:border-emerald-900 dark:from-emerald-950/70 dark:to-slate-900"
+          aria-labelledby="people-online-heading"
+          aria-live="polite"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" aria-hidden="true"></span>
+                <h3 id="people-online-heading" class="text-sm font-bold text-slate-950 dark:text-white">People online</h3>
               </div>
-            </ng-template>
-          </li>
-        </ul>
+              <p class="mt-1 text-xs text-slate-600 dark:text-slate-300">Available to chat in this room</p>
+            </div>
+            <span class="rounded-full bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-sm">
+              {{ onlineParticipants.length }} online
+            </span>
+          </div>
 
-        <ng-template #noOnlineParticipants>
-          <p class="rounded-lg border border-dashed border-slate-300 p-3 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-            No teammates are online right now.
+          <ul *ngIf="onlineParticipants.length; else noOnlineParticipants" class="mt-3 space-y-2">
+            <li
+              *ngFor="let participant of onlineParticipants; trackBy: trackByParticipant"
+              class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-white/90 p-2.5 shadow-sm dark:border-emerald-900/70 dark:bg-slate-900/90"
+            >
+              <span class="relative grid h-10 w-10 shrink-0 place-content-center overflow-hidden rounded-full bg-emerald-100 text-xs font-bold text-emerald-800 ring-2 ring-white dark:bg-emerald-950 dark:text-emerald-200 dark:ring-slate-900">
+                <img *ngIf="getParticipantAvatar(participant)" [src]="getParticipantAvatar(participant)" [alt]="getParticipantDisplayName(participant)" class="h-full w-full object-cover" />
+                <span *ngIf="!getParticipantAvatar(participant)">{{ getInitial(getParticipantDisplayName(participant)) }}</span>
+                <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900"></span>
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block truncate text-sm font-bold text-slate-900 dark:text-white">{{ getParticipantDisplayName(participant) }}</span>
+                <span class="block text-[11px] font-medium text-emerald-700 dark:text-emerald-300">Online now</span>
+              </span>
+            </li>
+          </ul>
+          <ng-template #noOnlineParticipants>
+            <div class="mt-3 rounded-xl border border-dashed border-emerald-200 bg-white/60 p-3 text-center dark:border-emerald-900 dark:bg-slate-900/50">
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-200">No teammates online right now</p>
+              <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Messages will be waiting when they return.</p>
+            </div>
+          </ng-template>
+          <p class="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
+            {{ roomHumanCount }} people have access to this discussion.
           </p>
-        </ng-template>
+        </section>
+
+        <section class="mt-4 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900" aria-labelledby="participation-heading">
+          <label id="participation-heading" for="participation-mode" class="block text-xs font-bold text-slate-800 dark:text-slate-100">Participation</label>
+          <select
+            id="participation-mode"
+            [(ngModel)]="participationMode"
+            (ngModelChange)="updateRoomPreferences()"
+            [disabled]="roundInProgress || roomSettingsSaving || !isRoomFeatureAvailable"
+            class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            <option value="mentions">Chat + mentions</option>
+            <option value="roundtable">Roundtable — all room AIs</option>
+          </select>
+          <p class="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{{ participationHelpText }}</p>
+
+          <div *ngIf="participationMode === 'roundtable'" class="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
+            <label for="round-limit" class="text-xs font-semibold text-slate-700 dark:text-slate-200">Round limit</label>
+            <select
+              id="round-limit"
+              [(ngModel)]="roundLimit"
+              (ngModelChange)="updateRoomPreferences()"
+              [disabled]="roundInProgress || roomSettingsSaving"
+              class="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm dark:border-slate-700 dark:bg-slate-800"
+            >
+              <option [ngValue]="1">1</option>
+              <option [ngValue]="2">2</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="mt-4 border-t border-slate-200 pt-4 dark:border-slate-800" aria-labelledby="ai-agents-heading">
+          <div class="mb-2 flex items-center justify-between">
+            <div>
+              <h3 id="ai-agents-heading" class="text-xs font-bold text-slate-800 dark:text-slate-100">AI agents</h3>
+              <p class="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">Secondary support for the room</p>
+            </div>
+            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ selectedRoomAIAgents.length }}</span>
+          </div>
+          <ul class="grid grid-cols-2 gap-2">
+            <li
+              *ngFor="let agent of roomAIPreviewAgents; trackBy: trackByAIAvatar"
+              class="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-800 dark:bg-slate-900"
+            >
+              <span class="relative grid h-8 w-8 shrink-0 place-content-center overflow-hidden rounded-full bg-teal-100 text-[10px] font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-200">
+                <img *ngIf="agent.avatarPath" [src]="agent.avatarPath" [alt]="agent.name" class="h-full w-full object-cover" />
+                <span *ngIf="!agent.avatarPath">{{ getInitial(agent.name) }}</span>
+              </span>
+              <span class="min-w-0 flex-1 truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{{ agent.name }}</span>
+            </li>
+          </ul>
+          <p *ngIf="hiddenRoomAIAgentCount" class="mt-2 text-center text-[11px] font-medium text-slate-500 dark:text-slate-400">
+            + {{ hiddenRoomAIAgentCount }} more agent{{ hiddenRoomAIAgentCount === 1 ? '' : 's' }}
+          </p>
+          <button
+            *ngIf="isRoomFeatureAvailable"
+            type="button"
+            (click)="openAddAI()"
+            [disabled]="roundInProgress || roomSettingsSaving"
+            class="mt-2 w-full rounded-xl border border-teal-300 bg-white px-3 py-2 text-sm font-semibold text-teal-700 transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-teal-800 dark:bg-slate-900 dark:text-teal-300 dark:hover:bg-teal-950/40"
+          >Manage AI agents</button>
+        </section>
       </aside>
+      </div>
+
+      <div
+        *ngIf="roundInProgress || roundStatusLabel"
+        class="flex shrink-0 items-center gap-3 border-t border-teal-200 bg-teal-50 px-4 py-2 text-xs font-semibold text-teal-900 dark:border-teal-900 dark:bg-teal-950/50 dark:text-teal-100"
+        aria-live="polite"
+      >
+        <span *ngIf="roundInProgress" class="h-2 w-2 animate-pulse rounded-full bg-teal-500" aria-hidden="true"></span>
+        <span class="min-w-0 flex-1 truncate">{{ roundStatusLabel }}</span>
+        <button
+          *ngIf="roundInProgress"
+          type="button"
+          (click)="stopRound()"
+          [disabled]="roundStopRequested"
+          class="rounded-lg border border-teal-300 bg-white px-2.5 py-1 font-bold text-teal-800 transition hover:bg-teal-100 disabled:opacity-60 dark:border-teal-800 dark:bg-slate-900 dark:text-teal-200"
+        >{{ roundStopRequested ? 'Stopping…' : 'Stop after this reply' }}</button>
       </div>
 
       <div
@@ -533,10 +654,38 @@
         class="shrink-0 p-3
                dark:bg-slate-800 bg-white
                dark:border-slate-700 border-t border-slate-300
-               flex items-center space-x-2"
+               flex flex-wrap items-center gap-2"
       >
+        <div *ngIf="isRoomFeatureAvailable" class="flex w-full flex-wrap items-center gap-2 pb-1">
+          <label class="sr-only" for="mobile-room-select">Room</label>
+          <select
+            id="mobile-room-select"
+            [ngModel]="activeRoomId"
+            (ngModelChange)="selectRoomById($event)"
+            [disabled]="roundInProgress || roomSettingsSaving"
+            class="min-w-0 flex-1 rounded-full border border-violet-200 bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-800 outline-none focus:ring-2 focus:ring-violet-500 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-200 md:hidden"
+          >
+            <option *ngFor="let room of displayRooms; trackBy: trackByRoom" [value]="room.id"># {{ room.name }}</option>
+          </select>
+
+          <label class="sr-only" for="composer-participation-mode">AI participation</label>
+          <select
+            id="composer-participation-mode"
+            [(ngModel)]="participationMode"
+            (ngModelChange)="updateRoomPreferences()"
+            [disabled]="roundInProgress"
+            class="rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-bold text-teal-800 outline-none focus:ring-2 focus:ring-teal-500 disabled:opacity-60 dark:border-teal-800 dark:bg-teal-950/50 dark:text-teal-200"
+          >
+            <option value="mentions">Chat + mentions</option>
+            <option value="roundtable">Roundtable · {{ selectedRoomAIAgents.length }} AI agents</option>
+          </select>
+          <span class="hidden text-[11px] text-slate-500 dark:text-slate-400 sm:inline">
+            {{ participationMode === 'roundtable' ? 'All room AIs reply in order.' : 'Only @mentioned AIs reply.' }}
+          </span>
+        </div>
 <button type="button"
         (click)="fileInput.click()"
+        [disabled]="roundInProgress"
         class="p-2 rounded hover:bg-slate-200 dark:hover:bg-slate-600">
   <!-- simple paper-clip icon -->
   <svg class="w-5 h-5 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor"
@@ -612,7 +761,8 @@
             (keydown.enter)="sendOnEnter($event)"
             (keydown.escape)="closeComposerPanels()"
             id="user-input"
-            placeholder="Message #team-discussion — use @ to mention"
+            [placeholder]="participationMode === 'roundtable' ? 'Ask every AI in #' + activeRoom.name + '…' : 'Message #' + activeRoom.name + ' — use @ to mention an AI'"
+            [disabled]="roundInProgress"
             class="w-full resize-none 
                    dark:bg-slate-900 bg-slate-100
                    dark:text-gray-200 text-slate-800
@@ -749,13 +899,144 @@
         <button
           (click)="addToDiscussion()"
           id="send-button"
-          class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-md text-sm"
+          [disabled]="roundInProgress || (!prompt.trim() && !pendingFiles.length) || (participationMode === 'roundtable' && !selectedRoomAIAgents.length)"
+          class="bg-teal-600 hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50 text-white px-4 py-2 rounded-md text-sm font-semibold"
         >
-          Send
+          {{ composerActionLabel }}
         </button>
+        <p class="w-full pl-12 text-[11px] text-slate-500 dark:text-slate-400">
+          {{ participationMode === 'roundtable'
+            ? 'Each selected AI replies once per round. You can stop after the current response.'
+            : 'Type @agent for one AI. Type @everyone to notify people; it does not trigger every AI.' }}
+        </p>
       </div>
     </div>
   </div>
+
+<div
+  *ngIf="showCreateRoomDialog"
+  class="fixed inset-0 z-[100] grid place-items-center bg-slate-950/45 p-4 backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="create-room-title"
+  (click)="closeCreateRoom()"
+>
+  <section class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
+    <div class="flex items-start justify-between gap-4">
+      <div>
+        <h2 id="create-room-title" class="text-lg font-bold text-slate-950 dark:text-white">Create a room</h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">All solution teammates can enter. Each room gets its own AI team and history.</p>
+      </div>
+      <button type="button" (click)="closeCreateRoom()" class="grid h-8 w-8 place-content-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">×</button>
+    </div>
+
+    <label for="new-room-name" class="mt-5 block text-sm font-semibold text-slate-800 dark:text-slate-100">Room name</label>
+    <div class="mt-1 flex items-center rounded-xl border border-slate-300 bg-white px-3 focus-within:ring-2 focus-within:ring-teal-500 dark:border-slate-700 dark:bg-slate-800">
+      <span class="text-slate-400">#</span>
+      <input
+        id="new-room-name"
+        [(ngModel)]="newRoomName"
+        maxlength="40"
+        autocomplete="off"
+        placeholder="Research"
+        class="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm text-slate-900 outline-none dark:text-white"
+        (keydown.enter)="createRoom()"
+      />
+    </div>
+
+    <label for="new-room-purpose" class="mt-4 block text-sm font-semibold text-slate-800 dark:text-slate-100">Purpose <span class="font-normal text-slate-400">(optional)</span></label>
+    <textarea
+      id="new-room-purpose"
+      [(ngModel)]="newRoomDescription"
+      maxlength="160"
+      rows="3"
+      placeholder="What should this room accomplish?"
+      class="mt-1 w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+    ></textarea>
+
+    <label class="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
+      <input type="checkbox" [(ngModel)]="copyRoomAI" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
+      <span>
+        <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Copy this room’s AI team</span>
+        <span class="block text-xs text-slate-500 dark:text-slate-400">You can add or remove agents after creating the room.</span>
+      </span>
+    </label>
+
+    <p *ngIf="roomActionError" class="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:bg-red-950/50 dark:text-red-200">{{ roomActionError }}</p>
+
+    <div class="mt-5 flex justify-end gap-2">
+      <button type="button" (click)="closeCreateRoom()" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancel</button>
+      <button type="button" (click)="createRoom()" class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">Create room</button>
+    </div>
+  </section>
+</div>
+
+<div
+  *ngIf="showAddAIDialog"
+  class="fixed inset-0 z-[100] flex justify-end bg-slate-950/45 backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="add-ai-title"
+  (click)="closeAddAI()"
+>
+  <section class="flex h-full w-full max-w-lg flex-col border-l border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
+    <div class="border-b border-slate-200 p-5 dark:border-slate-800">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 id="add-ai-title" class="text-lg font-bold text-slate-950 dark:text-white">AI agents for #{{ activeRoom.name }}</h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Selected agents can be @mentioned individually and join Roundtable mode.</p>
+        </div>
+        <button type="button" (click)="closeAddAI()" class="grid h-8 w-8 place-content-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">×</button>
+      </div>
+      <div class="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-xs leading-relaxed text-teal-900 dark:border-teal-900 dark:bg-teal-950/50 dark:text-teal-100">
+        <strong>How participation works:</strong> In Chat + mentions, only an AI you name with &#64; replies. In Roundtable, every selected AI replies in the order shown.
+      </div>
+    </div>
+
+    <div class="min-h-0 flex-1 overflow-y-auto p-4">
+      <ul class="space-y-2">
+        <li *ngFor="let agent of availableAIAgents; trackBy: trackByAIAvatar">
+          <button
+            type="button"
+            (click)="toggleRoomAgent(agent)"
+            [disabled]="roomSettingsSaving"
+            [attr.aria-pressed]="isAgentSelected(agent)"
+            class="flex w-full items-center gap-3 rounded-xl border p-3 text-left transition"
+            [class.border-teal-400]="isAgentSelected(agent)"
+            [class.bg-teal-50]="isAgentSelected(agent)"
+            [class.dark:bg-teal-950]="isAgentSelected(agent)"
+            [class.dark:bg-opacity-40]="isAgentSelected(agent)"
+            [class.border-slate-200]="!isAgentSelected(agent)"
+            [class.hover:bg-slate-50]="!isAgentSelected(agent)"
+            [class.dark:border-slate-800]="!isAgentSelected(agent)"
+            [class.dark:hover:bg-slate-800]="!isAgentSelected(agent)"
+          >
+            <span class="grid h-11 w-11 shrink-0 place-content-center overflow-hidden rounded-full bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              <img *ngIf="agent.avatarPath" [src]="agent.avatarPath" [alt]="agent.name" class="h-full w-full object-cover" />
+              <span *ngIf="!agent.avatarPath">{{ getInitial(agent.name) }}</span>
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="font-semibold text-slate-900 dark:text-white">{{ agent.name }}</span>
+              <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ agent.description }}</span>
+            </span>
+            <span aria-hidden="true" class="grid h-6 w-6 shrink-0 place-content-center rounded-full border text-xs font-bold"
+              [class.border-teal-600]="isAgentSelected(agent)"
+              [class.bg-teal-600]="isAgentSelected(agent)"
+              [class.text-white]="isAgentSelected(agent)"
+              [class.border-slate-300]="!isAgentSelected(agent)"
+              [class.text-transparent]="!isAgentSelected(agent)"
+            >✓</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+
+    <div class="flex items-center justify-between gap-3 border-t border-slate-200 p-4 dark:border-slate-800">
+      <p class="text-xs text-slate-500 dark:text-slate-400">{{ selectedRoomAIAgents.length }} selected</p>
+      <button type="button" (click)="closeAddAI()" class="rounded-lg bg-teal-600 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-700">Done</button>
+    </div>
+  </section>
+</div>
 
 <ng-template #participantPreview let-participant>
   <span

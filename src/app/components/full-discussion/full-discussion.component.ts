@@ -41,32 +41,64 @@ interface ParticipantInfo {
   isAI?: boolean;
   avatarPath?: string;
   collectionKey?: string;
+  provider?: AIProvider;
+  providerLabel?: string;
+  model?: string;
+  description?: string;
 }
+
+type AIProvider = 'google' | 'xai';
+type DiscussionParticipationMode = 'mentions' | 'roundtable';
 
 interface AIAvatar {
   name: string;
-  avatarPath: string;
+  avatarPath?: string;
   collectionKey: string;
   group: 'colleague' | 'elder';
+  provider: AIProvider;
+  providerLabel: string;
+  model?: string;
+  description: string;
+}
+
+interface DiscussionRoom {
+  id: string;
+  name: string;
+  description?: string;
+  isGeneral?: boolean;
+  createdAt?: string;
+  createdBy?: string;
+  aiMemberKeys?: string[];
+  participationMode?: DiscussionParticipationMode;
+  roundLimit?: number;
+  settingsVersion?: number;
+  discussion?: Comment[];
 }
 
 const AI_AVATARS: AIAvatar[] = [
-  { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara', group: 'colleague' },
-  { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun', group: 'colleague' },
-  { name: 'Sofia Morales', avatarPath: '../../../assets/img/sofia-agent.png', collectionKey: 'sofia', group: 'colleague' },
-  { name: 'Li Wei', avatarPath: '../../../assets/img/li-agent.png', collectionKey: 'li', group: 'colleague' },
-  { name: 'Amina Al-Sayed', avatarPath: '../../../assets/img/amina-agent.png', collectionKey: 'amina', group: 'colleague' },
-  { name: 'Elena Volkov', avatarPath: '../../../assets/img/elena-agent.png', collectionKey: 'elena', group: 'colleague' },
-  { name: 'Tane Kahu', avatarPath: '../../../assets/img/tane-agent.png', collectionKey: 'tane', group: 'colleague' },
-  { name: 'Dr. Logos', avatarPath: '../../../assets/img/logos.png', collectionKey: 'business', group: 'colleague' },
-  { name: 'Marie Curie', avatarPath: '../../../assets/img/marie-curie.jpg', collectionKey: 'marie', group: 'elder' },
-  { name: 'Rachel Carson', avatarPath: '../../../assets/img/rachel-carlson.jpeg', collectionKey: 'rachel', group: 'elder' },
-  { name: 'Buckminster Fuller', avatarPath: '../../../assets/img/fuller.jpg', collectionKey: 'bucky', group: 'elder' },
-  { name: 'Albert Einstein', avatarPath: '../../../assets/img/albert.png', collectionKey: 'albert', group: 'elder' },
-  { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'nelson', group: 'elder' },
-  { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi', group: 'elder' },
-  { name: 'Mark Twain', avatarPath: '../../../assets/img/twain.jpg', collectionKey: 'twain', group: 'elder' },
+  { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Community-centered research and inclusive strategy.' },
+  { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Technology, implementation, and systems analysis.' },
+  { name: 'Sofia Morales', avatarPath: '../../../assets/img/sofia-agent.png', collectionKey: 'sofia', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Policy, partnerships, and stakeholder perspectives.' },
+  { name: 'Li Wei', avatarPath: '../../../assets/img/li-agent.png', collectionKey: 'li', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Evidence synthesis and practical planning.' },
+  { name: 'Amina Al-Sayed', avatarPath: '../../../assets/img/amina-agent.png', collectionKey: 'amina', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Equity, resilience, and community impact.' },
+  { name: 'Elena Volkov', avatarPath: '../../../assets/img/elena-agent.png', collectionKey: 'elena', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Science, evaluation, and risk analysis.' },
+  { name: 'Tane Kahu', avatarPath: '../../../assets/img/tane-agent.png', collectionKey: 'tane', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Ecological knowledge and long-term stewardship.' },
+  { name: 'Dr. Logos', avatarPath: '../../../assets/img/logos.png', collectionKey: 'business', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Business models, feasibility, and execution.' },
+  { name: 'Marie Curie', avatarPath: '../../../assets/img/marie-curie.jpg', collectionKey: 'marie', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Scientific rigor and experimental thinking.' },
+  { name: 'Rachel Carson', avatarPath: '../../../assets/img/rachel-carlson.jpeg', collectionKey: 'rachel', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Environmental evidence and public communication.' },
+  { name: 'Buckminster Fuller', avatarPath: '../../../assets/img/fuller.jpg', collectionKey: 'bucky', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Whole-systems design and synthesis.' },
+  { name: 'Albert Einstein', avatarPath: '../../../assets/img/albert.png', collectionKey: 'albert', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'First-principles reasoning and thought experiments.' },
+  { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'nelson', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Leadership, reconciliation, and coalition building.' },
+  { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Nonviolent action and ethical reflection.' },
+  { name: 'Mark Twain', avatarPath: '../../../assets/img/twain.jpg', collectionKey: 'twain', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'A concise, skeptical literary perspective.' },
+  { name: 'Gemini', collectionKey: 'google-gemini', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Research, comparison, and multimodal reasoning.' },
+  { name: 'Grok', collectionKey: 'xai-grok', group: 'colleague', provider: 'xai', providerLabel: 'xAI', description: 'Direct analysis and alternative viewpoints.' },
 ];
+
+const DEFAULT_AI_MEMBER_KEYS = ['zara', 'arjun', 'sofia', 'bucky'];
+const GENERAL_AI_MEMBER_KEYS = AI_AVATARS.slice(0, 15).map(
+  (agent) => agent.collectionKey
+);
 
 interface PendingPreview {
   file: File;
@@ -164,6 +196,31 @@ export class FullDiscussionComponent
   replyTarget: Comment | null = null;
   showComposerEmojiPicker = false;
 
+  readonly availableAIAgents = AI_AVATARS;
+  rooms: DiscussionRoom[] = [];
+  activeRoomId = 'general';
+  activeRoom: DiscussionRoom = this.buildGeneralRoom();
+  participationMode: DiscussionParticipationMode = 'mentions';
+  roundLimit = 1;
+  roundInProgress = false;
+  roundStopRequested = false;
+  roundCurrentTurn = 0;
+  roundTotalTurns = 0;
+  roundStatusLabel = '';
+  showCreateRoomDialog = false;
+  showAddAIDialog = false;
+  newRoomName = '';
+  newRoomDescription = '';
+  copyRoomAI = true;
+  roomActionError = '';
+  roomSettingsSaving = false;
+
+  private roomsSub?: Subscription;
+  private activeRoomSub?: Subscription;
+  private latestParticipantsInput: unknown = [];
+  private roomFeatureInitialized = false;
+  private participantLoadGeneration = 0;
+
   constructor(
     private afs: AngularFirestore,
     public auth: AuthService,
@@ -187,6 +244,10 @@ export class FullDiscussionComponent
     const prefix = this.activatedRoute.snapshot.data['docPrefix'];
     // const id = this.activatedRoute.snapshot.paramMap.get('id');
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.activeRoomId = !prefix
+      ? this.activatedRoute.snapshot.queryParamMap.get('room') || 'general'
+      : 'general';
+    this.activeRoom = this.buildGeneralRoom();
     this.watchDiscussionTyping();
     this.configureWorkspaceReturn(prefix);
     /* Hosted mode: we got a docPath – stream its data */
@@ -201,9 +262,11 @@ export class FullDiscussionComponent
         .subscribe((doc: any) => {
           const shouldPinToBottom =
             !this.hasRouteMessageId() && this.isNearBottom();
-          this.comments = (doc?.discussion || []).map((c: any) =>
-            this.normalizeComment(c)
-          );
+          if (this.activeRoomId === 'general') {
+            this.comments = (doc?.discussion || []).map((c: any) =>
+              this.normalizeComment(c)
+            );
+          }
           const latest = this.comments.at(-1);
           if (latest?.date && latest.date !== this.lastMsgIso) {
             if (!this.firstSnapshot) this.playPing(); // skip very first batch
@@ -228,7 +291,8 @@ export class FullDiscussionComponent
           }
 
           // Load participants for @mention functionality
-          this.refreshParticipants(doc?.participants || []);
+          this.latestParticipantsInput = doc?.participants || [];
+          this.refreshParticipants(this.latestParticipantsInput);
         });
       return; // skip the old "solution-id via route" code
     }
@@ -244,9 +308,11 @@ export class FullDiscussionComponent
       const shouldPinToBottom =
         !this.hasRouteMessageId() && this.isNearBottom();
       this.currentSolution = data;
-      this.comments = (data?.discussion || []).map((c: any) =>
-        this.normalizeComment(c)
-      );
+      if (this.activeRoomId === 'general') {
+        this.comments = (data?.discussion || []).map((c: any) =>
+          this.normalizeComment(c)
+        );
+      }
       this.markCurrentDiscussionRead();
       this.scrollToRouteMessage();
       this.hydrateCommentAuthorProfiles();
@@ -268,8 +334,399 @@ export class FullDiscussionComponent
           participantEmails.push(...Object.values(data.participants).filter(Boolean) as string[]);
         }
       }
+      this.latestParticipantsInput = participantEmails;
       this.refreshParticipants(participantEmails);
+      this.initializeRoomFeature();
     });
+  }
+
+  get isRoomFeatureAvailable(): boolean {
+    return !this.docPath && !!(this.currentSolution?.solutionId || this.id);
+  }
+
+  get displayRooms(): DiscussionRoom[] {
+    const storedGeneral = this.rooms.find((room) => room.id === 'general');
+    const general = this.buildGeneralRoom(storedGeneral);
+    const customRooms = this.rooms
+      .filter((room) => room.id !== 'general')
+      .sort((a, b) =>
+        String(a.createdAt || '').localeCompare(String(b.createdAt || ''))
+      );
+    return [general, ...customRooms];
+  }
+
+  get selectedRoomAIAgents(): AIAvatar[] {
+    const keys = new Set(
+      this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS
+    );
+    return AI_AVATARS.filter((agent) => keys.has(agent.collectionKey));
+  }
+
+  get roomHumanCount(): number {
+    return this.participants.filter((participant) => !participant.isAI).length;
+  }
+
+  get roomAIPreviewAgents(): AIAvatar[] {
+    return this.selectedRoomAIAgents.slice(0, 4);
+  }
+
+  get hiddenRoomAIAgentCount(): number {
+    return Math.max(0, this.selectedRoomAIAgents.length - this.roomAIPreviewAgents.length);
+  }
+
+  get composerActionLabel(): string {
+    return this.participationMode === 'roundtable' ? 'Start round' : 'Send';
+  }
+
+  get participationHelpText(): string {
+    return this.participationMode === 'roundtable'
+      ? `Every AI in this room replies once per round, in order. @everyone still notifies people. Maximum ${this.roundLimit} round${this.roundLimit === 1 ? '' : 's'}.`
+      : 'People can always chime in. Only AI agents you @mention will reply; @everyone notifies all solution teammates.';
+  }
+
+  trackByRoom(_index: number, room: DiscussionRoom): string {
+    return room.id;
+  }
+
+  trackByAIAvatar(_index: number, agent: AIAvatar): string {
+    return agent.collectionKey;
+  }
+
+  isAgentSelected(agent: AIAvatar): boolean {
+    return !!this.activeRoom.aiMemberKeys?.includes(agent.collectionKey);
+  }
+
+  canDeleteRoom(room: DiscussionRoom): boolean {
+    if (!room || room.id === 'general' || room.isGeneral) return false;
+    const uid = this.auth.currentUser?.uid || '';
+    const email = String(this.auth.currentUser?.email || '').toLowerCase();
+    const currentUser: any = this.auth.currentUser || {};
+    const solution: any = this.currentSolution || {};
+    const adminEmails = (solution.solutionAdminEmails || []).map((value: string) =>
+      String(value || '').toLowerCase()
+    );
+    return (
+      room.createdBy === uid ||
+      currentUser.admin === 'true' ||
+      currentUser.role === 'admin' ||
+      solution.ownerAccountId === uid ||
+      solution.authorAccountId === uid ||
+      solution.initiatorId === uid ||
+      String(solution.ownerEmail || solution.authorEmail || '').toLowerCase() === email ||
+      adminEmails.includes(email)
+    );
+  }
+
+  openCreateRoom(): void {
+    if (!this.isRoomFeatureAvailable || this.roundInProgress) return;
+    this.roomActionError = '';
+    this.newRoomName = '';
+    this.newRoomDescription = '';
+    this.copyRoomAI = true;
+    this.showCreateRoomDialog = true;
+  }
+
+  closeCreateRoom(): void {
+    this.showCreateRoomDialog = false;
+    this.roomActionError = '';
+  }
+
+  openAddAI(): void {
+    if (!this.isRoomFeatureAvailable || this.roundInProgress) return;
+    this.roomActionError = '';
+    this.showAddAIDialog = true;
+  }
+
+  closeAddAI(): void {
+    this.showAddAIDialog = false;
+    this.roomActionError = '';
+  }
+
+  async createRoom(): Promise<void> {
+    const name = this.newRoomName.replace(/\s+/g, ' ').trim();
+    if (name.length < 2 || name.length > 40) {
+      this.roomActionError = 'Use a room name between 2 and 40 characters.';
+      return;
+    }
+    if (
+      this.displayRooms.some(
+        (room) => room.name.trim().toLowerCase() === name.toLowerCase()
+      )
+    ) {
+      this.roomActionError = 'A room with that name already exists.';
+      return;
+    }
+
+    const id = this.afs.createId();
+    const room: DiscussionRoom = {
+      id,
+      name,
+      description: this.newRoomDescription.replace(/\s+/g, ' ').trim().slice(0, 160),
+      createdAt: new Date().toISOString(),
+      createdBy: this.auth.currentUser?.uid || '',
+      aiMemberKeys: this.copyRoomAI
+        ? [...(this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS)]
+        : [...DEFAULT_AI_MEMBER_KEYS],
+      participationMode: 'mentions',
+      roundLimit: 1,
+      settingsVersion: 1,
+      discussion: [],
+    };
+
+    try {
+      await this.afs.doc(this.getRoomDocPath(id)).set(room);
+      this.closeCreateRoom();
+      this.selectRoom(room);
+    } catch (error) {
+      console.error('Unable to create discussion room', error);
+      this.roomActionError = 'Unable to create the room right now. Please try again.';
+    }
+  }
+
+  async deleteRoom(room: DiscussionRoom, event?: Event): Promise<void> {
+    event?.stopPropagation();
+    if (!this.canDeleteRoom(room) || this.roundInProgress) return;
+    if (
+      !confirm(
+        `Delete #${room.name}? Its messages will be permanently removed. #General can never be deleted.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      if (this.activeRoomId === room.id) {
+        this.selectRoom(this.buildGeneralRoom());
+      }
+      await this.afs.doc(this.getRoomDocPath(room.id)).delete();
+    } catch (error) {
+      console.error('Unable to delete discussion room', error);
+      alert('Unable to delete that room. Only its creator or a solution administrator can delete it.');
+    }
+  }
+
+  selectRoom(room: DiscussionRoom, updateUrl = true): void {
+    if (!room || room.id === this.activeRoomId) return;
+    if (this.roundInProgress) {
+      alert('Stop the current AI round before changing rooms.');
+      return;
+    }
+
+    this.activeRoomSub?.unsubscribe();
+    this.activeRoomId = room.id;
+    this.applyRoomSettings(room);
+    this.comments = [];
+    this.hasScrolled = false;
+    this.lastReadMarkerKey = '';
+    this.participantSourceKey = '';
+
+    if (room.id === 'general') {
+      this.comments = ((this.currentSolution as any)?.discussion || []).map(
+        (comment: any) => this.normalizeComment(comment)
+      );
+      this.refreshParticipants(this.latestParticipantsInput);
+      this.markCurrentDiscussionRead();
+    } else {
+      this.subscribeToActiveRoom(room.id);
+    }
+
+    this.watchDiscussionTyping();
+    if (updateUrl) {
+      this.router.navigate([], {
+        relativeTo: this.activatedRoute,
+        queryParams: { room: room.id === 'general' ? null : room.id, messageId: null },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
+  }
+
+  selectRoomById(roomId: string): void {
+    const room = this.displayRooms.find((candidate) => candidate.id === roomId);
+    if (room) this.selectRoom(room);
+  }
+
+  async updateRoomPreferences(): Promise<void> {
+    if (this.roomSettingsSaving) return;
+    this.roomSettingsSaving = true;
+    this.roundLimit = Math.min(2, Math.max(1, Number(this.roundLimit) || 1));
+    this.activeRoom = {
+      ...this.activeRoom,
+      participationMode: this.participationMode,
+      roundLimit: this.roundLimit,
+    };
+    await this.persistActiveRoomSettings();
+    this.roomSettingsSaving = false;
+  }
+
+  async toggleRoomAgent(agent: AIAvatar): Promise<void> {
+    if (this.roundInProgress || this.roomSettingsSaving) return;
+    this.roomSettingsSaving = true;
+    const keys = new Set(this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS);
+    if (keys.has(agent.collectionKey)) {
+      keys.delete(agent.collectionKey);
+    } else {
+      keys.add(agent.collectionKey);
+    }
+    this.activeRoom = { ...this.activeRoom, aiMemberKeys: Array.from(keys) };
+    this.participantSourceKey = '';
+    this.refreshParticipants(this.latestParticipantsInput);
+    await this.persistActiveRoomSettings();
+    this.roomSettingsSaving = false;
+  }
+
+  async removeRoomAgent(agent: AIAvatar): Promise<void> {
+    if (!this.isAgentSelected(agent) || this.roundInProgress) return;
+    await this.toggleRoomAgent(agent);
+  }
+
+  stopRound(): void {
+    if (!this.roundInProgress) return;
+    this.roundStopRequested = true;
+    this.roundStatusLabel = 'Stopping after the current response…';
+  }
+
+  private buildGeneralRoom(settings?: DiscussionRoom): DiscussionRoom {
+    return {
+      id: 'general',
+      name: 'General',
+      description: 'The main discussion for this solution.',
+      isGeneral: true,
+      createdAt: settings?.createdAt || '',
+      createdBy: settings?.createdBy || '',
+      aiMemberKeys:
+        settings?.aiMemberKeys !== undefined
+          ? [...settings.aiMemberKeys]
+          : [...GENERAL_AI_MEMBER_KEYS],
+      participationMode: settings?.participationMode || 'mentions',
+      roundLimit: settings?.roundLimit === 2 ? 2 : 1,
+      settingsVersion: 1,
+    };
+  }
+
+  private initializeRoomFeature(): void {
+    if (!this.isRoomFeatureAvailable || this.roomFeatureInitialized) return;
+    this.roomFeatureInitialized = true;
+    const collectionPath = this.getRoomsCollectionPath();
+    this.roomsSub = this.afs
+      .collection<DiscussionRoom>(collectionPath)
+      .valueChanges({ idField: 'id' })
+      .subscribe((rooms) => {
+        this.rooms = rooms || [];
+        const requestedRoom = this.displayRooms.find(
+          (room) => room.id === this.activeRoomId
+        );
+        if (!requestedRoom) {
+          this.selectRoom(this.buildGeneralRoom(), true);
+          return;
+        }
+        if (requestedRoom.id === 'general') {
+          this.applyRoomSettings(requestedRoom);
+        } else if (!this.activeRoomSub) {
+          this.applyRoomSettings(requestedRoom);
+          this.subscribeToActiveRoom(requestedRoom.id);
+        }
+      });
+    void this.ensureGeneralRoomSettings();
+  }
+
+  private async ensureGeneralRoomSettings(): Promise<void> {
+    const ref = this.afs.doc<DiscussionRoom>(this.getRoomDocPath('general'));
+    try {
+      const snapshot = await firstValueFrom(ref.get());
+      if (snapshot.exists) {
+        const existing = snapshot.data();
+        if (!existing?.settingsVersion) {
+          await ref.set(
+            {
+              id: 'general',
+              name: 'General',
+              isGeneral: true,
+              aiMemberKeys: [...GENERAL_AI_MEMBER_KEYS],
+              settingsVersion: 1,
+            },
+            { merge: true }
+          );
+        }
+        return;
+      }
+      await ref.set(this.buildGeneralRoom({
+        id: 'general',
+        name: 'General',
+        createdAt: new Date().toISOString(),
+        createdBy: this.auth.currentUser?.uid || '',
+      }));
+    } catch (error) {
+      console.error('Unable to initialize general room settings', error);
+    }
+  }
+
+  private subscribeToActiveRoom(roomId: string): void {
+    this.activeRoomSub?.unsubscribe();
+    this.activeRoomSub = this.afs
+      .doc<DiscussionRoom>(this.getRoomDocPath(roomId))
+      .valueChanges()
+      .subscribe((room) => {
+        if (!room) {
+          this.selectRoom(this.buildGeneralRoom());
+          return;
+        }
+        const normalizedRoom = { ...room, id: roomId };
+        this.applyRoomSettings(normalizedRoom);
+        const shouldPinToBottom = !this.hasRouteMessageId() && this.isNearBottom();
+        this.comments = (room.discussion || []).map((comment) =>
+          this.normalizeComment(comment)
+        );
+        this.refreshParticipants(this.latestParticipantsInput);
+        this.markCurrentDiscussionRead();
+        this.hydrateCommentAuthorProfiles();
+        if (shouldPinToBottom) this.scrollToBottom();
+      });
+  }
+
+  private applyRoomSettings(room: DiscussionRoom): void {
+    this.activeRoom = room.id === 'general' ? this.buildGeneralRoom(room) : {
+      ...room,
+      aiMemberKeys: room.aiMemberKeys !== undefined
+        ? [...room.aiMemberKeys]
+        : [...DEFAULT_AI_MEMBER_KEYS],
+      participationMode: room.participationMode || 'mentions',
+      roundLimit: room.roundLimit === 2 ? 2 : 1,
+      settingsVersion: 1,
+    };
+    this.participationMode = this.activeRoom.participationMode || 'mentions';
+    this.roundLimit = this.activeRoom.roundLimit === 2 ? 2 : 1;
+    this.participantSourceKey = '';
+    this.refreshParticipants(this.latestParticipantsInput);
+  }
+
+  private async persistActiveRoomSettings(): Promise<void> {
+    if (!this.isRoomFeatureAvailable) return;
+    try {
+      await this.afs.doc(this.getRoomDocPath(this.activeRoomId)).set(
+        {
+          name: this.activeRoom.name,
+          description: this.activeRoom.description || '',
+          isGeneral: this.activeRoomId === 'general',
+          aiMemberKeys: this.activeRoom.aiMemberKeys || [],
+          participationMode: this.participationMode,
+          roundLimit: this.roundLimit,
+          settingsVersion: 1,
+        },
+        { merge: true }
+      );
+    } catch (error) {
+      console.error('Unable to update room preferences', error);
+      this.roomActionError = 'Unable to save the room settings right now.';
+    }
+  }
+
+  private getRoomsCollectionPath(): string {
+    return `solutions/${this.currentSolution?.solutionId || this.id}/discussionRooms`;
+  }
+
+  private getRoomDocPath(roomId: string): string {
+    return `${this.getRoomsCollectionPath()}/${roomId}`;
   }
 
   /** True when the comment at index i is the first of a new calendar day */
@@ -390,7 +847,7 @@ Please choose a file under 5 MB.`);
           continue;
         }
         const id = this.afs.createId();
-        const path = `chatUploads/${this.currentSolution.solutionId}/${id}-${file.name}`;
+        const path = `chatUploads/${this.currentSolution.solutionId || this.id}/${this.activeRoomId}/${id}-${file.name}`;
         const task = await this.storage.upload(path, file);
         const url = await task.ref.getDownloadURL();
 
@@ -417,13 +874,6 @@ Please choose a file under 5 MB.`);
 
     this.comments.push(msg);
 
-    // Process @mentions and send notifications (before clearing prompt)
-    if (content) {
-      this.processMentions(content);
-      // Process AI mentions and generate responses
-      this.processAIMentions(content);
-    }
-
     // Clear the prompt & scroll
     this.previews.forEach((p) => URL.revokeObjectURL(p.url));
     this.previews = [];
@@ -439,10 +889,19 @@ Please choose a file under 5 MB.`);
     const toSave = this.serializeDiscussionForSave(this.comments);
     // play ping before adding message
     this.playPing();
-    const path =
-      this.docPath || `solutions/${this.currentSolution!.solutionId}`;
-    await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
+    await this.afs
+      .doc(this.getDiscussionDocPath())
+      .set({ discussion: toSave }, { merge: true });
     await this.createUnreadNotificationsForMessage(msg);
+
+    if (content) {
+      await this.processMentions(content);
+      if (this.participationMode === 'roundtable') {
+        await this.startRoundtable(content);
+      } else {
+        await this.processAIMentions(content);
+      }
+    }
   }
 
   // “Close” might navigate away or handle a different route
@@ -488,6 +947,9 @@ Please choose a file under 5 MB.`);
   }
 
   ngOnDestroy(): void {
+    this.roundStopRequested = true;
+    this.roomsSub?.unsubscribe();
+    this.activeRoomSub?.unsubscribe();
     this.participantPresenceSub?.unsubscribe();
     this.typingPresenceSub?.unsubscribe();
     this.stopDiscussionTyping();
@@ -789,7 +1251,7 @@ Please choose a file under 5 MB.`);
 
   async sendOnEnter(event: Event): Promise<void> {
     const keyboardEvent = event as KeyboardEvent;
-    if (keyboardEvent.shiftKey || keyboardEvent.isComposing) return;
+    if (keyboardEvent.shiftKey || keyboardEvent.isComposing || this.roundInProgress) return;
 
     keyboardEvent.preventDefault();
     this.closeMentionDropdown();
@@ -881,13 +1343,17 @@ Please choose a file under 5 MB.`);
   /** --- helper: update Firestore once --- */
   private async syncDiscussion() {
     const toSave = this.serializeDiscussionForSave(this.comments);
-    const path =
-      this.docPath || `solutions/${this.currentSolution!.solutionId}`;
-    await this.afs.doc(path).set({ discussion: toSave }, { merge: true });
+    await this.afs
+      .doc(this.getDiscussionDocPath())
+      .set({ discussion: toSave }, { merge: true });
   }
 
   private getDiscussionDocPath(): string {
-    return this.docPath || `solutions/${this.currentSolution!.solutionId || this.id}`;
+    if (this.docPath) return this.docPath;
+    if (this.activeRoomId !== 'general') {
+      return this.getRoomDocPath(this.activeRoomId);
+    }
+    return `solutions/${this.currentSolution!.solutionId || this.id}`;
   }
 
   private getDiscussionContextType(): 'solution' | 'challenge' {
@@ -898,9 +1364,12 @@ Please choose a file under 5 MB.`);
 
   private getDiscussionRoute(): string {
     const contextType = this.getDiscussionContextType();
-    return contextType === 'challenge'
+    const baseRoute = contextType === 'challenge'
       ? `/challenge-discussion/${this.id}`
       : `/full-discussion/${this.currentSolution!.solutionId || this.id}`;
+    return this.activeRoomId === 'general'
+      ? baseRoute
+      : `${baseRoute}?room=${encodeURIComponent(this.activeRoomId)}`;
   }
 
   private normalizeComment(comment: any): Comment {
@@ -1093,7 +1562,10 @@ Please choose a file under 5 MB.`);
             ? `${message.attachments.length} attachment(s)`
             : ''),
         contextId: String(this.currentSolution!.solutionId || this.id || ''),
-        contextTitle: this.currentSolution?.title || 'Team discussion',
+        contextTitle:
+          this.activeRoomId === 'general'
+            ? this.currentSolution?.title || 'Team discussion'
+            : `#${this.activeRoom.name} · ${this.currentSolution?.title || 'Team discussion'}`,
         contextType: this.getDiscussionContextType(),
         sourceDocPath: this.getDiscussionDocPath(),
         discussionPath: this.getDiscussionRoute(),
@@ -1108,7 +1580,11 @@ Please choose a file under 5 MB.`);
 
   private refreshParticipants(participantsInput: unknown): void {
     const participantEmails = this.normalizeParticipantEmails(participantsInput);
-    const nextKey = participantEmails.join('|');
+    const aiKey = (this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS)
+      .slice()
+      .sort()
+      .join('|');
+    const nextKey = `${participantEmails.join('|')}::${aiKey}`;
 
     if (nextKey === this.participantSourceKey) {
       this.buildParticipantsFromComments();
@@ -1116,8 +1592,11 @@ Please choose a file under 5 MB.`);
     }
 
     this.participantSourceKey = nextKey;
-    this.loadParticipants(participantEmails).then(() => {
-      this.buildParticipantsFromComments();
+    const generation = ++this.participantLoadGeneration;
+    this.loadParticipants(participantEmails, generation).then(() => {
+      if (generation === this.participantLoadGeneration) {
+        this.buildParticipantsFromComments();
+      }
     });
   }
 
@@ -1142,7 +1621,10 @@ Please choose a file under 5 MB.`);
   }
 
   /** Load participant emails and fetch their display names */
-  private async loadParticipants(participantEmails: string[]) {
+  private async loadParticipants(
+    participantEmails: string[],
+    generation: number
+  ) {
     const participants: ParticipantInfo[] = [];
     const seenEmails = new Set<string>();
     
@@ -1211,6 +1693,7 @@ Please choose a file under 5 MB.`);
       }
     }
 
+    if (generation !== this.participantLoadGeneration) return;
     this.participants = participants;
 
     // Add AI avatars to participants
@@ -1222,13 +1705,22 @@ Please choose a file under 5 MB.`);
 
   /** Add AI avatars to the participants list */
   private addAIParticipants() {
-    for (const ai of AI_AVATARS) {
+    const activeKeys = new Set(
+      this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS
+    );
+    for (const ai of AI_AVATARS.filter((candidate) =>
+      activeKeys.has(candidate.collectionKey)
+    )) {
       this.participants.push({
         email: `ai-${ai.collectionKey}@system`,
         displayName: ai.name,
         isAI: true,
         avatarPath: ai.avatarPath,
         collectionKey: ai.collectionKey,
+        provider: ai.provider,
+        providerLabel: ai.providerLabel,
+        model: ai.model,
+        description: ai.description,
       });
     }
   }
@@ -1412,7 +1904,7 @@ Please choose a file under 5 MB.`);
 
   private get discussionTypingContextId(): string {
     const solutionId = this.currentSolution?.solutionId || this.id;
-    return solutionId ? `solution-${solutionId}` : '';
+    return solutionId ? `solution-${solutionId}-room-${this.activeRoomId}` : '';
   }
 
   /** Filter participants based on search text */
@@ -1474,12 +1966,17 @@ Please choose a file under 5 MB.`);
 
     const senderName = `${this.auth.currentUser.firstName} ${this.auth.currentUser.lastName}`.trim();
     const challengeTitle = this.currentSolution?.title || 'Discussion';
-    const discussionUrl = `${window.location.origin}/challenge-discussion/${this.id}`;
+    const discussionUrl = `${window.location.origin}${this.getDiscussionRoute()}`;
 
     // Check for @everyone
     if (content.toLowerCase().includes('@everyone')) {
       const recipientEmails = this.participants
-        .filter((p) => p.email !== this.auth.currentUser.email?.toLowerCase())
+        .filter(
+          (p) =>
+            !p.isAI &&
+            !!p.email &&
+            p.email !== this.auth.currentUser.email?.toLowerCase()
+        )
         .map((p) => p.email);
 
       if (recipientEmails.length > 0) {
@@ -1516,7 +2013,12 @@ Please choose a file under 5 MB.`);
           p.email.toLowerCase() === mentionText ||
           p.displayName.toLowerCase().startsWith(mentionText)
       );
-      if (found && found.email !== this.auth.currentUser.email?.toLowerCase()) {
+      if (
+        found &&
+        !found.isAI &&
+        found.email &&
+        found.email !== this.auth.currentUser.email?.toLowerCase()
+      ) {
         if (!mentionedEmails.includes(found.email)) {
           mentionedEmails.push(found.email);
         }
@@ -1618,8 +2120,48 @@ Please choose a file under 5 MB.`);
     }
   }
 
+  private async startRoundtable(userMessage: string): Promise<void> {
+    const agents = this.participants.filter(
+      (participant) => participant.isAI && participant.collectionKey
+    );
+    if (!agents.length) {
+      alert('Add at least one AI agent to this room before starting a round.');
+      return;
+    }
+
+    this.roundInProgress = true;
+    this.roundStopRequested = false;
+    this.roundCurrentTurn = 0;
+    this.roundTotalTurns = agents.length * this.roundLimit;
+
+    try {
+      for (let round = 1; round <= this.roundLimit; round += 1) {
+        for (const agent of agents) {
+          if (this.roundStopRequested) return;
+          this.roundCurrentTurn += 1;
+          this.roundStatusLabel = `Round ${round} of ${this.roundLimit} · ${agent.displayName} is responding · ${this.roundCurrentTurn} of ${this.roundTotalTurns}`;
+          await this.generateAIResponse(agent, userMessage, round);
+        }
+      }
+    } finally {
+      const stopped = this.roundStopRequested;
+      this.roundInProgress = false;
+      this.roundStopRequested = false;
+      this.roundStatusLabel = stopped
+        ? 'Round stopped.'
+        : `Round complete · ${this.roundCurrentTurn} AI response${this.roundCurrentTurn === 1 ? '' : 's'}`;
+      setTimeout(() => {
+        if (!this.roundInProgress) this.roundStatusLabel = '';
+      }, 4_000);
+    }
+  }
+
   /** Generate an AI response and add it to the discussion */
-  private async generateAIResponse(ai: ParticipantInfo, userMessage: string) {
+  private async generateAIResponse(
+    ai: ParticipantInfo,
+    userMessage: string,
+    roundNumber?: number
+  ): Promise<void> {
     // Build context from full discussion
     const context = this.buildDiscussionContext();
 
@@ -1634,6 +2176,7 @@ Please choose a file under 5 MB.`);
     // Add placeholder message immediately
     const nowIso = new Date().toISOString();
     const placeholderMsg: Comment = {
+      messageId: this.afs.createId(),
       date: nowIso,
       authorId: `ai-${ai.collectionKey}`,
       authorName: ai.displayName,
@@ -1641,72 +2184,112 @@ Please choose a file under 5 MB.`);
       content: '',
       displayTime: this.time.formatDateStringComment(nowIso),
       isAI: true,
+      aiProvider: ai.providerLabel || 'Google',
+      aiModel: ai.model || '',
       isLoading: true,
     };
     this.comments.push(placeholderMsg);
     this.scrollToBottom();
 
-    // Write prompt to trigger Cloud Function
-    await docRef.set({
-      prompt: `You are ${ai.displayName}, an AI team member participating in a team discussion.
+    const participationInstruction = roundNumber
+      ? `You are participating in round ${roundNumber} of a controlled roundtable. Other AI agents may have already responded. Add a distinct perspective, acknowledge useful prior points, and do not address or trigger other agents with @mentions.`
+      : 'A team member explicitly mentioned you. Respond to that person without triggering other agents.';
+
+    try {
+      // Write prompt to trigger the provider-neutral Cloud Function.
+      await docRef.set({
+        provider: ai.provider || 'google',
+        requestedAgentKey: ai.collectionKey || '',
+        conversationId: this.getDiscussionDocPath(),
+        prompt: `You are ${ai.displayName}, an AI team member participating in the “${this.activeRoom.name}” room.
+${participationInstruction}
 Here is the context of the conversation so far:
 
 ${context}
 
-A team member has just mentioned you with this message: "${userMessage}"
+A team member submitted this message: "${userMessage}"
 
 Please respond helpfully to their question or comment, staying in character as ${ai.displayName}.
 Keep your response concise and relevant to the discussion.
 You may use basic markdown for emphasis: **bold** for important terms, *italic* for emphasis.
 For lists, use dashes (-) or numbers (1. 2. 3.).`,
-    });
+      });
+    } catch (error) {
+      await this.finishAIPlaceholder(
+        placeholderMsg,
+        'This AI provider could not be reached. Please check its configuration and try again.'
+      );
+      return;
+    }
 
-    // Subscribe to response
-    const subscription = docRef.valueChanges().subscribe(async (data: any) => {
-      if (!data || !data.status) return;
+    await new Promise<void>((resolve) => {
+      let finished = false;
+      let subscription: Subscription | undefined;
+      let timeout: ReturnType<typeof setTimeout>;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(timeout);
+        subscription?.unsubscribe();
+        resolve();
+      };
+      timeout = setTimeout(async () => {
+        await this.finishAIPlaceholder(
+          placeholderMsg,
+          `${ai.displayName} took too long to respond. You can continue the discussion or try again.`
+        );
+        finish();
+      }, 190_000);
+      subscription = docRef.valueChanges().subscribe(async (data: any) => {
+        if (!data?.status || finished) return;
 
-      if (data.status.state === 'COMPLETED' && data.response) {
-        // Run inside Angular zone to trigger change detection
-        this.ngZone.run(async () => {
-          // Find and update the placeholder message in the array
-          const msgIndex = this.comments.findIndex(
-            (c) => c.date === placeholderMsg.date && c.authorId === placeholderMsg.authorId
+        if (data.status.state === 'COMPLETED' && data.response) {
+          await this.finishAIPlaceholder(
+            placeholderMsg,
+            data.response,
+            data.providerLabel || ai.providerLabel,
+            data.modelUsed || ai.model
           );
-          if (msgIndex !== -1) {
-            // Create a new object to trigger change detection
-            this.comments[msgIndex] = {
-              ...this.comments[msgIndex],
-              content: data.response,
-              isLoading: false,
-            };
-            // Force array reference change for Angular
-            this.comments = [...this.comments];
-          }
-
-          // Sync to Firestore
-          await this.syncDiscussion();
-          this.scrollToBottom();
           this.playPing();
-
-          subscription.unsubscribe();
-        });
-      } else if (data.status.state === 'ERRORED') {
-        this.ngZone.run(async () => {
-          const msgIndex = this.comments.findIndex(
-            (c) => c.date === placeholderMsg.date && c.authorId === placeholderMsg.authorId
+          finish();
+        } else if (data.status.state === 'ERRORED') {
+          await this.finishAIPlaceholder(
+            placeholderMsg,
+            data.response ||
+              data.status.error ||
+              'This AI provider encountered an error. Please try again.'
           );
-          if (msgIndex !== -1) {
-            this.comments[msgIndex] = {
-              ...this.comments[msgIndex],
-              content: 'Sorry, I encountered an error while generating a response. Please try again.',
-              isLoading: false,
-            };
-            this.comments = [...this.comments];
-          }
-          await this.syncDiscussion();
-          subscription.unsubscribe();
-        });
-      }
+          finish();
+        }
+      });
+    });
+  }
+
+  private async finishAIPlaceholder(
+    placeholder: Comment,
+    content: string,
+    providerLabel?: string,
+    model?: string
+  ): Promise<void> {
+    await new Promise<void>((resolve) => {
+      this.ngZone.run(async () => {
+        const msgIndex = this.comments.findIndex(
+          (comment) => comment.messageId === placeholder.messageId
+        );
+        if (msgIndex !== -1) {
+          this.comments[msgIndex] = {
+            ...this.comments[msgIndex],
+            content,
+            aiProvider: providerLabel || this.comments[msgIndex].aiProvider,
+            aiModel: model || this.comments[msgIndex].aiModel,
+            isLoading: false,
+          };
+          this.comments = [...this.comments];
+        }
+        await this.syncDiscussion();
+        this.scrollToBottom();
+        resolve();
+      });
     });
   }
 

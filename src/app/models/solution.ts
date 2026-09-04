@@ -257,6 +257,8 @@ export class Comment {
   attachments?: Attachment[]; // NEW
   linkPreview?: LinkPreview;
   isAI?: boolean; // For AI-generated messages
+  aiProvider?: string; // Provider label for transparent multi-lab discussions
+  aiModel?: string; // Optional configured model identifier
   isLoading?: boolean; // For AI typing indicator
   createdAt?: any;
   createdAtMs?: number;

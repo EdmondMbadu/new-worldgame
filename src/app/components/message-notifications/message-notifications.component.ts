@@ -135,8 +135,9 @@ export class MessageNotificationsComponent implements OnInit, OnDestroy {
       );
     }
 
+    const separator = discussion.discussionPath.includes('?') ? '&' : '?';
     await this.router.navigateByUrl(
-      `${discussion.discussionPath}?messageId=${encodeURIComponent(
+      `${discussion.discussionPath}${separator}messageId=${encodeURIComponent(
         discussion.messageId
       )}`
     );

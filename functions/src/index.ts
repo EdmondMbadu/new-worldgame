@@ -6966,11 +6966,109 @@ function stripPromptContextBlocks(prompt: string): string {
   return remaining.trim() || original;
 }
 
+type DiscussionAIProvider = 'google' | 'xai';
+
+interface ProviderTextResult {
+  answer: string;
+  model: string;
+  providerLabel: string;
+}
+
+function normalizeDiscussionProvider(value: unknown): DiscussionAIProvider {
+  const provider = String(value || 'google').trim().toLowerCase();
+  return provider === 'xai' ? provider : 'google';
+}
+
+function providerRuntimeConfig(): {
+  key: string;
+  model: string;
+} {
+  const config = (functions.config() as any)?.xai || {};
+  return {
+    key: String(config.key || '').trim(),
+    model: String(config.model || '').trim(),
+  };
+}
+
+function responseOutputText(payload: any): string {
+  if (typeof payload?.output_text === 'string' && payload.output_text.trim()) {
+    return payload.output_text.trim();
+  }
+
+  const text = (payload?.output || [])
+    .flatMap((item: any) => (Array.isArray(item?.content) ? item.content : []))
+    .filter((item: any) => item?.type === 'output_text' && item?.text)
+    .map((item: any) => String(item.text))
+    .join('\n')
+    .trim();
+  return text;
+}
+
+async function fetchProviderJson(
+  providerLabel: string,
+  url: string,
+  init: RequestInit
+): Promise<any> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 170_000);
+  try {
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    const payload: any = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message =
+        payload?.error?.message ||
+        payload?.message ||
+        `${providerLabel} returned HTTP ${response.status}`;
+      throw new Error(`${providerLabel}: ${message}`);
+    }
+    return payload;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function generateWithExternalProvider(
+  provider: Exclude<DiscussionAIProvider, 'google'>,
+  history: string
+): Promise<ProviderTextResult> {
+  const { key, model } = providerRuntimeConfig();
+  const providerLabel = 'xAI';
+  if (!key || !model) {
+    throw new Error(
+      `${providerLabel} is not configured. Add both xai.key and xai.model to Firebase Functions configuration.`
+    );
+  }
+
+  const boundedHistory = history.slice(-80_000);
+  const payload = await fetchProviderJson(providerLabel, 'https://api.x.ai/v1/responses', {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${key}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      input: [{ role: 'user', content: boundedHistory }],
+      max_output_tokens: 1200,
+      store: false,
+    }),
+  });
+  const answer = responseOutputText(payload);
+  if (!answer) throw new Error(`${providerLabel} returned an empty response.`);
+  return { answer, model: String(payload?.model || model), providerLabel };
+}
+
 const processChatPrompt = async (snap: any): Promise<void> => {
     try {
       const prompt: string = (snap.data()?.['prompt'] || '').trim();
       if (!prompt) return;
       const userPrompt = stripPromptContextBlocks(prompt);
+      const requestedProvider = normalizeDiscussionProvider(
+        snap.data()?.['provider']
+      );
+      const conversationId = String(
+        snap.data()?.['conversationId'] || ''
+      ).trim();
       const collectionId = String(snap.ref.parent?.id || '')
         .trim()
         .toLowerCase();
@@ -6986,7 +7084,11 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       const colRef = snap.ref.parent!;
       const allDocs = await colRef.get();
       const sorted = allDocs.docs
-        .filter((d: any) => d.id !== snap.id)
+        .filter(
+          (d: any) =>
+            d.id !== snap.id &&
+            (!conversationId || d.get('conversationId') === conversationId)
+        )
         .sort(
           (a: any, b: any) =>
             (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
@@ -7059,7 +7161,13 @@ const processChatPrompt = async (snap: any): Promise<void> => {
 
       console.log('Model selection:', {
         wantsImage,
-        modelName: wantsImage ? CHAT_IMAGE_MODELS[0].name : textModelName,
+        provider: wantsImage ? 'google' : requestedProvider,
+        modelName:
+          wantsImage || requestedProvider === 'google'
+            ? wantsImage
+              ? CHAT_IMAGE_MODELS[0].name
+              : textModelName
+            : providerRuntimeConfig().model || 'not-configured',
         promptPreview: userPrompt.slice(0, 100),
       });
 
@@ -7082,6 +7190,8 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       let imgB64 = '';
       let imgMimeType = 'image/png';
       let imageModelUsed = '';
+      let textModelUsed = textModelName;
+      let providerLabel = 'Google';
       let finalResponse: any;
 
       if (wantsImage) {
@@ -7135,6 +7245,14 @@ const processChatPrompt = async (snap: any): Promise<void> => {
           answer =
             "I couldn't generate that image. It may have been blocked by safety guidelines or the image service may be temporarily busy. Please adjust the request and try again.";
         }
+      } else if (requestedProvider !== 'google') {
+        const providerResult = await generateWithExternalProvider(
+          requestedProvider,
+          history
+        );
+        answer = providerResult.answer;
+        textModelUsed = providerResult.model;
+        providerLabel = providerResult.providerLabel;
       } else {
         const streamResult = await model.generateContentStream(history);
         const STREAM_THROTTLE_MS = 250;
@@ -7346,6 +7464,9 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       await snap.ref.update({
         status: { state: 'COMPLETED' },
         response: answer || null,
+        provider: wantsImage ? 'google' : requestedProvider,
+        providerLabel,
+        modelUsed: imageModelUsed || textModelUsed,
         imageUrl: imageUrl || null,
         imageDocId: imageDocId || null,
         sources: cleanSources.length > 0 ? cleanSources : null,
@@ -7358,7 +7479,10 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       let userFriendlyError = 'An unexpected error occurred. Please try again.';
       const errorMsg = err instanceof Error ? err.message : String(err);
 
-      if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
+      if (errorMsg.includes('is not configured')) {
+        userFriendlyError =
+          'This AI lab has not been connected by an administrator yet. Choose another room agent or ask an administrator to configure the provider.';
+      } else if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
         userFriendlyError =
           'Your request was blocked due to content safety guidelines. Please try a different prompt.';
       } else if (errorMsg.includes('quota') || errorMsg.includes('429')) {
@@ -7373,7 +7497,6 @@ const processChatPrompt = async (snap: any): Promise<void> => {
         status: {
           state: 'ERRORED',
           error: userFriendlyError,
-          technicalError: errorMsg,
         },
         response: userFriendlyError,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),

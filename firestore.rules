@@ -108,6 +108,16 @@ service cloud.firestore {
         );
     }
 
+    function canManageDiscussionRoom(room, solution) {
+      return isSignedIn()
+        && (
+          room.get('createdBy', '') == request.auth.uid
+          || isCurrentSolutionOwner(solution)
+          || solution.get('solutionAdminEmails', []).hasAny([authEmail()])
+          || isPlatformAdmin()
+        );
+    }
+
     function changesSolutionOwnership() {
       return request.resource.data.diff(resource.data).affectedKeys().hasAny([
         'ownerAccountId',
@@ -199,6 +209,44 @@ service cloud.firestore {
       // Comments are created by the authenticated callable function so the
       // server can enforce privacy, count atomically, and notify the team.
       allow create, update, delete: if false;
+    }
+
+    match /solutions/{solutionId}/discussionRooms/{roomId} {
+      allow read: if canReadSolution(
+        get(/databases/$(database)/documents/solutions/$(solutionId)).data
+      );
+      allow create: if isSignedIn()
+        && canReadSolution(
+          get(/databases/$(database)/documents/solutions/$(solutionId)).data
+        )
+        && request.resource.data.get('createdBy', '') == request.auth.uid
+        && request.resource.data.get('name', '') is string
+        && request.resource.data.get('name', '').size() >= 2
+        && request.resource.data.get('name', '').size() <= 40
+        && (
+          roomId != 'general'
+          || request.resource.data.get('isGeneral', false) == true
+        );
+      allow update: if isSignedIn()
+        && canReadSolution(
+          get(/databases/$(database)/documents/solutions/$(solutionId)).data
+        )
+        && request.resource.data.get('createdBy', '')
+          == resource.data.get('createdBy', '')
+        && request.resource.data.get('name', '') is string
+        && request.resource.data.get('name', '').size() >= 2
+        && request.resource.data.get('name', '').size() <= 40
+        && (
+          roomId != 'general'
+          || request.resource.data.get('isGeneral', false) == true
+        );
+      // General is a permanent settings document. Its messages remain on the
+      // parent solution for backward compatibility, and it can never be deleted.
+      allow delete: if roomId != 'general'
+        && canManageDiscussionRoom(
+          resource.data,
+          get(/databases/$(database)/documents/solutions/$(solutionId)).data
+        );
     }
 
     match /solutions/{solutionId}/strategyReviewRevisions/{revisionId} {
