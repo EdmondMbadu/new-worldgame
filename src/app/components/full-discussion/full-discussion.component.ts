@@ -380,8 +380,8 @@ export class FullDiscussionComponent
 
   get participationHelpText(): string {
     return this.participationMode === 'roundtable'
-      ? `Every AI in this room replies once per round, in order. @everyone still notifies people. Maximum ${this.roundLimit} round${this.roundLimit === 1 ? '' : 's'}.`
-      : 'People can always chime in. Only AI agents you @mention will reply; @everyone notifies all solution teammates.';
+      ? `Every room AI replies in order, for up to ${this.roundLimit} round${this.roundLimit === 1 ? '' : 's'}.`
+      : 'Mention an AI for a reply. @everyone notifies your teammates.';
   }
 
   trackByRoom(_index: number, room: DiscussionRoom): string {
