@@ -6896,6 +6896,7 @@ function stripPromptContextBlocks(prompt: string): string {
 }
 
 type DiscussionAIProvider = 'google' | 'xai';
+const ROOM_AGENT_PROMPT_KIND = 'room-agent-v1';
 
 interface ProviderTextResult {
   answer: string;
@@ -6989,14 +6990,19 @@ async function generateWithExternalProvider(
 
 const processChatPrompt = async (snap: any): Promise<void> => {
     try {
-      const prompt: string = (snap.data()?.['prompt'] || '').trim();
+      const promptData = snap.data() || {};
+      const prompt: string = (promptData['prompt'] || '').trim();
       if (!prompt) return;
-      const userPrompt = stripPromptContextBlocks(prompt);
+      const isRoomAgentPrompt =
+        String(promptData['promptKind'] || '').trim() === ROOM_AGENT_PROMPT_KIND;
+      const userPrompt = isRoomAgentPrompt
+        ? String(promptData['userMessage'] || prompt).trim()
+        : stripPromptContextBlocks(prompt);
       const requestedProvider = normalizeDiscussionProvider(
-        snap.data()?.['provider']
+        promptData['provider']
       );
       const conversationId = String(
-        snap.data()?.['conversationId'] || ''
+        promptData['conversationId'] || ''
       ).trim();
       const collectionId = String(snap.ref.parent?.id || '')
         .trim()
@@ -7010,19 +7016,22 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       });
 
       // ────────── 0. helpers ─────────────────────────────────────
-      const colRef = snap.ref.parent!;
-      const allDocs = await colRef.get();
-      const sorted = allDocs.docs
-        .filter(
-          (d: any) =>
-            d.id !== snap.id &&
-            (!conversationId || d.get('conversationId') === conversationId)
-        )
-        .sort(
-          (a: any, b: any) =>
-            (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
-            (b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0)
-        );
+      let sorted: any[] = [];
+      if (!isRoomAgentPrompt) {
+        const colRef = snap.ref.parent!;
+        const allDocs = await colRef.get();
+        sorted = allDocs.docs
+          .filter(
+            (d: any) =>
+              d.id !== snap.id &&
+              (!conversationId || d.get('conversationId') === conversationId)
+          )
+          .sort(
+            (a: any, b: any) =>
+              (a.get('createdAt')?.toMillis() ?? a.createTime?.toMillis() ?? 0) -
+              (b.get('createdAt')?.toMillis() ?? b.createTime?.toMillis() ?? 0)
+          );
+      }
 
       // current turn attachments
       const thisAttachments = (snap.data()?.['attachmentList'] || []) as {
@@ -7034,7 +7043,12 @@ const processChatPrompt = async (snap: any): Promise<void> => {
       // ────────── 1. build conversation history ─────────────────
       let history = '';
 
-      /* include every previous doc (attachments + turns) */
+      /*
+       * Room-agent prompts already contain a bounded room transcript and a
+       * compact solution brief. Do not load their earlier prompt documents:
+       * each one repeats that transcript and would grow cost geometrically.
+       * Legacy chat and avatar flows retain their existing history behavior.
+       */
       for (const d of sorted) {
         const data = d.data();
 

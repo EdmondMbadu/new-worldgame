@@ -4,6 +4,7 @@ import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { ActivatedRoute, Router } from '@angular/router';
+import { of } from 'rxjs';
 
 import { AuthService } from 'src/app/services/auth.service';
 import { DiscussionNotificationsService } from 'src/app/services/discussion-notifications.service';
@@ -54,7 +55,10 @@ describe('FullDiscussionComponent room behavior', () => {
         { provide: AngularFireFunctions, useValue: {} },
         { provide: AuthService, useValue: { currentUser, currentAuthUid: currentUser.uid } },
         { provide: SolutionService, useValue: {} },
-        { provide: TimeService, useValue: {} },
+        {
+          provide: TimeService,
+          useValue: { formatDateStringComment: () => 'Now' },
+        },
         { provide: PresenceService, useValue: { clearTyping: () => Promise.resolve() } },
         { provide: DiscussionNotificationsService, useValue: {} },
         { provide: Router, useValue: {} },
@@ -206,6 +210,137 @@ describe('FullDiscussionComponent room behavior', () => {
     component.participationMode = 'roundtable';
     component.roundLimit = 1;
     expect(component.participationHelpText).toContain('agents reply once, in order');
+  });
+
+  it('gives room agents a compact solution brief and only relevant detailed notes', () => {
+    component.currentSolution = {
+      solutionId: 'solution-1',
+      title: 'Neighborhood Solar Cooperative',
+      description: '<p>Shared clean energy for apartment residents.</p>',
+      sdgs: ['SDG 7 Affordable and Clean Energy', 'SDG 11 Sustainable Cities'],
+      content: '<p>The visual identity uses warm yellow and blue.</p>',
+      strategyReview: '<p>Members will vote on major governance decisions.</p>',
+      status: {
+        'S4-F': '<p>Funding will combine community shares and municipal grants.</p>',
+      },
+    };
+    component.activeRoom = {
+      ...component.activeRoom,
+      description: 'Evaluate research and implementation choices.',
+    };
+
+    const context = (component as any).buildSolutionContext(
+      'Which funding approach is most practical?'
+    );
+
+    expect(context).toContain('Title: Neighborhood Solar Cooperative');
+    expect(context).toContain('Summary: Shared clean energy for apartment residents.');
+    expect(context).toContain('SDG 7 Affordable and Clean Energy');
+    expect(context).toContain('Room purpose: Evaluate research and implementation choices.');
+    expect(context).toContain('Funding will combine community shares and municipal grants.');
+    expect(context).not.toContain('visual identity');
+    expect(context.length).toBeLessThanOrEqual(2_400);
+  });
+
+  it('keeps routine room questions on the small always-on solution brief', () => {
+    component.currentSolution = {
+      solutionId: 'solution-1',
+      title: 'Neighborhood Solar Cooperative',
+      description: 'Shared clean energy.',
+      strategyReview: 'A long internal strategy review that is not needed here.',
+    };
+
+    const context = (component as any).buildSolutionContext('Hello everyone');
+
+    expect(context).toContain('Title: Neighborhood Solar Cooperative');
+    expect(context).toContain('Summary: Shared clean energy.');
+    expect(context).not.toContain('Relevant solution notes');
+    expect(context).not.toContain('long internal strategy review');
+  });
+
+  it('bounds room history and does not repeat the current request', () => {
+    component.comments = Array.from({ length: 14 }, (_, index) => ({
+      messageId: `message-${index}`,
+      authorName: index % 2 ? 'Zara Nkosi' : 'Room Creator',
+      authorId: index % 2 ? 'ai-zara' : currentUser.uid,
+      isAI: index % 2 === 1,
+      content: `Earlier message ${index} ${'detail '.repeat(90)}`,
+    }));
+    component.comments.push({
+      messageId: 'current-request',
+      authorName: 'Room Creator',
+      authorId: currentUser.uid,
+      content: 'What should we prioritize?',
+    });
+
+    const context = (component as any).buildDiscussionContext(
+      'What should we prioritize?'
+    );
+
+    expect(context).not.toContain('What should we prioritize?');
+    expect(context).not.toContain('Earlier message 0');
+    expect(context).toContain('Earlier message 13');
+    expect(context.split('\n').length).toBeLessThanOrEqual(12);
+    expect(context.length).toBeLessThanOrEqual(6_000);
+  });
+
+  it('sends the compact solution context as a room-agent prompt', async () => {
+    const promptSet = jasmine.createSpy('promptSet').and.resolveTo();
+    const firestore = TestBed.inject(AngularFirestore) as any;
+    spyOn(firestore, 'doc').and.callFake((path: string) => {
+      if (path.startsWith('users/')) {
+        return {
+          set: promptSet,
+          valueChanges: () =>
+            of({ status: { state: 'COMPLETED' }, response: 'A useful answer.' }),
+        };
+      }
+      return { set: roomSet, ref: { path } };
+    });
+    component.notifyAudio = {
+      nativeElement: {
+        currentTime: 0,
+        play: () => Promise.resolve(),
+      },
+    } as any;
+    component.currentSolution = {
+      solutionId: 'solution-1',
+      title: 'Neighborhood Solar Cooperative',
+      description: 'Shared clean energy for apartment residents.',
+      sdgs: ['SDG 7 Affordable and Clean Energy'],
+      status: {
+        'S4-F': 'Funding combines community shares and municipal grants.',
+      },
+    };
+    component.comments = [
+      {
+        messageId: 'current-request',
+        authorId: currentUser.uid,
+        authorName: 'Room Creator',
+        content: 'How should we fund this solution?',
+      },
+    ];
+
+    await (component as any).generateAIResponse(
+      {
+        email: 'ai-zara@system',
+        displayName: 'Zara Nkosi',
+        isAI: true,
+        collectionKey: 'zara',
+        provider: 'google',
+      },
+      'How should we fund this solution?',
+      1
+    );
+
+    const payload = promptSet.calls.mostRecent().args[0];
+    expect(payload.promptKind).toBe('room-agent-v1');
+    expect(payload.userMessage).toBe('How should we fund this solution?');
+    expect(payload.prompt).toContain('Title: Neighborhood Solar Cooperative');
+    expect(payload.prompt).toContain(
+      'Funding combines community shares and municipal grants.'
+    );
+    expect(payload.prompt.match(/How should we fund this solution\?/g)?.length).toBe(1);
   });
 
   it('preserves the next AI placeholder when an older room snapshot arrives', () => {
