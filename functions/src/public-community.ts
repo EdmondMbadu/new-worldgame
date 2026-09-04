@@ -1,6 +1,9 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v1';
-import { hasApprovedCurrentModerationVersion } from './solution-moderation-core';
+import {
+  hasApprovedCurrentModerationVersion,
+  isLegacyApprovedMetadataOnlyUpdate,
+} from './solution-moderation-core';
 
 type CommunityFilter = 'all' | 'in-development' | 'submitted';
 
@@ -222,10 +225,14 @@ export const syncPublicCommunitySolutionFeed = functions.firestore
       .firestore()
       .doc(`publicCommunitySolutions/${context.params.solutionId}`);
 
-    if (
-      !change.after.exists ||
-      !isCommunityVisible(change.after.data())
-    ) {
+    const before = change.before.exists ? change.before.data() : null;
+    const after = change.after.exists ? change.after.data() : null;
+    const shouldPublish =
+      Boolean(after) &&
+      (isCommunityVisible(after) ||
+        isLegacyApprovedMetadataOnlyUpdate(before, after));
+
+    if (!shouldPublish) {
       await publicReference.delete();
       return;
     }

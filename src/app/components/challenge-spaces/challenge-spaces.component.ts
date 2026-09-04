@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { ChallengeJoinRequest, ChallengePage, User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
@@ -168,6 +168,13 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
 
   routeTarget(space: ChallengePage): string[] {
     return ['/home-challenge', space.challengePageId || space.customUrl || ''];
+  }
+
+  readonly trackSpace = (_index: number, space: ChallengePage): string =>
+    this.spaceKey(space);
+
+  trackJoinRequest(_index: number, request: ChallengeJoinRequest): string {
+    return request.id || `${request.challengePageId}:${request.requesterEmail}`;
   }
 
   adminPendingRequests(): ChallengeJoinRequest[] {
@@ -429,7 +436,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
       )
     );
 
-    await Promise.all(emails.map((email) => this.resolveMemberByEmail(email)));
+    await this.resolveMembersByEmail(emails);
 
     const allUids = new Set<string>();
     this.memberUidsBySpace.clear();
@@ -464,43 +471,46 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
       });
   }
 
-  private async resolveMemberByEmail(
-    email: string
-  ): Promise<ChallengeSpaceMember | null> {
-    const normalizedEmail = this.normalizeEmail(email);
-    if (this.memberUsersByEmail.has(normalizedEmail)) {
-      return this.memberUsersByEmail.get(normalizedEmail) || null;
-    }
-
+  private async resolveMembersByEmail(emails: string[]): Promise<void> {
     const currentUserEmail = this.normalizeEmail(this.auth.currentUser?.email || '');
     const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
-    if (normalizedEmail && normalizedEmail === currentUserEmail && currentUid) {
-      const member = {
-        uid: currentUid,
-        lastActiveAt: new Date().toISOString(),
-      };
-      this.memberUsersByEmail.set(normalizedEmail, member);
-      return member;
-    }
+    const unresolved = emails.filter((email) => {
+      const normalizedEmail = this.normalizeEmail(email);
+      if (!normalizedEmail || this.memberUsersByEmail.has(normalizedEmail)) {
+        return false;
+      }
+      if (normalizedEmail === currentUserEmail && currentUid) {
+        this.memberUsersByEmail.set(normalizedEmail, {
+          uid: currentUid,
+          lastActiveAt: new Date().toISOString(),
+        });
+        return false;
+      }
+      return true;
+    });
+    if (!unresolved.length) return;
 
     try {
-      let users = await firstValueFrom(this.auth.getUserFromEmail(email));
-      if (!users?.length && normalizedEmail !== email) {
-        users = await firstValueFrom(this.auth.getUserFromEmail(normalizedEmail));
-      }
-
-      const user = users?.[0] as User | undefined;
-      const member = user?.uid
-        ? {
-            uid: user.uid,
-            lastActiveAt: user.lastActiveAt,
-          }
-        : null;
-      this.memberUsersByEmail.set(normalizedEmail, member);
-      return member;
+      const users = await this.auth.getUsersByEmailsOnce(unresolved);
+      const usersByEmail = new Map<string, User>();
+      users.forEach((user) => {
+        const email = this.normalizeEmail(user.emailLower || user.email || '');
+        if (email) usersByEmail.set(email, user);
+      });
+      unresolved.forEach((email) => {
+        const normalizedEmail = this.normalizeEmail(email);
+        const user = usersByEmail.get(normalizedEmail);
+        this.memberUsersByEmail.set(
+          normalizedEmail,
+          user?.uid
+            ? { uid: user.uid, lastActiveAt: user.lastActiveAt }
+            : null
+        );
+      });
     } catch {
-      this.memberUsersByEmail.set(normalizedEmail, null);
-      return null;
+      unresolved.forEach((email) => {
+        this.memberUsersByEmail.set(this.normalizeEmail(email), null);
+      });
     }
   }
 

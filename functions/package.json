@@ -12,6 +12,8 @@
     "logs": "firebase functions:log",
     "community-feed:audit": "node scripts/backfill-community-solutions.js",
     "community-feed:apply": "node scripts/backfill-community-solutions.js --apply",
+    "community-projection-status:audit": "node scripts/backfill-publication-status-projections.js",
+    "community-projection-status:apply": "node scripts/backfill-publication-status-projections.js --apply",
     "moderation:prepare-legacy": "node scripts/prepare-solution-moderation.js",
     "moderation:prepare-legacy:apply": "node scripts/prepare-solution-moderation.js --apply"
   },

@@ -58,7 +58,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   showAddChallenge: boolean = false;
 
   /** Loading UX flags */
-  isInitialLoad = true; // fullscreen overlay when the page first opens
+  isInitialLoad = true; // tracks first data load without blocking the page shell
   isLoadingChallenges = true; // skeletons in the grid when (re)loading challenges
   isErrorChallenges = false; // error state if fetch fails
   homeView: 'solutions' | 'challenges' = 'solutions';
@@ -73,8 +73,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   private readonly communityPageSize = 20;
 
   // (optional) simple cache hit to prevent flashing loader if we already have data for that category
-  private minOverlayMs = 120; // a brief transition without delaying the feed
-  private initialStart = performance.now();
   private languageSub?: Subscription;
 
   get isGuest(): boolean {
@@ -248,9 +246,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private finishInitialOverlay() {
-    const elapsed = performance.now() - this.initialStart;
-    const remaining = Math.max(this.minOverlayMs - elapsed, 0);
-    setTimeout(() => (this.isInitialLoad = false), remaining);
+    this.isInitialLoad = false;
   }
 
   async setActiveCategory(category: string) {

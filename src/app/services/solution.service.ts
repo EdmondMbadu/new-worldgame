@@ -664,8 +664,11 @@ export class SolutionService {
   }
 
   getHomePageSolutions() {
+    // Home and Discover only need card-sized public fields. Reading the full
+    // `solutions` documents here transferred megabytes of strategy content
+    // before the first useful paint on slow connections.
     return this.afs
-      .collection<Solution>('solutions', (ref) =>
+      .collection<Solution>('publicCommunitySolutions', (ref) =>
         ref.where('statusForPublication', '==', 'approved')
       )
       .valueChanges({ idField: 'solutionId' })

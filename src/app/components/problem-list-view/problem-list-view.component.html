@@ -312,7 +312,7 @@
         <div *ngIf="viewMode === 'grid'">
           <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             <article
-              *ngFor="let solution of filteredSolutions; let i = index"
+              *ngFor="let solution of filteredSolutions; let i = index; trackBy: trackSolution"
               class="group relative flex flex-col overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-slate-800 shadow hover:shadow-xl hover:-translate-y-1 transition-transform transition-shadow"
               (click)="openSolution(solution)"
             >
@@ -616,7 +616,7 @@
 
           <div class="max-h-80 overflow-y-auto border-t border-gray-100 dark:border-gray-800">
             <button
-              *ngFor="let solution of filteredWeeklyBriefSolutions"
+              *ngFor="let solution of filteredWeeklyBriefSolutions; trackBy: trackSolution"
               type="button"
               (click)="selectWeeklyBriefSolution(solution, $event)"
               class="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-500/10"

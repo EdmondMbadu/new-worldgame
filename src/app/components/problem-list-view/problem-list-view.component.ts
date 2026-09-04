@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
@@ -113,6 +113,10 @@ export class ProblemListViewComponent implements OnInit {
 
   isOwnerOfSolution(solution: Solution): boolean {
     return isSolutionOwner(solution, this.auth.currentUser);
+  }
+
+  trackSolution(index: number, solution: Solution): string {
+    return solution.solutionId || solution.title || String(index);
   }
   async findPendingSolutions() {
     this.pendingSolutions = [];
@@ -596,7 +600,7 @@ export class ProblemListViewComponent implements OnInit {
       )
     );
 
-    await Promise.all(emails.map((email) => this.resolveMemberByEmail(email)));
+    await this.resolveMembersByEmail(emails);
 
     const allUids = new Set<string>();
     this.solutionMemberUids.clear();
@@ -669,48 +673,63 @@ export class ProblemListViewComponent implements OnInit {
     return Array.from(emails);
   }
 
-  private async resolveMemberByEmail(email: string): Promise<SolutionMember | null> {
-    const normalizedEmail = this.normalizeEmail(email);
-    if (this.memberByEmail.has(normalizedEmail)) {
-      return this.memberByEmail.get(normalizedEmail) || null;
-    }
-
+  private async resolveMembersByEmail(emails: string[]): Promise<void> {
     const currentEmail = this.normalizeEmail(this.auth.currentUser?.email || '');
     const currentUid = this.auth.currentUser?.uid || this.auth.currentAuthUid || '';
-    if (normalizedEmail === currentEmail && currentUid) {
-      const member = {
-        email: normalizedEmail,
-        displayName:
-          [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
-            .filter(Boolean)
-            .join(' ')
-            .trim() || normalizedEmail,
-        uid: currentUid,
-        lastActiveAt: new Date().toISOString(),
-      };
-      this.memberByEmail.set(normalizedEmail, member);
-      return member;
-    }
+    const unresolved = emails.filter((email) => {
+      const normalizedEmail = this.normalizeEmail(email);
+      if (!normalizedEmail || this.memberByEmail.has(normalizedEmail)) {
+        return false;
+      }
+      if (normalizedEmail === currentEmail && currentUid) {
+        this.memberByEmail.set(normalizedEmail, {
+          email: normalizedEmail,
+          displayName:
+            [this.auth.currentUser?.firstName, this.auth.currentUser?.lastName]
+              .filter(Boolean)
+              .join(' ')
+              .trim() || normalizedEmail,
+          uid: currentUid,
+          lastActiveAt: new Date().toISOString(),
+        });
+        return false;
+      }
+      return true;
+    });
+    if (!unresolved.length) return;
 
     try {
-      const users = await firstValueFrom(this.auth.getUserFromEmail(normalizedEmail));
-      const user = users?.[0] as User | undefined;
-      const member = user?.uid
-        ? {
-            email: normalizedEmail,
-            displayName:
-              [user.firstName, user.lastName].filter(Boolean).join(' ').trim() ||
-              user.email ||
-              normalizedEmail,
-            uid: user.uid,
-            lastActiveAt: user.lastActiveAt,
-          }
-        : null;
-      this.memberByEmail.set(normalizedEmail, member);
-      return member;
+      const users = await this.auth.getUsersByEmailsOnce(unresolved);
+      const usersByEmail = new Map<string, User>();
+      users.forEach((user) => {
+        const email = this.normalizeEmail(user.emailLower || user.email || '');
+        if (email) usersByEmail.set(email, user);
+      });
+      unresolved.forEach((email) => {
+        const normalizedEmail = this.normalizeEmail(email);
+        const user = usersByEmail.get(normalizedEmail);
+        this.memberByEmail.set(
+          normalizedEmail,
+          user?.uid
+            ? {
+                email: normalizedEmail,
+                displayName:
+                  [user.firstName, user.lastName]
+                    .filter(Boolean)
+                    .join(' ')
+                    .trim() ||
+                  user.email ||
+                  normalizedEmail,
+                uid: user.uid,
+                lastActiveAt: user.lastActiveAt,
+              }
+            : null
+        );
+      });
     } catch {
-      this.memberByEmail.set(normalizedEmail, null);
-      return null;
+      unresolved.forEach((email) => {
+        this.memberByEmail.set(this.normalizeEmail(email), null);
+      });
     }
   }
 

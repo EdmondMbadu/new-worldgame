@@ -6,16 +6,12 @@ import { RouterModule } from '@angular/router';
 import { ProtectedRoutingModule } from './protected-routing.module';
 import { SharedModule } from '../shared/shared.module';
 
-import { HomeComponent } from '../components/home/home.component';
 import { ProfileComponent } from '../components/profile/profile.component';
 import { PostComponent } from '../components/solution/solution.component';
-import { ProblemListComponent } from '../components/problem-list/problem-list.component';
-import { ProblemListViewComponent } from '../components/problem-list-view/problem-list-view.component';
 import { ProblemListFeedbackComponent } from '../components/problem-list-feedback/problem-list-feedback.component';
 import { ProblemFeedbackComponent } from '../components/problem-feedback/problem-feedback.component';
 import { TextPopupComponent } from '../components/text-popup/text-popup.component';
 import { UserProfileComponent } from '../components/user-profile/user-profile.component';
-import { DropZoneDirective } from '../components/drop-zone.directive';
 import { SolutionViewComponent } from '../components/solution-view/solution-view.component';
 import { EvaluationSummaryComponent } from '../components/evaluation-summary/evaluation-summary.component';
 import { SolutionViewExternalComponent } from '../components/solution-view-external/solution-view-external.component';
@@ -25,7 +21,6 @@ import { AudioPlayerComponent } from '../components/audio-player/audio-player.co
 import { VideoCallComponent } from '../components/video-call/video-call.component';
 import { SrcObjectDirective } from '../directives/src-object.directive';
 import { MeetingComponent } from '../components/meeting/meeting.component';
-import { ChallengeComponent } from '../components/challenge/challenge.component';
 import { ChallengeStarterComponent } from '../components/challenge-starter/challenge-starter.component';
 import { StartChallengeComponent } from '../components/start-challenge/start-challenge.component';
 import { GenerateChallengesComponent } from '../components/generate-challenges/generate-challenges.component';
@@ -60,21 +55,19 @@ import { BroadcastedSolutionsComponent } from '../components/broadcasted-solutio
 import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component';
 import { AvatarDetailComponent } from '../components/avatar-detail/avatar-detail.component';
 import { ActivityHeatmapComponent } from '../components/activity-heatmap/activity-heatmap.component';
-import { ChallengeSpacesComponent } from '../components/challenge-spaces/challenge-spaces.component';
 import { DirectMessageComponent } from '../components/direct-message/direct-message.component';
+import { ChallengeCardModule } from './challenge-card.module';
+import { DropZoneModule } from './drop-zone.module';
+import { ProblemListCardModule } from './problem-list-card.module';
 
 @NgModule({
   declarations: [
-    HomeComponent,
     ProfileComponent,
     PostComponent,
-    ProblemListComponent,
-    ProblemListViewComponent,
     ProblemListFeedbackComponent,
     ProblemFeedbackComponent,
     TextPopupComponent,
     UserProfileComponent,
-    DropZoneDirective,
     SolutionViewComponent,
     EvaluationSummaryComponent,
     SolutionViewExternalComponent,
@@ -84,7 +77,6 @@ import { DirectMessageComponent } from '../components/direct-message/direct-mess
     VideoCallComponent,
     SrcObjectDirective,
     MeetingComponent,
-    ChallengeComponent,
     ChallengeStarterComponent,
     StartChallengeComponent,
     GenerateChallengesComponent,
@@ -119,7 +111,6 @@ import { DirectMessageComponent } from '../components/direct-message/direct-mess
     UnsubscribeComponent,
     AvatarDetailComponent,
     ActivityHeatmapComponent,
-    ChallengeSpacesComponent,
     DirectMessageComponent,
   ],
   imports: [
@@ -128,6 +119,9 @@ import { DirectMessageComponent } from '../components/direct-message/direct-mess
     ReactiveFormsModule,
     RouterModule,
     SharedModule,
+    ChallengeCardModule,
+    ProblemListCardModule,
+    DropZoneModule,
     ProtectedRoutingModule,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],

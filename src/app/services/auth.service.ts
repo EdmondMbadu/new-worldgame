@@ -580,6 +580,64 @@ export class AuthService {
       })
     );
   }
+
+  /** Resolve many presence-directory entries with a few one-shot reads. */
+  async getUsersByEmailsOnce(emails: string[]): Promise<User[]> {
+    const exactEmails = Array.from(
+      new Set(
+        (emails || [])
+          .flatMap((email) => {
+            const exact = String(email || '').trim();
+            return [exact, exact.toLowerCase()];
+          })
+          .filter(Boolean)
+      )
+    );
+    const normalizedEmails = Array.from(
+      new Set(exactEmails.map((email) => email.toLowerCase()))
+    );
+    if (!normalizedEmails.length) return [];
+
+    const chunksOfTen = (values: string[]): string[][] => {
+      const chunks: string[][] = [];
+      for (let index = 0; index < values.length; index += 10) {
+        chunks.push(values.slice(index, index + 10));
+      }
+      return chunks;
+    };
+
+    const snapshots = await Promise.all(
+      [
+        ...chunksOfTen(normalizedEmails).map((chunk) =>
+          this.afs
+            .collection<User>('users', (ref) =>
+              ref.where('emailLower', 'in', chunk)
+            )
+            .ref.get()
+        ),
+        ...chunksOfTen(exactEmails).map((chunk) =>
+          this.afs
+            .collection<User>('users', (ref) => ref.where('email', 'in', chunk))
+            .ref.get()
+        ),
+      ]
+    );
+
+    const users = new Map<string, User>();
+    snapshots.forEach((snapshot) => {
+      snapshot.docs.forEach((document) => {
+        const user = document.data() as User;
+        const key =
+          user.uid ||
+          String(user.emailLower || user.email || '')
+            .trim()
+            .toLowerCase();
+        if (key) users.set(key, user);
+      });
+    });
+    return Array.from(users.values());
+  }
+
   getAllOtherUsers(email: string) {
     return this.afs
       .collection<User>(`users`, (ref) =>

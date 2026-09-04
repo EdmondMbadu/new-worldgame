@@ -4,7 +4,6 @@ import { RouterModule, Routes } from '@angular/router';
 import { AuthGuard } from '../services/auth.guard';
 import { GameComponent } from '../game/game/game.component';
 import { MiniGameComponent } from '../game/mini-game/mini-game.component';
-import { HomeComponent } from '../components/home/home.component';
 import { DiscoverComponent } from '../components/discover/discover.component';
 import { ProfileComponent } from '../components/profile/profile.component';
 import { StartChallengeComponent } from '../components/start-challenge/start-challenge.component';
@@ -19,7 +18,6 @@ import { FullDiscussionComponent } from '../components/full-discussion/full-disc
 import { SolutionDetailsComponent } from '../components/solution-details/solution-details.component';
 import { DocumentFilesComponent } from '../components/document-files/document-files.component';
 import { SolutionViewExternalComponent } from '../components/solution-view-external/solution-view-external.component';
-import { ProblemListViewComponent } from '../components/problem-list-view/problem-list-view.component';
 import { ListFinishedSolutionsComponent } from '../components/list-finished-solutions/list-finished-solutions.component';
 import { ProblemListFeedbackComponent } from '../components/problem-list-feedback/problem-list-feedback.component';
 import { JoinTournamentComponent } from '../components/join-tournament/join-tournament.component';
@@ -44,12 +42,10 @@ import { UnsubscribeComponent } from '../game/unsubscribe/unsubscribe.component'
 import { InvitationsComponent } from '../components/invitations/invitations.component';
 import { MessageNotificationsComponent } from '../components/message-notifications/message-notifications.component';
 import { SchoolDashboardComponent } from '../components/school-dashboard/school-dashboard.component';
-import { ChallengeSpacesComponent } from '../components/challenge-spaces/challenge-spaces.component';
 
 const routes: Routes = [
   { path: 'game', component: GameComponent },
   { path: 'mini-game', component: MiniGameComponent },
-  { path: 'home', component: HomeComponent },
   { path: 'discover', component: DiscoverComponent },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   {
@@ -107,16 +103,6 @@ const routes: Routes = [
   {
     path: 'solution-view-external/:id',
     component: SolutionViewExternalComponent,
-  },
-  {
-    path: 'problem-list-view',
-    component: ProblemListViewComponent,
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'challenge-spaces',
-    component: ChallengeSpacesComponent,
-    canActivate: [AuthGuard],
   },
   {
     path: 'list-finished-solutions',

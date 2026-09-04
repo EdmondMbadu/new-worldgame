@@ -12,26 +12,6 @@
                 (toggleAsideEvent)="toggleAside()">
     </app-navbar>
 
-    <!-- ── Initial fullscreen overlay (first app load only) ───────────────── -->
-    <div *ngIf="isInitialLoad"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 dark:bg-slate-900/70 backdrop-blur-sm">
-      <div class="flex flex-col items-center gap-4">
-        <!-- Spinner -->
-        <svg class="w-10 h-10 animate-spin text-slate-700 dark:text-slate-200" viewBox="0 0 24 24" fill="none">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-        </svg>
-        <div class="text-sm font-medium text-slate-700 dark:text-slate-100 tracking-wide">
-          {{ 'home.loading.title' | translate }}
-        </div>
-        <div class="text-xs text-slate-500 dark:text-slate-400">
-          {{ 'home.loading.subtitle' | translate }}
-        </div>
-      </div>
-    </div>
-    <!-- ───────────────────────────────────────────────────────────────────── -->
-
     <main class="mx-auto max-w-7xl px-1 pb-4 pt-20 sm:px-3 sm:pt-24">
       <header class="community-home-hero">
         <div class="community-home-hero__copy">
@@ -103,22 +83,22 @@
           </svg>
 
           <div class="community-map-person community-map-person--north-america" aria-hidden="true">
-            <img src="assets/img/sofia-agent.png" alt="" />
+            <img src="assets/img/sofia-agent-thumb.png" alt="" width="128" height="128" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
           <div class="community-map-person community-map-person--south-america" aria-hidden="true">
-            <img src="assets/img/edmond.png" alt="" />
+            <img src="assets/img/edmond-thumb.png" alt="" width="128" height="128" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
           <div class="community-map-person community-map-person--europe" aria-hidden="true">
-            <img src="assets/img/jim.jpeg" alt="" />
+            <img src="assets/img/jim.jpeg" alt="" width="128" height="128" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
           <div class="community-map-person community-map-person--africa" aria-hidden="true">
-            <img src="assets/img/zara-agent.png" alt="" />
+            <img src="assets/img/zara-agent-thumb.png" alt="" width="128" height="128" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
           <div class="community-map-person community-map-person--asia" aria-hidden="true">
-            <img src="assets/img/arjun-agent.png" alt="" />
+            <img src="assets/img/arjun-agent-thumb.png" alt="" width="128" height="128" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
           <div class="community-map-person community-map-person--oceania" aria-hidden="true">
-            <img src="assets/img/tane-agent.png" alt="" />
+            <img src="assets/img/tane-agent-thumb.png" alt="" width="128" height="128" loading="lazy" fetchpriority="low" decoding="async" />
           </div>
 
           <div class="community-map-idea" aria-hidden="true">

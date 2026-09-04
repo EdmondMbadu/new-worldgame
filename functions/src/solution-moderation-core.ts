@@ -198,6 +198,27 @@ export const hasApprovedCurrentModerationVersion = (solution: any): boolean => {
   );
 };
 
+/**
+ * Preserve an already-published legacy card for metadata-only writes such as
+ * likes. New or edited substantive content must still pass current moderation.
+ */
+export const isLegacyApprovedMetadataOnlyUpdate = (
+  before: any,
+  after: any
+): boolean => {
+  if (!before || !after) return false;
+  return (
+    before.statusForPublication === 'approved' &&
+    after.statusForPublication === 'approved' &&
+    after.feedEligible === true &&
+    after.isPrivate === false &&
+    after.communityVisibility !== 'private' &&
+    !hasApprovedCurrentModerationVersion(after) &&
+    buildSolutionModerationContentHash(before) ===
+      buildSolutionModerationContentHash(after)
+  );
+};
+
 const clampScore = (value: unknown): number => {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return 0;

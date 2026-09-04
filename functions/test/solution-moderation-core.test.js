@@ -8,6 +8,7 @@ const {
   decideModeration,
   DEFAULT_MODERATION_POLICY,
   hasApprovedCurrentModerationVersion,
+  isLegacyApprovedMetadataOnlyUpdate,
   hasMeaningfulModerationContent,
   MODERATION_CATEGORIES,
   MODERATION_ENFORCEMENT_EPOCH_MS,
@@ -129,6 +130,40 @@ test('only a server-marked pre-enforcement solution receives rollout grace', () 
       moderationLegacyExempt: true,
     }),
     true
+  );
+});
+
+test('legacy approved cards survive metadata-only updates but not content edits', () => {
+  const before = {
+    title: 'Legacy clinic electrification plan',
+    description: 'An approved plan to provide reliable electricity to clinics.',
+    statusForPublication: 'approved',
+    feedEligible: true,
+    isPrivate: false,
+    communityVisibility: 'community',
+    numLike: '17',
+  };
+
+  assert.equal(
+    isLegacyApprovedMetadataOnlyUpdate(before, {
+      ...before,
+      numLike: '18',
+    }),
+    true
+  );
+  assert.equal(
+    isLegacyApprovedMetadataOnlyUpdate(before, {
+      ...before,
+      title: 'Edited clinic electrification plan',
+    }),
+    false
+  );
+  assert.equal(
+    isLegacyApprovedMetadataOnlyUpdate(before, {
+      ...before,
+      isPrivate: true,
+    }),
+    false
   );
 });
 

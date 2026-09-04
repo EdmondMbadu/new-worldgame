@@ -7,6 +7,7 @@ describe('SolutionService', () => {
   let service: SolutionService;
   let where: jasmine.Spy;
   let collectionValues: Solution[];
+  let collectionName = '';
 
   beforeEach(() => {
     collectionValues = [];
@@ -14,7 +15,8 @@ describe('SolutionService', () => {
     const afs = {
       collection: jasmine
         .createSpy('collection')
-        .and.callFake((_name: string, query: (ref: any) => unknown) => {
+        .and.callFake((name: string, query: (ref: any) => unknown) => {
+          collectionName = name;
           query({ where });
           return {
             valueChanges: () => of(collectionValues),
@@ -64,6 +66,7 @@ describe('SolutionService', () => {
       '==',
       'approved'
     );
+    expect(collectionName).toBe('publicCommunitySolutions');
     expect(solutions.map((solution) => solution.solutionId)).toEqual([
       'higher-liked',
       'lower-liked',

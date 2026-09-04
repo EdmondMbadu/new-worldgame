@@ -4,14 +4,14 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 
-import { NavbarComponent } from '../components/navbar/navbar.component';
 import { FooterComponent } from '../components/footer/footer.component';
-import { ChatbotComponent } from '../components/chatbot/chatbot.component';
 import { ToastComponent } from '../components/toast/toast.component';
 import { MaterialModule } from './material.module';
+import { ChatbotModule } from './chatbot.module';
+import { NavbarModule } from './navbar.module';
 
 @NgModule({
-  declarations: [NavbarComponent, FooterComponent, ChatbotComponent, ToastComponent],
+  declarations: [FooterComponent, ToastComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -19,11 +19,13 @@ import { MaterialModule } from './material.module';
     ReactiveFormsModule,
     MaterialModule,
     TranslateModule,
+    NavbarModule,
+    ChatbotModule,
   ],
   exports: [
-    NavbarComponent,
+    NavbarModule,
     FooterComponent,
-    ChatbotComponent,
+    ChatbotModule,
     ToastComponent,
     MaterialModule,
     TranslateModule,
