@@ -15,6 +15,7 @@ import { FullDiscussionComponent } from './full-discussion.component';
 describe('FullDiscussionComponent room behavior', () => {
   let component: FullDiscussionComponent;
   let fixture: ComponentFixture<FullDiscussionComponent>;
+  let roomSet: jasmine.Spy;
 
   const currentUser = {
     uid: 'creator-1',
@@ -24,10 +25,17 @@ describe('FullDiscussionComponent room behavior', () => {
   };
 
   beforeEach(async () => {
+    roomSet = jasmine.createSpy('set').and.resolveTo();
     await TestBed.configureTestingModule({
       declarations: [FullDiscussionComponent],
       providers: [
-        { provide: AngularFirestore, useValue: { createId: () => 'generated-id' } },
+        {
+          provide: AngularFirestore,
+          useValue: {
+            createId: () => 'generated-id',
+            doc: () => ({ set: roomSet }),
+          },
+        },
         { provide: AngularFireStorage, useValue: {} },
         { provide: AngularFireFunctions, useValue: {} },
         { provide: AuthService, useValue: { currentUser, currentAuthUid: currentUser.uid } },
@@ -64,6 +72,23 @@ describe('FullDiscussionComponent room behavior', () => {
     expect(component.activeRoom.id).toBe('general');
     expect(component.canDeleteRoom(component.activeRoom)).toBeFalse();
     expect(component.selectedRoomAIAgents.length).toBe(15);
+    expect(component.participationMode).toBe('mentions');
+  });
+
+  it('keeps General in mentions mode', () => {
+    component.setParticipationMode('roundtable');
+    expect(component.participationMode).toBe('mentions');
+  });
+
+  it('creates focused rooms in one-round roundtable mode', async () => {
+    component.newRoomName = 'Research';
+    spyOn(component, 'selectRoom');
+
+    await component.createRoom();
+
+    const savedRoom = roomSet.calls.mostRecent().args[0];
+    expect(savedRoom.participationMode).toBe('roundtable');
+    expect(savedRoom.roundLimit).toBe(1);
   });
 
   it('does not offer unavailable OpenAI or Anthropic agents', () => {

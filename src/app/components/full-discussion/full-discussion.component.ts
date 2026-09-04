@@ -467,7 +467,7 @@ export class FullDiscussionComponent
       aiMemberKeys: this.copyRoomAI
         ? [...(this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS)]
         : [...DEFAULT_AI_MEMBER_KEYS],
-      participationMode: 'mentions',
+      participationMode: 'roundtable',
       roundLimit: 1,
       settingsVersion: 1,
       discussion: [],
@@ -548,6 +548,11 @@ export class FullDiscussionComponent
 
   async updateRoomPreferences(): Promise<void> {
     if (this.roomSettingsSaving) return;
+    if (this.activeRoomId === 'general') {
+      this.participationMode = 'mentions';
+      this.roundLimit = 1;
+      return;
+    }
     this.roomSettingsSaving = true;
     this.roundLimit = Math.min(2, Math.max(1, Number(this.roundLimit) || 1));
     this.activeRoom = {
@@ -557,6 +562,19 @@ export class FullDiscussionComponent
     };
     await this.persistActiveRoomSettings();
     this.roomSettingsSaving = false;
+  }
+
+  setParticipationMode(mode: DiscussionParticipationMode): void {
+    if (
+      this.roundInProgress ||
+      this.roomSettingsSaving ||
+      (this.activeRoomId === 'general' && mode !== 'mentions') ||
+      this.participationMode === mode
+    ) {
+      return;
+    }
+    this.participationMode = mode;
+    void this.updateRoomPreferences();
   }
 
   async toggleRoomAgent(agent: AIAvatar): Promise<void> {
@@ -598,8 +616,8 @@ export class FullDiscussionComponent
         settings?.aiMemberKeys !== undefined
           ? [...settings.aiMemberKeys]
           : [...GENERAL_AI_MEMBER_KEYS],
-      participationMode: settings?.participationMode || 'mentions',
-      roundLimit: settings?.roundLimit === 2 ? 2 : 1,
+      participationMode: 'mentions',
+      roundLimit: 1,
       settingsVersion: 1,
     };
   }
@@ -636,13 +654,15 @@ export class FullDiscussionComponent
       const snapshot = await firstValueFrom(ref.get());
       if (snapshot.exists) {
         const existing = snapshot.data();
-        if (!existing?.settingsVersion) {
+        if (!existing?.settingsVersion || existing.participationMode !== 'mentions') {
           await ref.set(
             {
               id: 'general',
               name: 'General',
               isGeneral: true,
               aiMemberKeys: [...GENERAL_AI_MEMBER_KEYS],
+              participationMode: 'mentions',
+              roundLimit: 1,
               settingsVersion: 1,
             },
             { merge: true }
@@ -690,7 +710,7 @@ export class FullDiscussionComponent
       aiMemberKeys: room.aiMemberKeys !== undefined
         ? [...room.aiMemberKeys]
         : [...DEFAULT_AI_MEMBER_KEYS],
-      participationMode: room.participationMode || 'mentions',
+      participationMode: room.participationMode || 'roundtable',
       roundLimit: room.roundLimit === 2 ? 2 : 1,
       settingsVersion: 1,
     };

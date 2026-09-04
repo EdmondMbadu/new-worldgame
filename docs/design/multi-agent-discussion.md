@@ -23,6 +23,10 @@ and participation settings are room-specific.
   once per configured round. The user may stop the run after the response in
   progress. Generated AI mentions are inert and cannot recursively start agents.
 
+`#General` is fixed to Chat + mentions so a normal team message cannot
+accidentally trigger its full AI roster. New custom rooms default to Roundtable
+with one round; room members may switch a custom room between the two modes.
+
 `#General` retains all existing Global Solutions Lab personas so the old mention
 behavior remains available. A new room starts with a smaller four-agent team
 unless its creator copies the current room team. The picker only shows agents
