@@ -80,6 +80,11 @@ interface DiscussionRoom {
   discussion?: Comment[];
 }
 
+interface PendingAIComment {
+  comment: Comment;
+  discussionPath: string;
+}
+
 const AI_AVATARS: AIAvatar[] = [
   { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Community-centered research and inclusive strategy.', sdgs: [1, 4, 10, 15, 17] },
   { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Technology, implementation, and systems analysis.', sdgs: [1, 4, 6, 8, 9, 11] },
@@ -237,6 +242,7 @@ export class FullDiscussionComponent
 
   private roomsSub?: Subscription;
   private activeRoomSub?: Subscription;
+  private pendingAIComments = new Map<string, PendingAIComment>();
   private latestParticipantsInput: unknown = [];
   private roomFeatureInitialized = false;
   private participantLoadGeneration = 0;
@@ -283,8 +289,9 @@ export class FullDiscussionComponent
           const shouldPinToBottom =
             !this.hasRouteMessageId() && this.isNearBottom();
           if (this.activeRoomId === 'general') {
-            this.comments = (doc?.discussion || []).map((c: any) =>
-              this.normalizeComment(c)
+            this.comments = this.mergeDiscussionSnapshot(
+              doc?.discussion,
+              this.getDiscussionDocPath()
             );
           }
           const latest = this.comments.at(-1);
@@ -329,8 +336,9 @@ export class FullDiscussionComponent
         !this.hasRouteMessageId() && this.isNearBottom();
       this.currentSolution = data;
       if (this.activeRoomId === 'general') {
-        this.comments = (data?.discussion || []).map((c: any) =>
-          this.normalizeComment(c)
+        this.comments = this.mergeDiscussionSnapshot(
+          data?.discussion,
+          this.getDiscussionDocPath()
         );
       }
       this.markCurrentDiscussionRead();
@@ -638,8 +646,9 @@ export class FullDiscussionComponent
     this.participantSourceKey = '';
 
     if (room.id === 'general') {
-      this.comments = ((this.currentSolution as any)?.discussion || []).map(
-        (comment: any) => this.normalizeComment(comment)
+      this.comments = this.mergeDiscussionSnapshot(
+        (this.currentSolution as any)?.discussion,
+        this.getDiscussionDocPath()
       );
       this.refreshParticipants(this.latestParticipantsInput);
       this.markCurrentDiscussionRead();
@@ -844,8 +853,9 @@ export class FullDiscussionComponent
         const normalizedRoom = { ...room, id: roomId };
         this.applyRoomSettings(normalizedRoom);
         const shouldPinToBottom = !this.hasRouteMessageId() && this.isNearBottom();
-        this.comments = (room.discussion || []).map((comment) =>
-          this.normalizeComment(comment)
+        this.comments = this.mergeDiscussionSnapshot(
+          room.discussion,
+          this.getRoomDocPath(roomId)
         );
         this.refreshParticipants(this.latestParticipantsInput);
         this.markCurrentDiscussionRead();
@@ -1530,6 +1540,39 @@ Please choose a file under 5 MB.`);
       .set({ discussion: toSave }, { merge: true });
   }
 
+  /**
+   * Persist one AI reply without replacing replies that another asynchronous
+   * writer may have added to the same room in the meantime.
+   */
+  private async upsertAIComment(
+    discussionPath: string,
+    comment: Comment
+  ): Promise<void> {
+    const serializedComment = this.serializeCommentForSave(comment);
+    const documentRef = this.afs.doc(discussionPath).ref;
+
+    await this.afs.firestore.runTransaction(async (transaction) => {
+      const snapshot = await transaction.get(documentRef);
+      const data: any = snapshot.exists ? snapshot.data() : {};
+      const discussion = Array.isArray(data?.discussion)
+        ? [...data.discussion]
+        : [];
+      const commentIndex = discussion.findIndex(
+        (candidate: Comment) =>
+          !!serializedComment.messageId &&
+          candidate?.messageId === serializedComment.messageId
+      );
+
+      if (commentIndex === -1) {
+        discussion.push(serializedComment);
+      } else {
+        discussion[commentIndex] = serializedComment;
+      }
+
+      transaction.set(documentRef, { discussion }, { merge: true });
+    });
+  }
+
   private getDiscussionDocPath(): string {
     if (this.docPath) return this.docPath;
     if (this.activeRoomId !== 'general') {
@@ -1565,6 +1608,51 @@ Please choose a file under 5 MB.`);
     }
 
     return normalized;
+  }
+
+  /**
+   * Firestore can deliver the snapshot from the previous AI write just after the
+   * next AI placeholder is rendered. Preserve in-flight AI messages until a
+   * snapshot confirms that their completed form has reached the room document.
+   */
+  private mergeDiscussionSnapshot(
+    discussion: unknown,
+    discussionPath: string
+  ): Comment[] {
+    const merged = (Array.isArray(discussion) ? discussion : []).map((comment) =>
+      this.normalizeComment(comment)
+    );
+
+    for (const [messageId, pending] of this.pendingAIComments.entries()) {
+      if (pending.discussionPath !== discussionPath) continue;
+
+      const pendingComment = this.normalizeComment(pending.comment);
+      const remoteIndex = merged.findIndex(
+        (comment) => comment.messageId === messageId
+      );
+      const remoteComment = remoteIndex === -1 ? undefined : merged[remoteIndex];
+      const isConfirmed =
+        !pendingComment.isLoading &&
+        remoteComment?.content === pendingComment.content &&
+        !remoteComment?.isLoading;
+
+      if (isConfirmed) {
+        this.pendingAIComments.delete(messageId);
+        continue;
+      }
+
+      if (remoteIndex === -1) {
+        merged.push(pendingComment);
+      } else {
+        merged[remoteIndex] = {
+          ...remoteComment,
+          ...pendingComment,
+          reactions: remoteComment?.reactions || pendingComment.reactions,
+        };
+      }
+    }
+
+    return merged;
   }
 
   private normalizeReactions(
@@ -2355,6 +2443,8 @@ Please choose a file under 5 MB.`);
   ): Promise<void> {
     // Build context from full discussion
     const context = this.buildDiscussionContext();
+    const discussionPath = this.getDiscussionDocPath();
+    const roomName = this.activeRoom.name;
 
     // Create prompt document in Firestore (triggers Cloud Function)
     // NOTE: Must write to 'discussions' collection to trigger the onChatPrompt Cloud Function
@@ -2379,6 +2469,10 @@ Please choose a file under 5 MB.`);
       aiModel: ai.model || '',
       isLoading: true,
     };
+    this.pendingAIComments.set(placeholderMsg.messageId!, {
+      comment: placeholderMsg,
+      discussionPath,
+    });
     this.comments.push(placeholderMsg);
     this.scrollToBottom();
 
@@ -2391,8 +2485,9 @@ Please choose a file under 5 MB.`);
       await docRef.set({
         provider: ai.provider || 'google',
         requestedAgentKey: ai.collectionKey || '',
-        conversationId: this.getDiscussionDocPath(),
-        prompt: `You are ${ai.displayName}, an AI team member participating in the “${this.activeRoom.name}” room.
+        conversationId: discussionPath,
+        uiMessageId: placeholderMsg.messageId,
+        prompt: `You are ${ai.displayName}, an AI team member participating in the “${roomName}” room.
 ${participationInstruction}
 Here is the context of the conversation so far:
 
@@ -2408,7 +2503,8 @@ For lists, use dashes (-) or numbers (1. 2. 3.).`,
     } catch (error) {
       await this.finishAIPlaceholder(
         placeholderMsg,
-        'This AI provider could not be reached. Please check its configuration and try again.'
+        'This AI provider could not be reached. Please check its configuration and try again.',
+        discussionPath
       );
       return;
     }
@@ -2427,7 +2523,8 @@ For lists, use dashes (-) or numbers (1. 2. 3.).`,
       timeout = setTimeout(async () => {
         await this.finishAIPlaceholder(
           placeholderMsg,
-          `${ai.displayName} took too long to respond. You can continue the discussion or try again.`
+          `${ai.displayName} took too long to respond. You can continue the discussion or try again.`,
+          discussionPath
         );
         finish();
       }, 190_000);
@@ -2438,6 +2535,7 @@ For lists, use dashes (-) or numbers (1. 2. 3.).`,
           await this.finishAIPlaceholder(
             placeholderMsg,
             data.response,
+            discussionPath,
             data.providerLabel || ai.providerLabel,
             data.modelUsed || ai.model
           );
@@ -2448,7 +2546,8 @@ For lists, use dashes (-) or numbers (1. 2. 3.).`,
             placeholderMsg,
             data.response ||
               data.status.error ||
-              'This AI provider encountered an error. Please try again.'
+              'This AI provider encountered an error. Please try again.',
+            discussionPath
           );
           finish();
         }
@@ -2459,29 +2558,48 @@ For lists, use dashes (-) or numbers (1. 2. 3.).`,
   private async finishAIPlaceholder(
     placeholder: Comment,
     content: string,
+    discussionPath: string,
     providerLabel?: string,
     model?: string
   ): Promise<void> {
-    await new Promise<void>((resolve) => {
-      this.ngZone.run(async () => {
+    const completedComment: Comment = {
+      ...placeholder,
+      content,
+      aiProvider: providerLabel || placeholder.aiProvider,
+      aiModel: model || placeholder.aiModel,
+      isLoading: false,
+    };
+    const messageId = completedComment.messageId!;
+    this.pendingAIComments.set(messageId, {
+      comment: completedComment,
+      discussionPath,
+    });
+
+    const isActiveDiscussion = this.getDiscussionDocPath() === discussionPath;
+    if (isActiveDiscussion) {
+      this.ngZone.run(() => {
         const msgIndex = this.comments.findIndex(
           (comment) => comment.messageId === placeholder.messageId
         );
         if (msgIndex !== -1) {
-          this.comments[msgIndex] = {
-            ...this.comments[msgIndex],
-            content,
-            aiProvider: providerLabel || this.comments[msgIndex].aiProvider,
-            aiModel: model || this.comments[msgIndex].aiModel,
-            isLoading: false,
-          };
-          this.comments = [...this.comments];
+          this.comments[msgIndex] = completedComment;
+        } else {
+          // A delayed Firestore snapshot may have displaced the placeholder.
+          // Append the completed reply so it can never fail silently.
+          this.comments.push(completedComment);
         }
-        await this.syncDiscussion();
+        this.comments = [...this.comments];
         this.scrollToBottom();
-        resolve();
       });
-    });
+    }
+
+    try {
+      await this.upsertAIComment(discussionPath, completedComment);
+    } catch (error) {
+      console.error('Unable to save AI response to the discussion', error);
+      this.roomActionError =
+        'An AI replied, but its response could not be saved. Keep this page open and try again.';
+    }
   }
 
   /** Build context from the discussion for AI */

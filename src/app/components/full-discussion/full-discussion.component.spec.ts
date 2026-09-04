@@ -16,6 +16,8 @@ describe('FullDiscussionComponent room behavior', () => {
   let component: FullDiscussionComponent;
   let fixture: ComponentFixture<FullDiscussionComponent>;
   let roomSet: jasmine.Spy;
+  let transactionSet: jasmine.Spy;
+  let transactionDiscussion: any[];
 
   const currentUser = {
     uid: 'creator-1',
@@ -26,6 +28,8 @@ describe('FullDiscussionComponent room behavior', () => {
 
   beforeEach(async () => {
     roomSet = jasmine.createSpy('set').and.resolveTo();
+    transactionSet = jasmine.createSpy('transactionSet');
+    transactionDiscussion = [];
     await TestBed.configureTestingModule({
       declarations: [FullDiscussionComponent],
       providers: [
@@ -33,7 +37,17 @@ describe('FullDiscussionComponent room behavior', () => {
           provide: AngularFirestore,
           useValue: {
             createId: () => 'generated-id',
-            doc: () => ({ set: roomSet }),
+            doc: () => ({ set: roomSet, ref: { path: 'discussion-doc' } }),
+            firestore: {
+              runTransaction: async (handler: any) =>
+                handler({
+                  get: async () => ({
+                    exists: true,
+                    data: () => ({ discussion: transactionDiscussion }),
+                  }),
+                  set: transactionSet,
+                }),
+            },
           },
         },
         { provide: AngularFireStorage, useValue: {} },
@@ -192,5 +206,87 @@ describe('FullDiscussionComponent room behavior', () => {
     component.participationMode = 'roundtable';
     component.roundLimit = 1;
     expect(component.participationHelpText).toContain('agents reply once, in order');
+  });
+
+  it('preserves the next AI placeholder when an older room snapshot arrives', () => {
+    const discussionPath =
+      'solutions/solution-1/discussionRooms/research-room';
+    const pending = {
+      messageId: 'ai-response-2',
+      authorId: 'ai-arjun',
+      authorName: 'Arjun Patel',
+      content: '',
+      isAI: true,
+      isLoading: true,
+    };
+    (component as any).pendingAIComments.set(pending.messageId, {
+      comment: pending,
+      discussionPath,
+    });
+
+    const merged = (component as any).mergeDiscussionSnapshot(
+      [
+        {
+          messageId: 'ai-response-1',
+          authorId: 'ai-zara',
+          authorName: 'Zara Nkosi',
+          content: 'First response',
+          isAI: true,
+        },
+      ],
+      discussionPath
+    );
+
+    expect(merged.map((comment: any) => comment.messageId)).toEqual([
+      'ai-response-1',
+      'ai-response-2',
+    ]);
+    expect(merged[1].isLoading).toBeTrue();
+  });
+
+  it('appends and transactionally saves a completed reply if its placeholder was displaced', async () => {
+    transactionDiscussion = [
+      {
+        messageId: 'human-question',
+        authorId: currentUser.uid,
+        authorName: 'Room Creator',
+        content: 'What should we research?',
+      },
+      {
+        messageId: 'ai-response-1',
+        authorId: 'ai-zara',
+        authorName: 'Zara Nkosi',
+        content: 'First response',
+        isAI: true,
+      },
+    ];
+    component.comments = [...transactionDiscussion];
+    const placeholder = {
+      messageId: 'ai-response-2',
+      authorId: 'ai-arjun',
+      authorName: 'Arjun Patel',
+      content: '',
+      isAI: true,
+      isLoading: true,
+    };
+
+    await (component as any).finishAIPlaceholder(
+      placeholder,
+      'Second response',
+      'solutions/solution-1'
+    );
+
+    expect(component.comments.some(
+      (comment) =>
+        comment.messageId === 'ai-response-2' &&
+        comment.content === 'Second response' &&
+        !comment.isLoading
+    )).toBeTrue();
+    const savedDiscussion = transactionSet.calls.mostRecent().args[1].discussion;
+    expect(savedDiscussion.map((comment: any) => comment.messageId)).toEqual([
+      'human-question',
+      'ai-response-1',
+      'ai-response-2',
+    ]);
   });
 });
