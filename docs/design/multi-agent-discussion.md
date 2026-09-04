@@ -29,11 +29,17 @@ question; after that Roundtable finishes, General automatically returns to
 mentions. New custom rooms default to Roundtable with one round and remember
 the room's selected mode.
 
-`#General` retains all existing Global Solutions Lab personas so the old mention
-behavior remains available. A new room starts with a smaller four-agent team
-unless its creator copies the current room team. The picker only shows agents
-that are available in the product, and provider branding is omitted from the
-participant interface so the focus stays on each agent's role.
+All 15 Global Solutions Lab personas remain available in the agent picker, but
+only four are active initially. `#General` and new rooms receive a deterministic
+recommended team based on the solution's selected SDGs. The recommendation
+combines two topical specialists, one systems/implementation perspective, and
+one community/policy perspective. If no valid SDG is present, the balanced
+starter team is Zara Nkosi, Arjun Patel, Sofia Morales, and Buckminster Fuller.
+
+The room creation dialog previews the recommended team. Its creator may instead
+copy the current room's team. After creation, any room member may add or remove
+agents in Manage AI agents; this changes only that room. “Ask all AIs” always
+means all currently active room agents, never all 15 available agents.
 
 ## Operational limits
 

@@ -68,11 +68,69 @@ describe('FullDiscussionComponent room behavior', () => {
     component.currentSolution = { solutionId: 'solution-1' };
   });
 
-  it('creates a permanent General room with the legacy AI roster', () => {
+  it('creates a permanent General room with a four-agent starter team', () => {
     expect(component.activeRoom.id).toBe('general');
     expect(component.canDeleteRoom(component.activeRoom)).toBeFalse();
-    expect(component.selectedRoomAIAgents.length).toBe(15);
+    expect(component.selectedRoomAIAgents.length).toBe(4);
     expect(component.participationMode).toBe('mentions');
+  });
+
+  it('recommends a deterministic balanced team from selected SDGs', () => {
+    component.currentSolution = {
+      solutionId: 'solution-1',
+      sdgs: [
+        'SDG11  Sustainable Cities And Communities',
+        'SDG 13 Climate Action',
+      ],
+    };
+
+    expect(component.solutionSdgNumbers).toEqual([11, 13]);
+    expect(component.recommendedAIKeys).toEqual([
+      'li',
+      'rachel',
+      'arjun',
+      'sofia',
+    ]);
+    expect(component.recommendedAIAgents.map((agent) => agent.collectionKey)).toEqual(
+      component.recommendedAIKeys
+    );
+  });
+
+  it('refreshes recommended teams when SDGs change but preserves manual teams', () => {
+    component.currentSolution = {
+      solutionId: 'solution-1',
+      sdgs: ['SDG13  Climate Action'],
+    };
+    const previouslyRecommended = ['li', 'arjun', 'albert', 'zara'];
+
+    const refreshed = (component as any).buildGeneralRoom({
+      id: 'general',
+      settingsVersion: 2,
+      aiMemberKeys: previouslyRecommended,
+      aiSelectionSource: 'recommended',
+      recommendedSdgNumbers: [11],
+    });
+    const manual = (component as any).buildGeneralRoom({
+      id: 'general',
+      settingsVersion: 2,
+      aiMemberKeys: previouslyRecommended,
+      aiSelectionSource: 'manual',
+      recommendedSdgNumbers: [11],
+    });
+
+    expect(refreshed.aiMemberKeys).toEqual(component.recommendedAIKeys);
+    expect(manual.aiMemberKeys).toEqual(previouslyRecommended);
+  });
+
+  it('reduces the legacy 15-agent General roster to a recommended team', () => {
+    const legacy = (component as any).buildGeneralRoom({
+      id: 'general',
+      settingsVersion: 1,
+      aiMemberKeys: component.availableAIAgents.map((agent) => agent.collectionKey),
+    });
+
+    expect(legacy.aiMemberKeys.length).toBe(4);
+    expect(legacy.aiSelectionSource).toBe('recommended');
   });
 
   it('lets General use one roundtable question and then resets to mentions', async () => {
@@ -103,6 +161,8 @@ describe('FullDiscussionComponent room behavior', () => {
     const savedRoom = roomSet.calls.mostRecent().args[0];
     expect(savedRoom.participationMode).toBe('roundtable');
     expect(savedRoom.roundLimit).toBe(1);
+    expect(savedRoom.aiMemberKeys).toEqual(['zara', 'arjun', 'sofia', 'bucky']);
+    expect(savedRoom.aiSelectionSource).toBe('recommended');
   });
 
   it('only offers the available Global Solutions Lab agents', () => {

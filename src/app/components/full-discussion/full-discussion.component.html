@@ -615,7 +615,7 @@
         <section class="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800" aria-labelledby="ai-agents-heading">
           <div class="mb-2 flex items-center justify-between">
             <h3 id="ai-agents-heading" class="text-sm font-bold text-slate-900 dark:text-white">AI agents</h3>
-            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ selectedRoomAIAgents.length }}</span>
+            <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ selectedRoomAIAgents.length }} active · {{ availableAIAgents.length }} total</span>
           </div>
           <ul class="grid grid-cols-2 gap-2">
             <li
@@ -630,7 +630,7 @@
             </li>
           </ul>
           <p *ngIf="hiddenRoomAIAgentCount" class="mt-2 text-center text-[11px] font-medium text-slate-500 dark:text-slate-400">
-            + {{ hiddenRoomAIAgentCount }} more agent{{ hiddenRoomAIAgentCount === 1 ? '' : 's' }}
+            + {{ hiddenRoomAIAgentCount }} more active · {{ availableAIAgents.length }} available
           </p>
           <button
             *ngIf="isRoomFeatureAvailable"
@@ -953,7 +953,7 @@
   aria-labelledby="create-room-title"
   (click)="closeCreateRoom()"
 >
-  <section class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
+  <section class="max-h-[calc(100vh-2rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl dark:border-slate-700 dark:bg-slate-900" (click)="$event.stopPropagation()">
     <div class="flex items-start justify-between gap-4">
       <div>
         <h2 id="create-room-title" class="text-lg font-bold text-slate-950 dark:text-white">Create a room</h2>
@@ -986,11 +986,30 @@
       class="mt-1 w-full resize-none rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-teal-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
     ></textarea>
 
+    <section class="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-3 dark:border-teal-900 dark:bg-teal-950/40" aria-labelledby="suggested-team-heading">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <h3 id="suggested-team-heading" class="text-sm font-bold text-teal-900 dark:text-teal-100">Suggested AI team</h3>
+          <p class="mt-0.5 text-xs text-teal-700 dark:text-teal-300">{{ recommendationLabel }}</p>
+        </div>
+        <span class="rounded-full bg-white px-2 py-0.5 text-[10px] font-bold text-teal-700 dark:bg-slate-900 dark:text-teal-300">4 agents</span>
+      </div>
+      <ul class="mt-3 grid grid-cols-2 gap-2">
+        <li *ngFor="let agent of recommendedAIAgents; trackBy: trackByAIAvatar" class="flex min-w-0 items-center gap-2 rounded-lg bg-white/80 p-2 dark:bg-slate-900/70">
+          <span class="grid h-7 w-7 shrink-0 place-content-center overflow-hidden rounded-full bg-teal-100 text-[9px] font-bold text-teal-800 dark:bg-teal-900 dark:text-teal-100">
+            <img *ngIf="agent.avatarPath" [src]="agent.avatarPath" [alt]="agent.name" class="h-full w-full object-cover" />
+            <span *ngIf="!agent.avatarPath">{{ getInitial(agent.name) }}</span>
+          </span>
+          <span class="min-w-0 truncate text-xs font-semibold text-slate-800 dark:text-slate-100">{{ agent.name }}</span>
+        </li>
+      </ul>
+    </section>
+
     <label class="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
       <input type="checkbox" [(ngModel)]="copyRoomAI" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
       <span>
-        <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Copy this room’s AI team</span>
-        <span class="block text-xs text-slate-500 dark:text-slate-400">You can add or remove agents after creating the room.</span>
+        <span class="block text-sm font-semibold text-slate-800 dark:text-slate-100">Copy the current room’s team instead</span>
+        <span class="block text-xs text-slate-500 dark:text-slate-400">Leave this off to use the suggested four. You can add or remove agents later.</span>
       </span>
     </label>
 
@@ -1016,7 +1035,7 @@
       <div class="flex items-start justify-between gap-4">
         <div>
           <h2 id="add-ai-title" class="text-lg font-bold text-slate-950 dark:text-white">AI agents for #{{ activeRoom.name }}</h2>
-          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Selected agents can be @mentioned individually and join Roundtable mode.</p>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ selectedRoomAIAgents.length }} active · {{ availableAIAgents.length }} available. Add or remove anyone.</p>
         </div>
         <button type="button" (click)="closeAddAI()" class="grid h-8 w-8 place-content-center rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close">×</button>
       </div>
@@ -1048,7 +1067,10 @@
               <span *ngIf="!agent.avatarPath">{{ getInitial(agent.name) }}</span>
             </span>
             <span class="min-w-0 flex-1">
-              <span class="font-semibold text-slate-900 dark:text-white">{{ agent.name }}</span>
+              <span class="flex flex-wrap items-center gap-2">
+                <span class="font-semibold text-slate-900 dark:text-white">{{ agent.name }}</span>
+                <span *ngIf="isAgentRecommended(agent)" class="rounded-full bg-teal-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-teal-700 dark:bg-teal-950 dark:text-teal-300">Recommended</span>
+              </span>
               <span class="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">{{ agent.description }}</span>
             </span>
             <span aria-hidden="true" class="grid h-6 w-6 shrink-0 place-content-center rounded-full border text-xs font-bold"
@@ -1064,7 +1086,7 @@
     </div>
 
     <div class="flex items-center justify-between gap-3 border-t border-slate-200 p-4 dark:border-slate-800">
-      <p class="text-xs text-slate-500 dark:text-slate-400">{{ selectedRoomAIAgents.length }} selected</p>
+      <p class="text-xs text-slate-500 dark:text-slate-400">{{ selectedRoomAIAgents.length }} active · {{ availableAIAgents.length }} available</p>
       <button type="button" (click)="closeAddAI()" class="rounded-lg bg-teal-600 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-700">Done</button>
     </div>
   </section>

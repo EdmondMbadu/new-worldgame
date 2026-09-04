@@ -59,7 +59,10 @@ interface AIAvatar {
   providerLabel: string;
   model?: string;
   description: string;
+  sdgs: number[];
 }
+
+type AITeamSelectionSource = 'recommended' | 'copied' | 'manual';
 
 interface DiscussionRoom {
   id: string;
@@ -72,31 +75,50 @@ interface DiscussionRoom {
   participationMode?: DiscussionParticipationMode;
   roundLimit?: number;
   settingsVersion?: number;
+  aiSelectionSource?: AITeamSelectionSource;
+  recommendedSdgNumbers?: number[];
   discussion?: Comment[];
 }
 
 const AI_AVATARS: AIAvatar[] = [
-  { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Community-centered research and inclusive strategy.' },
-  { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Technology, implementation, and systems analysis.' },
-  { name: 'Sofia Morales', avatarPath: '../../../assets/img/sofia-agent.png', collectionKey: 'sofia', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Policy, partnerships, and stakeholder perspectives.' },
-  { name: 'Li Wei', avatarPath: '../../../assets/img/li-agent.png', collectionKey: 'li', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Evidence synthesis and practical planning.' },
-  { name: 'Amina Al-Sayed', avatarPath: '../../../assets/img/amina-agent.png', collectionKey: 'amina', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Equity, resilience, and community impact.' },
-  { name: 'Elena Volkov', avatarPath: '../../../assets/img/elena-agent.png', collectionKey: 'elena', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Science, evaluation, and risk analysis.' },
-  { name: 'Tane Kahu', avatarPath: '../../../assets/img/tane-agent.png', collectionKey: 'tane', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Ecological knowledge and long-term stewardship.' },
-  { name: 'Dr. Logos', avatarPath: '../../../assets/img/logos.png', collectionKey: 'business', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Business models, feasibility, and execution.' },
-  { name: 'Marie Curie', avatarPath: '../../../assets/img/marie-curie.jpg', collectionKey: 'marie', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Scientific rigor and experimental thinking.' },
-  { name: 'Rachel Carson', avatarPath: '../../../assets/img/rachel-carlson.jpeg', collectionKey: 'rachel', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Environmental evidence and public communication.' },
-  { name: 'Buckminster Fuller', avatarPath: '../../../assets/img/fuller.jpg', collectionKey: 'bucky', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Whole-systems design and synthesis.' },
-  { name: 'Albert Einstein', avatarPath: '../../../assets/img/albert.png', collectionKey: 'albert', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'First-principles reasoning and thought experiments.' },
-  { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'nelson', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Leadership, reconciliation, and coalition building.' },
-  { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Nonviolent action and ethical reflection.' },
-  { name: 'Mark Twain', avatarPath: '../../../assets/img/twain.jpg', collectionKey: 'twain', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'A concise, skeptical literary perspective.' },
+  { name: 'Zara Nkosi', avatarPath: '../../../assets/img/zara-agent.png', collectionKey: 'zara', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Community-centered research and inclusive strategy.', sdgs: [1, 4, 10, 15, 17] },
+  { name: 'Arjun Patel', avatarPath: '../../../assets/img/arjun-agent.png', collectionKey: 'arjun', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Technology, implementation, and systems analysis.', sdgs: [1, 4, 6, 8, 9, 11] },
+  { name: 'Sofia Morales', avatarPath: '../../../assets/img/sofia-agent.png', collectionKey: 'sofia', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Policy, partnerships, and stakeholder perspectives.', sdgs: [5, 13, 16] },
+  { name: 'Li Wei', avatarPath: '../../../assets/img/li-agent.png', collectionKey: 'li', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Evidence synthesis and practical planning.', sdgs: [2, 9, 11] },
+  { name: 'Amina Al-Sayed', avatarPath: '../../../assets/img/amina-agent.png', collectionKey: 'amina', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Equity, resilience, and community impact.', sdgs: [5, 10, 13] },
+  { name: 'Elena Volkov', avatarPath: '../../../assets/img/elena-agent.png', collectionKey: 'elena', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Science, evaluation, and risk analysis.', sdgs: [2, 3, 7, 12, 17] },
+  { name: 'Tane Kahu', avatarPath: '../../../assets/img/tane-agent.png', collectionKey: 'tane', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Ecological knowledge and long-term stewardship.', sdgs: [6, 12, 14, 15] },
+  { name: 'Dr. Logos', avatarPath: '../../../assets/img/logos.png', collectionKey: 'business', group: 'colleague', provider: 'google', providerLabel: 'Google', description: 'Business models, feasibility, and execution.', sdgs: [] },
+  { name: 'Marie Curie', avatarPath: '../../../assets/img/marie-curie.jpg', collectionKey: 'marie', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Scientific rigor and experimental thinking.', sdgs: [3, 7] },
+  { name: 'Rachel Carson', avatarPath: '../../../assets/img/rachel-carlson.jpeg', collectionKey: 'rachel', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Environmental evidence and public communication.', sdgs: [8, 13, 14] },
+  { name: 'Buckminster Fuller', avatarPath: '../../../assets/img/fuller.jpg', collectionKey: 'bucky', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Whole-systems design and synthesis.', sdgs: [] },
+  { name: 'Albert Einstein', avatarPath: '../../../assets/img/albert.png', collectionKey: 'albert', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'First-principles reasoning and thought experiments.', sdgs: [7, 11, 16] },
+  { name: 'Nelson Mandela', avatarPath: '../../../assets/img/mandela.png', collectionKey: 'nelson', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Leadership, reconciliation, and coalition building.', sdgs: [8, 16] },
+  { name: 'Mahatma Gandhi', avatarPath: '../../../assets/img/gandhi.jpg', collectionKey: 'gandhi', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'Nonviolent action and ethical reflection.', sdgs: [1, 10, 16, 17] },
+  { name: 'Mark Twain', avatarPath: '../../../assets/img/twain.jpg', collectionKey: 'twain', group: 'elder', provider: 'google', providerLabel: 'Google', description: 'A concise, skeptical literary perspective.', sdgs: [] },
 ];
 
 const DEFAULT_AI_MEMBER_KEYS = ['zara', 'arjun', 'sofia', 'bucky'];
-const GENERAL_AI_MEMBER_KEYS = AI_AVATARS.slice(0, 15).map(
-  (agent) => agent.collectionKey
-);
+const ROOM_SETTINGS_VERSION = 2;
+const SDG_AGENT_PRIORITY: Record<number, string[]> = {
+  1: ['zara', 'arjun', 'gandhi'],
+  2: ['elena', 'li', 'zara'],
+  3: ['marie', 'elena', 'amina'],
+  4: ['zara', 'arjun', 'gandhi'],
+  5: ['sofia', 'amina', 'zara'],
+  6: ['tane', 'arjun', 'elena'],
+  7: ['marie', 'elena', 'albert'],
+  8: ['nelson', 'arjun', 'rachel'],
+  9: ['li', 'arjun', 'albert'],
+  10: ['amina', 'zara', 'gandhi'],
+  11: ['li', 'arjun', 'albert'],
+  12: ['tane', 'elena', 'rachel'],
+  13: ['rachel', 'sofia', 'amina'],
+  14: ['rachel', 'tane', 'elena'],
+  15: ['tane', 'zara', 'rachel'],
+  16: ['nelson', 'sofia', 'gandhi'],
+  17: ['zara', 'elena', 'gandhi'],
+};
 
 interface PendingPreview {
   file: File;
@@ -209,7 +231,7 @@ export class FullDiscussionComponent
   showAddAIDialog = false;
   newRoomName = '';
   newRoomDescription = '';
-  copyRoomAI = true;
+  copyRoomAI = false;
   roomActionError = '';
   roomSettingsSaving = false;
 
@@ -354,10 +376,102 @@ export class FullDiscussionComponent
   }
 
   get selectedRoomAIAgents(): AIAvatar[] {
-    const keys = new Set(
-      this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS
+    const keys = this.activeRoom.aiMemberKeys ?? this.recommendedAIKeys;
+    return keys
+      .map((key) => AI_AVATARS.find((agent) => agent.collectionKey === key))
+      .filter((agent): agent is AIAvatar => !!agent);
+  }
+
+  get solutionSdgNumbers(): number[] {
+    const values: unknown[] = [
+      ...((this.currentSolution?.sdgs || []) as unknown[]),
+      this.currentSolution?.sdg,
+    ];
+    const numbers = values
+      .map((value) => {
+        if (typeof value === 'number') return value;
+        const match = String(value || '').match(/(?:sdg\s*)?(\d{1,2})/i);
+        return match ? Number(match[1]) : NaN;
+      })
+      .filter((value) => Number.isInteger(value) && value >= 1 && value <= 17);
+    return Array.from(new Set(numbers));
+  }
+
+  get recommendedAIKeys(): string[] {
+    const sdgs = this.solutionSdgNumbers;
+    if (!sdgs.length) return [...DEFAULT_AI_MEMBER_KEYS];
+
+    const selected: string[] = [];
+    const add = (key: string | undefined) => {
+      if (
+        key &&
+        !selected.includes(key) &&
+        AI_AVATARS.some((agent) => agent.collectionKey === key)
+      ) {
+        selected.push(key);
+      }
+    };
+
+    // Pick two topical specialists in a round-robin across the selected SDGs,
+    // so the first SDG cannot consume every specialist slot.
+    for (let rank = 0; rank < 3 && selected.length < 2; rank += 1) {
+      for (const sdg of sdgs) {
+        add(SDG_AGENT_PRIORITY[sdg]?.[rank]);
+        if (selected.length === 2) break;
+      }
+    }
+
+    const addBestRoleMatch = (candidateKeys: string[]) => {
+      const ranked = candidateKeys
+        .map((key, index) => {
+          const agent = AI_AVATARS.find((candidate) => candidate.collectionKey === key);
+          const score = agent?.sdgs.filter((sdg) => sdgs.includes(sdg)).length || 0;
+          return { key, index, score };
+        })
+        .filter((candidate) => !selected.includes(candidate.key))
+        .sort((a, b) => b.score - a.score || a.index - b.index);
+      add(ranked[0]?.key);
+    };
+
+    // Always balance topical expertise with implementation and human context.
+    addBestRoleMatch(['bucky', 'business', 'arjun', 'li', 'elena']);
+    addBestRoleMatch(['zara', 'sofia', 'amina', 'nelson', 'gandhi']);
+
+    for (const key of DEFAULT_AI_MEMBER_KEYS) {
+      if (selected.length >= 4) break;
+      add(key);
+    }
+    for (const agent of AI_AVATARS) {
+      if (selected.length >= 4) break;
+      add(agent.collectionKey);
+    }
+    return selected.slice(0, 4);
+  }
+
+  get recommendedAIAgents(): AIAvatar[] {
+    return this.recommendedAIKeys
+      .map((key) => AI_AVATARS.find((agent) => agent.collectionKey === key))
+      .filter((agent): agent is AIAvatar => !!agent);
+  }
+
+  get recommendationLabel(): string {
+    const sdgs = this.solutionSdgNumbers;
+    return sdgs.length
+      ? `Recommended for SDG${sdgs.length === 1 ? '' : 's'} ${sdgs.join(', ')}`
+      : 'Balanced starter team';
+  }
+
+  isAgentRecommended(agent: AIAvatar): boolean {
+    return this.recommendedAIKeys.includes(agent.collectionKey);
+  }
+
+  private hasCurrentRecommendedSdgs(values?: number[]): boolean {
+    const current = [...this.solutionSdgNumbers].sort((a, b) => a - b);
+    const stored = [...(values || [])].sort((a, b) => a - b);
+    return (
+      current.length === stored.length &&
+      current.every((value, index) => value === stored[index])
     );
-    return AI_AVATARS.filter((agent) => keys.has(agent.collectionKey));
   }
 
   get roomHumanCount(): number {
@@ -423,7 +537,7 @@ export class FullDiscussionComponent
     this.roomActionError = '';
     this.newRoomName = '';
     this.newRoomDescription = '';
-    this.copyRoomAI = true;
+    this.copyRoomAI = false;
     this.showCreateRoomDialog = true;
   }
 
@@ -466,11 +580,13 @@ export class FullDiscussionComponent
       createdAt: new Date().toISOString(),
       createdBy: this.auth.currentUser?.uid || '',
       aiMemberKeys: this.copyRoomAI
-        ? [...(this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS)]
-        : [...DEFAULT_AI_MEMBER_KEYS],
+        ? [...(this.activeRoom.aiMemberKeys ?? this.recommendedAIKeys)]
+        : [...this.recommendedAIKeys],
+      aiSelectionSource: this.copyRoomAI ? 'copied' : 'recommended',
+      recommendedSdgNumbers: [...this.solutionSdgNumbers],
       participationMode: 'roundtable',
       roundLimit: 1,
-      settingsVersion: 1,
+      settingsVersion: ROOM_SETTINGS_VERSION,
       discussion: [],
     };
 
@@ -584,13 +700,18 @@ export class FullDiscussionComponent
   async toggleRoomAgent(agent: AIAvatar): Promise<void> {
     if (this.roundInProgress || this.roomSettingsSaving) return;
     this.roomSettingsSaving = true;
-    const keys = new Set(this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS);
+    const keys = new Set(this.activeRoom.aiMemberKeys ?? this.recommendedAIKeys);
     if (keys.has(agent.collectionKey)) {
       keys.delete(agent.collectionKey);
     } else {
       keys.add(agent.collectionKey);
     }
-    this.activeRoom = { ...this.activeRoom, aiMemberKeys: Array.from(keys) };
+    this.activeRoom = {
+      ...this.activeRoom,
+      aiMemberKeys: Array.from(keys),
+      aiSelectionSource: 'manual',
+      recommendedSdgNumbers: [...this.solutionSdgNumbers],
+    };
     this.participantSourceKey = '';
     this.refreshParticipants(this.latestParticipantsInput);
     await this.persistActiveRoomSettings();
@@ -609,6 +730,12 @@ export class FullDiscussionComponent
   }
 
   private buildGeneralRoom(settings?: DiscussionRoom): DiscussionRoom {
+    const storedKeys = settings?.aiMemberKeys;
+    const shouldUseRecommendation =
+      !storedKeys?.length ||
+      ((settings?.settingsVersion || 0) < ROOM_SETTINGS_VERSION && storedKeys.length > 4) ||
+      (settings?.aiSelectionSource === 'recommended' &&
+        !this.hasCurrentRecommendedSdgs(settings.recommendedSdgNumbers));
     return {
       id: 'general',
       name: 'General',
@@ -616,13 +743,16 @@ export class FullDiscussionComponent
       isGeneral: true,
       createdAt: settings?.createdAt || '',
       createdBy: settings?.createdBy || '',
-      aiMemberKeys:
-        settings?.aiMemberKeys !== undefined
-          ? [...settings.aiMemberKeys]
-          : [...GENERAL_AI_MEMBER_KEYS],
+      aiMemberKeys: shouldUseRecommendation
+        ? [...this.recommendedAIKeys]
+        : [...(storedKeys || [])],
+      aiSelectionSource: shouldUseRecommendation
+        ? 'recommended'
+        : settings?.aiSelectionSource || 'manual',
+      recommendedSdgNumbers: [...this.solutionSdgNumbers],
       participationMode: 'mentions',
       roundLimit: 1,
-      settingsVersion: 1,
+      settingsVersion: ROOM_SETTINGS_VERSION,
     };
   }
 
@@ -658,16 +788,32 @@ export class FullDiscussionComponent
       const snapshot = await firstValueFrom(ref.get());
       if (snapshot.exists) {
         const existing = snapshot.data();
-        if (!existing?.settingsVersion || existing.participationMode !== 'mentions') {
+        const existingKeys = existing?.aiMemberKeys || [];
+        const shouldUseRecommendation =
+          !existingKeys.length ||
+          ((existing?.settingsVersion || 0) < ROOM_SETTINGS_VERSION && existingKeys.length > 4) ||
+          (existing?.aiSelectionSource === 'recommended' &&
+            !this.hasCurrentRecommendedSdgs(existing.recommendedSdgNumbers));
+        if (
+          (existing?.settingsVersion || 0) < ROOM_SETTINGS_VERSION ||
+          existing?.participationMode !== 'mentions' ||
+          shouldUseRecommendation
+        ) {
           await ref.set(
             {
               id: 'general',
               name: 'General',
               isGeneral: true,
-              aiMemberKeys: [...GENERAL_AI_MEMBER_KEYS],
+              aiMemberKeys: shouldUseRecommendation
+                ? [...this.recommendedAIKeys]
+                : [...existingKeys],
+              aiSelectionSource: shouldUseRecommendation
+                ? 'recommended'
+                : existing?.aiSelectionSource || 'manual',
+              recommendedSdgNumbers: [...this.solutionSdgNumbers],
               participationMode: 'mentions',
               roundLimit: 1,
-              settingsVersion: 1,
+              settingsVersion: ROOM_SETTINGS_VERSION,
             },
             { merge: true }
           );
@@ -709,14 +855,23 @@ export class FullDiscussionComponent
   }
 
   private applyRoomSettings(room: DiscussionRoom): void {
+    const shouldUseRecommendation =
+      !room.aiMemberKeys?.length ||
+      ((room.settingsVersion || 0) < ROOM_SETTINGS_VERSION && room.aiMemberKeys.length > 4) ||
+      (room.aiSelectionSource === 'recommended' &&
+        !this.hasCurrentRecommendedSdgs(room.recommendedSdgNumbers));
     this.activeRoom = room.id === 'general' ? this.buildGeneralRoom(room) : {
       ...room,
-      aiMemberKeys: room.aiMemberKeys !== undefined
-        ? [...room.aiMemberKeys]
-        : [...DEFAULT_AI_MEMBER_KEYS],
+      aiMemberKeys: shouldUseRecommendation
+        ? [...this.recommendedAIKeys]
+        : [...(room.aiMemberKeys || [])],
+      aiSelectionSource: shouldUseRecommendation
+        ? 'recommended'
+        : room.aiSelectionSource || 'manual',
+      recommendedSdgNumbers: [...this.solutionSdgNumbers],
       participationMode: room.participationMode || 'roundtable',
       roundLimit: room.roundLimit === 2 ? 2 : 1,
-      settingsVersion: 1,
+      settingsVersion: ROOM_SETTINGS_VERSION,
     };
     this.participationMode = this.activeRoom.participationMode || 'mentions';
     this.roundLimit = this.activeRoom.roundLimit === 2 ? 2 : 1;
@@ -733,9 +888,12 @@ export class FullDiscussionComponent
           description: this.activeRoom.description || '',
           isGeneral: this.activeRoomId === 'general',
           aiMemberKeys: this.activeRoom.aiMemberKeys || [],
-          participationMode: this.participationMode,
-          roundLimit: this.roundLimit,
-          settingsVersion: 1,
+          aiSelectionSource: this.activeRoom.aiSelectionSource || 'manual',
+          recommendedSdgNumbers: [...this.solutionSdgNumbers],
+          participationMode:
+            this.activeRoomId === 'general' ? 'mentions' : this.participationMode,
+          roundLimit: this.activeRoomId === 'general' ? 1 : this.roundLimit,
+          settingsVersion: ROOM_SETTINGS_VERSION,
         },
         { merge: true }
       );
@@ -1604,7 +1762,7 @@ Please choose a file under 5 MB.`);
 
   private refreshParticipants(participantsInput: unknown): void {
     const participantEmails = this.normalizeParticipantEmails(participantsInput);
-    const aiKey = (this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS)
+    const aiKey = (this.activeRoom.aiMemberKeys ?? this.recommendedAIKeys)
       .slice()
       .sort()
       .join('|');
@@ -1730,9 +1888,9 @@ Please choose a file under 5 MB.`);
   /** Add AI avatars to the participants list */
   private addAIParticipants() {
     const activeKeys = new Set(
-      this.activeRoom.aiMemberKeys ?? DEFAULT_AI_MEMBER_KEYS
+      this.activeRoom.aiMemberKeys ?? this.recommendedAIKeys
     );
-    for (const ai of AI_AVATARS.filter((candidate) =>
+    for (const ai of this.selectedRoomAIAgents.filter((candidate) =>
       activeKeys.has(candidate.collectionKey)
     )) {
       this.participants.push({
