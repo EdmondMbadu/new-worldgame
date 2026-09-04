@@ -550,26 +550,21 @@
         </section>
 
         <section
-          class="mt-3 rounded-2xl border-2 border-teal-200 bg-white p-3 shadow-sm dark:border-teal-900 dark:bg-slate-900"
+          class="mt-3 rounded-xl border border-teal-200 bg-white p-2.5 shadow-sm dark:border-teal-900 dark:bg-slate-900"
           aria-labelledby="participation-heading"
         >
           <div class="flex items-center justify-between gap-2">
-            <div>
-              <h3 id="participation-heading" class="text-xs font-bold uppercase tracking-wide text-teal-800 dark:text-teal-200">Conversation mode</h3>
-              <p class="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
-                {{ activeRoomId === 'general' ? 'Fixed for the General room' : 'Choose who should answer' }}
-              </p>
-            </div>
-            <span *ngIf="activeRoomId === 'general'" class="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-300">General</span>
+            <h3 id="participation-heading" class="text-xs font-bold text-slate-800 dark:text-slate-100">AI response mode</h3>
+            <span *ngIf="activeRoomId === 'general'" class="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Fixed in General</span>
           </div>
 
-          <div class="mt-2 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="Conversation mode">
+          <div class="mt-1.5 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="AI response mode">
             <button
               type="button"
               (click)="setParticipationMode('mentions')"
               [disabled]="roundInProgress || roomSettingsSaving"
               [attr.aria-pressed]="participationMode === 'mentions'"
-              class="rounded-lg px-2 py-2 text-left transition disabled:cursor-default"
+              class="rounded-md px-2 py-1.5 text-center text-xs font-bold transition disabled:cursor-default"
               [class.bg-white]="participationMode === 'mentions'"
               [class.text-teal-800]="participationMode === 'mentions'"
               [class.shadow-sm]="participationMode === 'mentions'"
@@ -578,8 +573,7 @@
               [class.text-slate-500]="participationMode !== 'mentions'"
               [class.dark:text-slate-400]="participationMode !== 'mentions'"
             >
-              <span class="block text-xs font-bold">Mention AIs</span>
-              <span class="mt-0.5 block text-[9px] leading-tight">Only named agents</span>
+              Mention AIs
             </button>
             <button
               type="button"
@@ -587,31 +581,30 @@
               [disabled]="activeRoomId === 'general' || roundInProgress || roomSettingsSaving"
               [attr.aria-pressed]="participationMode === 'roundtable'"
               [attr.title]="activeRoomId === 'general' ? 'Create or open a focused room to use Roundtable' : 'Every selected AI replies in order'"
-              class="rounded-lg px-2 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-45"
+              class="rounded-md px-2 py-1.5 text-center text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-45"
               [class.bg-teal-600]="participationMode === 'roundtable'"
               [class.text-white]="participationMode === 'roundtable'"
               [class.shadow-sm]="participationMode === 'roundtable'"
               [class.text-slate-500]="participationMode !== 'roundtable'"
               [class.dark:text-slate-400]="participationMode !== 'roundtable'"
             >
-              <span class="block text-xs font-bold">Ask all AIs</span>
-              <span class="mt-0.5 block text-[9px] leading-tight">Roundtable in order</span>
+              Ask all AIs
             </button>
           </div>
 
-          <div class="mt-2 flex items-start justify-between gap-3">
-            <p class="text-[11px] font-medium leading-snug text-slate-600 dark:text-slate-300">{{ participationHelpText }}</p>
-            <label *ngIf="activeRoomId !== 'general' && participationMode === 'roundtable'" class="flex shrink-0 items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-              Rounds
+          <div class="mt-1.5 flex items-center justify-between gap-2">
+            <p class="min-w-0 text-[10px] leading-snug text-slate-500 dark:text-slate-400">{{ participationHelpText }}</p>
+            <label *ngIf="activeRoomId !== 'general' && participationMode === 'roundtable'" class="shrink-0">
+              <span class="sr-only">Round limit</span>
               <select
                 [(ngModel)]="roundLimit"
                 (ngModelChange)="updateRoomPreferences()"
                 [disabled]="roundInProgress || roomSettingsSaving"
-                class="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                class="rounded-md border border-slate-300 bg-white px-1.5 py-1 text-[10px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
                 aria-label="Round limit"
               >
-                <option [ngValue]="1">1</option>
-                <option [ngValue]="2">2</option>
+                <option [ngValue]="1">1 round</option>
+                <option [ngValue]="2">2 rounds</option>
               </select>
             </label>
           </div>
@@ -619,22 +612,19 @@
 
         <section class="mt-3 border-t border-slate-200 pt-3 dark:border-slate-800" aria-labelledby="ai-agents-heading">
           <div class="mb-2 flex items-center justify-between">
-            <div>
-              <h3 id="ai-agents-heading" class="text-xs font-bold text-slate-800 dark:text-slate-100">AI agents</h3>
-              <p class="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">Secondary support for the room</p>
-            </div>
+            <h3 id="ai-agents-heading" class="text-sm font-bold text-slate-900 dark:text-white">AI agents</h3>
             <span class="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ selectedRoomAIAgents.length }}</span>
           </div>
           <ul class="grid grid-cols-2 gap-2">
             <li
               *ngFor="let agent of roomAIPreviewAgents; trackBy: trackByAIAvatar"
-              class="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-800 dark:bg-slate-900"
+              class="flex min-w-0 items-center gap-2 rounded-xl border border-slate-200 bg-white p-2.5 shadow-sm dark:border-slate-700 dark:bg-slate-900"
             >
-              <span class="relative grid h-8 w-8 shrink-0 place-content-center overflow-hidden rounded-full bg-teal-100 text-[10px] font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-200">
+              <span class="relative grid h-9 w-9 shrink-0 place-content-center overflow-hidden rounded-full bg-teal-100 text-[10px] font-bold text-teal-800 dark:bg-teal-950 dark:text-teal-200">
                 <img *ngIf="agent.avatarPath" [src]="agent.avatarPath" [alt]="agent.name" class="h-full w-full object-cover" />
                 <span *ngIf="!agent.avatarPath">{{ getInitial(agent.name) }}</span>
               </span>
-              <span class="min-w-0 flex-1 truncate text-xs font-semibold text-slate-700 dark:text-slate-200">{{ agent.name }}</span>
+              <span class="min-w-0 flex-1 truncate text-xs font-bold text-slate-800 dark:text-slate-100">{{ agent.name }}</span>
             </li>
           </ul>
           <p *ngIf="hiddenRoomAIAgentCount" class="mt-2 text-center text-[11px] font-medium text-slate-500 dark:text-slate-400">

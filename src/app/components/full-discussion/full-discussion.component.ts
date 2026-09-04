@@ -379,9 +379,12 @@ export class FullDiscussionComponent
   }
 
   get participationHelpText(): string {
-    return this.participationMode === 'roundtable'
-      ? `Every room AI replies in order, for up to ${this.roundLimit} round${this.roundLimit === 1 ? '' : 's'}.`
-      : 'Mention an AI for a reply. @everyone notifies your teammates.';
+    if (this.participationMode === 'roundtable') {
+      return this.roundLimit === 1
+        ? `All ${this.selectedRoomAIAgents.length} agents reply once, in order.`
+        : `All ${this.selectedRoomAIAgents.length} agents reply for up to 2 rounds.`;
+    }
+    return 'Only @mentioned agents reply. @everyone notifies people.';
   }
 
   trackByRoom(_index: number, room: DiscussionRoom): string {

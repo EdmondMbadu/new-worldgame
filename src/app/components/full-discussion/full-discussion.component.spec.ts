@@ -110,10 +110,10 @@ describe('FullDiscussionComponent room behavior', () => {
 
   it('explains the difference between mentions and roundtable participation', () => {
     component.participationMode = 'mentions';
-    expect(component.participationHelpText).toContain('Mention an AI for a reply');
+    expect(component.participationHelpText).toContain('Only @mentioned agents reply');
 
     component.participationMode = 'roundtable';
     component.roundLimit = 1;
-    expect(component.participationHelpText).toContain('Every room AI replies in order');
+    expect(component.participationHelpText).toContain('agents reply once, in order');
   });
 });
