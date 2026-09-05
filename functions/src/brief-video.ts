@@ -5,7 +5,8 @@ export interface BriefVideo {
   durationSeconds: number; status: 'ready' | 'unavailable'; reason: string;
 }
 const origin = 'https://newworld-game.org';
-const fallback = `${origin}/assets/img/weekly-brief-video.jpg`;
+// Reuse the site's existing Sofia artwork so legacy uploads have a visible face.
+const fallback = `${origin}/assets/img/landing-intro-sofia-thumbnail.jpg`;
 export async function resolveBriefVideo(raw: string, load: (id: string) => Promise<any>, probe: typeof probePublicMedia = probePublicMedia): Promise<BriefVideo | undefined> {
   if (!raw.trim()) return undefined;
   const url = normalizeSourceUrl(raw);
@@ -22,6 +23,11 @@ export async function resolveBriefVideo(raw: string, load: (id: string) => Promi
       if (!(await probe(String(video.url), 'video'))) return { ...empty, reason: 'The selected video file could not be accessed. Check or replace it in NWG News.' };
       let thumb = '';
       try { thumb = video.thumbUrl ? normalizeSourceUrl(new URL(String(video.thumbUrl), origin).toString()) : ''; } catch { /* Use the default image for malformed legacy metadata. */ }
+      if (thumb) {
+        const thumbnail = new URL(thumb);
+        if (['newworld-game.org', 'www.newworld-game.org'].includes(thumbnail.hostname) &&
+            thumbnail.pathname === '/assets/img/weekly-brief-video.jpg') thumb = '';
+      }
       if (video.thumbnailVideoRevision && video.thumbnailVideoRevision !== (video.storagePath || video.url)) thumb = '';
       if (thumb && !(await probe(thumb, 'image'))) thumb = '';
       return { ...empty, url: `${origin}/nwg-news?v=${encodeURIComponent(id)}`, title: String(video.title || empty.title).slice(0, 180),

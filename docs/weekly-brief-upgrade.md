@@ -8,6 +8,8 @@ In NWG News, edit an uploaded video and select **Find frames**, choose a timesta
 
 In User Management, paste a specific `nwg-news?v=...` share link and preview/save. Select a solution in Single mode to preview its full email and review sources without sending. The preview uses the actual renderer in a sandboxed iframe. **Find fresh sources** bypasses the content cache. Source exclusions persist for that solution; **Restore and recheck** removes an exclusion and prepares fresh evidence. The selected video configuration remains shared across single, bulk and scheduled sends.
 
+The email's default thumbnail uses the existing Sofia face artwork at `src/assets/img/landing-intro-sofia-thumbnail.jpg`. This is a branded fallback, not an extracted frame of the selected video. Explicit references to the old faceless `weekly-brief-video.jpg` placeholder also resolve to the face artwork; other custom thumbnails remain selected. This uses an existing hosting asset, so the email resolver update requires a backend deployment. Previously delivered emails retain their original image URL.
+
 ## Source pipeline
 
 - Candidate URLs come from Gemini Google Search grounding metadata, never generated prose. Each category considers at most 15 retrieved sources and one replacement pass of at most 6.

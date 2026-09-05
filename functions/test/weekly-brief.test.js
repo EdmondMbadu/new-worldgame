@@ -83,7 +83,7 @@ test('missing selected videos are omitted and never replaced by a different vide
 });
 test('legacy records lacking thumbnails retain a usable video card', async () => {
   const video=await resolveBriefVideo('https://newworld-game.org/nwg-news?v=legacy',async()=>({title:'Legacy',url:'https://media.example/a.mp4'}));
-  assert.equal(video.status,'ready'); assert.ok(video.thumbnailUrl.endsWith('/assets/img/weekly-brief-video.jpg'));
+  assert.equal(video.status,'ready'); assert.ok(video.thumbnailUrl.endsWith('/assets/img/landing-intro-sofia-thumbnail.jpg'));
   assert.ok(renderBriefVideo(video).includes('Watch this week'));
 });
 test('curated catalog matches frontend IDs and resolves legacy thumbnails absolutely',async()=>{
@@ -98,5 +98,22 @@ test('missing media suppresses the card; broken thumbnail uses the branded fallb
   const unavailable=await resolveVideoWithProbe('https://newworld-game.org/nwg-news?v=selected',load,async()=>false);
   assert.equal(unavailable.status,'unavailable');assert.equal(renderBriefVideo(unavailable),'');
   const fallback=await resolveVideoWithProbe('https://newworld-game.org/nwg-news?v=selected',load,async(_url,kind)=>kind==='video');
-  assert.equal(fallback.status,'ready');assert.ok(fallback.thumbnailUrl.endsWith('weekly-brief-video.jpg'));
+  assert.equal(fallback.status,'ready');assert.ok(fallback.thumbnailUrl.endsWith('landing-intro-sofia-thumbnail.jpg'));
+});
+
+test('saved legacy placeholder images also upgrade to the face thumbnail', async () => {
+  const video = await resolveBriefVideo('https://newworld-game.org/nwg-news?v=weekly', async () => ({
+    title: 'Weekly briefing', url: 'https://media.example/video.mp4',
+    thumbUrl: 'https://newworld-game.org/assets/img/weekly-brief-video.jpg?version=1',
+  }));
+  assert.equal(video.thumbnailUrl, 'https://newworld-game.org/assets/img/landing-intro-sofia-thumbnail.jpg');
+  assert.ok(renderBriefVideo(video).includes('landing-intro-sofia-thumbnail.jpg'));
+});
+
+test('custom thumbnails with a similar filename on other hosts remain selected', async () => {
+  const custom = 'https://media.example/assets/img/weekly-brief-video.jpg';
+  const video = await resolveBriefVideo('https://newworld-game.org/nwg-news?v=weekly', async () => ({
+    title: 'Weekly briefing', url: 'https://media.example/video.mp4', thumbUrl: custom,
+  }));
+  assert.equal(video.thumbnailUrl, custom);
 });
