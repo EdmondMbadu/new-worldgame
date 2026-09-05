@@ -13,6 +13,7 @@ import { google } from 'googleapis';
 import { buildICS } from './ics';
 import { prepareBriefContent, BriefContent } from './brief-research';
 import { resolveBriefVideo, renderBriefVideo, BriefVideo } from './brief-video';
+import { loadNewsVideoWithThumbnail } from './news-video-thumbnail';
 import { fetchSourcePage, pageProblem } from './brief-sources';
 // At the top, with your other imports
 import Stripe from 'stripe';
@@ -2773,10 +2774,7 @@ const generateSolutionAIContent = (
 }), force);
 
 const hydrateBriefExtras = async (data: AIInsightsPayload): Promise<AIInsightsPayload> => {
-  const video = await resolveBriefVideo(data.videoSummaryUrl || '', async id => {
-    const snap = await admin.firestore().collection('nwgNewsVideos').doc(id).get();
-    return snap.exists ? snap.data() : undefined;
-  });
+  const video = await resolveBriefVideo(data.videoSummaryUrl || '', loadNewsVideoWithThumbnail);
   const links = await Promise.all((data.additionalLinks || []).slice(0, 6).map(async link => {
     try {
       const page = await fetchSourcePage(link.url);
@@ -3592,9 +3590,7 @@ export const previewAIInsightsBrief = functions.runWith({ timeoutSeconds: 540, m
       throw new functions.https.HttpsError('permission-denied', 'Only administrators can preview briefs.');
     }
     if (data?.mode === 'video') {
-      const video = await resolveBriefVideo(String(data.videoSummaryUrl || ''), async id => {
-        const doc = await admin.firestore().collection('nwgNewsVideos').doc(id).get(); return doc.data();
-      });
+      const video = await resolveBriefVideo(String(data.videoSummaryUrl || ''), loadNewsVideoWithThumbnail);
       return { video: video || null, html: renderBriefVideo(video) };
     }
     const solutionId = String(data?.solutionId || '');
