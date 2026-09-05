@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import { ActivatedRoute } from '@angular/router';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { firstValueFrom } from 'rxjs';
 import firebase from 'firebase/compat/app';
 import { Solution } from 'src/app/models/solution';
@@ -137,7 +138,8 @@ export class UserManagementComponent implements OnInit {
     private time: TimeService,
     private data: DataService,
     private fns: AngularFireFunctions,
-    private afs: AngularFirestore //
+    private afs: AngularFirestore,
+    private previewSanitizer?: DomSanitizer
   ) {}
   searchTerm: string = '';
   showActionDropDown: boolean = false;
@@ -282,6 +284,50 @@ export class UserManagementComponent implements OnInit {
     invalidPreference: 0,
     finalRecipients: 0,
   };
+  briefPreviewBusy = false;
+  briefPreviewError = '';
+  briefPreviewHtml: SafeHtml | string = '';
+  briefPreviewVideo: any = null;
+  briefPreviewSources: any[] = [];
+  briefPreviewQuality: any = null;
+  briefPreviewOmittedLinks = 0;
+
+  async previewBriefVideo(): Promise<boolean> {
+    if (this.briefPreviewBusy) return false;
+    const requestedUrl = this.aiInsightsVideoSummaryUrl;
+    this.briefPreviewBusy = true; this.briefPreviewError = '';
+    try {
+      const result = await firstValueFrom(this.fns.httpsCallable('previewAIInsightsBrief', { timeout: 540000 })({ mode: 'video', videoSummaryUrl: this.aiInsightsVideoSummaryUrl }));
+      if (requestedUrl !== this.aiInsightsVideoSummaryUrl) { this.briefPreviewError = 'The link changed. Preview it again.'; return false; }
+      this.briefPreviewVideo = result.video;
+      if (result.video?.status !== 'ready') {
+        this.briefPreviewError = result.video?.reason || 'Choose a video first.';
+        return false;
+      }
+      return true;
+    } catch (error: any) { this.briefPreviewError = error.message || 'Unable to preview video.'; return false; }
+    finally { this.briefPreviewBusy = false; }
+  }
+
+  async previewAIInsightsBrief(force = false, excludeUrl = '', restoreUrl = ''): Promise<void> {
+    const solution = this.aiInsightsSelectedSolution;
+    if (!solution) { this.briefPreviewError = 'Select a solution in Single mode to review its sources.'; return; }
+    if (this.briefPreviewBusy) return;
+    this.briefPreviewBusy = true; this.briefPreviewError = '';
+    try {
+      const result = await firstValueFrom(this.fns.httpsCallable('previewAIInsightsBrief', { timeout: 540000 })({
+        solutionId: solution.solutionId, videoSummaryUrl: this.aiInsightsSavedVideoSummaryUrl,
+        additionalLinks: this.aiInsightsSavedAdditionalLinks, force, excludeUrl, restoreUrl,
+      }));
+      if (this.aiInsightsSelectedSolution?.solutionId !== solution.solutionId) return;
+      // The exact email HTML is isolated in a sandbox without scripts, forms or same-origin privileges.
+      this.briefPreviewHtml = this.previewSanitizer?.bypassSecurityTrustHtml(result.html) || result.html; this.briefPreviewSources = result.sources || [];
+      this.briefPreviewQuality = result.quality; this.briefPreviewVideo = result.video;
+      this.briefPreviewOmittedLinks = result.omittedAdditionalLinks || 0;
+    } catch (error: any) { this.briefPreviewError = error.message || 'Unable to prepare preview.'; }
+    finally { this.briefPreviewBusy = false; }
+  }
+
   aiInsightsSendLogs: Array<{
     id: string;
     mode: 'single' | 'bulk';
@@ -750,6 +796,7 @@ export class UserManagementComponent implements OnInit {
   }
 
   clearAIInsightsVideoSummaryStatus(): void {
+    this.briefPreviewVideo = null;
     this.aiInsightsVideoSummaryMessage = '';
     this.aiInsightsVideoSummaryError = '';
   }
@@ -765,6 +812,10 @@ export class UserManagementComponent implements OnInit {
       return;
     }
 
+    if (normalized && !(await this.previewBriefVideo())) {
+      this.aiInsightsVideoSummaryError = this.briefPreviewError;
+      return;
+    }
     await this.persistAIInsightsVideoSummaryUrl(normalized);
   }
 
@@ -3342,6 +3393,7 @@ ${solutionSources}`;
 
   // Select a solution from the dropdown
   selectAIInsightsSolution(sol: Solution) {
+    this.briefPreviewHtml = ''; this.briefPreviewSources = []; this.briefPreviewQuality = null;
     this.aiInsightsSelectedSolution = sol;
     this.aiInsightsSolutionSearch = sol.title || 'Untitled Solution';
     this.showAIInsightsSolutionDropdown = false;
@@ -3403,7 +3455,7 @@ ${solutionSources}`;
     this.aiInsightsSent = false;
 
     try {
-      const callable = this.fns.httpsCallable('sendAIInsightsEmail');
+      const callable = this.fns.httpsCallable('sendAIInsightsEmail', { timeout: 540000 });
       await firstValueFrom(
         callable({
           userEmail: user.email,

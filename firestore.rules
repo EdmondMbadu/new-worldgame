@@ -16,6 +16,14 @@ service cloud.firestore {
       allow create, update, delete: if isPlatformAdmin();
     }
 
+    // Only the Admin SDK may author verification results or immutable sent-content evidence.
+    match /ai_insights_content_cache/{cacheId} {
+      allow read, write: if false;
+    }
+    match /ai_insights_content_snapshots/{snapshotId} {
+      allow read, write: if false;
+    }
+
     match /nwgNewsSettings/{settingId} {
       allow read: if true;
       allow create, update, delete: if isPlatformAdmin();
@@ -360,7 +368,9 @@ service cloud.firestore {
         && topLevelCollection != 'solutionModerationPolicies'
         && topLevelCollection != 'solutionModerationCache'
         && topLevelCollection != 'campaignPages'
-        && topLevelCollection != 'campaignRoutes';
+        && topLevelCollection != 'campaignRoutes'
+        && topLevelCollection != 'ai_insights_content_cache'
+        && topLevelCollection != 'ai_insights_content_snapshots';
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
@@ -373,7 +383,9 @@ service cloud.firestore {
         && topLevelCollection != 'solutionModerationPolicies'
         && topLevelCollection != 'solutionModerationCache'
         && topLevelCollection != 'campaignPages'
-        && topLevelCollection != 'campaignRoutes';
+        && topLevelCollection != 'campaignRoutes'
+        && topLevelCollection != 'ai_insights_content_cache'
+        && topLevelCollection != 'ai_insights_content_snapshots';
     }
   }
 }

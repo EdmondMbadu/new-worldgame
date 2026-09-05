@@ -11,6 +11,9 @@ import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { google } from 'googleapis';
 import { buildICS } from './ics';
+import { prepareBriefContent, BriefContent } from './brief-research';
+import { resolveBriefVideo, renderBriefVideo, BriefVideo } from './brief-video';
+import { fetchSourcePage, pageProblem } from './brief-sources';
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -1736,111 +1739,10 @@ type AIInsightsPayload = {
   meetLink?: string;
   solutionImage?: string;
   videoSummaryUrl?: string;
+  briefVideo?: BriefVideo;
   additionalLinks?: AIInsightsBriefLink[];
   teamMembers?: AIInsightsTeamMember[];
   joinOpportunities?: AIInsightsJoinOpportunity[];
-};
-
-// Cache structure for AI-generated content per solution
-interface SolutionAIContentCache {
-  solutionId: string;
-  solutionTitle: string;
-  fundersHtml: string;
-  newsHtml: string;
-  validFundersCount: number;
-  validNewsCount: number;
-  generatedAt: admin.firestore.Timestamp;
-  periodKey: string; // e.g., "P12345" - 5-day period key for cache invalidation
-}
-
-// Get cache key based on 5-day periods (ensures weekly sends always get fresh content)
-const getCurrentPeriodKey = (): string => {
-  const now = new Date();
-  // Use epoch time divided by 5 days to create 5-day periods
-  const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
-  const periodNum = Math.floor(now.getTime() / fiveDaysMs);
-  return `P${periodNum}`;
-};
-
-// Helper functions extracted for reuse
-const cleanUrlFromLine = (line: string): string => {
-  const match = line.match(/https?:\/\/[^\s<>"')]+/);
-  if (!match) return '';
-  return match[0].replace(/[)\].,]+$/, '');
-};
-
-const parseFunders = (text: string) => {
-  const blocks = text.split(/\n\n+/).filter(b => b.trim());
-  return blocks
-    .map(block => {
-      const lines = block.split('\n').filter(l => l.trim());
-      if (lines.length === 0) return null;
-      const name = lines[0]?.replace(/\*\*/g, '').trim() || '';
-      const desc = lines[1]?.replace(/\*\*/g, '').trim() || '';
-      const url = lines[2]?.replace(/\*\*/g, '').trim() || '';
-      const cleanUrl = cleanUrlFromLine(url);
-      if (!name || !cleanUrl) return null;
-      return { name, desc, url: cleanUrl };
-    })
-    .filter(Boolean) as Array<{ name: string; desc: string; url: string }>;
-};
-
-const parseNews = (text: string) => {
-  const blocks = text.split(/\n\n+/).filter(b => b.trim());
-  return blocks
-    .map(block => {
-      const lines = block.split('\n').filter(l => l.trim());
-      if (lines.length === 0) return null;
-      const headline = lines[0]?.replace(/\*\*/g, '').trim() || '';
-      const source = lines[1]?.replace(/\*\*/g, '').trim() || '';
-      const urlLine = lines[2]?.replace(/\*\*/g, '').trim() || '';
-      const relevance = lines[3]?.replace(/\*\*/g, '').trim() || '';
-      const articleUrl = cleanUrlFromLine(urlLine);
-      if (!headline || !articleUrl) return null;
-      return { headline, source, relevance, url: articleUrl };
-    })
-    .filter(Boolean) as Array<{
-      headline: string;
-      source: string;
-      relevance: string;
-      url: string;
-    }>;
-};
-
-const isUrlReachable = async (url: string, timeoutMs = 3000): Promise<boolean> => {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-    const response = await fetch(url, {
-      method: 'HEAD',
-      redirect: 'follow',
-      signal: controller.signal,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; Global Solutions LabBot/1.0; +https://newworld-game.org)',
-      },
-    });
-    clearTimeout(timeoutId);
-    if (response.status === 405) {
-      const controller2 = new AbortController();
-      const timeoutId2 = setTimeout(() => controller2.abort(), timeoutMs);
-      const getResponse = await fetch(url, {
-        method: 'GET',
-        redirect: 'follow',
-        signal: controller2.signal,
-        headers: {
-          'User-Agent':
-            'Mozilla/5.0 (compatible; Global Solutions LabBot/1.0; +https://newworld-game.org)',
-          Range: 'bytes=0-1024',
-        },
-      });
-      clearTimeout(timeoutId2);
-      return getResponse.status >= 200 && getResponse.status < 400;
-    }
-    return response.status >= 200 && response.status < 400;
-  } catch (error) {
-    return false;
-  }
 };
 
 const isUrlUsableForReport = async (url: string, timeoutMs = 3500): Promise<boolean> => {
@@ -1885,16 +1787,6 @@ const isUrlUsableForReport = async (url: string, timeoutMs = 3500): Promise<bool
   } catch (error) {
     return false;
   }
-};
-
-const validateLinks = async <T extends { url: string }>(items: T[]) => {
-  const results = await Promise.all(
-    items.map(async (item) => ({
-      item,
-      valid: await isUrlReachable(item.url),
-    }))
-  );
-  return results.filter((r) => r.valid).map((r) => r.item);
 };
 
 const sanitizeGeneratedReportText = (value: string): string =>
@@ -2872,185 +2764,26 @@ Return JSON only in this exact shape:
 Do not include markdown. Do not include commentary outside JSON.`;
 };
 
-const formatFundersForEmail = (
-  items: Array<{ name: string; desc: string; url: string }>
-): string => {
-  return items
-    .map(item => {
-      const displayHost = item.url
-        .replace(/^https?:\/\//, '')
-        .split('/')[0];
-      return `
-          <tr>
-            <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-              <p style="margin:0 0 4px;font-size:15px;font-weight:600;color:#111827;font-family:Georgia,'Times New Roman',serif;">${item.name}</p>
-              <p style="margin:0 0 8px;font-size:14px;color:#4b5563;line-height:1.5;">${item.desc}</p>
-              <a href="${item.url}" style="font-size:13px;color:#2563eb;text-decoration:none;">${displayHost} →</a>
-            </td>
-          </tr>`;
-    })
-    .join('');
-};
+// Shared structured research, versioned caching and send-time freshness gate.
+const generateSolutionAIContent = (
+  solutionId: string, solutionTitle: string, solutionDescription?: string,
+  solutionArea?: string, sdgs?: string[], force = false
+): Promise<BriefContent> => prepareBriefContent(GEMINI_KEY, solutionId, JSON.stringify({
+  title: solutionTitle, description: solutionDescription || '', area: solutionArea || '', sdgs: sdgs || [],
+}), force);
 
-const formatNewsForEmail = (
-  items: Array<{
-    headline: string;
-    source: string;
-    relevance: string;
-    url: string;
-  }>
-): string => {
-  return items
-    .map(item => {
-      return `
-          <tr>
-            <td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
-              <p style="margin:0 0 6px;font-size:15px;font-weight:600;color:#111827;line-height:1.4;font-family:Georgia,'Times New Roman',serif;">${item.headline}</p>
-              <p style="margin:0;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;">${item.source}</p>
-              ${item.relevance ? `<p style="margin:8px 0 0;font-size:14px;color:#4b5563;line-height:1.5;">${item.relevance}</p>` : ''}
-              <a href="${item.url}" style="display:inline-block;margin-top:8px;font-size:13px;color:#2563eb;text-decoration:none;">Read article →</a>
-            </td>
-          </tr>`;
-    })
-    .join('');
-};
-
-// Generate AI content for a solution (with caching)
-const generateSolutionAIContent = async (
-  solutionId: string,
-  solutionTitle: string,
-  solutionDescription?: string,
-  solutionArea?: string,
-  sdgs?: string[]
-): Promise<{ fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }> => {
-  const periodKey = getCurrentPeriodKey();
-  const cacheRef = admin.firestore().collection('ai_insights_content_cache').doc(`${solutionId}_${periodKey}`);
-
-  // Check cache first
-  const cacheDoc = await cacheRef.get();
-  if (cacheDoc.exists) {
-    const cached = cacheDoc.data() as SolutionAIContentCache;
-    console.log(`Using cached AI content for solution ${solutionId} (period ${periodKey})`);
-    return {
-      fundersHtml: cached.fundersHtml,
-      newsHtml: cached.newsHtml,
-      validFundersCount: cached.validFundersCount,
-      validNewsCount: cached.validNewsCount,
-    };
-  }
-
-  console.log(`Generating new AI content for solution ${solutionId}`);
-
-  // Build context for AI prompts
-  const solutionContext = [
-    `Solution Title: "${solutionTitle}"`,
-    solutionDescription ? `Description: ${solutionDescription}` : '',
-    solutionArea ? `Focus Area: ${solutionArea}` : '',
-    sdgs?.length ? `Related SDGs: ${sdgs.join(', ')}` : '',
-  ]
-    .filter(Boolean)
-    .join('\n');
-
-  // Initialize Gemini with Google Search grounding
-  const genAI = new GoogleGenerativeAI(GEMINI_KEY);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-flash',
-    tools: [{ google_search: {} }],
-  } as any);
-
-  // Generate funders and news prompts
-  const fundersPrompt = `You are a research assistant helping social entrepreneurs find funding.
-
-Based on this project:
-${solutionContext}
-
-Find 6 REAL, currently active grant programs, foundations, or funding organizations that would be interested in funding this type of project.
-
-For each funder, provide ONLY this format (no markdown, no asterisks):
-Organization Name
-Brief description of what they fund (1 sentence)
-Website URL (full https:// link to the official organization page)
-
-Separate each funder with a blank line.
-
-IMPORTANT:
-- Only include real, verifiable organizations.
-- Use a precise, direct link to the official site (no homepages without context, no short links, no tracking, no aggregators).
-- Include the full URL with https:// and the complete path.
-- If you cannot find an exact URL, omit the item.
-- No markdown formatting.`;
-
-  const newsPrompt = `You are a research assistant helping social entrepreneurs stay informed.
-
-Based on this project:
-${solutionContext}
-
-Find 6 recent and relevant news headlines from the past 6 months that would be interesting and useful for someone working on this type of solution.
-
-For each headline, provide ONLY this format (no markdown, no asterisks):
-Headline text
-Source publication name
-Article URL (full https:// link to the exact article page)
-Why it's relevant (1 sentence)
-
-Separate each news item with a blank line.
-
-IMPORTANT:
-- Only include real, recent news articles with working URLs.
-- Use a precise, direct article link from the publisher (no homepages, no short links, no tracking, no aggregators).
-- Include the full URL with https:// and the complete path.
-- If you cannot find an exact URL, omit the item.
-- No markdown formatting.`;
-
-  // Call Gemini for both prompts in parallel
-  const [fundersResult, newsResult] = await Promise.all([
-    model.generateContent(fundersPrompt),
-    model.generateContent(newsPrompt),
-  ]);
-
-  const fundersText =
-    fundersResult.response?.text() ||
-    'Unable to generate funder recommendations at this time.';
-  const newsText =
-    newsResult.response?.text() ||
-    'Unable to generate news insights at this time.';
-
-  // Parse and validate
-  const funderItems = parseFunders(fundersText);
-  const newsItems = parseNews(newsText);
-
-  // Validate URLs in parallel
-  const validFunders = (await validateLinks(funderItems)).slice(0, 5);
-  const validNews = (await validateLinks(newsItems)).slice(0, 5);
-
-  const fundersHtml = validFunders.length
-    ? formatFundersForEmail(validFunders)
-    : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified funding links available today.</p></td></tr>`;
-
-  const newsHtml = validNews.length
-    ? formatNewsForEmail(validNews)
-    : `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;"><p style="margin:0;font-size:14px;color:#6b7280;">No verified news links available today.</p></td></tr>`;
-
-  // Cache the result
-  await cacheRef.set({
-    solutionId,
-    solutionTitle,
-    fundersHtml,
-    newsHtml,
-    validFundersCount: validFunders.length,
-    validNewsCount: validNews.length,
-    generatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    periodKey,
+const hydrateBriefExtras = async (data: AIInsightsPayload): Promise<AIInsightsPayload> => {
+  const video = await resolveBriefVideo(data.videoSummaryUrl || '', async id => {
+    const snap = await admin.firestore().collection('nwgNewsVideos').doc(id).get();
+    return snap.exists ? snap.data() : undefined;
   });
-
-  console.log(`Cached AI content for solution ${solutionId} (${validFunders.length} funders, ${validNews.length} news)`);
-
-  return {
-    fundersHtml,
-    newsHtml,
-    validFundersCount: validFunders.length,
-    validNewsCount: validNews.length,
-  };
+  const links = await Promise.all((data.additionalLinks || []).slice(0, 6).map(async link => {
+    try {
+      const page = await fetchSourcePage(link.url);
+      return pageProblem(page) ? null : { label: link.label, url: page.url };
+    } catch { return null; }
+  }));
+  return { ...data, briefVideo: video, additionalLinks: links.filter((link): link is AIInsightsBriefLink => !!link) };
 };
 
 // Build email HTML using cached content (fast - no AI calls)
@@ -3097,40 +2830,7 @@ const buildAIInsightsEmailFromCache = (
     return '';
   };
 
-  const videoSummaryUrl = safeHttpUrl(data.videoSummaryUrl);
-  const videoSummarySection = videoSummaryUrl
-    ? `
-              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:24px 0;background-color:#111827;border:1px solid #1f2937;border-radius:18px;">
-                <tr>
-                  <td style="padding:24px 22px 22px;">
-                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                      <tr>
-                        <td width="66" style="width:66px;vertical-align:middle;padding-right:16px;">
-                          <a href="${videoSummaryUrl}" aria-label="Watch this week's intelligence brief" style="display:inline-block;width:58px;height:58px;background-color:#14b8a6;border-radius:50%;color:#062f2b;text-align:center;text-decoration:none;font-size:24px;line-height:58px;font-weight:700;">
-                            <span style="padding-left:3px;">&#9654;</span>
-                          </a>
-                        </td>
-                        <td style="vertical-align:middle;">
-                          <p style="margin:0 0 6px;font-size:11px;color:#5eead4;text-transform:uppercase;letter-spacing:1.4px;font-weight:700;">
-                            Featured video briefing
-                          </p>
-                          <p style="margin:0;font-size:22px;line-height:1.3;font-weight:600;font-family:Georgia,'Times New Roman',serif;">
-                            <a href="${videoSummaryUrl}" style="color:#ffffff;text-decoration:none;">Watch this week's intelligence brief</a>
-                          </p>
-                        </td>
-                      </tr>
-                    </table>
-                    <p style="margin:18px 0 18px;font-size:14px;line-height:1.65;color:#cbd5e1;">
-                      Start here for a concise video overview of this week's most useful Global Solutions Lab news and opportunities.
-                    </p>
-                    <a href="${videoSummaryUrl}" style="display:inline-block;background-color:#14b8a6;color:#062f2b;text-decoration:none;padding:13px 20px;font-size:14px;font-weight:800;border-radius:10px;">
-                      Watch the briefing&nbsp;&nbsp;&#8594;
-                    </a>
-                  </td>
-                </tr>
-              </table>
-      `
-    : '';
+  const videoSummarySection = renderBriefVideo(data.briefVideo);
 
   const additionalLinks = Array.isArray(data.additionalLinks)
     ? data.additionalLinks
@@ -3384,7 +3084,7 @@ const buildAIInsightsEmailFromCache = (
   <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#ffffff;">
     <tr>
       <td align="center">
-        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;">
+        <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;table-layout:fixed;">
 
           <!-- Masthead -->
           <tr>
@@ -3401,6 +3101,7 @@ const buildAIInsightsEmailFromCache = (
             </td>
           </tr>
 
+          ${videoSummarySection ? `<tr><td style="padding:0 24px;">${videoSummarySection}</td></tr>` : ''}
           <!-- Hero Section with Solution -->
           <tr>
             <td style="padding:32px 24px;">
@@ -3412,7 +3113,6 @@ const buildAIInsightsEmailFromCache = (
               <p style="margin:0;font-size:16px;color:#4b5563;line-height:1.6;">
                 Dear ${userFirstName || 'there'},
               </p>
-              ${videoSummarySection}
               <p style="margin:16px 0 0;font-size:16px;color:#4b5563;line-height:1.7;">
                 Welcome to this week's Global Solutions Lab Intelligence Brief - and thank you for being part of Global Solutions Lab.
               </p>
@@ -3607,7 +3307,8 @@ const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
   );
 
   // Build the email HTML using cached content
-  return buildAIInsightsEmailFromCache(data, cachedContent);
+  const enriched = await hydrateBriefExtras(data);
+  return { ...buildAIInsightsEmailFromCache(enriched, cachedContent), quality: cachedContent.quality };
 };
 
 const AI_INSIGHTS_TEAM_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -3849,6 +3550,7 @@ const writeAIInsightsLog = async (entry: {
   successCount: number;
   failureCount: number;
   failures?: string[];
+  quality?: BriefContent['quality'];
 }) => {
   await admin.firestore().collection('ai_insights_send_logs').add({
     mode: entry.mode,
@@ -3859,6 +3561,7 @@ const writeAIInsightsLog = async (entry: {
     successCount: entry.successCount,
     failureCount: entry.failureCount,
     failures: entry.failures || [],
+    ...(entry.quality ? { quality: entry.quality } : {}),
     sentAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 };
@@ -3880,9 +3583,47 @@ const runWithConcurrency = async <T, R>(
   return results;
 };
 
+// Preview and quality review never send email. Restricted to the existing admin roles.
+export const previewAIInsightsBrief = functions.runWith({ timeoutSeconds: 540, memory: '1GB' }).https.onCall(
+  async (data: any, context: functions.https.CallableContext) => {
+    if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Sign in first.');
+    const user = (await admin.firestore().doc(`users/${context.auth.uid}`).get()).data();
+    if (!(user?.admin === 'true' || user?.admin === true || ['admin', 'schooladmin'].includes(String(user?.role || '').toLowerCase()))) {
+      throw new functions.https.HttpsError('permission-denied', 'Only administrators can preview briefs.');
+    }
+    if (data?.mode === 'video') {
+      const video = await resolveBriefVideo(String(data.videoSummaryUrl || ''), async id => {
+        const doc = await admin.firestore().collection('nwgNewsVideos').doc(id).get(); return doc.data();
+      });
+      return { video: video || null, html: renderBriefVideo(video) };
+    }
+    const solutionId = String(data?.solutionId || '');
+    if (!/^[a-zA-Z0-9_-]{1,150}$/.test(solutionId)) throw new functions.https.HttpsError('invalid-argument', 'Select a solution.');
+    const solution = (await admin.firestore().collection('solutions').doc(solutionId).get()).data();
+    if (!solution) throw new functions.https.HttpsError('not-found', 'Solution not found.');
+    if (data.excludeUrl || data.restoreUrl) {
+      const { normalizeSourceUrl } = await import('./brief-sources');
+      const url = normalizeSourceUrl(String(data.excludeUrl || data.restoreUrl));
+      if (!url) throw new functions.https.HttpsError('invalid-argument', 'Invalid source URL.');
+      await admin.firestore().doc(`solutions/${solutionId}/weeklyBrief/settings`).set({
+        excludedUrls: data.restoreUrl ? admin.firestore.FieldValue.arrayRemove(url) : admin.firestore.FieldValue.arrayUnion(url), updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
+    }
+    const content = await generateSolutionAIContent(solutionId, solution.title || 'Untitled Solution', solution.description || '', solution.solutionArea || '', solution.sdgs || [], data.force === true || !!data.restoreUrl);
+    const enriched = await hydrateBriefExtras({ solutionId, solutionTitle: solution.title || 'Untitled Solution',
+      userEmail: String(context.auth.token.email || ''), userFirstName: user?.firstName || 'there',
+      solutionImage: solution.image || '', videoSummaryUrl: String(data.videoSummaryUrl || ''), additionalLinks: data.additionalLinks || [],
+    });
+    const rendered = buildAIInsightsEmailFromCache(enriched, content);
+    const snapshot = content.quality ? (await admin.firestore().collection('ai_insights_content_cache').doc(content.quality.cacheId).get()).data() : undefined;
+    return { html: rendered.html, quality: content.quality || null, sources: snapshot?.sources || [],
+      video: enriched.briefVideo || null, omittedAdditionalLinks: (data.additionalLinks || []).length - (enriched.additionalLinks || []).length };
+  }
+);
+
 // ===== AI Insights Email Function =====
 // Sends personalized AI-generated insights (funders, news) to solution authors
-export const sendAIInsightsEmail = functions.https.onCall(
+export const sendAIInsightsEmail = functions.runWith({ timeoutSeconds: 540, memory: '1GB' }).https.onCall(
   async (data: AIInsightsPayload, context: functions.https.CallableContext) => {
     // Validate authentication
     if (!context.auth) {
@@ -3918,7 +3659,7 @@ export const sendAIInsightsEmail = functions.https.onCall(
         teamMembers,
         joinOpportunities,
       };
-      const { html, subject } = await buildAIInsightsEmail(enrichedData);
+      const { html, subject, quality } = await buildAIInsightsEmail(enrichedData);
 
       const msg = {
         to: userEmail,
@@ -3933,6 +3674,7 @@ export const sendAIInsightsEmail = functions.https.onCall(
       const createdBy = context.auth?.token?.email || 'unknown';
       await writeAIInsightsLog({
         mode: 'single',
+        quality,
         subject,
         createdBy,
         recipients: [
@@ -3960,7 +3702,8 @@ export const sendAIInsightsEmail = functions.https.onCall(
 
 // Bulk AI Insights sender with concurrency
 // Batch size for processing - keeps each function invocation under timeout
-const AI_INSIGHTS_BATCH_SIZE = 25;
+// Smaller research batches keep cold-cache verification inside the worker deadline.
+const AI_INSIGHTS_BATCH_SIZE = 3;
 
 type AIInsightsBulkCriteria = 'user_selected' | 'most_recent' | 'second_recent' | 'random';
 
@@ -4409,8 +4152,8 @@ export const processAIInsightsBulkJob = functions
 
     console.log(`Batch ${batchIndex + 1}: Pre-generating AI content for ${uniqueSolutions.size} unique solutions`);
 
-    const contentCache = new Map<string, { fundersHtml: string; newsHtml: string; validFundersCount: number; validNewsCount: number }>();
-    await runWithConcurrency(Array.from(uniqueSolutions.values()), concurrency, async (solution) => {
+    const contentCache = new Map<string, BriefContent>();
+    await runWithConcurrency(Array.from(uniqueSolutions.values()), 3, async (solution) => {
       try {
         const content = await generateSolutionAIContent(
           solution.solutionId,
@@ -4463,6 +4206,9 @@ export const processAIInsightsBulkJob = functions
       );
     }
 
+    // Resolve each distinct video/link configuration once per batch.
+    const extrasCache = new Map<string, Promise<AIInsightsPayload>>();
+    const batchQuality: Record<string, unknown> = {};
     // ===== PHASE 2: Send emails using cached content =====
     await runWithConcurrency(batchRecipients, concurrency, async (recipient) => {
       const { userEmail, solutionId, solutionTitle } = recipient as AIInsightsPayload;
@@ -4472,19 +4218,18 @@ export const processAIInsightsBulkJob = functions
       }
 
       try {
-        let cachedContent = contentCache.get(solutionId);
+        const cachedContent = contentCache.get(solutionId);
         if (!cachedContent) {
-          cachedContent = await generateSolutionAIContent(
-            solutionId,
-            solutionTitle,
-            (recipient as AIInsightsPayload).solutionDescription,
-            (recipient as AIInsightsPayload).solutionArea,
-            (recipient as AIInsightsPayload).sdgs
-          );
+          throw new Error('Source preparation failed; retry this recipient after checking the job log.');
         }
 
+        const extrasKey = JSON.stringify([recipient.videoSummaryUrl || '', recipient.additionalLinks || []]);
+        if (!extrasCache.has(extrasKey)) extrasCache.set(extrasKey, hydrateBriefExtras(recipient));
+        const extras = await extrasCache.get(extrasKey)!;
         const enrichedRecipient: AIInsightsPayload = {
           ...(recipient as AIInsightsPayload),
+          briefVideo: extras.briefVideo,
+          additionalLinks: extras.additionalLinks,
           teamMembers: teamMembersCache.get(solutionId) || [],
           joinOpportunities: selectAIInsightsJoinOpportunities(
             joinOpportunityPool,
@@ -4502,6 +4247,7 @@ export const processAIInsightsBulkJob = functions
           subject: emailSubject,
           html,
         });
+        if (cachedContent.quality) batchQuality[solutionId] = cachedContent.quality;
         successCount += 1;
         successfulEmails.push(userEmail.toLowerCase());
         console.log(`Batch ${batchIndex + 1}: Email sent to ${userEmail} (${successCount}/${batchRecipients.length})`);
@@ -4513,10 +4259,12 @@ export const processAIInsightsBulkJob = functions
 
     // Update shared log with this batch's results
     await updateLogProgress();
+    if (Object.keys(batchQuality).length) await logRef.set({ qualityBySolution: batchQuality }, { merge: true });
 
     // Update this job's status
     await snap.ref.update({
       status: 'batch_completed',
+      quality: batchQuality,
       batchSuccessCount: successCount,
       batchFailureCount: failures.length,
       completedAt: admin.firestore.FieldValue.serverTimestamp(),

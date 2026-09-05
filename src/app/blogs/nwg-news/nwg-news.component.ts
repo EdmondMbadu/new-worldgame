@@ -13,6 +13,7 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import { lastValueFrom, Subscription } from 'rxjs';
+import { extractVideoThumbnails, customVideoThumbnail, VideoThumbnail } from 'src/app/utils/video-thumbnail';
 import { AuthService } from 'src/app/services/auth.service';
 
 interface Video {
@@ -21,6 +22,10 @@ interface Video {
   url: string;
   speaker?: string;
   thumbUrl?: string;
+  durationSeconds?: number;
+  thumbnailSeconds?: number;
+  thumbnailStoragePath?: string;
+  thumbnailVideoRevision?: string;
   tagline?: string;
   source?: 'curated' | 'admin';
   createdAtMs?: number;
@@ -91,6 +96,55 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
     tagline: '',
   };
   editingVideo: Video | null = null;
+  thumbnailCandidates: VideoThumbnail[] = [];
+  selectedThumbnail: VideoThumbnail | null = null;
+  thumbnailBusy = false;
+  thumbnailError = '';
+  thumbnailTimestamp = 0;
+  private thumbnailGeneration = 0;
+
+  async generateThumbnails(timestamp?: number): Promise<void> {
+    const source = this.showEditVideoModal
+      ? this.selectedReplacementVideoFile || this.editingVideo?.url
+      : this.selectedVideoFile;
+    if (!source) return;
+    const generation = ++this.thumbnailGeneration;
+    this.thumbnailBusy = true; this.thumbnailError = '';
+    try {
+      const candidates = await extractVideoThumbnails(source, timestamp);
+      if (generation !== this.thumbnailGeneration) return;
+      this.thumbnailCandidates = candidates;
+      this.selectedThumbnail = candidates[0] || null;
+    } catch (error: any) {
+      if (generation === this.thumbnailGeneration) this.thumbnailError = error.message || 'Could not extract a frame. Upload a custom thumbnail.';
+    } finally { if (generation === this.thumbnailGeneration) this.thumbnailBusy = false; }
+  }
+
+  async onCustomThumbnail(event: Event): Promise<void> {
+    const file = (event.target as HTMLInputElement).files?.[0]; if (!file) return;
+    const generation = ++this.thumbnailGeneration;
+    this.thumbnailBusy = true; this.thumbnailError = '';
+    try {
+      const dataUrl = await customVideoThumbnail(file);
+      if (generation === this.thumbnailGeneration) this.selectedThumbnail = { dataUrl, seconds: -1, duration: this.selectedThumbnail?.duration || this.editingVideo?.durationSeconds || 0 };
+    } catch (error: any) { if (generation === this.thumbnailGeneration) this.thumbnailError = error.message; }
+    finally { if (generation === this.thumbnailGeneration) this.thumbnailBusy = false; }
+  }
+
+  private resetThumbnails(): void {
+    this.thumbnailGeneration++; this.thumbnailBusy = false; this.thumbnailCandidates = [];
+    this.selectedThumbnail = null; this.thumbnailError = ''; this.thumbnailTimestamp = 0;
+  }
+
+  private async uploadThumbnail(id: string, revision: string): Promise<Partial<Video>> {
+    const thumbnail = this.selectedThumbnail;
+    if (!thumbnail) return {};
+    const path = `${this.newsCollection}/thumbnails/${id}/${Date.now()}.jpg`;
+    const bytes = Uint8Array.from(atob(thumbnail.dataUrl.split(',')[1]), c => c.charCodeAt(0));
+    await lastValueFrom(this.storage.upload(path, new Blob([bytes], { type: 'image/jpeg' }), { contentType: 'image/jpeg', cacheControl: 'public,max-age=31536000,immutable' }).snapshotChanges());
+    return { thumbUrl: await lastValueFrom(this.storage.ref(path).getDownloadURL()), thumbnailStoragePath: path,
+      thumbnailSeconds: thumbnail.seconds, durationSeconds: thumbnail.duration, thumbnailVideoRevision: revision };
+  }
 
   private readonly newsCollection = 'nwgNewsVideos';
   private readonly newsSettingsDocument = 'nwgNewsSettings/default';
@@ -258,6 +312,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.resetThumbnails();
     this.authSub?.unsubscribe();
     this.newsSub?.unsubscribe();
     this.newsSettingsSub?.unsubscribe();
@@ -311,6 +366,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   openEditVideoModal(video: Video) {
     if (!this.canManageVideo(video)) return;
+    this.resetThumbnails();
     this.editingVideo = video;
     this.editVideoError = '';
     this.selectedReplacementVideoFile = null;
@@ -332,7 +388,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async addVideo() {
-    if (!this.isAdmin || this.isSavingVideo) return;
+    if (!this.isAdmin || this.isSavingVideo || this.thumbnailBusy) return;
     this.addVideoError = '';
 
     const file = this.selectedVideoFile;
@@ -376,6 +432,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
         url,
         speaker: this.videoForm.speaker.trim(),
         thumbUrl: '',
+        ...await this.uploadThumbnail(docRef.ref.id, storagePath),
         tagline: this.videoForm.tagline.trim(),
         source: 'admin',
         youtubeId: null,
@@ -401,7 +458,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async updateVideo() {
-    if (!this.isAdmin || this.isUpdatingVideo || !this.editingVideo?.id) return;
+    if (!this.isAdmin || this.isUpdatingVideo || this.thumbnailBusy || !this.editingVideo?.id) return;
     if (!this.canManageVideo(this.editingVideo)) return;
     this.editVideoError = '';
 
@@ -460,6 +517,11 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
         updates.size = replacement.size;
       }
 
+      if (replacement) {
+        // Never reuse a thumbnail or duration from a replaced video.
+        updates.thumbUrl = ''; updates.thumbnailStoragePath = ''; updates.thumbnailSeconds = 0; updates.durationSeconds = 0;
+      }
+      Object.assign(updates, await this.uploadThumbnail(this.editingVideo.id!, updates.storagePath || this.editingVideo.storagePath || this.editingVideo.url));
       await docRef.update(updates as any);
 
       if (oldStoragePathToDelete && oldStoragePathToDelete !== updates.storagePath) {
@@ -524,7 +586,9 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   onVideoFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
+    this.resetThumbnails();
     this.selectedVideoFile = file;
+    if (file) void this.generateThumbnails();
     this.addVideoError = '';
     this.uploadProgress = null;
     if (file && !this.videoForm.title.trim()) {
@@ -535,7 +599,9 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   onReplacementVideoSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
+    this.resetThumbnails();
     this.selectedReplacementVideoFile = file;
+    if (file) void this.generateThumbnails();
     this.editVideoError = '';
     this.replaceUploadProgress = null;
     if (file && !this.editVideoForm.title.trim()) {
@@ -731,6 +797,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private resetVideoForm() {
+    this.resetThumbnails();
     this.videoForm = {
       title: '',
       speaker: '',
@@ -742,6 +809,7 @@ export class NwgNewsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private resetEditVideoForm() {
+    this.resetThumbnails();
     this.editVideoForm = {
       title: '',
       speaker: '',

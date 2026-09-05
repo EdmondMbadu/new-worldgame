@@ -39,6 +39,12 @@ service firebase.storage {
       allow delete: if signedIn();
     }
 
+    match /nwgNewsVideos/thumbnails/{videoId}/{fileName} {
+      allow read: if true;
+      allow create, update: if signedIn() && isSolutionImageUpload();
+      allow delete: if signedIn();
+    }
+
     // Raw drafts and published campaign artifacts are server-managed. The
     // public renderer streams approved HTML with strict response headers.
     match /campaign-drafts/{allPaths=**} {

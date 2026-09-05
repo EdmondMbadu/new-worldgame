@@ -83,4 +83,29 @@ describe('NwgNewsComponent', () => {
     expect(component.mainVideo?.id).toBe('saved-default');
     expect(component.isVideoCatalogLoading).toBeFalse();
   });
+  it('clears old thumbnail metadata when selecting a replacement video', () => {
+    component.selectedThumbnail = { dataUrl: 'old', seconds: 10, duration: 60 };
+    component.thumbnailCandidates = [component.selectedThumbnail];
+    spyOn(component, 'generateThumbnails').and.returnValue(Promise.resolve());
+    const file = new File(['video'], 'new.mp4', { type: 'video/mp4' });
+    component.onReplacementVideoSelected({ target: { files: [file] } } as any);
+    expect(component.selectedThumbnail).toBeNull();
+    expect(component.thumbnailCandidates).toEqual([]);
+    expect(component.generateThumbnails).toHaveBeenCalled();
+  });
+
+  it('does not save while thumbnail preparation is in progress', async () => {
+    component.isAdmin = true;
+    component.thumbnailBusy = true;
+    await component.addVideo();
+    expect(component.isSavingVideo).toBeFalse();
+  });
+
+  it('clears thumbnail state when the editor closes', () => {
+    component.selectedThumbnail = { dataUrl: 'old', seconds: 10, duration: 60 };
+    component.closeEditVideoModal();
+    expect(component.selectedThumbnail).toBeNull();
+    expect(component.thumbnailBusy).toBeFalse();
+  });
+
 });

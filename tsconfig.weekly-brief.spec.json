@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/blogs/nwg-news/nwg-news.component.spec.ts",
+    "src/app/components/user-management/user-management.component.spec.ts",
+    "src/app/utils/video-thumbnail.spec.ts"
+  ]
+}

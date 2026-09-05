@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:weekly-brief": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.weekly-brief.spec.json --include=src/app/blogs/nwg-news/nwg-news.component.spec.ts --include=src/app/components/user-management/user-management.component.spec.ts --include=src/app/utils/video-thumbnail.spec.ts"
   },
   "private": true,
   "dependencies": {

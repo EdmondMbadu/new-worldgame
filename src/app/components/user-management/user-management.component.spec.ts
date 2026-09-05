@@ -157,4 +157,26 @@ describe('UserManagementComponent', () => {
       { label: 'Read the report', url: 'https://example.com/report' },
     ]);
   });
+  it('requires a solution before requesting a source preview', async () => {
+    await component.previewAIInsightsBrief();
+    expect(component.briefPreviewError).toContain('Select a solution');
+    expect(component.briefPreviewBusy).toBeFalse();
+  });
+
+  it('does not persist a video link when metadata verification fails', async () => {
+    component.aiInsightsVideoSummaryUrl = 'https://newworld-game.org/nwg-news?v=missing';
+    spyOn(component, 'previewBriefVideo').and.returnValue(Promise.resolve(false));
+    const persist = spyOn<any>(component, 'persistAIInsightsVideoSummaryUrl');
+    await component.saveAIInsightsVideoSummaryUrl();
+    expect(persist).not.toHaveBeenCalled();
+  });
+
+  it('keeps the saved URL unchanged while previewing a draft', async () => {
+    component.aiInsightsSavedVideoSummaryUrl = 'https://newworld-game.org/nwg-news?v=saved';
+    component.aiInsightsVideoSummaryUrl = 'https://newworld-game.org/nwg-news?v=draft';
+    await component.previewBriefVideo();
+    expect(component.aiInsightsSavedVideoSummaryUrl).toContain('v=saved');
+    expect(component.hasUnsavedAIInsightsVideoUrl()).toBeTrue();
+  });
+
 });
