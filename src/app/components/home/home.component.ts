@@ -1,3 +1,4 @@
+import { homeDesignerCount, solutionDesignerCount } from '../../../../functions/src/solution-designers';
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { TranslateService } from '@ngx-translate/core';
@@ -441,34 +442,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         ...card,
         authorName: owner?.authorName || card.authorName,
         publicDesignerCount:
-          this.designerCountFromParticipants(fullSolution),
+          solutionDesignerCount(fullSolution),
       };
     });
-  }
-
-  private designerCountFromParticipants(solution: Solution): number {
-    const value: any = solution.participants;
-    const entries = Array.isArray(value)
-      ? value
-      : value && typeof value === 'object'
-      ? Object.values(value)
-      : [];
-    const emails = entries
-      .map((entry: any) =>
-        String(
-          typeof entry === 'string'
-            ? entry
-            : entry?.name ||
-              entry?.email ||
-              Object.values(entry || {})[0] ||
-              ''
-        )
-          .trim()
-          .toLowerCase()
-      )
-      .filter(Boolean);
-
-    return new Set(emails).size;
   }
 
   private prepareDiscoverSolutionCard(solution: Solution): Solution {
@@ -477,7 +453,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       finished: 'true',
       feedStatus: 'submitted',
       publicProgress: 100,
-      publicDesignerCount: this.designerCountFromParticipants(solution),
+      publicDesignerCount: homeDesignerCount(solution),
       commentCount: Math.max(
         Number(solution.commentCount || 0),
         solution.comments?.length || 0

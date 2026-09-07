@@ -1,3 +1,4 @@
+import { solutionDesignerCount as publicDesignerCount } from './solution-designers';
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v1';
 import {
@@ -119,28 +120,6 @@ export const isCommunityVisible = (solution: any): boolean =>
   solution?.communityVisibility !== 'private' &&
   hasApprovedCurrentModerationVersion(solution);
 
-const publicDesignerCount = (solution: any): number => {
-  const designers = new Set<string>();
-  const add = (value: unknown) => {
-    const normalized = String(value || '').trim().toLowerCase();
-    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized)) {
-      designers.add(normalized);
-    }
-  };
-
-  if (Array.isArray(solution?.participants)) {
-    solution.participants.forEach((entry: any) =>
-      add(typeof entry === 'string' ? entry : entry?.name || entry?.email)
-    );
-  } else if (solution?.participants && typeof solution.participants === 'object') {
-    Object.entries(solution.participants).forEach(([key, entry]: [string, any]) => {
-      add(key);
-      add(entry?.name || entry?.email || entry);
-    });
-  }
-
-  return designers.size;
-};
 
 const publicProgress = (solution: any): number => {
   if (solution?.finished === 'true') return 100;
