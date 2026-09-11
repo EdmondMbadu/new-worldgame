@@ -43,3 +43,4 @@ cpSync(path.join(game, "dist"), path.join(root, "dist/games/lost-in-orbit"), {
   recursive: true,
 });
 run(process.execPath, ["scripts/verify-hosting.mjs"]);
+console.log("Build succeeded. The complete site and game are ready in dist/.");

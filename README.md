@@ -103,8 +103,18 @@ Meet your diverse AI colleagues, each inspired by different cultural perspective
    ```
 
    This assembles Angular and the standalone games into `dist`. Firebase Hosting
-   checks that both are present before deploying. Use `npm run start:app` for
+   automatically runs this complete build and its verification before deploying.
+   Use `npm run start:app` for
    Angular alone, or `npm run start:game` for the isolated game server.
+
+   To publish the website, run `firebase deploy --only hosting`. A full
+   `firebase deploy` also builds the complete website, along with its other
+   configured services. `ng serve` only runs a local development server;
+   it does not prepare a deployment. A later `ng build` or `npm run watch`
+   replaces `dist` without the catalog packaging step, but deployment now
+   rebuilds and verifies all required files automatically. Yellow bundle-size
+   and CommonJS warnings do not mean the build failed: look for the final
+   `Build succeeded` message.
 
 ### Lost in Orbit
 

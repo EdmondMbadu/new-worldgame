@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Local production preview. Firebase's actual routing is also checked in the Hosting emulator.
-const dist = fileURLToPath(new URL("../dist/", import.meta.url));
+const dist = path.resolve(fileURLToPath(new URL("../dist/", import.meta.url)));
 const types = {
   ".html": "text/html",
   ".js": "text/javascript",

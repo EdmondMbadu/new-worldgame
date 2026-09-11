@@ -36,8 +36,11 @@ npm run preview:site
 The assembled production preview is `http://127.0.0.1:4175/games`.
 `npm run build` builds the isolated game first, then Angular copies the game
 as static files into `dist`. It also creates the catalog entry and verifies Hosting
-assets. Always use the combined command for Hosting releases so game assets are
-fresh and all entry points and isolation checks run.
+assets. Firebase Hosting's predeploy hook runs this complete build automatically
+for both `firebase deploy` and `firebase deploy --only hosting`, so a previous
+Angular-only build cannot leave the deployment missing its catalog entry or
+verification metadata. The final `Build succeeded` message confirms completion;
+the existing bundle-size and CommonJS warnings are non-blocking.
 
 ## Isolation
 
