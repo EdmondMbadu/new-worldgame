@@ -73,7 +73,7 @@ Meet your diverse AI colleagues, each inspired by different cultural perspective
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v16 or higher)
+- Node.js 22.12 or higher
 - Angular CLI (`npm install -g @angular/cli`)
 - Firebase CLI (`npm install -g firebase-tools`)
 
@@ -88,18 +88,38 @@ Meet your diverse AI colleagues, each inspired by different cultural perspective
 2. **Install dependencies**
    ```bash
    npm install
+   npm run setup:games
    ```
 
 3. **Start development server**
    ```bash
-   ng serve
+   npm start
    ```
    Navigate to `http://localhost:4200/` to see the application.
 
 4. **Build for production**
    ```bash
-   ng build --configuration production
+   npm run build
    ```
+
+   This assembles Angular and the standalone games into `dist`. Firebase Hosting
+   checks that both are present before deploying. Use `npm run start:app` for
+   Angular alone, or `npm run start:game` for the isolated game server.
+
+### Lost in Orbit
+
+Games are currently unlisted (no navigation links). Visit `/games` for the catalog and `/games/lost-in-orbit/` to play. The 3D game
+loads in its own document; React, Three.js, audio, and the simulation never enter
+the Angular application bundles. It needs no account or backend. Fly with WASD, climb/dive with Q/C, and dodge incoming asteroids.
+
+`npm run start:app` builds and serves the game through Angular alone. Plain
+`ng serve` serves the latest `npm run build:game` output too; restart Angular once
+after pulling this change to load its static-asset mapping.
+
+Run `npm run test:game` for the simulation and input tests. After building,
+`npm run preview:site` serves the assembled site at `http://127.0.0.1:4175/games`.
+See [the game documentation](games/lost-in-orbit/README.md) for architecture,
+controls, tuning, browser verification, and how to add another game.
 
 ## 🎯 Target Audience
 

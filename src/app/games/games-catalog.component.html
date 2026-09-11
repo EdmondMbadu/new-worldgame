@@ -1,0 +1,73 @@
+<main class="playroom">
+  <header class="playroom-header">
+    <a routerLink="/" class="brand"
+      ><img
+        src="/assets/img/gsl-logo.png"
+        alt="Global Solutions Lab"
+        width="38"
+        height="38"
+      /><span
+        >GLOBAL SOLUTIONS LAB<span class="brand-section"> / PLAY</span></span
+      ></a
+    >
+    <a routerLink="/" class="back"
+      >{{ "games.backToLab" | translate }} <span aria-hidden="true">↗</span></a
+    >
+  </header>
+  <section class="catalog-intro">
+    <span class="eyebrow"><i></i> {{ "games.eyebrow" | translate }}</span>
+    <h1>
+      {{ "games.title" | translate }}<br /><em>{{
+        "games.titleAccent" | translate
+      }}</em>
+    </h1>
+    <p>{{ "games.intro" | translate }}</p>
+  </section>
+  <section
+    class="catalog"
+    [attr.aria-label]="'games.availableGames' | translate"
+  >
+    <a
+      *ngFor="let game of games"
+      [href]="game.href"
+      class="game-card"
+      [attr.aria-label]="('games.play' | translate) + ' ' + game.title"
+    >
+      <div class="game-art">
+        <img
+          [src]="game.image"
+          [alt]="'games.orbit.imageAlt' | translate"
+          width="1200"
+          height="680"
+          fetchpriority="high"
+        /><span class="mission"
+          >{{ "games.mission" | translate }} {{ game.number }}</span
+        ><span class="game-type"
+          >3D · {{ "games.orbit.genre" | translate }}</span
+        >
+      </div>
+      <div class="game-details">
+        <div class="game-copy">
+          <span class="eyebrow">{{ "games.orbit.kicker" | translate }}</span>
+          <h2>{{ game.title }}</h2>
+          <p>{{ "games.orbit.description" | translate }}</p>
+          <div class="game-tags">
+            <span>◷ {{ "games.duration" | translate }}</span
+            ><span>⌘ {{ "games.controls" | translate }}</span
+            ><span>✧ {{ "games.age" | translate }}</span>
+          </div>
+        </div>
+        <span class="play-button"
+          >{{ "games.play" | translate }}
+          <span aria-hidden="true">↗</span></span
+        >
+      </div>
+    </a>
+  </section>
+  <footer class="catalog-footer">
+    <span>{{ "games.footer" | translate }}</span
+    ><span
+      >{{ "games.more" | translate }} <span aria-hidden="true">✧</span></span
+    >
+  </footer>
+</main>

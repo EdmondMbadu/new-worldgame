@@ -1,0 +1,72 @@
+export const CONFIG = {
+  arena: { halfWidth: 40, halfDepth: 30, softMargin: 5, boundaryForce: 7 },
+  altitude: { min: -3, max: 11, speed: 5.5, acceleration: 14 },
+  threats: {
+    pool: 6,
+    firstWave: 3,
+    interval: 5.5,
+    warning: 1.5,
+    speed: 10,
+    spawnDistance: 27,
+    lifetime: 6.5,
+    radius: 1.1,
+    shelter: 6.5,
+  },
+  movement: {
+    speed: 7,
+    acceleration: 16,
+    drag: 1.4,
+    brake: 9,
+    radius: 0.65,
+    boostSpeed: 13,
+    boostAcceleration: 55,
+    boostDuration: 0.45,
+    boostCooldown: 3,
+  },
+  cargo: { capacity: 2, total: 5, pickupRadius: 1.25, dropDelay: 0.75 },
+  docking: { radius: 4.5, drag: 3, hullRadius: 2.2 },
+  collision: { immunity: 1.5, knockback: 4.2 },
+  timing: { fixedStep: 1 / 120, maxDelta: 0.1, launch: 4.2, hudInterval: 0.08 },
+  rendering: {
+    maxDpr: 1.65,
+    mobileDpr: 1.25,
+    particles: 110,
+    stars: 600,
+    cameraHeight: 13,
+    cameraDepth: 22,
+    fov: 55,
+  },
+  colors: {
+    space: '#070b1a',
+    nebula: '#473478',
+    cyan: '#56ddf5',
+    gold: '#ffd166',
+    ivory: '#f3f0e8',
+    orange: '#ff875c',
+  },
+} as const;
+
+export const CELL_LAYOUT = [
+  { x: -8, y: 0, z: -5, name: 'First light' },
+  { x: 18, y: 4, z: -17, name: 'Blue passage' },
+  { x: -29, y: 7, z: -20, name: 'The quiet edge' },
+  { x: 31, y: -1, z: 19, name: 'Faraway signal' },
+  { x: -23, y: 5, z: 22, name: 'The long way home' },
+] as const;
+
+// Hand-authored paths: the entire swept disk stays outside the docking area.
+export const ASTEROID_LAYOUT = [
+  { x: -13, z: -7, radius: 1.9, rx: 1.8, rz: 2, speed: 0.21, phase: 0 },
+  { x: 9, z: -12, radius: 2.1, rx: 2, rz: 2, speed: 0.24, phase: 1 },
+  { x: 22, z: -10, radius: 2.7, rx: 2.5, rz: 2, speed: 0.17, phase: 2 },
+  { x: -21, z: -17, radius: 2.6, rx: 2.2, rz: 1.5, speed: 0.18, phase: 3 },
+  { x: -31, z: -10, radius: 2.3, rx: 1.5, rz: 2, speed: 0.2, phase: 4 },
+  { x: -8, z: -23, radius: 2.8, rx: 2, rz: 1.5, speed: 0.14, phase: 5 },
+  { x: 30, z: -23, radius: 2.2, rx: 2, rz: 1, speed: 0.2, phase: 2 },
+  { x: 14, z: 9, radius: 2.4, rx: 2, rz: 2, speed: 0.23, phase: 3 },
+  { x: 24, z: 15, radius: 2.2, rx: 1.4, rz: 2.5, speed: 0.19, phase: 1 },
+  { x: 9, z: 24, radius: 2.8, rx: 2.5, rz: 1, speed: 0.15, phase: 4 },
+  { x: -11, z: 13, radius: 2.5, rx: 2.5, rz: 1.5, speed: 0.22, phase: 2 },
+  { x: -29, z: 13, radius: 2, rx: 2, rz: 1.5, speed: 0.2, phase: 1 },
+  { x: -16, z: 26, radius: 1.5, rx: 1.2, rz: 0.5, speed: 0.21, phase: 5 },
+] as const;

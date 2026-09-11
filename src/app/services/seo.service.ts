@@ -266,6 +266,11 @@ export class SeoService {
         keywords: 'Bucky AI, virtual assistant, Buckminster Fuller, AI guide, problem solving assistant',
         url: `${baseUrl}/bucky`
       },
+      '/games': {
+        title: 'Games · Global Solutions Lab',
+        description: 'Small adventures for curious minds. Play Lost in Orbit, a free 3D space rescue adventure from Global Solutions Lab.',
+        url: `${baseUrl}/games`
+      },
       '/privacy': {
         title: 'Privacy Policy - Global Solutions Lab',
         description: 'Read Global Solutions Lab\'s privacy policy to understand how we protect and handle your data.',
@@ -313,7 +318,7 @@ export class SeoService {
 
   private normalizeRoute(route: string): string {
     const [path] = route.split(/[?#]/);
-    return path || '/';
+    return path === '/games/' ? '/games' : path || '/';
   }
 
   private toAbsoluteUrl(url: string): string {
@@ -330,6 +335,7 @@ export class SeoService {
 
   private getRobotsForRoute(route: string): string {
     const noIndexPrefixes = [
+      '/games',
       '/home',
       '/game',
       '/mini-game',

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <base target="_top" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#070b1a" />
+    <meta name="description" content="A little astronaut. A big way home. Drift, boost, and bring back five energy cells in a charming 3D space rescue adventure." />
+    <title>Lost in Orbit · Global Solutions Lab</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23070b1a'/%3E%3Ccircle cx='32' cy='28' r='20' fill='%23f3f0e8'/%3E%3Crect x='17' y='20' width='30' height='19' rx='9' fill='%232b6075'/%3E%3Cpath d='M17 47h30' stroke='%23ff875c' stroke-width='8'/%3E%3C/svg%3E" />
+    <style>html,body{margin:0;background:#070b1a;color:#f3f0e8;font-family:system-ui}#boot{position:fixed;inset:0;display:grid;place-content:center;text-align:center;gap:16px}#boot span{color:#8b9db9;font-size:12px;letter-spacing:.2em}</style>
+  </head>
+  <body>
+    <div id="root"><div id="boot"><strong>Preparing your little corner of the universe…</strong><span>LOST IN ORBIT</span></div></div>
+    <noscript>This adventure needs JavaScript. Please enable it, then reload. <a href="/games">Back to games</a></noscript>
+    <script>
+      window.addEventListener('error', function (event) {
+        if (!(event.target instanceof HTMLScriptElement)) return;
+        const boot = document.getElementById('boot');
+        if (!boot) return;
+        boot.textContent = 'Your rescue couldn’t load. Check your connection, then reload.';
+        const retry = document.createElement('button');
+        retry.textContent = 'Reload game'; retry.onclick = function () { location.reload(); };
+        retry.style.cssText = 'margin:16px auto;padding:14px 24px;border:0;border-radius:10px;background:#ffd166;color:#182436;cursor:pointer';
+        boot.append(retry);
+      }, true);
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

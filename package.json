@@ -3,11 +3,20 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "node scripts/dev-site.mjs",
+    "build": "node scripts/build-site.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:weekly-brief": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.weekly-brief.spec.json --include=src/app/blogs/nwg-news/nwg-news.component.spec.ts --include=src/app/components/user-management/user-management.component.spec.ts --include=src/app/utils/video-thumbnail.spec.ts"
+    "test:weekly-brief": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.weekly-brief.spec.json --include=src/app/blogs/nwg-news/nwg-news.component.spec.ts --include=src/app/components/user-management/user-management.component.spec.ts --include=src/app/utils/video-thumbnail.spec.ts",
+    "start:app": "ng serve",
+    "start:game": "npm --prefix games/lost-in-orbit run dev",
+    "setup:games": "npm --prefix games/lost-in-orbit ci && npm run build:game",
+    "build:app": "ng build",
+    "build:game": "npm --prefix games/lost-in-orbit run build",
+    "test:game": "npm --prefix games/lost-in-orbit test",
+    "verify:hosting": "node scripts/verify-hosting.mjs",
+    "preview:site": "node scripts/preview-site.mjs",
+    "prestart:app": "npm run build:game"
   },
   "private": true,
   "dependencies": {

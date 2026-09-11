@@ -14,7 +14,8 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/stats.json"
     ],
     "headers": [
       {
@@ -123,6 +124,33 @@
             "value": "no-store, max-age=0, must-revalidate"
           }
         ]
+      },
+      {
+        "source": "/games/lost-in-orbit/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/games/lost-in-orbit/assets/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "/games{,/**}",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
       }
     ],
     "redirects": [
@@ -133,6 +161,10 @@
       }
     ],
     "rewrites": [
+      {
+        "source": "/games/lost-in-orbit/",
+        "destination": "/games/lost-in-orbit/index.html"
+      },
       {
         "source": "/campaigns/power-drc-clinics",
         "destination": "/index.html"
@@ -148,6 +180,9 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "predeploy": [
+      "npm run verify:hosting"
     ]
   },
   "functions": [

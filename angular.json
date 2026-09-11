@@ -30,7 +30,16 @@
               "src/assets",
               "src/sitemap.xml",
               "src/robots.txt",
-              { "glob": "**/*", "input": "node_modules/tinymce", "output": "/tinymce/" }
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "/tinymce/"
+              },
+              {
+                "glob": "**/*",
+                "input": "games/lost-in-orbit/dist",
+                "output": "/games/lost-in-orbit/"
+              }
             ],
             "styles": [
               "src/styles.css"

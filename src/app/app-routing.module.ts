@@ -9,6 +9,16 @@ import { protectedPathsCanMatch } from './protected/protected-paths.can-match';
 
 const routes: Routes = [
   {
+    path: 'games/lost-in-orbit',
+    pathMatch: 'full',
+    loadComponent: () => import('./games/game-launcher.component').then((m) => m.GameLauncherComponent),
+  },
+  {
+    path: 'games',
+    pathMatch: 'full',
+    loadComponent: () => import('./games/games-catalog.component').then((m) => m.GamesCatalogComponent),
+  },
+  {
     path: '',
     canMatch: [authPathsCanMatch],
     loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule),

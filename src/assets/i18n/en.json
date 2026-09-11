@@ -1,4 +1,25 @@
 {
+  "games": {
+    "backToLab": "Back to the lab",
+    "eyebrow": "THE GLOBAL SOLUTIONS LAB PLAYROOM",
+    "title": "Small adventures.",
+    "titleAccent": "Big possibilities.",
+    "intro": "A place to explore, try something new, and enjoy the journey. Made for curious minds of all ages.",
+    "availableGames": "Available games",
+    "mission": "MISSION",
+    "play": "Play now",
+    "duration": "3–5 minutes",
+    "controls": "Keyboard & touch",
+    "age": "Ages 9+",
+    "footer": "A little play. A little discovery. A world of possibility.",
+    "more": "More adventures on the horizon",
+    "orbit": {
+      "imageAlt": "A small ivory astronaut floats beside a rescue ship among gold energy cells and blue asteroids.",
+      "genre": "SPACE ADVENTURE",
+      "kicker": "A LITTLE ASTRONAUT. A BIG WAY HOME.",
+      "description": "Stranded among the stars, with five little sparks standing between you and home. Master your jetpack, collect energy cells, and bring your ship back to life."
+    }
+  },
   "app": {
     "language": {
       "english": "English",
@@ -16,6 +37,7 @@
     }
   },
   "navbar": {
+    "games": "Games",
     "logoAlt": "Global Solutions Lab logo",
     "brand": "Global Solutions Lab",
     "tagline": "Developing solutions for global and local problems.",
