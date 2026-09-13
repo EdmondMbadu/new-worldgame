@@ -10,7 +10,7 @@ import {
 import { roadWidth } from './routes';
 import { roadSections, sectionEnvelope } from './road-sections';
 
-export const ROAD_REVISION = 4;
+export const ROAD_REVISION = 5;
 export const RESTORE_DURATION = 18;
 export const TUNING = {
   speed: 22.2, // 80 km/h on firm, visible road; curves still require braking.

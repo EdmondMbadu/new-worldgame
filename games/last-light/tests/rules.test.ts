@@ -29,18 +29,28 @@ describe('mission rules', () => {
     expect(e.position).toEqual(p);
     e.dispose();
   });
-  it('pauses all gameplay and requires deliberate resume after a long frame stall', () => {
+  it('bounds foreground hitch catch-up without a pause modal or clock penalty for dropped time', () => {
     const e = new GameEngine(MISSIONS[0]);
-    e.advance(0.1, { ...emptyInput(), throttle: 1 });
-    const time = e.time;
-    e.advance(3, emptyInput());
-    expect(e.phase).toBe('paused');
-    e.advance(0.1, { ...emptyInput(), throttle: 1 });
-    expect(e.time).toBe(time);
-    e.resume();
-    e.advance(0.1, emptyInput());
-    expect(e.time).toBeLessThan(time);
-    e.dispose();
+    try {
+      e.advance(0.1, { ...emptyInput(), throttle: 1 });
+      const time = e.time;
+      e.advance(3, emptyInput());
+      expect(e.phase).toBe('driving');
+      expect(e.lastSubsteps).toBe(6);
+      expect(e.time).toBeCloseTo(time - 0.1, 6);
+      expect(e.droppedTime).toBeCloseTo(2.9, 6);
+      e.pause('blur');
+      const stopped = e.time;
+      e.advance(1, { ...emptyInput(), throttle: 1 });
+      expect(e.phase).toBe('paused');
+      expect(e.pauseReason).toBe('blur');
+      expect(e.time).toBe(stopped);
+      e.resume();
+      e.advance(0.1, emptyInput());
+      expect(e.time).toBeLessThan(stopped);
+    } finally {
+      e.dispose();
+    }
   });
   it('recovery costs eight seconds and does not replenish equipment or advance the road', () => {
     const e = new GameEngine(MISSIONS[0]);

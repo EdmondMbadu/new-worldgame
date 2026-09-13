@@ -7,7 +7,15 @@ export function driveInput(
   e: GameEngine,
   alternate = false,
   fast = false,
+  conservative = false,
 ): Input {
+  const stoppedContact = e.traffic.cars.find(
+    (car) =>
+      car.contactHeld &&
+      Math.hypot(car.pose.x - e.position.x, car.pose.z - e.position.z) < 8,
+  );
+  if (stoppedContact && Math.abs(e.speed) < 3)
+    return { steer: 0, throttle: 0, brake: 0.5, action: false };
   const p = e.position,
     m = e.mission;
   const z = stationAhead(
@@ -54,6 +62,66 @@ export function driveInput(
       if (distance < 65) encounterLimit = event.kind === 'flood' ? 5.5 : 6.5;
     }
   }
+  // Read visible road users and use the same steer/pedals as a player. A
+  // conservative run follows; an overtaking run waits for a clear return gap.
+  const users = e.traffic.cars.filter(
+    (car) =>
+      Math.abs(
+        routeX(m, car.station, true) - routeX(m, car.station, alternate),
+      ) < 5,
+  );
+  const lead = users
+    .filter(
+      (car) =>
+        car.direction > 0 &&
+        car.station - e.progress > -14 &&
+        car.station - e.progress < 75,
+    )
+    .sort(
+      (a, b) =>
+        Math.abs(a.station - e.progress) - Math.abs(b.station - e.progress),
+    )[0];
+  const incoming = users.filter(
+    (car) =>
+      car.direction < 0 &&
+      car.station - e.progress > -12 &&
+      car.station - e.progress < 180,
+  );
+  const hazard =
+    event &&
+    !['minibus', 'traffic'].includes(event.kind) &&
+    event.z - e.progress < 85 &&
+    Math.abs(routeX(m, z, alternate) - roadX(m, z)) < 8;
+  const onRidge = ridgeAt(m, e.progress) > 0 || ridgeAt(m, z) > 0;
+  if (!hazard && !onRidge) {
+    if (lead) {
+      const gap = lead.station - e.progress;
+      const pass =
+        !conservative &&
+        incoming.length === 0 &&
+        ridgeAt(m, e.progress + 25) < 0.01;
+      x =
+        routeX(m, z, alternate) +
+        (pass ? 2.15 : -2.35) * (1 - smooth(55, 75, Math.abs(gap)));
+      if (!pass && gap > -5)
+        encounterLimit = Math.min(
+          encounterLimit,
+          Math.max(0, lead.speed + (gap - 17) * 0.5),
+        );
+    } else if (incoming.some((car) => car.station - e.progress < 85)) {
+      x = routeX(m, z, alternate) - 2.35;
+    }
+  }
+  if (
+    hazard &&
+    lead &&
+    lead.station > e.progress &&
+    lead.station - e.progress < 55
+  )
+    encounterLimit = Math.min(
+      encounterLimit,
+      Math.max(0, lead.speed + (lead.station - e.progress - 17) * 0.45),
+    );
   const point = routePoint(m, z, alternate, x - routeX(m, z, alternate));
   let error = Math.atan2(point.x - p.x, point.z - p.z) - e.heading;
   while (error > Math.PI) error -= Math.PI * 2;

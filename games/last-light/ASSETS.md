@@ -50,3 +50,8 @@ The stylesheet requests DM Sans and Barlow Condensed through Google Fonts, with 
 ## Living roads additions (revision 4)
 
 The switchback and cliff, goat models and articulated gait, minibus light geometry, village architecture, water pumps, footpaths and corrugated roofs are original geometry authored in this repository. No new third-party asset downloads or dependencies were introduced. Village residents reuse the existing locally bundled rigged staff; road/ground surfaces reuse the existing texture sources above. Goat bells and directional traffic tones are synthesized locally with Web Audio. The complete production package remains within the existing 12 MiB limit.
+
+
+## Traffic additions (revision 5)
+
+Compact cars, loaded pickups, sacks, wheel/hub shapes, lamp meshes, light-pool gradients and tire spray are original code-generated geometry/materials in `src/traffic-art.ts`. Three vehicle templates share geometry across the fixed roster. Nearby traffic motors use two reusable, synthesized and spatially panned Web Audio voices. No additional downloaded models, textures, audio files or runtime dependencies were added. The production package is 11.95 MiB against the unchanged 12 MiB limit.

@@ -1,4 +1,6 @@
 import { bendStatic } from './route-art';
+import { FrameHealth } from './frame-health';
+import { TrafficArt } from './traffic-art';
 import {
   ridgeAt,
   roadWidth,
@@ -73,7 +75,8 @@ export class GameWorld {
   private camReady = false;
   private sky: T.Mesh;
   private low = false;
-  private frameSamples: number[] = [];
+  frames = new FrameHealth();
+  private trafficArt: TrafficArt;
   private adaptTimer = 0;
   private particles: Float32Array;
   private disposed = false;
@@ -186,6 +189,8 @@ export class GameWorld {
       bendStatic(object, m);
     this.living = new LivingWorld(m, engine.encounters, this.low);
     this.scene.add(this.living.group);
+    this.trafficArt = new TrafficArt(engine.traffic, this.low, m.rain);
+    this.scene.add(this.trafficArt.group);
     this.truck = createTruck();
     this.scene.add(this.truck.root);
     for (const x of [-0.72, 0.72]) {
@@ -910,6 +915,7 @@ export class GameWorld {
     this.truck.root.quaternion.copy(this.renderedRotation);
     this.windTime.value = this.clock;
     this.living.update(e, this.clock);
+    this.trafficArt.update(e, alpha, this.settings.reducedMotion);
     for (const chunk of this.chunks)
       chunk.mesh.visible =
         chunk.end > e.progress - 150 && chunk.start < e.progress + 410;
@@ -1221,32 +1227,27 @@ export class GameWorld {
     }
     this.dust.geometry.attributes.position.needsUpdate = true;
     this.renderer.render(this.scene, this.camera);
-    if (frameDelta > 0 && frameDelta < 0.5) {
-      this.frameSamples.push(frameDelta);
-      this.adaptTimer += frameDelta;
-      if (this.adaptTimer > 5) {
-        const mean =
-          this.frameSamples.reduce((a, b) => a + b, 0) /
-          this.frameSamples.length;
-        const sorted = [...this.frameSamples].sort((a, b) => a - b);
-        const p95 = sorted[Math.floor(sorted.length * 0.95)] || mean;
-        this.performance = {
-          fps: 1 / mean,
-          p95: p95 * 1000,
-          calls: this.renderer.info.render.calls,
-          triangles: this.renderer.info.render.triangles,
-        };
-        if (
-          this.settings.quality === 'auto' &&
-          p95 > (this.low ? 0.04 : 0.025) &&
-          this.renderer.getPixelRatio() > 0.75
-        )
-          this.renderer.setPixelRatio(
-            Math.max(0.75, this.renderer.getPixelRatio() - 0.15),
-          );
-        this.frameSamples = [];
-        this.adaptTimer = 0;
-      }
+  }
+  recordFrame(dt: number, physicsMs: number, renderMs: number) {
+    this.frames.record(dt, physicsMs, renderMs);
+    const stats = this.frames.stats;
+    this.performance = {
+      fps: stats.fps,
+      p95: stats.p95,
+      calls: this.renderer.info.render.calls,
+      triangles: this.renderer.info.render.triangles,
+    };
+    this.adaptTimer += dt;
+    if (this.adaptTimer > 5) {
+      this.adaptTimer = 0;
+      if (
+        this.settings.quality === 'auto' &&
+        stats.p95 > (this.low ? 40 : 25) &&
+        this.renderer.getPixelRatio() > 0.75
+      )
+        this.renderer.setPixelRatio(
+          Math.max(0.75, this.renderer.getPixelRatio() - 0.15),
+        );
     }
   }
   dispose() {

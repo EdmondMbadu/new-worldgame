@@ -126,7 +126,8 @@ describe('traffic with room to react', () => {
   it('signals before pulling into the stop and brakes instead of sweeping through an occupied lane', () => {
     const e = makeEncounters(m).find((e) => e.kind === 'minibus')!;
     const driver = { x: 0, z: e.z - 90, speed: 6 };
-    for (let i = 0; i < 250; i++) updateTraffic(e, m, driver, 1 / 60);
+    for (let i = 0; i < 600 && e.actorZ < e.z - 11; i++)
+      updateTraffic(e, m, driver, 1 / 60);
     expect(e.indicator).toBe(-e.side);
     expect(e.actorZ).toBeGreaterThan(e.z - 30);
     const before = { z: e.actorZ, offset: e.actorOffset };
@@ -288,7 +289,11 @@ describe('fair records and recovery practice', () => {
       e.isAlt = false;
       e.phase = 'driving';
       e.recover();
-      const ridge = routePoint(m, 510, true);
+      // A newly populated road may occupy the old exact checkpoint. Recovery
+      // must remain on its branch and choose a clear point at or behind it.
+      const ridge = routePoint(m, e.progress, true);
+      expect(e.progress).toBeLessThanOrEqual(510);
+      expect(e.traffic.occupied(e.position.x, e.position.z, 12)).toBe(false);
       expect(
         Math.hypot(e.position.x - ridge.x, e.position.z - ridge.z),
       ).toBeLessThan(0.02);

@@ -27,7 +27,7 @@ export function roadSections(m: Mission): RoadSection[] {
       kind: m.bridge ? 'bridge' : 'minibus',
       z: m.bridge ? (m.bridge[0] + m.bridge[1]) / 2 : 525,
       length: m.bridge ? m.bridge[1] - m.bridge[0] : 12,
-      safeSide: -side,
+      safeSide: m.bridge ? -side : 1,
     },
     {
       kind: m.id === 1 || m.id === 4 ? 'flood' : 'herd',
@@ -41,7 +41,7 @@ export function roadSections(m: Mission): RoadSection[] {
       kind: m.id === 3 ? 'gust' : m.id === 4 ? 'tree' : 'traffic',
       z: m.length - 170,
       length: 12,
-      safeSide: side,
+      safeSide: m.id === 1 || m.id === 2 ? -1 : side,
     });
   if (m.id === 1 || m.id === 4)
     sections.push({ kind: 'herd', z: 705, length: 16, safeSide: side });

@@ -1867,3 +1867,7 @@ kbd {
     padding: 5px 10px;
   }
 }
+
+/* Short traffic intent stays legible without covering the driving view. */
+.speedometer .traffic-status { color: #f5dba1; max-width: 190px; font-size: 9px; letter-spacing: .07em; line-height: 1.45; margin-top: 7px; }
+@media (max-width: 600px) { .speedometer .traffic-status { max-width: 125px; font-size: 8px; } }

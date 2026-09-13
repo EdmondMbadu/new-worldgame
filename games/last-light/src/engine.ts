@@ -7,7 +7,8 @@ import {
   toWorld,
   worldHeight,
 } from './routes';
-import { updateTraffic } from './traffic';
+import { crossingBrake, updateTraffic } from './traffic';
+import { TrafficFlow } from './traffic-flow';
 import {
   engineRpm,
   impactDamage,
@@ -111,6 +112,13 @@ export class GameEngine {
   wheelSpin = 0;
   throttle = 0;
   braking = 0;
+  brakeSource: 'driver' | 'crossing' | 'delivery' = 'driver';
+  crossingAssist = 0;
+  droppedTime = 0;
+  lastSubsteps = 0;
+  resumeRevision = 0;
+  pauseReason = 'manual';
+  pauseEvents = 0;
   rpm = 850;
   gear = 1;
   shiftPulse = 0;
@@ -118,6 +126,9 @@ export class GameEngine {
   cleanEncounters = 0;
   rewardUntil = 0;
   encounters: Encounter[];
+  traffic: TrafficFlow;
+  private trafficBodies: RAPIER.RigidBody[] = [];
+  private trafficColliders = new Map<number, number>();
   wheelSurfaces: ReturnType<typeof surfaceAt>[] = [];
   previousPosition = { x: 0, y: 0, z: 0 };
   previousRotation = { x: 0, y: 0, z: 0, w: 1 };
@@ -234,13 +245,31 @@ export class GameEngine {
       );
       this.eventBodies.set(event.id, body);
     }
+    this.traffic = new TrafficFlow(mission);
+    for (const car of this.traffic.cars) {
+      const body = this.world.createRigidBody(
+        RAPIER.RigidBodyDesc.kinematicPositionBased(),
+      );
+      const collider = this.world.createCollider(
+        RAPIER.ColliderDesc.cuboid(0.9, 0.5, car.kind === 'pickup' ? 2.2 : 1.95)
+          .setTranslation(0, 0.9, 0)
+          .setFriction(0.2)
+          .setRestitution(0.03),
+        body,
+      );
+      this.trafficBodies.push(body);
+      this.trafficColliders.set(collider.handle, car.id);
+      body.setTranslation(car.pose, false);
+      body.setRotation(this.trafficRotation(car.pose), false);
+    }
     this.setPose(8);
     for (let i = 0; i < 80; i++) {
       this.vehicle.updateVehicle(
         1 / 60,
         undefined,
         undefined,
-        (c) => c.parent()?.handle !== this.body.handle,
+        (c) =>
+          c.parent()?.handle !== this.body.handle && !c.parent()?.isKinematic(),
       );
       this.world.step();
     }
@@ -346,7 +375,7 @@ export class GameEngine {
     let station = this.safeZ;
     // Traffic may have reached a previously empty checkpoint. Step back to a
     // clear part of the same route instead of spawning inside a moving vehicle.
-    while (station > 8) {
+    while (station >= -24) {
       const point = routePoint(this.mission, station, this.safeAlt);
       const occupied = this.encounters.some((event) => {
         if (!['minibus', 'traffic', 'bridge', 'tree'].includes(event.kind))
@@ -354,18 +383,25 @@ export class GameEngine {
         const actor = encounterPose(this.mission, event);
         return Math.hypot(actor.x - point.x, actor.z - point.z) < 9;
       });
-      if (!occupied && ridgeAt(this.mission, station) < 0.05) break;
-      station = Math.max(8, station - 12);
+      if (
+        !occupied &&
+        !this.traffic.occupied(point.x, point.z, 12) &&
+        ridgeAt(this.mission, station) < 0.05
+      )
+        break;
+      station -= 12;
     }
-    this.setPose(station);
+    this.setPose(Math.max(-16, station));
   }
   say(who: string, text: string, seconds = 7) {
     this.notice = { who, text, until: this.elapsed + seconds };
     this.serial++;
   }
-  pause() {
+  pause(reason = 'manual') {
     if (!['ready', 'driving', 'restoring'].includes(this.phase)) return;
     this.previous = this.phase;
+    this.pauseReason = reason;
+    this.pauseEvents++;
     this.phase = 'paused';
     this.accumulator = 0;
     this.delivery = 0;
@@ -374,6 +410,7 @@ export class GameEngine {
   resume() {
     if (this.phase === 'paused') {
       this.phase = this.previous;
+      this.resumeRevision++;
       this.lastAction = false;
       this.accumulator = 0;
     }
@@ -412,16 +449,17 @@ export class GameEngine {
   }
   advance(delta: number, input: Input, singlePress = false) {
     if (!Number.isFinite(delta) || delta < 0) return;
-    if (delta > 0.65) {
-      this.pause();
-      return;
-    }
+    this.lastSubsteps = 0;
     if (this.phase === 'paused') return;
-    this.accumulator += Math.min(delta, 0.12);
+    // Never turn a foreground rendering hitch into a modal pause or an unbounded
+    // catch-up. Deadline and road users advance only with simulated time.
+    this.droppedTime += Math.max(0, delta - 0.1);
+    this.accumulator += Math.min(delta, 0.1);
     const revision = this.pauseRevision;
-    while (this.accumulator >= 1 / 60) {
+    while (this.accumulator + 1e-10 >= 1 / 60 && this.lastSubsteps < 6) {
+      this.lastSubsteps++;
       this.step(1 / 60, input, singlePress);
-      this.accumulator -= 1 / 60;
+      this.accumulator = Math.max(0, this.accumulator - 1 / 60);
       if (this.pauseRevision !== revision) {
         this.accumulator = 0;
         break;
@@ -519,6 +557,34 @@ export class GameEngine {
       (engineRpm(this.speed, this.gear, input.throttle) - this.rpm) *
       Math.min(1, dt * 9);
     this.updateEncounters(dt);
+    const previousTrafficClean = this.traffic.clean;
+    this.traffic.update(
+      dt,
+      {
+        ...this.position,
+        station: this.progress,
+        speed: this.speed,
+        heading: this.heading,
+      },
+      this.encounters,
+    );
+    if (this.traffic.clean > previousTrafficClean)
+      this.rewardUntil = this.elapsed + 2.5;
+    for (const car of this.traffic.cars) {
+      const body = this.trafficBodies[car.id];
+      const delta = Math.hypot(
+        car.pose.x - car.previous.x,
+        car.pose.z - car.previous.z,
+      );
+      // Recycling at an invisible route exit must not create a swept collider
+      // across the whole valley. Ordinary motion always uses a kinematic step.
+      if (delta > 30) {
+        body.setTranslation(car.pose, false);
+        body.setRotation(this.trafficRotation(car.pose), false);
+      }
+      body.setNextKinematicTranslation(car.pose);
+      body.setNextKinematicRotation(this.trafficRotation(car.pose));
+    }
     const v = this.body.linvel();
     const q = this.rotation;
     const forward = {
@@ -526,27 +592,34 @@ export class GameEngine {
       y: 2 * (q.y * q.z - q.w * q.x),
       z: 1 - 2 * (q.x * q.x + q.y * q.y),
     };
-    const herdAhead = this.encounters.some(
-      (event) =>
-        event.kind === 'herd' &&
-        event.state === 'crossing' &&
-        Math.abs(road.z - event.z) < 15 &&
-        Math.abs(road.x - roadX(m, road.z)) < 5.6,
+    const desiredAssist = crossingBrake(this.encounters, m, road, this.speed);
+    this.crossingAssist += clamp(
+      desiredAssist - this.crossingAssist,
+      -dt * 4,
+      dt * 2.5,
     );
-    const parking = (this.canDeliver && input.action) || herdAhead;
+    const parking = this.canDeliver && input.action;
+    const braking = Math.max(input.brake, this.crossingAssist);
+    this.braking = parking ? 1 : braking;
+    this.brakeSource = parking
+      ? 'delivery'
+      : this.crossingAssist > input.brake
+        ? 'crossing'
+        : 'driver';
     const reverse =
       !parking &&
       input.brake > 0.1 &&
       this.speed < 0.35 &&
       input.throttle < 0.1;
-    const force = parking
-      ? 0
-      : reverse
-        ? -900 * input.brake
-        : input.throttle *
-          TUNING.force *
-          clamp((maxSpeed - this.speed) / 4.5, 0, 1) *
-          (1 - this.shiftPulse * 0.14);
+    const force =
+      parking || (this.crossingAssist > 0.05 && !reverse)
+        ? 0
+        : reverse
+          ? -900 * input.brake
+          : input.throttle *
+            TUNING.force *
+            clamp((maxSpeed - this.speed) / 4.5, 0, 1) *
+            (1 - this.shiftPulse * 0.14);
     for (let i = 0; i < 4; i++) {
       this.vehicle.setWheelSteering(i, i < 2 ? this.steering : 0);
       this.vehicle.setWheelEngineForce(i, force);
@@ -555,7 +628,7 @@ export class GameEngine {
         parking
           ? 240
           : !reverse
-            ? input.brake * TUNING.brake + (input.throttle < 0.01 ? 3 : 0)
+            ? braking * TUNING.brake + (input.throttle < 0.01 ? 3 : 0)
             : 0,
       );
       this.vehicle.setWheelFrictionSlip(i, this.wheelSurfaces[i].grip);
@@ -568,7 +641,8 @@ export class GameEngine {
       dt,
       undefined,
       undefined,
-      (c) => c.parent()?.handle !== this.body.handle,
+      (c) =>
+        c.parent()?.handle !== this.body.handle && !c.parent()?.isKinematic(),
     );
     // Gentle stability assistance preserves suspension pitch while discouraging rollovers.
     const av = this.body.angvel();
@@ -578,16 +652,48 @@ export class GameEngine {
       this.body.setLinvel({ x: v.x * factor, y: v.y, z: v.z * factor }, true);
     }
     this.world.step(this.contactQueue);
+    // A vehicle trapped against a scripted body must never acquire solver-scale
+    // horizontal speeds. This lies above all intended driving/collision speeds.
+    const solvedVelocity = this.body.linvel();
+    const horizontalSpeed = Math.hypot(solvedVelocity.x, solvedVelocity.z);
+    if (horizontalSpeed > 32)
+      this.body.setLinvel(
+        {
+          x: (solvedVelocity.x * 32) / horizontalSpeed,
+          y: clamp(solvedVelocity.y, -40, 16),
+          z: (solvedVelocity.z * 32) / horizontalSpeed,
+        },
+        true,
+      );
     let contactForce = 0;
     this.contactQueue.drainContactForceEvents((event) => {
       contactForce = Math.max(contactForce, event.totalForceMagnitude());
     });
     let collisionStarted = false;
+    let trafficDamage = 0;
     const chassis = this.body.collider(0).handle;
     // CCD can stop a fast impact without emitting a contact-force event.
     // A new chassis contact plus measured speed loss still represents a real hit.
     this.contactQueue.drainCollisionEvents((a, b, start) => {
-      if (start && (a === chassis || b === chassis)) collisionStarted = true;
+      if (start && (a === chassis || b === chassis)) {
+        collisionStarted = true;
+        const id = this.trafficColliders.get(a === chassis ? b : a);
+        if (id !== undefined) {
+          const car = this.traffic.cars[id];
+          const dx = car.pose.x - p.x,
+            dz = car.pose.z - p.z,
+            length = Math.hypot(dx, dz) || 1;
+          const closing =
+            ((v.x - Math.sin(car.pose.yaw) * car.speed) * dx +
+              (v.z - Math.cos(car.pose.yaw) * car.speed) * dz) /
+            length;
+          trafficDamage = Math.max(
+            trafficDamage,
+            clamp((closing - 2) * 1.3, 0, 22),
+          );
+          this.traffic.hit(id);
+        }
+      }
     });
     this.collisionGrace = collisionStarted
       ? 0.08
@@ -618,7 +724,16 @@ export class GameEngine {
       compression,
       Math.abs(this.speed),
     );
-    if (damage > 0) this.hurt(damage);
+    if (Math.max(damage, trafficDamage) > 0) {
+      const before = this.impacts;
+      this.hurt(Math.max(damage, trafficDamage));
+      if (trafficDamage > 0 && this.impacts > before)
+        this.say(
+          'CARGO CHECK',
+          'Traffic impact. Give the next vehicle more room; the solar kit is still with you.',
+          4,
+        );
+    }
     const current = this.roadPosition;
     const ridge = ridgeAt(m, this.progress);
     if (ridge > 0.2 && this.position.y < roadY(m, this.progress) - 3)
@@ -710,9 +825,35 @@ export class GameEngine {
         updateTraffic(
           event,
           this.mission,
-          { ...this.roadPosition, speed: this.speed },
+          {
+            ...this.roadPosition,
+            speed: this.speed,
+            occupied: this.traffic.cars.some((car) => {
+              const pose = encounterPose(this.mission, event);
+              return (
+                Math.hypot(car.pose.x - pose.x, car.pose.z - pose.z) < 18 &&
+                (event.kind === 'minibus'
+                  ? car.station >= event.actorZ - 6
+                  : car.station <= event.actorZ + 6)
+              );
+            }),
+          },
           dt,
         );
+        if (
+          event.kind === 'herd' &&
+          oldState === 'waiting' &&
+          event.state === 'crossing' &&
+          this.traffic.occupied(
+            routePoint(this.mission, event.z).x,
+            routePoint(this.mission, event.z).z,
+            13,
+          )
+        ) {
+          event.state = 'waiting';
+          event.phaseTime = 0;
+          event.yieldAmount = 0;
+        }
         if (
           event.state === 'clear' &&
           oldState !== 'clear' &&
@@ -771,11 +912,27 @@ export class GameEngine {
             event.passedSafely = false;
         }
       }
-      if (event.entered && event.resolved && event.state !== 'clear')
+      if (
+        event.entered &&
+        event.resolved &&
+        ['minibus', 'traffic', 'bridge'].includes(event.kind)
+      )
         updateTraffic(
           event,
           this.mission,
-          { ...this.roadPosition, speed: this.speed },
+          {
+            ...this.roadPosition,
+            speed: this.speed,
+            occupied: this.traffic.cars.some((car) => {
+              const pose = encounterPose(this.mission, event);
+              return (
+                Math.hypot(car.pose.x - pose.x, car.pose.z - pose.z) < 18 &&
+                (event.kind === 'minibus'
+                  ? car.station >= event.actorZ - 6
+                  : car.station <= event.actorZ + 6)
+              );
+            }),
+          },
           dt,
         );
       const body = this.eventBodies.get(event.id);
@@ -804,6 +961,34 @@ export class GameEngine {
       }
     }
   }
+  private trafficRotation(p: { yaw: number; pitch: number }) {
+    const sy = Math.sin(p.yaw / 2),
+      cy = Math.cos(p.yaw / 2),
+      sp = Math.sin(p.pitch / 2),
+      cp = Math.cos(p.pitch / 2);
+    return { x: cy * sp, y: sy * cp, z: -sy * sp, w: cy * cp };
+  }
+  get trafficHint() {
+    if (this.brakeSource === 'crossing' && this.braking > 0.1)
+      return 'CROSSING AHEAD · BRAKING ASSIST';
+    const car = this.traffic.cars.find(
+      (c) =>
+        c.station > this.progress &&
+        c.station < this.progress + 65 &&
+        Math.hypot(c.pose.x - this.position.x, c.pose.z - this.position.z) < 70,
+    );
+    if (!car) return '';
+    if (car.contactHeld) return 'GIVE ROOM · HOLD BRAKE TO REVERSE';
+    return car.direction < 0
+      ? 'ONCOMING TRAFFIC · KEEP RIGHT'
+      : 'TRAFFIC AHEAD · PASS WHEN CLEAR';
+  }
+  get totalClean() {
+    return this.cleanEncounters + this.traffic.clean;
+  }
+  get totalEncounters() {
+    return this.encounters.length + this.traffic.observed;
+  }
   private accept() {
     if (this.phase !== 'driving' || !this.canDeliver || this.time <= 0) return;
     const ratio = this.time / this.initial;
@@ -816,17 +1001,17 @@ export class GameEngine {
       lives: this.mission.lives,
       revision: ROAD_REVISION,
       variant: this.mission.variant || 0,
-      clean: this.cleanEncounters,
-      encounters: this.encounters.length,
+      clean: this.totalClean,
+      encounters: this.totalEncounters,
       score:
         1000 +
         Math.floor(400 * ratio) +
         Math.floor(4 * this.integrity) +
-        Math.floor((200 * this.cleanEncounters) / this.encounters.length),
+        Math.floor((200 * this.totalClean) / this.totalEncounters),
       stars:
         this.integrity >= 90 &&
         ratio >= 0.12 &&
-        this.cleanEncounters >= Math.ceil(this.encounters.length * 0.75)
+        this.totalClean >= Math.ceil(this.totalEncounters * 0.75)
           ? 3
           : this.integrity >= 70
             ? 2

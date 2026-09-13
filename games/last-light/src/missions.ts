@@ -39,7 +39,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Emergency care is back. Three patients have the power they need, and the valley has a brighter tomorrow.',
     length: 1050,
-    seconds: 200,
+    seconds: 235,
     lives: 3,
     rain: 0,
     night: 0.82,
@@ -85,7 +85,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Five patients can continue treatment. The rain keeps falling; inside, the clinic is warm and bright.',
     length: 1160,
-    seconds: 220,
+    seconds: 255,
     lives: 5,
     rain: 0.65,
     night: 0.9,
@@ -132,7 +132,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Six lives supported by restored emergency care. The riverside community has a dependable source of power.',
     length: 1210,
-    seconds: 230,
+    seconds: 265,
     lives: 6,
     rain: 0.25,
     night: 0.86,
@@ -179,7 +179,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'The maternity ward is bright again. Eight patients and their families can face the night with hope.',
     length: 1280,
-    seconds: 230,
+    seconds: 265,
     lives: 8,
     rain: 0.45,
     night: 0.88,
@@ -225,7 +225,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Twelve patients have power for their care. Five clinics now shine across the region. You brought the light; together, you kept hope alive.',
     length: 1400,
-    seconds: 255,
+    seconds: 290,
     lives: 12,
     rain: 1,
     night: 0.96,
@@ -347,7 +347,9 @@ export function obstacles(m: Mission): Obstacle[] {
     });
     if (z > 330 && rand() > 0.6)
       list.push({
-        x: roadX(m, z) + (rand() > 0.5 ? 1 : -1) * 3.7,
+        x:
+          roadX(m, z + 12) +
+          (rand() > 0.5 ? 1 : -1) * (roadWidth(m, z + 12) + 1.1),
         z: z + 12,
         radius: 0.7,
         kind: 'rock',

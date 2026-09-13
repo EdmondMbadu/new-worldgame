@@ -1,6 +1,6 @@
 import { clamp, heightAt, roadX, smooth, type Mission } from './missions';
 import { driverSide, roadSections, type RoadSection } from './road-sections';
-import { routeHeading, toWorld } from './routes';
+import { routeHeading, routePoint, toWorld } from './routes';
 export type EncounterKind = RoadSection['kind'];
 export type Encounter = {
   id: string;
@@ -28,6 +28,7 @@ export type Encounter = {
   brakeLights: boolean;
   indicator: number;
   waterLevel: number;
+  stopTime: number;
 };
 export function makeEncounters(m: Mission): Encounter[] {
   return roadSections(m).map((s, i) => ({
@@ -90,6 +91,7 @@ export function makeEncounters(m: Mission): Encounter[] {
     brakeLights: false,
     indicator: 0,
     waterLevel: 0,
+    stopTime: 0,
   }));
 }
 export function warningDistance(speed: number, wet: number) {
@@ -108,9 +110,16 @@ export function encounterPose(m: Mission, event: Encounter) {
   if (event.kind === 'bridge' && event.state === 'clearing')
     offset = -event.side * 4.3 * smooth(0, 16, event.z - event.length / 2 - z);
   if (event.kind === 'bridge' && event.state === 'clear')
-    offset = -event.side * 4.3;
+    offset = event.actorOffset || -event.side * 4.3;
   const fall = smooth(0, 2.2, event.elapsed);
-  const tilt = event.kind === 'tree' ? -Math.acos(fall) : 0;
+  let tilt = event.kind === 'tree' ? -Math.acos(fall) : 0;
+  if (moving) {
+    const a = routePoint(m, z - 0.25, false, offset),
+      b = routePoint(m, z + 0.25, false, offset);
+    tilt =
+      -Math.atan2(b.y - a.y, Math.hypot(b.x - a.x, b.z - a.z)) *
+      (event.kind === 'minibus' ? 1 : -1);
+  }
   if (event.kind === 'tree') offset = -event.side * (4.3 - 2.55 * fall);
   const x = roadX(m, z) + offset;
   const heading =

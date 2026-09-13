@@ -382,8 +382,7 @@ export default function App() {
     settingsOpenRef = useRef(false),
     settingsRef = useRef(save.settings),
     saveRef = useRef(save),
-    pilotRef = useRef(false),
-    frameStats = useRef<number[]>([]);
+    pilotRef = useRef(false);
   const mission = MISSIONS[selected];
   settingsOpenRef.current = showSettings;
   const e = engine.current;
@@ -480,7 +479,7 @@ export default function App() {
             instance.resume();
             void sound.current?.unlock();
           } else {
-            instance.pause();
+            instance.pause(force ? "controller-disconnected" : "manual");
             sound.current?.silence();
           }
           input.clear();
@@ -488,13 +487,18 @@ export default function App() {
         controls.current = input;
         setReady(true);
         last = performance.now();
+        let observedResume = instance.resumeRevision;
         const frame = (now: number) => {
           if (cancelled) return;
-          const dt = (now - last) / 1000;
+          const resumed = observedResume !== instance.resumeRevision;
+          observedResume = instance.resumeRevision;
+          const dt = resumed ? 0 : (now - last) / 1000;
           last = now;
           let state = input.sample();
           if (qa && pilotRef.current) state = driveInput(instance, false, true);
+          const stepStart = performance.now();
           instance.advance(dt, state, settingsRef.current.singlePress);
+          const physicsMs = performance.now() - stepStart;
           if (instance.result && !committed) {
             committed = true;
             setSave((s) => recordResult(s, instance.result!));
@@ -503,12 +507,10 @@ export default function App() {
             instance.phase !== "paused" &&
             document.visibilityState !== "hidden"
           ) {
+            const renderStart = performance.now();
             view.render(Math.min(dt, 0.06), dt);
+            view.recordFrame(dt, physicsMs, performance.now() - renderStart);
             sound.current?.update(instance, Math.min(dt, 0.06));
-            if (qa) {
-              frameStats.current.push(dt);
-              if (frameStats.current.length > 18000) frameStats.current.shift();
-            }
           }
           hudTime += dt;
           if (hudTime > 0.08) {
@@ -530,8 +532,8 @@ export default function App() {
       }
     };
     void load();
-    const interrupt = () => {
-      engine.current?.pause();
+    const interrupt = (event?: Event) => {
+      engine.current?.pause(event?.type || "visibility");
       controls.current?.clear();
       sound.current?.silence();
       setTick((t) => t + 1);
@@ -541,7 +543,7 @@ export default function App() {
     };
     const contextLost = (event: Event) => {
       event.preventDefault();
-      interrupt();
+      interrupt(event);
       setError(
         "The graphics connection was interrupted. Restart this drive to restore the scene. Your completed clinics are saved.",
       );
@@ -579,7 +581,6 @@ export default function App() {
     setShowSettings(false);
     pilotRef.current = false;
     setAutopilot(false);
-    frameStats.current = [];
   };
   const home = () => {
     sound.current?.silence();
@@ -752,7 +753,8 @@ export default function App() {
               <div className="loading-line" />
               <p>{loading}…</p>
               <small>
-                The clinic clock starts with your first driving input.
+                Keep right, follow tail lights and pass when the road ahead is
+                clear. The clinic clock starts with your first driving input.
               </small>
             </div>
           )}
@@ -848,6 +850,9 @@ export default function App() {
                       />
                     </div>
                     <small>{e.surface.toUpperCase()}</small>
+                    {e.trafficHint && (
+                      <small className="traffic-status">{e.trafficHint}</small>
+                    )}
                     <small className="beam-status">
                       ◌ {beamMode(e.mission, Math.abs(e.speed))}
                     </small>
@@ -878,7 +883,7 @@ export default function App() {
                   )}
                   {e.elapsed < e.rewardUntil && (
                     <div className="clean-cue">
-                      ✓ CLEAN PASS <span>{e.cleanEncounters} handled</span>
+                      ✓ CLEAN DRIVING <span>{e.totalClean} handled</span>
                     </div>
                   )}
                   {save.settings.subtitles && e.elapsed < e.notice.until && (
@@ -1232,12 +1237,19 @@ export default function App() {
                       world.current?.renderer.info.render.triangles || 0,
                     )}{" "}
                     triangles · p95 {world.current?.performance.p95.toFixed(1)}{" "}
-                    ms
+                    ms · p99 {world.current?.frames.stats.p99.toFixed(1)} ms ·
+                    max {world.current?.frames.stats.max.toFixed(0)} ms ·
+                    &gt;100ms {world.current?.frames.stats.over100} · &gt;250ms{" "}
+                    {world.current?.frames.stats.over250}· CPU{" "}
+                    {world.current?.frames.stats.physicsMs.toFixed(1)}/
+                    {world.current?.frames.stats.renderMs.toFixed(1)} ms ·
+                    dropped {e.droppedTime.toFixed(2)}s · pause {e.pauseEvents}{" "}
+                    ({e.pauseReason}) · traffic {e.traffic.observed}/
+                    {e.traffic.cars.length} · clean {e.traffic.clean}· brake{" "}
+                    {e.brakeSource} {e.braking.toFixed(2)}
                   </output>
                   <output>
-                    {frameStats.current.length
-                      ? `${Math.round(1 / (frameStats.current.reduce((a, b) => a + b, 0) / frameStats.current.length))} avg fps`
-                      : ""}
+                    {Math.round(world.current?.frames.stats.fps || 0)} avg fps
                   </output>
                 </div>
               )}

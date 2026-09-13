@@ -27,6 +27,11 @@ export class Soundtrack {
   private lastBird = -1;
   private lastPower = 0;
   private lastRoadSound = -1;
+  private trafficVoices: {
+    oscillator: OscillatorNode;
+    gain: GainNode;
+    pan: StereoPannerNode;
+  }[] = [];
   private load: Promise<void> | null = null;
   private abort = new AbortController();
   private stopped = false;
@@ -81,6 +86,26 @@ export class Soundtrack {
         this.tireGain = tires.gain;
         this.tireFilter = tires.filter;
         this.rainGain = layer('highpass', 1100).gain;
+        for (let i = 0; i < 2; i++) {
+          const oscillator = c.createOscillator(),
+            gain = c.createGain(),
+            pan = c.createStereoPanner(),
+            filter = c.createBiquadFilter();
+          oscillator.type = 'triangle';
+          oscillator.frequency.value = 85;
+          gain.gain.value = 0;
+          filter.type = 'lowpass';
+          filter.frequency.value = 380;
+          oscillator
+            .connect(filter)
+            .connect(gain)
+            .connect(pan)
+            .connect(this.gain);
+          oscillator.start();
+          this.sources.push(oscillator);
+          this.nodes.push(filter, gain, pan);
+          this.trafficVoices.push({ oscillator, gain, pan });
+        }
         // Local CC0 recording is optional: the fallback remains usable offline or if decoding fails.
         this.load = (async () => {
           try {
@@ -253,6 +278,48 @@ export class Soundtrack {
       c.currentTime,
       0.05,
     );
+    const roadUsers = e.traffic.cars
+      .map((car) => ({
+        car,
+        distance: Math.hypot(
+          car.pose.x - e.position.x,
+          car.pose.z - e.position.z,
+        ),
+      }))
+      .filter((user) => user.distance < 70)
+      .sort((a, b) => a.distance - b.distance);
+    this.trafficVoices.forEach((voice, i) => {
+      const user = roadUsers[i];
+      voice.gain.gain.setTargetAtTime(
+        active && driving && user ? 0.04 * (1 - user.distance / 70) ** 2 : 0,
+        c.currentTime,
+        0.12,
+      );
+      if (!user) return;
+      const car = user.car,
+        dx = car.pose.x - e.position.x,
+        dz = car.pose.z - e.position.z;
+      const closing =
+        ((Math.sin(e.heading) * e.speed - Math.sin(car.pose.yaw) * car.speed) *
+          dx +
+          (Math.cos(e.heading) * e.speed - Math.cos(car.pose.yaw) * car.speed) *
+            dz) /
+        Math.max(1, user.distance);
+      voice.oscillator.frequency.setTargetAtTime(
+        (75 + car.speed * 5) * clamp(1 + closing / 340, 0.85, 1.15),
+        c.currentTime,
+        0.1,
+      );
+      voice.pan.pan.setTargetAtTime(
+        clamp(
+          (-Math.cos(e.heading) * dx + Math.sin(e.heading) * dz) / 12,
+          -1,
+          1,
+        ),
+        c.currentTime,
+        0.08,
+      );
+    });
     if (!active) return;
     const beat = Math.floor(e.elapsed * 1.6);
     if (driving && beat !== this.lastRoadSound) {
