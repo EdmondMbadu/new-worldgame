@@ -29,26 +29,31 @@ The combined production build creates Angular and both game documents in `dist/`
 - A / D or left / right: steer. E: deliver in the marked courtyard or recover when stuck. Escape: pause.
 - Touch controls can be enabled in the driving HUD and appear automatically on touch-oriented devices. Hold DRIVE and a steering button together.
 - Standard gamepads use the left stick, triggers, A / cross for the contextual action and the menu button to pause.
-- Settings include remappable letter/number keys, volume, radio voice/subtitles, reduced camera motion, one-press delivery, graphics quality and Relaxed difficulty. Difficulty and graphics changes apply to the next drive.
+- Settings include remappable letter/number keys, volume, radio voice/subtitles, night brightness, enhanced night visibility, reduced lightning/camera motion, one-press delivery, graphics quality and Relaxed difficulty. Difficulty and graphics changes apply to the next drive.
 
-Firm-road propulsion now targets 80 km/h, with automatic gearing, progressive steering, per-wheel surface traction, and speed-sensitive camera framing. Roads have physical rut depressions, gravel and wetness materials, rocks, mud, narrow bridges, alternate routes and a fallen tree in the final chapter. Stopped minibuses, yielding oncoming vehicles, announced rockfalls and exposed wind sections add encounters. Hard collisions, landings and severe suspension compression can damage cargo; ordinary shallow roughness produces motion and sound. Recovery costs eight seconds. The clock stops when handover succeeds, before the 18-second restoration scene. Staff carry the kit, connect the battery, and restore the rooms and porch in sequence; a fan and equipment restart. Continue becomes available after the lights return. The installed roof array appears in the later completed-clinic view. A charged battery supplies immediate power; solar panels support the clinic beyond this delivery.
+Every chapter now takes place at night. Automatic headlights follow steering and cast a bounded shadow, with distinct moonlight, forest rain, river mist, highland fog and storm profiles. Firm-road propulsion targets 80 km/h, with automatic gearing, progressive steering, per-wheel traction and speed-sensitive framing. Left/right input follows the driver's viewpoint consistently across keyboard, touch and controller adapters.
+
+The centre of the road is no longer a universally safe line. Physical washouts require a marked firm strip or a bypass; stopped minibuses block the centre; single-lane bridge traffic must clear before crossing; announced trees fall into the road; deep floodwater slows progress more than the marked shallow route. Explicit branches share their geometry with vehicle collision and scoring. Incidental rocks and ruts stay out of the authored approach corridors. A clean pass requires the correct line, controlled speed where appropriate, traffic clearance, and no damage or recovery. Hard collisions, including fast CCD contacts, landings and severe suspension compression can damage cargo. Recovery costs eight seconds.
+
+Each clinic has its own compound, including recessed windows, wings, shelters, drainage and electrical equipment. The clock stops at accepted handover. During the 18-second restoration, the tailgate opens, rigged staff carry the kit with hand targeting, a staff member connects the battery, and room, corridor and porch lighting returns in sequence. Equipment and community activity resume. Continue becomes available after power returns; the installed roof array appears in the later completed-clinic view. A charged battery supplies immediate power at night.
 
 | Chapter | Place | New challenge |
 | --- | --- | --- |
-| The First Light | Kijani Valley Clinic | Ruts, cargo protection and a route choice |
-| Before the Rain | Mawingu Forest Clinic | Rain and longer muddy sections |
-| Across the River | Mto Riverside Clinic | A narrow bridge or a ridge detour |
-| Night Watch | Nyota Maternity Clinic | Darkness, headlight visibility and tighter curves |
-| The Last Connection | Umoja Regional Clinic | Storm, bridge, fallen tree and the final delivery |
+| The First Light | Kijani Valley Clinic | Moonlit washout, blocked road and village dispensary |
+| Before the Rain | Mawingu Forest Clinic | Forest rain, floodwater and a sheltered courtyard |
+| Across the River | Mto Riverside Clinic | Occupied single-lane bridge, bypass and raised receiving walkway |
+| Night Watch | Nyota Maternity Clinic | Fog, fallen tree, exposed descent and a separate ward |
+| The Last Connection | Umoja Regional Clinic | Storm, bridge, flood and a larger compound with connected wings |
 
 On-time delivery earns 1,000 points plus up to 400 for reserve remaining, 400 for cargo condition, and 200 for clean encounters. A clean encounter is credited once; revisiting cannot multiply the award. Valley run and Fresh tracks use deterministic different hazard layouts. Stars reward a stronger delivery. Clinic completion unlocks the next chapter; new best scores are stored separately by Standard/Relaxed, road edition, and rules revision. Existing records remain in storage under their legacy keys and existing clinic unlocks carry over. Lives saved are authored fictional story outcomes, counted once per clinic, not multiplied by replaying. Progress and preferences are local to this browser and origin under `last-light.v1`.
 
 ## Structure
 
 - `src/engine.ts`: fixed 60 Hz Rapier simulation, raycast vehicle suspension, collisions, traction, cargo, clock and mission state machine.
-- `src/missions.ts`, `vehicle.ts`, `encounters.ts`: five chapters, deterministic road editions, shared road/collision surfaces, handling profiles, and moving encounter trajectories.
+- `src/missions.ts`, `road-sections.ts`, `vehicle.ts`, `encounters.ts`: five chapters, deterministic road editions, shared road/collision surfaces, safe corridors, handling profiles and moving encounter trajectories.
 - `src/world.ts`, `art.ts`, `foliage.ts`, `surfaces.ts`, `living-world.ts`: Three.js renderer, chunked terrain, shaped truck meshes, skinned characters, wind animation, roadside villages, HDR lighting, rain, surface spray, headlights, clinic interiors, unloading and camera choreography.
 - `src/App.tsx`, `input.ts`, `audio.ts`, `save.ts`: interface, input adapters, recorded engine and generated soundscape, optional browser speech and resilient local saves.
+- `src/night.ts`, `road-art.ts`, `clinic-assets.ts`, `clinic-architecture.ts`, `staff.ts`: night profiles, hazard markers/water, chapter-specific GLB compounds and animated staff. Reproducible asset preparation scripts live in `scripts/`; provenance is in `ASSETS.md`.
 
 Game libraries are independent of the Angular application and Lost in Orbit. Heavy rendering and physics modules load when a drive starts. Texture fallbacks keep a missing material download from preventing play. Rendering supports automatic resolution adjustment, fewer shadows in Low mode, reduced camera motion and a restart path for WebGL context loss. Timers pause on lost focus or page visibility, and long frame gaps do not consume the mission clock.
 
@@ -58,6 +63,6 @@ The regression suite checks complete ordinary-input deliveries on both routes; d
 
 The development-only `?qa=1` control drives the actual vehicle through the ordinary input API at a faster pace, slowing for mud, bridges and the delivery bay. It does not teleport, bypass deadlines or manufacture successful deliveries. Production verification rejects the QA interface in built JavaScript. Frame diagnostics report actual frame intervals before simulation clamping, including a rolling 95th percentile.
 
-Graphics use original code-authored geometry, skinned characters, and locally bundled photographic materials and environment lighting. Menu/concept artwork is separately generated art, not a gameplay screenshot. The desktop upgrade checks run at a 1280×720 viewport; performance must also be measured on target devices. Responsive layout checks do not substitute for physical iOS/Android/controller tests, and automated completion does not establish player enjoyment or retention. The game narrative is English; the catalog includes English and French copy.
+Graphics combine original authored geometry and clinic GLBs, CC0 rigged Quaternius staff, and locally bundled photographic materials/environment lighting. Menu/concept artwork is separately generated art, not a gameplay screenshot. Desktop checks use a 1280×720 viewport; performance must also be measured on target devices. Responsive layout checks do not substitute for physical iOS/Android/controller tests, and automated completion does not establish player enjoyment or retention. The game narrative is English; the catalog includes English and French copy.
 
-See [upgrade verification](../../docs/design/last-light/upgrade-verification.md), [asset provenance](ASSETS.md) and the [original design package](../../docs/design/last-light/README.md).
+See [night-journey verification](../../docs/design/last-light/night-journey-verification.md), [previous upgrade verification](../../docs/design/last-light/upgrade-verification.md), [asset provenance](ASSETS.md) and the [original design package](../../docs/design/last-light/README.md).

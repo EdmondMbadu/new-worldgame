@@ -8,6 +8,8 @@ The second game in the Global Solutions Lab collection follows Lost in Orbit. Th
 - [Implementation plan](/Users/edmondmbadu/repo/new-worldgame/docs/design/last-light/implementation-plan.md): architecture, assets, vehicle simulation, rendering, loading targets, exact repository integration points, validation, and production milestones.
 - [Realism and gameplay upgrade plan](realism-upgrade-plan.md): assessment of the current implementation and the proposed next release, covering faster driving, physical roads, active encounters, production assets, clinic animation, performance, and validation.
 - [Upgrade implementation and verification](upgrade-verification.md): shipped behavior, automated and browser checks, build budgets, and remaining device and production-art work.
+- [Night journey upgrade plan](night-journey-upgrade-plan.md): the approved blueprint for five night missions, consequential road encounters, useful headlights and redesigned clinics.
+- [Night journey implementation and verification](night-journey-verification.md): steering correction, implemented night/road/clinic changes, final tests, build budgets, browser checks and remaining device/player validation.
 - [Concept board](/Users/edmondmbadu/repo/new-worldgame/docs/design/last-light/concept-board.png): journey, dark arrival, and restored clinic. Generated using the built-in image-generation tool as aspirational art direction, not an implemented-game screenshot.
 - [Exact generation prompt](/Users/edmondmbadu/repo/new-worldgame/docs/design/last-light/concept-prompt.txt): source prompt for the concept board.
 

@@ -308,7 +308,10 @@ export function createTruck() {
     box(fixed, ivory, side * 0.85, 0.65, -1.64, 0.14, 0.4, 1.3, 0.045);
     box(fixed, dark, side * 0.86, 0.875, -1.64, 0.15, 0.045, 1.38, 0.02);
   }
-  box(fixed, ivory, 0, 0.64, -2.25, 1.75, 0.43, 0.1, 0.045);
+  const tailgate = new T.Group();
+  tailgate.position.set(0, 0.425, -2.25);
+  root.add(tailgate);
+  box(tailgate, ivory, 0, 0.215, 0, 1.75, 0.43, 0.1, 0.045);
   box(fixed, ivory, 0, 1.45, -0.1, 1.72, 0.11, 1.56, 0.055);
   box(fixed, dark, 0, 0.79, -0.16, 1.54, 0.08, 1.6);
   quad(
@@ -400,11 +403,11 @@ export function createTruck() {
   box(fixed, steel, 0, 0.12, 2.43, 0.57, 0.14, 0.08, 0.025);
   box(fixed, dark, 0, 0.06, 2.45, 0.24, 0.1, 0.08, 0.02);
   box(
-    fixed,
+    tailgate,
     label('LAST LIGHT', '#eff1df', '#25665b', 512, 96),
     0,
-    0.66,
-    -2.312,
+    0.235,
+    -0.062,
     1.05,
     0.19,
     0.014,
@@ -551,7 +554,17 @@ export function createTruck() {
   box(cargo, dark, 0, 0.73, -1.5, 0.62, 0.43, 0.61, 0.04);
   box(cargo, teal, 0, 0.75, -1.815, 0.35, 0.16, 0.013);
   batch(cargo);
-  return { root, wheels, tires, cargo, headlights, tail, panelMat, wipers };
+  return {
+    root,
+    wheels,
+    tires,
+    cargo,
+    headlights,
+    tail,
+    panelMat,
+    wipers,
+    tailgate,
+  };
 }
 export function createPerson(shirt: string, skin = '#67432d', scale = 1) {
   const group = new T.Group(),

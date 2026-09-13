@@ -14,6 +14,7 @@ import {
 import { encounterPose, type Encounter } from './encounters';
 import { heightAt, roadX, smooth, type Mission } from './missions';
 import type { GameEngine } from './engine';
+import { buildRoadEncounter } from './road-art';
 
 export function windMaterial(
   mat: T.MeshStandardMaterial,
@@ -62,6 +63,8 @@ export class LivingWorld {
     const stone = material('#676e62', 0.96),
       wood = material('#625943');
     for (const event of events) {
+      buildRoadEncounter(this.group, mission, event, this.time);
+      if (event.kind === 'washout' || event.kind === 'flood') continue;
       const g = new T.Group(),
         fixed = new T.Group();
       g.add(fixed);
@@ -86,18 +89,37 @@ export class LivingWorld {
         this.flags.push(flag);
         continue;
       }
-      if (event.kind === 'rockfall') {
-        for (let i = 0; i < 3; i++) {
-          const rock = mesh(
-            new T.DodecahedronGeometry(0.5 + i * 0.07, 1),
-            stone,
+      if (event.kind === 'tree') {
+        const bark = material('#67503b', 0.95);
+        const trunk = cylinder(fixed, bark, 0, 0, 0, 0.32, 0.4, 5.1, 14);
+        trunk.rotation.x = Math.PI / 2;
+        for (let i = 0; i < 4; i++) {
+          const branch = cylinder(
             fixed,
-            (i - 1) * 0.55,
-            0.3,
-            Math.sin(i) * 0.55,
+            bark,
+            0.35,
+            0.25,
+            (i - 1.5) * 0.8,
+            0.07,
+            0.13,
+            1.4,
+            8,
           );
-          rock.rotation.set(i, 0.4 * i, 0.3 * i);
+          branch.rotation.z = -0.7;
+          branch.rotation.x = 0.4 * i;
         }
+        const cut = cylinder(
+          fixed,
+          material('#b9a17a'),
+          0,
+          0,
+          2.57,
+          0.31,
+          0.31,
+          0.02,
+          16,
+        );
+        cut.rotation.x = Math.PI / 2;
       } else {
         const body = material(
             event.kind === 'minibus' ? '#d8be88' : '#788f82',
@@ -202,6 +224,12 @@ export class LivingWorld {
           }
       }
       batch(fixed);
+      if (event.kind !== 'tree') {
+        const beam = new T.SpotLight('#fff1ca', 85, 90, 0.48, 0.6, 1.3);
+        beam.position.set(0, 1, 2.6);
+        beam.target.position.set(0, 0, 30);
+        g.add(beam, beam.target);
+      }
       this.group.add(g);
       this.actors.push({ event, group: g, wheels, lamps });
       const signZ = event.z - 110,
@@ -214,9 +242,9 @@ export class LivingWorld {
         label(
           event.kind === 'minibus'
             ? 'STOPPED VEHICLE'
-            : event.kind === 'oncoming'
-              ? 'SHARE THE ROAD'
-              : 'LOOSE ROCKS',
+            : event.kind === 'bridge'
+              ? 'SINGLE LANE · WAIT'
+              : 'TREE · SLOW PASSAGE',
           '#f1ddb4',
           '#5b5237',
           768,
@@ -294,8 +322,17 @@ export class LivingWorld {
     this.time.value = clock;
     for (const actor of this.actors) {
       const p = encounterPose(this.mission, actor.event);
-      actor.group.position.set(p.x, p.y, p.z);
-      actor.group.rotation.y = p.heading;
+      actor.group.position.set(
+        p.x,
+        p.y + (actor.event.kind === 'tree' ? 0.4 : 0),
+        p.z,
+      );
+      actor.group.quaternion.set(
+        p.rotation.x,
+        p.rotation.y,
+        p.rotation.z,
+        p.rotation.w,
+      );
       actor.group.visible = Math.abs(e.position.z - p.z) < 320;
       actor.lamps.emissiveIntensity =
         actor.event.kind === 'minibus'
@@ -303,12 +340,9 @@ export class LivingWorld {
             ? 3
             : 0.15
           : 1.3;
-      if (actor.event.kind === 'rockfall')
-        actor.group.rotation.z =
-          (1 - smooth(0, 2.2, actor.event.elapsed)) * 0.5;
       for (const wheel of actor.wheels)
-        wheel.rotation.x =
-          actor.event.kind === 'oncoming' ? actor.event.elapsed * 7 : 0;
+        if (actor.event.kind === 'bridge' && actor.event.state !== 'clear')
+          wheel.rotation.x = actor.event.elapsed * 7;
     }
     for (const v of this.villagers) {
       const near = Math.abs(e.position.z - v.z) < 38;

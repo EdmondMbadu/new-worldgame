@@ -10,7 +10,11 @@ import {
 } from '../src/missions';
 import { driveInput } from '../src/qa-driver';
 import { impactDamage, surfaceAt, ROAD_REVISION } from '../src/vehicle';
-import { makeEncounters, warningDistance } from '../src/encounters';
+import {
+  encounterPose,
+  makeEncounters,
+  warningDistance,
+} from '../src/encounters';
 import {
   bestKey,
   freshSave,
@@ -68,6 +72,7 @@ describe('faster driving and meaningful surfaces', () => {
         it(`delivers ${base.title}, edition ${variant}, ${alternate ? 'ridge' : 'main'} at the faster pace`, async () => {
           const e = new GameEngine(missionVariant(base, variant));
           let top = 0;
+          const hits: unknown[] = [];
           try {
             for (
               let i = 0;
@@ -77,7 +82,14 @@ describe('faster driving and meaningful surfaces', () => {
               i++
             ) {
               if (i % 900 === 0) await new Promise((r) => setTimeout(r, 0));
+              const impacts = e.impacts;
               e.step(1 / 60, driveInput(e, alternate, true));
+              if (e.impacts !== impacts)
+                hits.push({
+                  z: e.progress,
+                  speed: e.speed,
+                  integrity: e.integrity,
+                });
               top = Math.max(top, e.speed * 3.6);
             }
             if (e.phase !== 'restoring')
@@ -90,6 +102,22 @@ describe('faster driving and meaningful surfaces', () => {
                 e.encounters,
               );
             expect(e.phase).toBe('restoring');
+            if (e.cleanEncounters !== e.encounters.length || e.integrity < 90)
+              console.log(
+                'route quality',
+                base.id,
+                variant,
+                alternate,
+                hits,
+                e.encounters.map((x) => ({
+                  kind: x.kind,
+                  clean: x.clean,
+                  passed: x.passedSafely,
+                  impactEntry: x.impactAtEntry,
+                })),
+              );
+            expect(e.cleanEncounters).toBe(e.encounters.length);
+            expect(e.integrity).toBeGreaterThanOrEqual(90);
             expect(top).toBeGreaterThan(60);
             expect(e.result?.revision).toBe(ROAD_REVISION);
             expect(e.result?.score).toBeLessThanOrEqual(2000);
@@ -101,13 +129,15 @@ describe('faster driving and meaningful surfaces', () => {
     const m = { ...MISSIONS[0], bend: 0 },
       e = new GameEngine(m);
     try {
-      const event = e.encounters[0],
+      const event = e.encounters.find((event) => event.kind === 'minibus')!,
         z = event.z - 15,
-        x = event.side * 3.15;
+        x = encounterPose(m, event).x;
       e.body.setTranslation({ x, y: heightAt(m, x, z) + 0.85, z }, true);
       e.body.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true);
-      e.body.setLinvel({ x: 0, y: 0, z: 18 }, true);
       e.phase = 'driving';
+      // Settle the wheel rays on this section before applying the collision velocity.
+      for (let i = 0; i < 90; i++) e.step(1 / 60, emptyInput());
+      e.body.setLinvel({ x: 0, y: 0, z: 18 }, true);
       for (let i = 0; i < 100; i++) e.step(1 / 60, emptyInput());
       expect(e.impacts).toBeGreaterThan(0);
       expect(e.integrity).toBeLessThan(100);

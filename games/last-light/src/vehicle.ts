@@ -7,8 +7,9 @@ import {
   smooth,
   type Mission,
 } from './missions';
+import { roadSections, sectionEnvelope } from './road-sections';
 
-export const ROAD_REVISION = 2;
+export const ROAD_REVISION = 3;
 export const RESTORE_DURATION = 18;
 export const TUNING = {
   speed: 22.2, // 80 km/h on firm, visible road; curves still require braking.
@@ -20,7 +21,7 @@ export const TUNING = {
   suspension: 0.45,
 };
 export type SurfaceSample = {
-  name: 'Gravel' | 'Mud' | 'Verge' | 'Bridge';
+  name: 'Gravel' | 'Mud' | 'Verge' | 'Bridge' | 'Water';
   grip: number;
   sideGrip: number;
   speed: number;
@@ -28,6 +29,22 @@ export type SurfaceSample = {
 };
 
 export function surfaceAt(m: Mission, x: number, z: number): SurfaceSample {
+  for (const s of roadSections(m)) {
+    if (
+      s.kind === 'flood' &&
+      sectionEnvelope(z, s.z, s.length) > 0.2 &&
+      Math.abs(x - roadX(m, z)) < 5.5
+    ) {
+      const shallow = (x - roadX(m, z)) * s.safeSide > 1.7;
+      return {
+        name: 'Water',
+        grip: shallow ? 3.5 : 2.3,
+        sideGrip: 0.85,
+        speed: shallow ? 7 : 3.8,
+        wet: 1,
+      };
+    }
+  }
   if (onBridge(m, z) && Math.abs(x - roadX(m, z)) < 2.8)
     return {
       name: 'Bridge',

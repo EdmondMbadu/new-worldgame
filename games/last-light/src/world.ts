@@ -37,6 +37,10 @@ import { canopyTexture, grassGeometry } from './foliage';
 import { surfaceTexture, environmentTexture } from './surfaces';
 import { LivingWorld, windMaterial } from './living-world';
 import { surfaceAt } from './vehicle';
+import { branchSections } from './road-sections';
+import { beamMode, nightProfile } from './night';
+import { createStaff } from './staff';
+import { clinicArchitecture } from './clinic-assets';
 
 export class GameWorld {
   renderer: T.WebGLRenderer;
@@ -68,6 +72,9 @@ export class GameWorld {
   private windTime = { value: 0 };
   private chunks: { mesh: T.Object3D; start: number; end: number }[] = [];
   private water: T.Mesh | null = null;
+  private staff: ReturnType<typeof createStaff>[] = [];
+  private moonFill: T.HemisphereLight;
+  private clinicWingGlow: T.MeshStandardMaterial[] = [];
   private speedFov = 56;
   private renderedPosition = new T.Vector3();
   private renderedRotation = new T.Quaternion();
@@ -81,6 +88,7 @@ export class GameWorld {
     public settings: Settings,
   ) {
     const m = engine.mission;
+    const night = nightProfile(m);
     this.low =
       settings.quality === 'low' ||
       (settings.quality === 'auto' && matchMedia('(pointer:coarse)').matches);
@@ -94,26 +102,27 @@ export class GameWorld {
     this.renderer.shadowMap.type = T.PCFSoftShadowMap;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = m.night > 0.5 ? 1.3 : 1.1;
+    this.renderer.toneMappingExposure = night.exposure;
     const environment = environmentTexture();
     if (environment) {
       const pmrem = new T.PMREMGenerator(this.renderer);
       this.environmentTarget = pmrem.fromEquirectangular(environment);
       this.scene.environment = this.environmentTarget.texture;
-      this.scene.environmentIntensity = m.night > 0.5 ? 0.12 : 0.4;
+      this.scene.environmentIntensity = 0.11;
       pmrem.dispose();
     }
     this.scene.background = new T.Color(m.sky);
-    this.scene.fog = new T.FogExp2(m.sky, 0.0018 + m.night * 0.0012);
+    this.scene.fog = new T.FogExp2(night.sky, night.fog);
     const hemi = new T.HemisphereLight(
       m.night > 0.5 ? '#8baec5' : '#e3e8d4',
       '#4b4830',
-      m.night > 0.5 ? 0.95 : 1.3,
+      night.fill,
     );
+    this.moonFill = hemi;
     this.scene.add(hemi);
     this.sun.color.set(m.sun);
-    this.sun.intensity = m.night > 0.5 ? 0.65 : 2.6 - m.rain * 0.9;
-    this.sun.castShadow = true;
+    this.sun.intensity = night.moon;
+    this.sun.castShadow = false;
     this.sun.shadow.mapSize.set(this.low ? 1024 : 2048, this.low ? 1024 : 2048);
     this.sun.shadow.camera.left = -55;
     this.sun.shadow.camera.right = 55;
@@ -126,6 +135,39 @@ export class GameWorld {
     this.scene.add(this.sun, this.sun.target);
     this.sky = this.makeSky(m);
     this.scene.add(this.sky);
+    const moonMat = new T.MeshBasicMaterial({ color: '#c4d8d8', fog: false });
+    materials.add(moonMat);
+    const moon = mesh(
+      new T.SphereGeometry(4.8, 20, 12),
+      moonMat,
+      this.sky,
+      -320,
+      210,
+      570,
+    );
+    moon.castShadow = false;
+    const stars = new Float32Array(200 * 3),
+      starRng = random(372);
+    for (let i = 0; i < 200; i++) {
+      const a = starRng() * Math.PI * 2,
+        h = 0.12 + starRng() * 0.78;
+      stars[i * 3] = Math.cos(a) * Math.sqrt(1 - h * h) * 690;
+      stars[i * 3 + 1] = h * 690;
+      stars[i * 3 + 2] = Math.sin(a) * Math.sqrt(1 - h * h) * 690;
+    }
+    const sg = new T.BufferGeometry();
+    sg.setAttribute('position', new T.BufferAttribute(stars, 3));
+    geometries.add(sg);
+    const sm = new T.PointsMaterial({
+      color: '#c4d8dc',
+      size: 1.2,
+      transparent: true,
+      opacity: m.id === 0 ? 0.5 : 0.14,
+      depthWrite: false,
+      fog: false,
+    });
+    materials.add(sm);
+    this.sky.add(new T.Points(sg, sm));
     this.buildTerrain(m);
     this.buildNature(m);
     this.buildRoute(m);
@@ -136,14 +178,20 @@ export class GameWorld {
     for (const x of [-0.72, 0.72]) {
       const light = new T.SpotLight(
         '#fff0cc',
-        m.night > 0.4 ? 95 : 18,
-        120,
-        0.46,
+        145,
+        night.beam,
+        0.38,
         0.55,
         1.25,
       );
       light.position.set(x, 0.66, 2.3);
-      light.target.position.set(x, -0.35, 55);
+      light.target.position.set(x, -0.5, 55);
+      light.castShadow = x < 0;
+      light.shadow.mapSize.set(this.low ? 512 : 1024, this.low ? 512 : 1024);
+      light.shadow.camera.near = 0.3;
+      light.shadow.camera.far = night.beam;
+      light.shadow.bias = -0.0003;
+      light.shadow.normalBias = 0.035;
       this.truck.root.add(light, light.target);
       this.headlights.push(light);
     }
@@ -166,6 +214,9 @@ export class GameWorld {
     this.clinic = createClinic(m.place, m.id === 4);
     this.clinic.root.position.set(0, roadY(m, m.length), m.length + 19);
     this.clinic.root.rotation.y = Math.PI;
+    const architecture = clinicArchitecture(m.id);
+    this.clinic.root.add(architecture.root);
+    this.clinicWingGlow = architecture.glow;
     this.scene.add(this.clinic.root);
     for (let i = 0; i < 7; i++) {
       const p = createPerson(
@@ -187,6 +238,21 @@ export class GameWorld {
         m.length + 10 + (i % 3),
       );
       this.people.push(p);
+      const actor = createStaff(
+        [
+          '#b7d4c6',
+          '#507d83',
+          '#d1ba8c',
+          '#7098a0',
+          '#b78259',
+          '#d6bc82',
+          '#c4cbc2',
+        ][i],
+        i % 2 ? '#61412c' : '#7b5239',
+        i === 5 ? 0.76 : 1,
+      );
+      this.staff.push(actor);
+      if (actor) this.scene.add(actor.group);
       this.scene.add(p.group);
     }
     // The delivery bay uses world geometry, so it remains legible without HUD colour.
@@ -236,7 +302,19 @@ export class GameWorld {
     const dg = new T.BufferGeometry();
     dg.setAttribute('position', new T.BufferAttribute(this.dustData, 3));
     geometries.add(dg);
+    const sprayCanvas = document.createElement('canvas');
+    sprayCanvas.width = sprayCanvas.height = 32;
+    const sprayContext = sprayCanvas.getContext('2d')!;
+    const sprayFade = sprayContext.createRadialGradient(16, 16, 0, 16, 16, 16);
+    sprayFade.addColorStop(0, 'rgba(255,255,255,0.75)');
+    sprayFade.addColorStop(0.35, 'rgba(255,255,255,0.35)');
+    sprayFade.addColorStop(1, 'rgba(255,255,255,0)');
+    sprayContext.fillStyle = sprayFade;
+    sprayContext.fillRect(0, 0, 32, 32);
+    const sprayTexture = new T.CanvasTexture(sprayCanvas);
+    textures.add(sprayTexture);
     const dm = new T.PointsMaterial({
+      map: sprayTexture,
       color: m.rain > 0.3 ? '#b2a48a' : '#bfa376',
       size: 0.12,
       transparent: true,
@@ -332,15 +410,19 @@ export class GameWorld {
     if (mat.normalMap) textures.add(mat.normalMap);
     mat.vertexColors = true;
     this.addTerrainChunks(geometry, mat, data.cols, data.rows);
-    for (const alt of [false, true]) {
+    for (const section of [
+      { from: -30, to: m.length + 12, alt: false },
+      ...branchSections(m).map(([from, to]) => ({ from, to, alt: true })),
+    ]) {
+      const alt = section.alt;
       const geo = new T.BufferGeometry(),
         p: number[] = [],
         u: number[] = [],
         colors: number[] = [],
         wet: number[] = [],
         idx: number[] = [];
-      const start = alt ? m.fork[0] : -30,
-        end = alt ? m.fork[1] : m.length + 12;
+      const start = section.from,
+        end = section.to;
       for (let z = start, j = 0; z <= end; z += 1, j++) {
         const width =
           onBridge(m, z) && !alt
@@ -530,7 +612,7 @@ export class GameWorld {
       );
       g.computeBoundingSphere();
       const o = mesh(g, mat, this.scene);
-      o.castShadow = false;
+      o.castShadow = true;
       const pos = g.attributes.position;
       this.chunks.push({
         mesh: o,
@@ -740,7 +822,8 @@ export class GameWorld {
       p.rotation.y = Math.PI;
     };
     sign(35, 'CLINIC ↑');
-    sign(m.fork[0] - 28, '← SHORT   /   FIRMER →');
+    for (const [a] of branchSections(m))
+      sign(a - 20, '← FIRMER DETOUR   /   SHORT →');
     sign(m.length - 75, 'CLINIC 75 m ↑');
     if (m.bridge) sign(m.bridge[0] - 35, 'NARROW BRIDGE · SLOW');
     for (const [a] of m.mud) sign(a - 25, 'MUD · STEADY SPEED', -1);
@@ -785,6 +868,28 @@ export class GameWorld {
         mat.normalMap.offset.y = this.clock * 0.008;
       }
     }
+    const night = nightProfile(m);
+    this.renderer.toneMappingExposure =
+      night.exposure * (this.settings.brightness ?? 1);
+    this.moonFill.intensity =
+      night.fill * (this.settings.enhancedVisibility ? 1.7 : 1);
+    const lightning =
+      m.id === 4 &&
+      !this.settings.reducedFlashes &&
+      !this.settings.reducedMotion
+        ? Math.pow(Math.max(0, Math.sin(this.clock * 0.27)), 90) * 0.45
+        : 0;
+    this.sun.intensity = night.moon + lightning;
+    this.headlights.forEach((light, i) => {
+      const high = beamMode(m, Math.abs(e.speed)) === 'HIGH BEAMS';
+      light.angle = high ? 0.35 : 0.46;
+      light.intensity = high ? 180 : 145;
+      light.target.position.set(
+        (i === 0 ? -0.72 : 0.72) + e.steering * 8,
+        -0.5,
+        55,
+      );
+    });
     this.sky.rotation.y = this.clock * 0.0007;
     for (let i = 0; i < 4; i++) {
       const wheel = this.truck.wheels[i];
@@ -802,6 +907,7 @@ export class GameWorld {
       e.roadPulse * Math.sin(this.clock * 25) * 0.008;
     const restoring = e.phase === 'restoring' || e.phase === 'results';
     const t = restoring ? e.restoreTime : 0;
+    this.truck.tailgate.rotation.x = (-smooth(0.3, 2.5, t) * Math.PI) / 2;
     this.truck.cargo.visible = t < 3;
     const transfer = smooth(3, 8, t),
       ground = roadY(m, m.length);
@@ -825,6 +931,9 @@ export class GameWorld {
           smooth(8.2 + i * 0.7, 9 + i * 0.7, t) * (i === 2 ? 16 : 24)),
     );
     const power = smooth(8.3, 10.5, t);
+    this.clinicWingGlow.forEach((mat, i) => {
+      mat.emissiveIntensity = smooth(10.5 + i * 0.35, 12 + i * 0.35, t) * 0.7;
+    });
     this.clinic.interiorMats.forEach((mat, i) => {
       mat.color
         .copy(this.clinic.interiorColors[i])
@@ -920,7 +1029,33 @@ export class GameWorld {
       person.group.position.y =
         heightAt(m, person.group.position.x, person.group.position.z) +
         Math.abs(gait) * walking * 0.025;
-      person.group.visible = p.z > m.length - 180;
+      const actor = this.staff[i];
+      person.group.visible = !actor && p.z > m.length - 180;
+      if (actor) {
+        actor.group.position.copy(person.group.position);
+        actor.group.rotation.copy(person.group.rotation);
+        actor.group.visible = p.z > m.length - 180;
+        const mode =
+          receiver && restoring && t >= 3 && t < 8.5
+            ? 'carry'
+            : walking > 0
+              ? 'walk'
+              : i === 0 && t > 8 && t < 10.5
+                ? 'connect'
+                : restoring && t > 11 && (i === 3 || i === 4)
+                  ? 'wave'
+                  : 'idle';
+        actor.animate(mode, dt);
+        if (mode === 'carry') {
+          actor.group.updateMatrixWorld(true);
+          const gripX = kitX + (i ? 0.79 : -0.79),
+            gripY = this.transferKit.position.y + 1.18;
+          actor.hold(
+            new T.Vector3(gripX, gripY, kitZ + (i ? -0.26 : 0.26)),
+            new T.Vector3(gripX, gripY, kitZ + (i ? 0.26 : -0.26)),
+          );
+        }
+      }
     }
     const heading = e.heading;
     const forward = this.forward.set(Math.sin(heading), 0, Math.cos(heading));
@@ -937,9 +1072,9 @@ export class GameWorld {
     if (restoring) {
       const a = this.settings.reducedMotion ? 1 : smooth(0, 5, t);
       const targetEye = new T.Vector3(
-        -18,
-        roadY(m, m.length) + 10,
-        m.length - 9,
+        portrait ? (m.id === 4 ? -25 : -20) : -21,
+        roadY(m, m.length) + (portrait ? 13 : 11),
+        m.length - (portrait ? (m.id === 4 ? 28 : 20) : 12),
       );
       this.eye
         .set(p.x - forward.x * 8, p.y + 4, p.z - forward.z * 8)
@@ -948,7 +1083,7 @@ export class GameWorld {
     } else {
       this.eye.set(
         p.x - forward.x * (portrait ? 9.6 : 8.2 + speed * 0.9),
-        p.y + (portrait ? 4.5 : 3.1 + speed * 0.2),
+        p.y + (portrait ? 4.3 : 2.85 + speed * 0.2),
         p.z - forward.z * (portrait ? 9.6 : 8.2 + speed * 0.9),
       );
       const ground = heightAt(m, this.eye.x, this.eye.z);
@@ -990,9 +1125,9 @@ export class GameWorld {
       e.wheelSurfaces.reduce((n, s) => n + s.wet, 0) /
       Math.max(1, e.wheelSurfaces.length);
     const dustMat = this.dust.material as T.PointsMaterial;
-    dustMat.color.set(wet > 0.45 ? '#b7bbb1' : '#bcaa80');
-    dustMat.size = wet > 0.45 ? 0.075 : 0.16;
-    dustMat.opacity = 0.18 + speed * 0.3;
+    dustMat.color.set(wet > 0.45 ? '#68736d' : '#837253');
+    dustMat.size = wet > 0.45 ? 0.09 : 0.22;
+    dustMat.opacity = 0.12 + speed * 0.15;
     for (let i = 0; i < this.particles.length; i++) {
       this.particles[i] -= dt;
       const k = i * 3;
@@ -1003,9 +1138,17 @@ export class GameWorld {
       ) {
         this.particles[i] = 0.35 + Math.random() * (wet > 0.4 ? 0.45 : 1);
         const side = i % 2 ? 1 : -1;
-        this.dustData[k] = p.x - forward.x * 1.3 + forward.z * side * 0.95;
+        this.dustData[k] =
+          p.x -
+          forward.x * 1.3 +
+          forward.z * side * 0.95 +
+          (Math.random() - 0.5) * 0.24;
         this.dustData[k + 1] = p.y - 0.72;
-        this.dustData[k + 2] = p.z - forward.z * 1.3 - forward.x * side * 0.95;
+        this.dustData[k + 2] =
+          p.z -
+          forward.z * 1.3 -
+          forward.x * side * 0.95 +
+          (Math.random() - 0.5) * 0.3;
         this.dustVelocity[k] =
           forward.z * side * (0.4 + speed * 2) - forward.x * speed;
         this.dustVelocity[k + 1] =
@@ -1056,6 +1199,7 @@ export class GameWorld {
     this.resizeObserver.disconnect();
     this.living.dispose();
     this.people.forEach((p) => p.skin.skeleton.dispose());
+    this.staff.forEach((p) => p?.dispose());
     this.environmentTarget?.dispose();
     this.renderer.dispose();
     disposeArt();

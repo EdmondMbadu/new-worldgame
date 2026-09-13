@@ -8,8 +8,8 @@ export const bestKey = (
   revision = ROAD_REVISION,
 ) => `${mission}:${mode}:r${revision}:v${variant}`;
 const resultKey = (r: Result) =>
-  r.revision === ROAD_REVISION
-    ? bestKey(r.mission, r.mode, r.variant || 0)
+  r.revision !== undefined
+    ? bestKey(r.mission, r.mode, r.variant ?? 0, r.revision)
     : `${r.mission}:${r.mode}`;
 export type Settings = {
   sound: boolean;
@@ -17,6 +17,9 @@ export type Settings = {
   subtitles: boolean;
   reducedMotion: boolean;
   singlePress: boolean;
+  brightness: number;
+  enhancedVisibility: boolean;
+  reducedFlashes: boolean;
   quality: 'auto' | 'high' | 'low';
   mode: 'standard' | 'relaxed';
   volume: number;
@@ -36,6 +39,9 @@ export const defaultSettings = (): Settings => ({
     typeof matchMedia !== 'undefined' &&
     matchMedia('(prefers-reduced-motion: reduce)').matches,
   singlePress: false,
+  brightness: 1,
+  enhancedVisibility: false,
+  reducedFlashes: false,
   quality: 'auto',
   mode: 'standard',
   volume: 0.65,
@@ -88,12 +94,14 @@ export function parseSave(raw: string | null): Save {
         r.remaining <=
           (r.revision === ROAD_REVISION
             ? MISSIONS[r.mission].seconds
-            : [235, 250, 270, 280, 300][r.mission]) *
+            : r.revision === 2
+              ? [160, 180, 205, 215, 235][r.mission]
+              : [235, 250, 270, 280, 300][r.mission]) *
             1.35 &&
         r.lives === MISSIONS[r.mission].lives &&
         (r.revision === undefined ||
-          (r.revision === ROAD_REVISION &&
-            [0, 1].includes(r.variant || 0) &&
+          ([2, ROAD_REVISION].includes(r.revision) &&
+            [0, 1].includes(r.variant ?? 0) &&
             Number.isInteger(r.clean) &&
             Number.isInteger(r.encounters) &&
             r.clean! >= 0 &&
@@ -110,11 +118,15 @@ export function parseSave(raw: string | null): Save {
       'subtitles',
       'reducedMotion',
       'singlePress',
+      'enhancedVisibility',
+      'reducedFlashes',
     ] as const)
       if (typeof s[k] === 'boolean') base.settings[k] = s[k];
     if (['auto', 'high', 'low'].includes(s.quality))
       base.settings.quality = s.quality;
     if (['standard', 'relaxed'].includes(s.mode)) base.settings.mode = s.mode;
+    if (Number.isFinite(s.brightness))
+      base.settings.brightness = Math.max(0.8, Math.min(1.4, s.brightness));
     if (Number.isFinite(s.volume))
       base.settings.volume = Math.max(0, Math.min(1, s.volume));
     if (

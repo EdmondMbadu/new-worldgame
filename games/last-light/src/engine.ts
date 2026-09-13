@@ -116,6 +116,7 @@ export class GameEngine {
   serial = 0;
   private radioIndex = 0;
   private damageCooldown = 0;
+  private collisionGrace = 0;
   private lastAction = false;
   private accumulator = 0;
   private pauseRevision = 0;
@@ -149,7 +150,10 @@ export class GameEngine {
         .setMass(780)
         .setFriction(0.15)
         .setRestitution(0.02)
-        .setActiveEvents(RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS)
+        .setActiveEvents(
+          RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS |
+            RAPIER.ActiveEvents.COLLISION_EVENTS,
+        )
         .setContactForceEventThreshold(14000),
       this.body,
     );
@@ -188,25 +192,21 @@ export class GameEngine {
     }
     this.encounters = makeEncounters(mission);
     for (const event of this.encounters) {
-      if (event.kind === 'gust') continue;
+      if (!['minibus', 'bridge', 'tree'].includes(event.kind)) continue;
       const p = encounterPose(mission, event);
       const body = this.world.createRigidBody(
         RAPIER.RigidBodyDesc.kinematicPositionBased()
-          .setTranslation(
-            p.x,
-            p.y + (event.kind === 'rockfall' ? 0.55 : 1),
-            p.z,
-          )
-          .setRotation({
-            x: 0,
-            y: Math.sin(p.heading / 2),
-            z: 0,
-            w: Math.cos(p.heading / 2),
-          }),
+          .setTranslation(p.x, p.y + (event.kind === 'tree' ? 0.4 : 1), p.z)
+          .setRotation(p.rotation),
       );
       this.world.createCollider(
-        (event.kind === 'rockfall'
-          ? RAPIER.ColliderDesc.ball(0.65)
+        (event.kind === 'tree'
+          ? RAPIER.ColliderDesc.capsule(2.2, 0.35).setRotation({
+              x: Math.SQRT1_2,
+              y: 0,
+              z: 0,
+              w: Math.SQRT1_2,
+            })
           : RAPIER.ColliderDesc.cuboid(
               1.02,
               0.83,
@@ -280,6 +280,7 @@ export class GameEngine {
     );
   }
   private setPose(z: number) {
+    this.collisionGrace = 0;
     const x = routeX(this.mission, z, this.isAlt),
       a = Math.atan2(routeX(this.mission, z + 2, this.isAlt) - x, 2);
     this.body.setTranslation(
@@ -433,8 +434,10 @@ export class GameEngine {
           : off
             ? 'Verge'
             : 'Gravel';
+    if (surfaceAt(m, p.x, p.z).name === 'Water') this.surface = 'Water';
     const target =
-      clamp(input.steer, -1, 1) *
+      // Inputs use the driver's left/right. With +Z forward, screen-right is -X.
+      -clamp(input.steer, -1, 1) *
       (0.49 - clamp(Math.abs(this.speed) / 52, 0, 0.28));
     this.steering += (target - this.steering) * Math.min(1, dt * 12);
     this.wheelSurfaces = Array.from({ length: 4 }, (_, i) => {
@@ -514,6 +517,16 @@ export class GameEngine {
     this.contactQueue.drainContactForceEvents((event) => {
       contactForce = Math.max(contactForce, event.totalForceMagnitude());
     });
+    let collisionStarted = false;
+    const chassis = this.body.collider(0).handle;
+    // CCD can stop a fast impact without emitting a contact-force event.
+    // A new chassis contact plus measured speed loss still represents a real hit.
+    this.contactQueue.drainCollisionEvents((a, b, start) => {
+      if (start && (a === chassis || b === chassis)) collisionStarted = true;
+    });
+    this.collisionGrace = collisionStarted
+      ? 0.08
+      : Math.max(0, this.collisionGrace - dt);
     this.sync();
     this.wheelSpin += (this.speed * dt) / 0.43;
     const speedLost = Math.max(
@@ -535,7 +548,7 @@ export class GameEngine {
     }
     this.roadPulse = Math.max(this.roadPulse, clamp(compression / 7, 0, 1));
     const damage = impactDamage(
-      contactForce > 14000 ? speedLost : 0,
+      contactForce > 14000 || this.collisionGrace > 0 ? speedLost : 0,
       grounded && this.body.linvel().y > v.y + 2 ? -v.y : 0,
       compression,
       Math.abs(this.speed),
@@ -553,7 +566,10 @@ export class GameEngine {
       roadDistance(m, p.x, p.z) < 4 &&
       Math.abs(q.x) < 0.25 &&
       Math.abs(q.z) < 0.25 &&
-      p.z < this.mission.length - 18
+      p.z < this.mission.length - 18 &&
+      !this.encounters.some(
+        (event) => Math.abs(p.z - event.z) < event.length / 2 + 18,
+      )
     ) {
       this.safeZ = Math.floor(Math.max(8, p.z - 4) / 5) * 5;
     }
@@ -589,37 +605,87 @@ export class GameEngine {
         distance > -25
       ) {
         event.warned = true;
-        this.say(event.title, event.instruction, 5);
+        this.say(event.title, event.instruction, 7);
       }
       if (
         !event.entered &&
-        distance < (event.kind === 'gust' ? 30 : 95) &&
+        distance < (event.kind === 'gust' ? 30 : 145) &&
         distance > -25
       ) {
         event.entered = true;
         event.impactAtEntry = this.impacts;
+        event.recoveryAtEntry = this.recoveries;
+        event.passedSafely = true;
+        if (event.kind === 'bridge') event.state = 'approaching';
       }
-      if (event.entered) event.elapsed += dt;
+      if (event.entered && !event.resolved) {
+        event.elapsed += dt;
+        if (event.kind === 'bridge' && event.state !== 'clear') {
+          const entry = event.z - event.length / 2;
+          // Traffic owns the narrow bridge until it reaches its clearing bay.
+          event.actorZ -= dt * 7;
+          event.state =
+            event.actorZ > event.z + event.length / 2
+              ? 'approaching'
+              : event.actorZ > entry
+                ? 'crossing'
+                : 'clearing';
+          if (event.actorZ < entry - 20) {
+            event.state = 'clear';
+            event.instruction =
+              'Bridge clear. Keep centred and cross slowly, then accelerate away.';
+            this.say('BRIDGE CLEAR', event.instruction, 5);
+          }
+        }
+        const local = this.position.x - roadX(this.mission, this.position.z);
+        const bypass =
+          Math.abs(local) > 8 &&
+          Math.abs(
+            this.position.x - routeX(this.mission, this.position.z, true),
+          ) < 5;
+        if (Math.abs(distance) < event.length / 2 + 2 && !bypass) {
+          if (Math.abs(local) > 6) event.passedSafely = false;
+          if (
+            event.kind === 'bridge' &&
+            (event.state !== 'clear' || Math.abs(this.speed) > 8)
+          )
+            event.passedSafely = false;
+          if (
+            (event.kind === 'washout' || event.kind === 'flood') &&
+            local * event.side < 1.8
+          )
+            event.passedSafely = false;
+          if (
+            event.kind === 'minibus' &&
+            (Math.abs(local) < 2 || Math.abs(this.speed) > 10)
+          )
+            event.passedSafely = false;
+          if (
+            event.kind === 'tree' &&
+            (local * event.side < 1.8 || Math.abs(this.speed) > 10)
+          )
+            event.passedSafely = false;
+        }
+      }
       const body = this.eventBodies.get(event.id);
       if (body && event.entered && !event.resolved) {
         const pose = encounterPose(this.mission, event);
         body.setNextKinematicTranslation({
           x: pose.x,
-          y: pose.y + (event.kind === 'rockfall' ? 0.55 : 1),
+          y: pose.y + (event.kind === 'tree' ? 0.4 : 1),
           z: pose.z,
         });
-        body.setNextKinematicRotation({
-          x: 0,
-          y: Math.sin(pose.heading / 2),
-          z: 0,
-          w: Math.cos(pose.heading / 2),
-        });
+        body.setNextKinematicRotation(pose.rotation);
       }
       if (event.kind === 'gust' && Math.abs(distance) < 30)
         this.body.applyImpulse({ x: windForce(event) * dt, y: 0, z: 0 }, true);
-      if (!event.resolved && distance < -30) {
+      if (!event.resolved && distance < -event.length / 2 - 22) {
         event.resolved = true;
-        event.clean = event.entered && event.impactAtEntry === this.impacts;
+        event.clean =
+          event.entered &&
+          event.passedSafely &&
+          event.impactAtEntry === this.impacts &&
+          event.recoveryAtEntry === this.recoveries;
         if (event.clean) {
           this.cleanEncounters++;
           this.rewardUntil = this.elapsed + 3;
@@ -646,7 +712,9 @@ export class GameEngine {
         Math.floor(4 * this.integrity) +
         Math.floor((200 * this.cleanEncounters) / this.encounters.length),
       stars:
-        this.integrity >= 90 && ratio >= 0.15
+        this.integrity >= 90 &&
+        ratio >= 0.12 &&
+        this.cleanEncounters >= Math.ceil(this.encounters.length * 0.75)
           ? 3
           : this.integrity >= 70
             ? 2

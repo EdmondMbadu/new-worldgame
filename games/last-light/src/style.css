@@ -1769,6 +1769,20 @@ kbd {
   white-space: nowrap;
   margin-left: 8px;
 }
+.encounter-cue[data-clear="true"] {
+  border-color: #a7d9b7;
+}
+.encounter-cue[data-clear="true"] strong,
+.encounter-cue[data-clear="true"] .encounter-mark {
+  color: #c1edce;
+  border-color: #a7d9b7;
+}
+.speedometer .beam-status {
+  color: #b7d2d3;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  margin-top: 5px;
+}
 .clean-cue {
   position: absolute;
   top: 197px;

@@ -2,7 +2,17 @@
 
 ## Original runtime content
 
-The truck, solar kit, clinic interiors, skinned people, minibuses, bridge, road furniture, terrain, hills, foliage and particles are authored in `src/`. The truck uses shaped body cross sections and separate steering/spin pivots. People use a bone hierarchy with skinned geometry and articulated elbows and knees. Canvas-generated material details, wind, tires, impacts, birds and music are original runtime content. Optional spoken radio uses the browser's installed English speech voice; voice availability varies by platform. Game assets are bundled locally.
+The truck, solar kit, clinic interiors and compounds, fallback people, minibuses, bridge, road furniture, terrain, hills, foliage and particles are authored in `src/`. The truck uses shaped body cross sections and separate steering/spin pivots. Canvas-generated material details, wind, tires, impacts, birds and music are original runtime content. Optional spoken radio uses the browser's installed English speech voice; voice availability varies by platform. Game assets are bundled locally.
+
+## Clinic compounds and animated staff
+
+`public/models/clinic-0.glb` through `clinic-4.glb` are original modular architecture authored in `src/clinic-architecture.ts` and exported by `scripts/build-clinic-assets.ts`. Each extends the main clinic with a distinct footprint, recessed windows, receiving shelter, drainage, electrical equipment and chapter-specific wings. They are authored game geometry, not scanned buildings. The selected chapter loads its own compound; an equivalent procedural fallback remains available.
+
+`public/models/clinic-staff.glb` is adapted from **Casual_2.gltf**, by **Quaternius**, from the [Ultimate Modular Characters / Ultimate Modular Men Pack](https://quaternius.com/packs/ultimatemodularcharacters.html), released under **CC0**. The source was obtained through the creator's linked public Google Drive distribution (file ID `1Jn7kULNmrtqP8BUUL19h8MhbdOnwPFhv`). `scripts/prepare-staff.py` retains only the civilian Idle_Neutral, Walk, Wave and Interact clips, removes unused buffers, deduplicates accessors and collapses constant animation channels. Runtime material variants provide clinic uniforms; two-bone arm targeting keeps hands on the carried kit. No combat animations are bundled.
+
+- Source SHA-256: `55c654d09a2a5ff6e3bd6158d4a1b462f181cd6f1e12a0f5e9d959f9c3abc438`.
+- Bundled GLB SHA-256: `53c9242c3ea2bd02660d43fd8a2b96c986a4e05dfe886b8ee2983f6e1c585f37`.
+- Bundled size: 825,664 bytes. Source geometry is cached; each actor owns its skeleton, animation mixer and material clones.
 
 ## Terrain materials
 

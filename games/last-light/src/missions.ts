@@ -1,3 +1,4 @@
+import { branchSections, roadDepression, roadSections } from './road-sections';
 export type Mission = {
   id: number;
   variant?: number;
@@ -34,10 +35,10 @@ export const MISSIONS: Mission[] = [
     seconds: 160,
     lives: 3,
     rain: 0,
-    night: 0,
+    night: 0.82,
     seed: 17,
     bend: 1,
-    sky: '#c2cdba',
+    sky: '#172b40',
     sun: '#ffe1a3',
     mud: [
       [280, 320],
@@ -58,7 +59,7 @@ export const MISSIONS: Mission[] = [
       {
         at: 410,
         who: 'JO · DISPATCH',
-        text: 'Road splits ahead. Left is shorter and rough. Right is a longer, firmer road. Both reach us.',
+        text: 'Road splits ahead. Right is shorter and rough. Left is a longer, firmer road. Both reach us.',
       },
       {
         at: 840,
@@ -80,10 +81,10 @@ export const MISSIONS: Mission[] = [
     seconds: 180,
     lives: 5,
     rain: 0.65,
-    night: 0.12,
+    night: 0.9,
     seed: 41,
     bend: 1.2,
-    sky: '#819d9c',
+    sky: '#182c37',
     sun: '#dbe1c3',
     mud: [
       [180, 260],
@@ -105,7 +106,7 @@ export const MISSIONS: Mission[] = [
       {
         at: 370,
         who: 'JO · DISPATCH',
-        text: 'At the fork, the right-hand ridge is firmer. The short route is muddy.',
+        text: 'At the fork, the left-hand ridge is firmer. The short route is muddy.',
       },
       {
         at: 960,
@@ -120,17 +121,17 @@ export const MISSIONS: Mission[] = [
     place: 'Mto Riverside Clinic',
     tagline: 'Some roads ask you to slow down.',
     briefing:
-      'The river bridge has lost part of its deck. A narrow marked lane is open. You can cross carefully or take the longer ridge road to the right.',
+      'The river bridge has lost part of its deck. A narrow marked lane is open. You can cross carefully or take the longer ridge road to the left.',
     outcome:
       'Six lives supported by restored emergency care. The riverside community has a dependable source of power.',
     length: 1210,
-    seconds: 205,
+    seconds: 190,
     lives: 6,
     rain: 0.25,
-    night: 0.2,
+    night: 0.86,
     seed: 68,
     bend: 1.1,
-    sky: '#9bafad',
+    sky: '#193444',
     sun: '#fce2bb',
     mud: [
       [240, 285],
@@ -147,7 +148,7 @@ export const MISSIONS: Mission[] = [
       {
         at: 370,
         who: 'JO · DISPATCH',
-        text: 'Bridge ahead: keep to the centre, under 20 kilometres an hour. The right fork goes around.',
+        text: 'Bridge ahead: keep to the centre, under 20 kilometres an hour. The left fork goes around.',
       },
       {
         at: 650,
@@ -171,13 +172,13 @@ export const MISSIONS: Mission[] = [
     outcome:
       'The maternity ward is bright again. Eight patients and their families can face the night with hope.',
     length: 1280,
-    seconds: 215,
+    seconds: 185,
     lives: 8,
     rain: 0.45,
     night: 0.88,
     seed: 93,
     bend: 1.4,
-    sky: '#263d51',
+    sky: '#223647',
     sun: '#a3c9d5',
     mud: [
       [260, 300],
@@ -198,7 +199,7 @@ export const MISSIONS: Mission[] = [
       {
         at: 410,
         who: 'JO · DISPATCH',
-        text: 'Right-hand route is wider. Keep your headlights on the markers.',
+        text: 'Left-hand route is wider. Keep your headlights on the markers.',
       },
       {
         at: 1060,
@@ -217,13 +218,13 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Twelve patients have power for their care. Five clinics now shine across the region. You brought the light; together, you kept hope alive.',
     length: 1400,
-    seconds: 235,
+    seconds: 215,
     lives: 12,
     rain: 1,
-    night: 0.6,
+    night: 0.96,
     seed: 121,
     bend: 1.45,
-    sky: '#405b69',
+    sky: '#172a35',
     sun: '#c5d9cf',
     mud: [
       [220, 280],
@@ -246,7 +247,7 @@ export const MISSIONS: Mission[] = [
       {
         at: 390,
         who: 'JO · DISPATCH',
-        text: 'The bridge is narrow. The ridge route to the right remains open.',
+        text: 'The bridge is narrow. The ridge route to the left remains open.',
       },
       {
         at: 800,
@@ -293,8 +294,12 @@ export function roadY(m: Mission, z: number) {
   );
 }
 export function forkOffset(m: Mission, z: number) {
-  const t = (z - m.fork[0]) / (m.fork[1] - m.fork[0]);
-  return t > 0 && t < 1 ? Math.pow(Math.sin(t * Math.PI), 2) * 27 : 0;
+  return branchSections(m).reduce((offset, [a, b]) => {
+    const t = (z - a) / (b - a);
+    return t > 0 && t < 1
+      ? Math.max(offset, Math.pow(Math.sin(t * Math.PI), 2) * 27)
+      : offset;
+  }, 0);
 }
 export function routeX(m: Mission, z: number, alt = false) {
   return roadX(m, z) + (alt ? forkOffset(m, z) : 0);
@@ -340,10 +345,17 @@ export function obstacles(m: Mission): Obstacle[] {
         kind: 'rock',
       });
   }
-  if (m.id === 4)
-    list.push({ x: roadX(m, 210) - 3, z: 210, radius: 1.3, kind: 'log' });
-  obstacleCache.set(m, list);
-  return list;
+
+  // Keep incidental roughness out of the approach and marked exit corridors.
+  // The authored hazard itself is the challenge; its safe line must stay usable.
+  const clear = list.filter(
+    (o) =>
+      !roadSections(m).some(
+        (s) => o.z > s.z - 135 && o.z < s.z + s.length / 2 + 40,
+      ),
+  );
+  obstacleCache.set(m, clear);
+  return clear;
 }
 export function rutDepthAt(m: Mission, x: number, z: number) {
   let depth = 0;
@@ -383,6 +395,13 @@ export function heightAt(m: Mission, x: number, z: number) {
     if (isMud(m, x, z)) h += Math.sin(z * 1.9) * 0.045;
     h -= rutDepthAt(m, x, z);
   }
+  h -= roadDepression(m, x - roadX(m, z), z);
+  // The expanded clinic wings and receiving paths share a level site in both worlds.
+  const clinicSite =
+    smooth(m.length - 24, m.length - 2, z) *
+    (1 - smooth(m.length + 38, m.length + 53, z)) *
+    (1 - smooth(18, 30, Math.abs(x)));
+  h += (roadY(m, m.length) - h) * clinicSite;
   return h;
 }
 export function pathLength(m: Mission, from = 0, alt = false) {

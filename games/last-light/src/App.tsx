@@ -27,6 +27,8 @@ import type { GameWorld } from "./world";
 import type { Controls } from "./input";
 import { Soundtrack } from "./audio";
 import { driveInput } from "./qa-driver";
+import { branchSections } from "./road-sections";
+import { beamMode, nightProfile } from "./night";
 
 const base = import.meta.env.BASE_URL;
 const time = (n: number) => {
@@ -39,12 +41,14 @@ function RouteMap({ engine: e }: { engine: GameEngine }) {
   const m = e.mission;
   const main = Array.from({ length: 100 }, (_, i) => {
     const z = (i * m.length) / 99;
-    return `${50 + roadX(m, z) * 0.45},${112 - (z / m.length) * 100}`;
+    return `${50 - roadX(m, z) * 0.45},${112 - (z / m.length) * 100}`;
   }).join(" ");
-  const alt = Array.from({ length: 35 }, (_, i) => {
-    const z = m.fork[0] + ((m.fork[1] - m.fork[0]) * i) / 34;
-    return `${50 + routeX(m, z, true) * 0.45},${112 - (z / m.length) * 100}`;
-  }).join(" ");
+  const alternatives = branchSections(m).map(([from, to]) =>
+    Array.from({ length: 35 }, (_, i) => {
+      const z = from + ((to - from) * i) / 34;
+      return `${50 - routeX(m, z, true) * 0.45},${112 - (z / m.length) * 100}`;
+    }).join(" "),
+  );
   return (
     <svg
       className="route-map"
@@ -52,11 +56,13 @@ function RouteMap({ engine: e }: { engine: GameEngine }) {
       aria-label="Route to the clinic"
     >
       <polyline points={main} className="route-line" />
-      <polyline points={alt} className="route-alt" />
+      {alternatives.map((points, i) => (
+        <polyline key={i} points={points} className="route-alt" />
+      ))}
       <circle cx="50" cy="12" r="4" className="map-clinic" />
       <path d="M47 12h6m-3-3v6" stroke="#153e36" strokeWidth="1.5" />
       <circle
-        cx={50 + e.position.x * 0.45}
+        cx={50 - e.position.x * 0.45}
         cy={112 - (e.progress / m.length) * 100}
         r="4"
         className="map-truck"
@@ -280,6 +286,8 @@ function SettingsPanel({
             ["subtitles", "Radio subtitles"],
             ["reducedMotion", "Reduced camera motion"],
             ["singlePress", "One-press delivery"],
+            ["enhancedVisibility", "Enhanced night visibility"],
+            ["reducedFlashes", "Reduce lightning flashes"],
           ] as const
         ).map(([key, label]) => (
           <label className="setting-row" key={key}>
@@ -293,6 +301,20 @@ function SettingsPanel({
             />
           </label>
         ))}
+        <label className="setting-row">
+          Night brightness
+          <input
+            type="range"
+            aria-label="Night brightness"
+            min="0.8"
+            max="1.4"
+            step="0.05"
+            value={settings.brightness}
+            onChange={(e) =>
+              onChange({ ...settings, brightness: Number(e.target.value) })
+            }
+          />
+        </label>
         <label className="setting-row">
           Volume
           <input
@@ -407,15 +429,24 @@ export default function App() {
           { GameWorld },
           { Controls },
           { loadSurfaces },
+          { loadStaff },
+          { loadClinic },
         ] = await Promise.all([
           import("./engine"),
           import("./world"),
           import("./input"),
           import("./surfaces"),
+          import("./staff"),
+          import("./clinic-assets"),
         ]);
         if (cancelled) return;
         setLoading("Checking the truck");
-        await Promise.all([initPhysics(), loadSurfaces()]);
+        await Promise.all([
+          initPhysics(),
+          loadSurfaces(),
+          loadStaff(),
+          loadClinic(selected),
+        ]);
         if (cancelled) return;
         const instance = new GameEngine(
           missionVariant(MISSIONS[selected], variant),
@@ -603,7 +634,7 @@ export default function App() {
               The reason is everything.
             </p>
             <p className="hero-description">
-              Carry solar power through a changing world.
+              Five nights. One reason to keep going.
               <br />
               Reach the clinic. Bring the light.
             </p>
@@ -650,11 +681,7 @@ export default function App() {
             <span>{mission.place}</span>
             <span className="preview-distance">
               {(pathLength(mission) / 1000).toFixed(1)} km ·{" "}
-              {selected < 2
-                ? "Valley roads"
-                : selected === 2
-                  ? "River crossing"
-                  : "Highland roads"}
+              {nightProfile(mission).name.toLowerCase()}
             </span>
           </aside>
           <section className="campaign" aria-label="Choose a chapter">
@@ -818,12 +845,24 @@ export default function App() {
                       />
                     </div>
                     <small>{e.surface.toUpperCase()}</small>
+                    <small className="beam-status">
+                      ◌ {beamMode(e.mission, Math.abs(e.speed))}
+                    </small>
                   </div>
                   {e.upcomingEncounter && (
-                    <div className="encounter-cue" role="status">
+                    <div
+                      className="encounter-cue"
+                      data-clear={e.upcomingEncounter.state === "clear"}
+                      role="status"
+                    >
                       <span className="encounter-mark">!</span>
                       <div>
-                        <strong>{e.upcomingEncounter.title}</strong>
+                        <strong>
+                          {e.upcomingEncounter.kind === "bridge" &&
+                          e.upcomingEncounter.state === "clear"
+                            ? "BRIDGE CLEAR"
+                            : e.upcomingEncounter.title}
+                        </strong>
                         <span>{e.upcomingEncounter.instruction}</span>
                       </div>
                       <b>
