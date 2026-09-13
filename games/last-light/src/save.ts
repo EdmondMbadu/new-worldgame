@@ -1,5 +1,16 @@
 import { MISSIONS } from './missions';
 import type { Result } from './engine';
+import { ROAD_REVISION } from './vehicle';
+export const bestKey = (
+  mission: number,
+  mode: string,
+  variant = 0,
+  revision = ROAD_REVISION,
+) => `${mission}:${mode}:r${revision}:v${variant}`;
+const resultKey = (r: Result) =>
+  r.revision === ROAD_REVISION
+    ? bestKey(r.mission, r.mode, r.variant || 0)
+    : `${r.mission}:${r.mode}`;
 export type Settings = {
   sound: boolean;
   voice: boolean;
@@ -74,9 +85,21 @@ export function parseSave(raw: string | null): Save {
         r.integrity <= 100 &&
         Number.isFinite(r.remaining) &&
         r.remaining >= 0 &&
-        r.remaining <= MISSIONS[r.mission].seconds * 1.35 &&
+        r.remaining <=
+          (r.revision === ROAD_REVISION
+            ? MISSIONS[r.mission].seconds
+            : [235, 250, 270, 280, 300][r.mission]) *
+            1.35 &&
         r.lives === MISSIONS[r.mission].lives &&
-        k === `${r.mission}:${r.mode}`
+        (r.revision === undefined ||
+          (r.revision === ROAD_REVISION &&
+            [0, 1].includes(r.variant || 0) &&
+            Number.isInteger(r.clean) &&
+            Number.isInteger(r.encounters) &&
+            r.clean! >= 0 &&
+            r.clean! <= r.encounters! &&
+            r.encounters! <= 4)) &&
+        k === resultKey(r)
       )
         base.best[k] = r;
     }
@@ -132,7 +155,7 @@ export function recordResult(save: Save, result: Result): Save {
   };
   if (!next.completed.includes(result.mission))
     next.completed.push(result.mission);
-  const k = `${result.mission}:${result.mode}`;
+  const k = resultKey(result);
   if (!next.best[k] || result.score > next.best[k].score)
     next.best[k] = { ...result };
   return next;

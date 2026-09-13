@@ -29,11 +29,14 @@ import {
   roadY,
   routeX,
   smooth,
+  rutDepthAt,
   type Mission,
 } from './missions';
 import type { Settings } from './save';
 import { canopyTexture, grassGeometry } from './foliage';
-import { surfaceTexture } from './surfaces';
+import { surfaceTexture, environmentTexture } from './surfaces';
+import { LivingWorld, windMaterial } from './living-world';
+import { surfaceAt } from './vehicle';
 
 export class GameWorld {
   renderer: T.WebGLRenderer;
@@ -60,6 +63,18 @@ export class GameWorld {
   private adaptTimer = 0;
   private particles: Float32Array;
   private disposed = false;
+  private environmentTarget: T.WebGLRenderTarget | null = null;
+  private living: LivingWorld;
+  private windTime = { value: 0 };
+  private chunks: { mesh: T.Object3D; start: number; end: number }[] = [];
+  private water: T.Mesh | null = null;
+  private speedFov = 56;
+  private renderedPosition = new T.Vector3();
+  private renderedRotation = new T.Quaternion();
+  private groundNormal = new T.Vector3(0, 1, 0);
+  private forward = new T.Vector3();
+  private dustVelocity = new Float32Array(180 * 3);
+  performance = { p95: 0, fps: 0, calls: 0, triangles: 0 };
   constructor(
     public canvas: HTMLCanvasElement,
     public engine: GameEngine,
@@ -79,17 +94,25 @@ export class GameWorld {
     this.renderer.shadowMap.type = T.PCFSoftShadowMap;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     this.renderer.toneMapping = T.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.35;
+    this.renderer.toneMappingExposure = m.night > 0.5 ? 1.3 : 1.1;
+    const environment = environmentTexture();
+    if (environment) {
+      const pmrem = new T.PMREMGenerator(this.renderer);
+      this.environmentTarget = pmrem.fromEquirectangular(environment);
+      this.scene.environment = this.environmentTarget.texture;
+      this.scene.environmentIntensity = m.night > 0.5 ? 0.12 : 0.4;
+      pmrem.dispose();
+    }
     this.scene.background = new T.Color(m.sky);
     this.scene.fog = new T.FogExp2(m.sky, 0.0018 + m.night * 0.0012);
     const hemi = new T.HemisphereLight(
       m.night > 0.5 ? '#8baec5' : '#e3e8d4',
       '#4b4830',
-      m.night > 0.5 ? 1.35 : 2,
+      m.night > 0.5 ? 0.95 : 1.3,
     );
     this.scene.add(hemi);
     this.sun.color.set(m.sun);
-    this.sun.intensity = m.night > 0.5 ? 0.8 : 3;
+    this.sun.intensity = m.night > 0.5 ? 0.65 : 2.6 - m.rain * 0.9;
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(this.low ? 1024 : 2048, this.low ? 1024 : 2048);
     this.sun.shadow.camera.left = -55;
@@ -106,19 +129,21 @@ export class GameWorld {
     this.buildTerrain(m);
     this.buildNature(m);
     this.buildRoute(m);
+    this.living = new LivingWorld(m, engine.encounters, this.low);
+    this.scene.add(this.living.group);
     this.truck = createTruck();
     this.scene.add(this.truck.root);
     for (const x of [-0.72, 0.72]) {
       const light = new T.SpotLight(
         '#fff0cc',
-        m.night > 0.4 ? 48 : 12,
-        65,
-        0.47,
+        m.night > 0.4 ? 95 : 18,
+        120,
+        0.46,
         0.55,
         1.25,
       );
-      light.position.set(x, 0.85, 2.2);
-      light.target.position.set(x, 0.1, 24);
+      light.position.set(x, 0.66, 2.3);
+      light.target.position.set(x, -0.35, 55);
       this.truck.root.add(light, light.target);
       this.headlights.push(light);
     }
@@ -234,10 +259,26 @@ export class GameWorld {
     if (!width || !height) return;
     this.camera.aspect = width / height;
     this.camera.fov = width < height ? 65 : 56;
+    this.speedFov = this.camera.fov;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
   }
   private makeSky(m: Mission) {
+    const env = environmentTexture();
+    if (env) {
+      const mat = new T.MeshBasicMaterial({
+        map: env,
+        side: T.BackSide,
+        depthWrite: false,
+        color: new T.Color(
+          m.night > 0.5 ? '#405a71' : '#ced6d0',
+        ).multiplyScalar(m.night > 0.5 ? 0.1 : 0.65),
+      });
+      materials.add(mat);
+      const g = new T.SphereGeometry(760, 48, 24);
+      geometries.add(g);
+      return new T.Mesh(g, mat);
+    }
     const mat = new T.ShaderMaterial({
       side: T.BackSide,
       depthWrite: false,
@@ -277,7 +318,7 @@ export class GameWorld {
       uv[i * 2 + 1] = z * 0.07;
       const d = roadDistance(m, x, z),
         v = 0.8 + Math.sin(x * 0.08 + z * 0.025) * 0.17;
-      const c = new T.Color(d < 7 ? '#a09572' : '#9da37a').multiplyScalar(v);
+      const c = new T.Color(d < 7 ? '#9c9973' : '#789760').multiplyScalar(v);
       colors.set([c.r, c.g, c.b], i * 3);
     }
     geometry.setAttribute('uv', new T.BufferAttribute(uv, 2));
@@ -290,69 +331,94 @@ export class GameWorld {
     textures.add(mat.map);
     if (mat.normalMap) textures.add(mat.normalMap);
     mat.vertexColors = true;
-    mesh(geometry, mat, this.scene);
+    this.addTerrainChunks(geometry, mat, data.cols, data.rows);
     for (const alt of [false, true]) {
       const geo = new T.BufferGeometry(),
         p: number[] = [],
         u: number[] = [],
+        colors: number[] = [],
+        wet: number[] = [],
         idx: number[] = [];
       const start = alt ? m.fork[0] : -30,
         end = alt ? m.fork[1] : m.length + 12;
-      for (let z = start, j = 0; z <= end; z += 2, j++) {
-        const width = onBridge(m, z) && !alt ? 2.5 : 5.8;
-        for (let i = 0; i < 5; i++) {
-          const x = routeX(m, z, alt) + ((i / 4) * 2 - 1) * width;
+      for (let z = start, j = 0; z <= end; z += 1, j++) {
+        const width =
+          onBridge(m, z) && !alt
+            ? 2.5
+            : 4.8 + Math.sin(z * 0.047) * 0.32 + Math.sin(z * 0.18) * 0.1;
+        for (let i = 0; i < 25; i++) {
+          const x = routeX(m, z, alt) + ((i / 24) * 2 - 1) * width;
           p.push(x, heightAt(m, x, z) + 0.055, z);
-          u.push(i * 0.44, z * 0.14);
-          if (i < 4 && z + 2 <= end) {
-            const a = j * 5 + i;
-            idx.push(a, a + 5, a + 1, a + 1, a + 5, a + 6);
+          u.push((x - roadX(m, z)) * 0.5, z * 0.5);
+          const muddy = isMud(m, x, z),
+            depth = rutDepthAt(m, x, z);
+          const track = Math.exp(
+            -Math.pow((Math.abs(x - routeX(m, z, alt)) - 1.1) / 0.65, 2),
+          );
+          const color = new T.Color(
+            muddy ? '#73674e' : '#c5b995',
+          ).multiplyScalar(1 - depth * 1.7 - track * 0.08);
+          colors.push(color.r, color.g, color.b);
+          wet.push(surfaceAt(m, x, z).wet);
+          if (i < 24 && z + 1 <= end) {
+            const a = j * 25 + i;
+            idx.push(a, a + 25, a + 1, a + 1, a + 25, a + 26);
           }
         }
       }
       geo.setAttribute('position', new T.Float32BufferAttribute(p, 3));
       geo.setAttribute('uv', new T.Float32BufferAttribute(u, 2));
+      geo.setAttribute('color', new T.Float32BufferAttribute(colors, 3));
+      geo.setAttribute('wetness', new T.Float32BufferAttribute(wet, 1));
       geo.setIndex(idx);
       geo.computeVertexNormals();
-      const dirt = material('#f5d8b8', m.rain > 0.3 ? 0.68 : 0.95);
+      const dirt = material('#ffffff', 0.96);
+      dirt.vertexColors = true;
       dirt.map = surfaceTexture('road-color') || texture('earth');
       dirt.normalMap = surfaceTexture('road-normal') || null;
-      dirt.normalScale.set(0.7, 0.7);
+      dirt.normalScale.set(0.55, 0.55);
+      dirt.roughnessMap = surfaceTexture('road-arm') || null;
+      if (dirt.roughnessMap) textures.add(dirt.roughnessMap);
+      dirt.onBeforeCompile = (shader) => {
+        shader.vertexShader =
+          'attribute float wetness; varying float vWet;\n' +
+          shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace(
+          '#include <begin_vertex>',
+          '#include <begin_vertex>\nvWet=wetness;',
+        );
+        shader.fragmentShader = 'varying float vWet;\n' + shader.fragmentShader;
+        shader.fragmentShader = shader.fragmentShader.replace(
+          '#include <roughnessmap_fragment>',
+          '#include <roughnessmap_fragment>\nroughnessFactor=mix(roughnessFactor,.26,vWet*.65);',
+        );
+      };
+      dirt.customProgramCacheKey = () => 'wet-road';
       textures.add(dirt.map);
       if (dirt.normalMap) textures.add(dirt.normalMap);
-      mesh(geo, dirt, this.scene);
+      this.addTerrainChunks(geo, dirt, 25, Math.floor(end - start));
     }
     const patches = new T.Group(),
       mud = material('#574330', 0.24),
       rut = material('#332b23', 0.95);
-    for (const [a, b] of m.mud) {
-      for (let z = a; z < b; z += 4) {
-        const x = roadX(m, z);
-        const o = mesh(
-          new T.CircleGeometry(1, 20),
+    // Small puddles occupy real depressions; the road itself supplies the muddy surface.
+    for (const o of this.engine.obstacles)
+      if (o.kind === 'rut' && m.rain > 0.1) {
+        const puddle = mesh(
+          new T.CircleGeometry(o.radius * 0.58, 20),
           mud,
           patches,
-          x,
-          heightAt(m, x, z) + 0.08,
-          z,
-        );
-        o.rotation.x = -Math.PI / 2;
-        o.scale.set(5, 2.7, 1);
-        o.castShadow = false;
-      }
-    }
-    for (const o of this.engine.obstacles) {
-      if (o.kind === 'rut') {
-        const pothole = mesh(
-          new T.CircleGeometry(o.radius, 16),
-          rut,
-          patches,
           o.x,
-          heightAt(m, o.x, o.z) + 0.082,
+          heightAt(m, o.x, o.z) + 0.065,
           o.z,
         );
-        pothole.rotation.x = -Math.PI / 2;
-        pothole.scale.set(1, 1.45, 1);
+        puddle.rotation.x = -Math.PI / 2;
+        puddle.scale.y = 1.65;
+        puddle.castShadow = false;
+      }
+    for (const o of this.engine.obstacles) {
+      if (o.kind === 'rut') {
+        continue;
       } else if (o.kind === 'rock') {
         sphere(
           patches,
@@ -394,6 +460,13 @@ export class GameWorld {
         40,
       );
       river.castShadow = false;
+      this.water = river;
+      water.normalMap = surfaceTexture('road-normal') || null;
+      if (water.normalMap) {
+        water.normalMap.repeat.set(30, 4);
+        textures.add(water.normalMap);
+      }
+      water.normalScale.set(0.13, 0.13);
       const bridge = new T.Group(),
         wood = material('#9c8c6c'),
         rail = material('#d0cbb0');
@@ -426,6 +499,47 @@ export class GameWorld {
       this.scene.add(batch(bridge));
     }
   }
+  private addTerrainChunks(
+    geometry: T.BufferGeometry,
+    mat: T.Material,
+    cols: number,
+    rows: number,
+  ) {
+    const original = geometry.index!.array;
+    for (let first = 0; first < rows; first += 160) {
+      const last = Math.min(rows, first + 160),
+        base = first * cols,
+        g = new T.BufferGeometry();
+      for (const [name, attr] of Object.entries(geometry.attributes)) {
+        const a = attr as T.BufferAttribute;
+        g.setAttribute(
+          name,
+          new T.BufferAttribute(
+            a.array.slice(base * a.itemSize, (last + 1) * cols * a.itemSize),
+            a.itemSize,
+          ),
+        );
+      }
+      const count = (last - first) * (cols - 1) * 6,
+        offset = first * (cols - 1) * 6;
+      g.setIndex(
+        Array.from(
+          original.slice(offset, offset + count),
+          (x) => Number(x) - base,
+        ),
+      );
+      g.computeBoundingSphere();
+      const o = mesh(g, mat, this.scene);
+      o.castShadow = false;
+      const pos = g.attributes.position;
+      this.chunks.push({
+        mesh: o,
+        start: pos.getZ(0),
+        end: pos.getZ(pos.count - 1),
+      });
+    }
+    geometry.dispose();
+  }
   private buildNature(m: Mission) {
     const rng = random(m.seed * 11),
       nature = new T.Group(),
@@ -444,6 +558,7 @@ export class GameWorld {
       mat.map = leafMap;
       mat.alphaTest = 0.45;
       mat.side = T.DoubleSide;
+      windMaterial(mat, this.windTime, 0.06 + m.rain * 0.035);
     });
     const count = this.low ? 450 : 800;
     const trunks = new T.InstancedMesh(trunkGeo, trunkMat, count);
@@ -501,6 +616,7 @@ export class GameWorld {
     geometries.add(grassGeo);
     const grassMat = material('#8f9e63');
     grassMat.side = T.DoubleSide;
+    windMaterial(grassMat, this.windTime, 0.12);
     const gc = this.low ? 4000 : 9500;
     const grass = new T.InstancedMesh(grassGeo, grassMat, gc);
     for (let i = 0; i < gc; i++) {
@@ -522,10 +638,25 @@ export class GameWorld {
     }
     grass.receiveShadow = true;
     this.scene.add(grass);
-    const rockGeo = new T.IcosahedronGeometry(1, 0);
+    const rockGeo = new T.IcosahedronGeometry(1, 2);
+    const rp = rockGeo.attributes.position;
+    for (let i = 0; i < rp.count; i++) {
+      const x = rp.getX(i),
+        y = rp.getY(i),
+        z = rp.getZ(i),
+        n = 1 + Math.sin(x * 9 + z * 4) * Math.sin(y * 7) * 0.15;
+      rp.setXYZ(i, x * n, y * n, z * n);
+    }
+    rockGeo.computeVertexNormals();
     geometries.add(rockGeo);
-    const rocks = new T.InstancedMesh(rockGeo, material('#797b60'), 300);
-    for (let i = 0; i < 300; i++) {
+    const rockMat = material('#858978');
+    rockMat.map = surfaceTexture('ground-color') || null;
+    rockMat.normalMap = surfaceTexture('ground-normal') || null;
+    rockMat.normalScale.set(0.3, 0.3);
+    if (rockMat.map) textures.add(rockMat.map);
+    if (rockMat.normalMap) textures.add(rockMat.normalMap);
+    const rocks = new T.InstancedMesh(rockGeo, rockMat, 230);
+    for (let i = 0; i < 230; i++) {
       const z = rng() * m.length,
         x = roadX(m, z) + (rng() > 0.5 ? 1 : -1) * (9 + rng() * 100);
       obj.position.set(x, heightAt(m, x, z) - 0.3, z);
@@ -537,11 +668,33 @@ export class GameWorld {
     rocks.castShadow = true;
     rocks.receiveShadow = true;
     this.scene.add(rocks);
+    const pebbleGeo = new T.IcosahedronGeometry(1, 0);
+    geometries.add(pebbleGeo);
+    const pebbles = new T.InstancedMesh(
+      pebbleGeo,
+      rockMat,
+      this.low ? 600 : 1500,
+    );
+    for (let i = 0; i < pebbles.count; i++) {
+      const z = rng() * m.length,
+        x = roadX(m, z) + (rng() - 0.5) * 8.8;
+      obj.position.set(x, heightAt(m, x, z) + 0.075, z);
+      obj.rotation.set(rng(), rng() * 6, rng());
+      obj.scale.set(
+        0.025 + rng() * 0.055,
+        0.018 + rng() * 0.035,
+        0.035 + rng() * 0.045,
+      );
+      obj.updateMatrix();
+      pebbles.setMatrixAt(i, obj.matrix);
+    }
+    pebbles.receiveShadow = true;
+    this.scene.add(pebbles);
     // Broad silhouettes extend the landscape beyond the playable road corridor.
-    const mountain = material(m.night > 0.5 ? '#294959' : '#798e80');
-    for (let i = 0; i < 28; i++) {
-      const z = i * 70 - 100;
-      const x = (i % 2 ? 1 : -1) * (230 + rng() * 150);
+    const mountain = material(m.night > 0.5 ? '#263d46' : '#465f59');
+    for (let i = 0; i < 18; i++) {
+      const z = i * 100 - 100;
+      const x = (i % 2 ? 1 : -1) * (330 + rng() * 160);
       const o = mesh(
         new T.SphereGeometry(1, 22, 12),
         mountain,
@@ -550,7 +703,16 @@ export class GameWorld {
         -17,
         z,
       );
-      o.scale.set(100 + rng() * 110, 45 + rng() * 60, 110 + rng() * 100);
+      const points = o.geometry.attributes.position;
+      for (let j = 0; j < points.count; j++) {
+        const x = points.getX(j),
+          y = points.getY(j),
+          z = points.getZ(j),
+          f = 1 + 0.06 * Math.sin(x * 8 + z * 7) * Math.sin(y * 6);
+        points.setXYZ(j, x * f, y * f, z * f);
+      }
+      o.geometry.computeVertexNormals();
+      o.scale.set(100 + rng() * 100, 40 + rng() * 50, 110 + rng() * 80);
       o.rotation.y = rng() * 6;
     }
     this.scene.add(batch(nature));
@@ -584,86 +746,193 @@ export class GameWorld {
     for (const [a] of m.mud) sign(a - 25, 'MUD · STEADY SPEED', -1);
     this.scene.add(batch(fixtures));
   }
-  render(dt: number) {
+  render(dt: number, frameDelta = dt) {
     if (this.disposed) return;
     const e = this.engine,
       m = e.mission;
     this.clock += dt;
-    const p = e.position,
-      q = e.rotation;
-    this.truck.root.position.set(p.x, p.y, p.z);
-    this.truck.root.quaternion.set(q.x, q.y, q.z, q.w);
+    const alpha = e.phase === 'driving' ? e.interpolation : 1;
+    this.renderedPosition
+      .set(e.previousPosition.x, e.previousPosition.y, e.previousPosition.z)
+      .lerp(new T.Vector3(e.position.x, e.position.y, e.position.z), alpha);
+    this.renderedRotation
+      .set(
+        e.previousRotation.x,
+        e.previousRotation.y,
+        e.previousRotation.z,
+        e.previousRotation.w,
+      )
+      .slerp(
+        new T.Quaternion(
+          e.rotation.x,
+          e.rotation.y,
+          e.rotation.z,
+          e.rotation.w,
+        ),
+        alpha,
+      );
+    const p = this.renderedPosition;
+    this.truck.root.position.copy(p);
+    this.truck.root.quaternion.copy(this.renderedRotation);
+    this.windTime.value = this.clock;
+    this.living.update(e, this.clock);
+    for (const chunk of this.chunks)
+      chunk.mesh.visible = chunk.end > p.z - 120 && chunk.start < p.z + 410;
+    if (this.water) {
+      const mat = this.water.material as T.MeshStandardMaterial;
+      if (mat.normalMap) {
+        mat.normalMap.offset.x = this.clock * 0.019;
+        mat.normalMap.offset.y = this.clock * 0.008;
+      }
+    }
+    this.sky.rotation.y = this.clock * 0.0007;
     for (let i = 0; i < 4; i++) {
       const wheel = this.truck.wheels[i];
       wheel.position.y = -(e.vehicle.wheelSuspensionLength(i) ?? 0.45);
-      wheel.rotation.set(e.wheelSpin, i < 2 ? e.steering : 0, 0);
+      wheel.rotation.y = i < 2 ? e.steering : 0;
+      this.truck.tires[i].rotation.x = e.wheelSpin;
     }
-    this.truck.tail.emissiveIntensity =
-      e.phase === 'driving' && Math.abs(e.speed) < 2 ? 3 : 1.1;
+    this.truck.tail.emissiveIntensity = e.braking > 0.1 ? 3.5 : 0.7;
+    for (const wiper of this.truck.wipers)
+      wiper.rotation.z =
+        m.rain > 0.2 ? Math.sin(this.clock * 4.5) * 0.72 : 0.65;
+    this.truck.cargo.rotation.z =
+      Math.sin(this.clock * 21) * e.roadPulse * 0.012;
+    this.truck.cargo.position.y =
+      e.roadPulse * Math.sin(this.clock * 25) * 0.008;
     const restoring = e.phase === 'restoring' || e.phase === 'results';
     const t = restoring ? e.restoreTime : 0;
-    this.truck.cargo.visible = t < 2;
-    this.transferKit.visible = t >= 2 && t < 6;
-    const transfer = smooth(2, 6, t);
-    this.transferKit.position.set(
-      T.MathUtils.lerp(p.x, -6, transfer),
-      T.MathUtils.lerp(p.y - 0.7, roadY(m, m.length), transfer),
-      T.MathUtils.lerp(p.z - 1.5, m.length + 16, transfer),
-    );
-    this.clinic.battery.visible = t > 3;
-    this.clinic.roofPanels.visible = t > 11;
+    this.truck.cargo.visible = t < 3;
+    const transfer = smooth(3, 8, t),
+      ground = roadY(m, m.length);
+    const kitX = T.MathUtils.lerp(p.x, -6, transfer),
+      kitZ = T.MathUtils.lerp(p.z - 1.57, m.length + 16, transfer);
+    this.transferKit.visible = t >= 3 && t < 8.5;
+    this.transferKit.position.set(kitX, heightAt(m, kitX, kitZ), kitZ);
+    this.clinic.battery.visible = t >= 8;
+    // The installed array belongs to the later completed-clinic view, after the battery handover.
+    this.clinic.roofPanels.visible = e.phase === 'results';
     this.clinic.panes.forEach((pane, i) => {
-      const a = smooth(5 + i * 0.6, 7 + i * 0.6, t);
-      const mat = pane.material as T.MeshStandardMaterial;
-      mat.color.set(a > 0.1 ? '#f3ddac' : '#0a2325');
-      mat.emissiveIntensity = a * 2.6;
+      const a = smooth(8.3 + i * 0.65, 9.3 + i * 0.65, t),
+        mat = pane.material as T.MeshStandardMaterial;
+      mat.color.set(a > 0 ? '#899c82' : '#102223');
+      mat.emissiveIntensity = a * 0.025;
+      mat.opacity = 0.13;
     });
-    this.clinic.lights[0].intensity = smooth(6, 9, t) * 90;
-    this.clinic.lights[1].intensity = smooth(7, 10, t) * 65;
-    this.clinic.fixture.emissiveIntensity = smooth(6, 9, t) * 2;
-    this.clinic.glowMat.opacity = smooth(6, 10, t) * 0.15;
+    this.clinic.interiorLights.forEach(
+      (light, i) =>
+        (light.intensity =
+          smooth(8.2 + i * 0.7, 9 + i * 0.7, t) * (i === 2 ? 16 : 24)),
+    );
+    const power = smooth(8.3, 10.5, t);
+    this.clinic.interiorMats.forEach((mat, i) => {
+      mat.color
+        .copy(this.clinic.interiorColors[i])
+        .multiplyScalar(0.13 + power * 0.87);
+      mat.emissive
+        .copy(this.clinic.interiorColors[i])
+        .multiplyScalar(power * 0.08);
+    });
+    this.clinic.screen.emissiveIntensity = power * 0.8;
+    this.clinic.fan.rotation.y =
+      t > 10 ? (t - 10) * Math.min(12, (t - 10) * 3) : 0;
+    this.clinic.lights[0].intensity = smooth(10, 12, t) * 80;
+    this.clinic.lights[1].intensity = smooth(10.8, 12.6, t) * 55;
+    this.clinic.fixture.emissiveIntensity = smooth(10, 12, t) * 3;
+    this.clinic.glowMat.opacity = smooth(10, 12.5, t) * 0.1;
     for (let i = 0; i < this.people.length; i++) {
-      const person = this.people[i];
-      const walk = i < 2 && t > 0 && t < 6;
-      const wave = t > 8 && (i === 3 || i === 4);
-      if (walk) {
-        const targetX = p.x + (i ? 1.5 : -1.5);
-        person.group.position.x = T.MathUtils.lerp(
-          targetX,
-          i ? 6 : -3,
-          smooth(2, 6, t),
-        );
-        person.group.position.z = T.MathUtils.lerp(
-          p.z - 1,
-          m.length + 13,
-          smooth(2, 6, t),
-        );
-        person.group.position.y = heightAt(
-          m,
-          person.group.position.x,
-          person.group.position.z,
-        );
-        person.limbs[2].rotation.x = Math.sin(t * 8) * 0.3;
-        person.limbs[3].rotation.x = -Math.sin(t * 8) * 0.3;
-        person.limbs[0].rotation.x = -0.9;
-        person.limbs[1].rotation.x = -0.9;
+      const person = this.people[i],
+        receiver = i < 2;
+      const baseX = (i % 2 ? 1 : -1) * (3.2 + Math.floor(i / 2) * 1.25),
+        baseZ = m.length + 10 + (i % 3);
+      let walking = 0;
+      if (receiver && restoring && t < 8.5) {
+        const reach = smooth(0, 3, t),
+          carry = t >= 3;
+        person.group.position.x = carry
+          ? kitX + (i ? 1.05 : -1.05)
+          : T.MathUtils.lerp(baseX, p.x + (i ? 1.05 : -1.05), reach);
+        person.group.position.z = carry
+          ? kitZ
+          : T.MathUtils.lerp(m.length + 3, p.z - 1.57, reach);
+        person.group.rotation.y = carry
+          ? i
+            ? -Math.PI / 2
+            : Math.PI / 2
+          : Math.atan2(
+              p.x - person.group.position.x,
+              p.z - 1.57 - person.group.position.z,
+            );
+        walking = t < 7.7 ? 0.28 : 0;
+        for (let a = 0; a < 2; a++) {
+          person.limbs[a].rotation.x = carry
+            ? -0.85
+            : Math.sin(t * 7 + a * Math.PI) * 0.22;
+          person.limbs[a].rotation.z = 0;
+          person.forearms[a].rotation.x = carry ? -0.95 : -0.2;
+        }
       } else {
-        person.limbs[0].rotation.z = wave
-          ? -0.9 + Math.sin(this.clock * 4) * 0.3
-          : 0.08;
-        person.limbs[1].rotation.z = -0.08;
-        person.limbs[2].rotation.x = person.limbs[3].rotation.x = 0;
-      }
-      person.group.rotation.y =
-        t > 5
+        person.group.position.x =
+          receiver && t >= 8.5 ? -6 + (i ? 1.1 : -1.1) : baseX;
+        person.group.position.z = receiver && t >= 8.5 ? m.length + 15 : baseZ;
+        if (receiver && !restoring)
+          person.group.position.z = T.MathUtils.lerp(
+            baseZ,
+            m.length + 3,
+            smooth(m.length - 50, m.length - 8, e.progress),
+          );
+        person.group.rotation.y = restoring
           ? Math.PI
           : Math.atan2(
               p.x - person.group.position.x,
               p.z - person.group.position.z,
             );
+        const wave = t > 11 && (i === 3 || i === 4);
+        for (let a = 0; a < 2; a++) {
+          person.limbs[a].rotation.x = 0;
+          person.limbs[a].rotation.z =
+            a === 0 && wave
+              ? 1.7 + Math.sin(this.clock * 4) * 0.2
+              : a
+                ? -0.09
+                : 0.09;
+          person.forearms[a].rotation.x = wave ? -0.6 : -0.15;
+        }
+        if (i === 0 && t > 8 && t < 10.5) {
+          person.group.rotation.y = Math.PI;
+          person.limbs[0].rotation.x = -1.1;
+          person.forearms[0].rotation.x = -0.7;
+        }
+        if (
+          !restoring &&
+          receiver &&
+          e.progress > m.length - 50 &&
+          e.progress < m.length - 8
+        )
+          walking = 0.15;
+      }
+      const gait = Math.sin(this.clock * 7 + i);
+      person.limbs[2].rotation.x = gait * walking;
+      person.limbs[3].rotation.x = -gait * walking;
+      person.calves[0].rotation.x = Math.max(0, -gait) * walking * 1.6;
+      person.calves[1].rotation.x = Math.max(0, gait) * walking * 1.6;
+      person.head.rotation.y = Math.sin(this.clock * 0.6 + i) * 0.07;
+      person.group.position.y =
+        heightAt(m, person.group.position.x, person.group.position.z) +
+        Math.abs(gait) * walking * 0.025;
+      person.group.visible = p.z > m.length - 180;
     }
     const heading = e.heading;
-    const forward = new T.Vector3(Math.sin(heading), 0, Math.cos(heading));
+    const forward = this.forward.set(Math.sin(heading), 0, Math.cos(heading));
+    const speed = clamp(Math.abs(e.speed) / 22.2, 0, 1);
+    const goalFov =
+      (this.camera.aspect < 1 ? 65 : 56) +
+      (this.settings.reducedMotion || restoring ? 0 : speed * 9);
+    this.speedFov += (goalFov - this.speedFov) * (1 - Math.exp(-dt * 3));
+    if (Math.abs(this.camera.fov - this.speedFov) > 0.03) {
+      this.camera.fov = this.speedFov;
+      this.camera.updateProjectionMatrix();
+    }
     const portrait = this.camera.aspect < 1;
     if (restoring) {
       const a = this.settings.reducedMotion ? 1 : smooth(0, 5, t);
@@ -678,13 +947,23 @@ export class GameWorld {
       this.aim.set(0, roadY(m, m.length) + 2.5, m.length + 17);
     } else {
       this.eye.set(
-        p.x - forward.x * (portrait ? 10 : 9.5),
-        p.y + (portrait ? 4.9 : 3.7),
-        p.z - forward.z * (portrait ? 10 : 9.5),
+        p.x - forward.x * (portrait ? 9.6 : 8.2 + speed * 0.9),
+        p.y + (portrait ? 4.5 : 3.1 + speed * 0.2),
+        p.z - forward.z * (portrait ? 9.6 : 8.2 + speed * 0.9),
       );
       const ground = heightAt(m, this.eye.x, this.eye.z);
       this.eye.y = Math.max(this.eye.y, ground + 1.8);
-      this.aim.set(p.x + forward.x * 9, p.y + 0.6, p.z + forward.z * 9);
+      const lead = 10 + speed * 11;
+      const turnX = routeX(m, Math.min(m.length, p.z + lead), e.isAlt);
+      this.aim.set(
+        T.MathUtils.lerp(p.x + forward.x * lead, turnX, 0.28),
+        p.y + 0.7,
+        p.z + forward.z * lead,
+      );
+      if (!this.settings.reducedMotion)
+        this.eye.y +=
+          Math.sin(this.clock * 24) *
+          (e.roadPulse * 0.045 + e.impactPulse * 0.085);
     }
     const lerp = this.camReady
       ? 1 -
@@ -707,6 +986,13 @@ export class GameWorld {
     this.rain.visible = m.rain > 0;
     (this.rain.material as T.LineBasicMaterial).opacity =
       m.rain * (0.12 + 0.18 * smooth(0, m.length * 0.55, e.progress));
+    const wet =
+      e.wheelSurfaces.reduce((n, s) => n + s.wet, 0) /
+      Math.max(1, e.wheelSurfaces.length);
+    const dustMat = this.dust.material as T.PointsMaterial;
+    dustMat.color.set(wet > 0.45 ? '#b7bbb1' : '#bcaa80');
+    dustMat.size = wet > 0.45 ? 0.075 : 0.16;
+    dustMat.opacity = 0.18 + speed * 0.3;
     for (let i = 0; i < this.particles.length; i++) {
       this.particles[i] -= dt;
       const k = i * 3;
@@ -715,28 +1001,49 @@ export class GameWorld {
         Math.abs(e.speed) > 2 &&
         e.phase === 'driving'
       ) {
-        this.particles[i] = 0.5 + Math.random() * 0.6;
-        this.dustData[k] = p.x - forward.x * 1.5 + (Math.random() - 0.5) * 1.9;
-        this.dustData[k + 1] = p.y - 0.5;
-        this.dustData[k + 2] = p.z - forward.z * 1.5;
+        this.particles[i] = 0.35 + Math.random() * (wet > 0.4 ? 0.45 : 1);
+        const side = i % 2 ? 1 : -1;
+        this.dustData[k] = p.x - forward.x * 1.3 + forward.z * side * 0.95;
+        this.dustData[k + 1] = p.y - 0.72;
+        this.dustData[k + 2] = p.z - forward.z * 1.3 - forward.x * side * 0.95;
+        this.dustVelocity[k] =
+          forward.z * side * (0.4 + speed * 2) - forward.x * speed;
+        this.dustVelocity[k + 1] =
+          wet > 0.4 ? 0.7 + Math.random() * speed * 2 : 0.35;
+        this.dustVelocity[k + 2] =
+          -forward.x * side * (0.4 + speed * 2) - forward.z * speed;
       } else {
-        this.dustData[k] += Math.sin(i) * 0.8 * dt;
-        this.dustData[k + 1] += dt * 0.6;
+        this.dustData[k] += this.dustVelocity[k] * dt;
+        this.dustData[k + 1] += this.dustVelocity[k + 1] * dt;
+        this.dustData[k + 2] += this.dustVelocity[k + 2] * dt;
+        if (wet > 0.4) this.dustVelocity[k + 1] -= dt * 3;
         if (this.particles[i] <= 0) this.dustData[k + 1] = -100;
       }
     }
     this.dust.geometry.attributes.position.needsUpdate = true;
     this.renderer.render(this.scene, this.camera);
-    if (this.settings.quality === 'auto' && dt > 0 && dt < 0.2) {
-      this.frameSamples.push(dt);
-      this.adaptTimer += dt;
+    if (frameDelta > 0 && frameDelta < 0.5) {
+      this.frameSamples.push(frameDelta);
+      this.adaptTimer += frameDelta;
       if (this.adaptTimer > 5) {
         const mean =
           this.frameSamples.reduce((a, b) => a + b, 0) /
           this.frameSamples.length;
-        if (mean > 0.024 && this.renderer.getPixelRatio() > 0.85)
+        const sorted = [...this.frameSamples].sort((a, b) => a - b);
+        const p95 = sorted[Math.floor(sorted.length * 0.95)] || mean;
+        this.performance = {
+          fps: 1 / mean,
+          p95: p95 * 1000,
+          calls: this.renderer.info.render.calls,
+          triangles: this.renderer.info.render.triangles,
+        };
+        if (
+          this.settings.quality === 'auto' &&
+          p95 > (this.low ? 0.04 : 0.025) &&
+          this.renderer.getPixelRatio() > 0.75
+        )
           this.renderer.setPixelRatio(
-            Math.max(0.85, this.renderer.getPixelRatio() - 0.2),
+            Math.max(0.75, this.renderer.getPixelRatio() - 0.15),
           );
         this.frameSamples = [];
         this.adaptTimer = 0;
@@ -747,6 +1054,9 @@ export class GameWorld {
     if (this.disposed) return;
     this.disposed = true;
     this.resizeObserver.disconnect();
+    this.living.dispose();
+    this.people.forEach((p) => p.skin.skeleton.dispose());
+    this.environmentTarget?.dispose();
     this.renderer.dispose();
     disposeArt();
     this.scene.clear();

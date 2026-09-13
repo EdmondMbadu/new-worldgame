@@ -1388,7 +1388,7 @@ kbd {
   }
   .radio {
     width: calc(100% - 32px);
-    bottom: 98px;
+    bottom: 118px;
     padding: 10px 13px;
     gap: 12px;
   }
@@ -1429,7 +1429,7 @@ kbd {
     font-size: 8px;
   }
   .in-game:has(.touch-controls) .radio {
-    bottom: 165px;
+    bottom: 200px;
   }
   .in-game:has(.touch-controls) .speedometer {
     bottom: 111px;
@@ -1695,4 +1695,161 @@ kbd {
 .arrival-replay {
   font-size: 10px;
   color: #bac9b4;
+}
+
+/* Driving upgrade: information stays near the road and away from touch pedals. */
+.road-edition {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.road-edition button {
+  border: 1px solid #d3ceae40;
+  color: #dddcc8;
+  background: #10292480;
+  padding: 8px 14px;
+  border-radius: 30px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.road-edition button[aria-pressed="true"] {
+  color: #162e27;
+  background: #dfd0a1;
+  border-color: #dfd0a1;
+}
+.road-edition button:focus-visible {
+  outline: 2px solid #f5e5ab;
+  outline-offset: 3px;
+}
+.encounter-cue {
+  position: absolute;
+  z-index: 4;
+  top: 132px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 520px;
+  width: max-content;
+  padding: 11px 16px;
+  background: #20322eef;
+  border: 1px solid #d9bc705c;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px #0002;
+  pointer-events: none;
+}
+.encounter-mark {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #e0bf76;
+  color: #e0bf76;
+  border-radius: 50%;
+  font-weight: 700;
+}
+.encounter-cue div {
+  display: grid;
+  gap: 4px;
+}
+.encounter-cue strong {
+  color: #e8d69f;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+.encounter-cue span:not(.encounter-mark) {
+  font-size: 12px;
+  color: #e4e9df;
+}
+.encounter-cue b {
+  color: #e9dbb4;
+  font-size: 15px;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+.clean-cue {
+  position: absolute;
+  top: 197px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #173f32df;
+  color: #c1e5c7;
+  border: 1px solid #a7caaa55;
+  border-radius: 20px;
+  padding: 8px 15px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+.clean-cue span {
+  opacity: 0.65;
+  letter-spacing: 0;
+  margin-left: 8px;
+}
+.gear {
+  display: inline-block;
+  padding: 1px 5px;
+  margin-left: 5px;
+  border: 1px solid #d8d3a870;
+  border-radius: 3px;
+  color: #e9d696;
+  font-size: 11px;
+}
+.rpm-track {
+  width: 68px;
+  height: 3px;
+  background: #c9c6ae33;
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.rpm-track i {
+  display: block;
+  height: 100%;
+  background: #d5c58c;
+  transition: width 0.1s linear;
+}
+.array-caption {
+  font-size: 11px !important;
+  color: #bec9b9 !important;
+  margin: 10px 0 !important;
+}
+@media (max-width: 700px) {
+  .encounter-cue {
+    top: 150px;
+    width: calc(100% - 30px);
+    gap: 8px;
+    padding: 9px 10px;
+  }
+  .encounter-cue span:not(.encounter-mark) {
+    font-size: 10px;
+  }
+  .encounter-cue strong {
+    font-size: 9px;
+  }
+  .encounter-cue b {
+    font-size: 12px;
+    margin-left: 0;
+  }
+  .clean-cue {
+    top: 216px;
+    font-size: 10px;
+  }
+}
+@media (max-height: 540px) and (orientation: landscape) {
+  .encounter-cue {
+    top: 75px;
+    max-width: 390px;
+    padding: 7px 10px;
+  }
+  .encounter-cue span:not(.encounter-mark) {
+    font-size: 10px;
+  }
+  .clean-cue {
+    top: 137px;
+    font-size: 9px;
+    padding: 5px 10px;
+  }
 }

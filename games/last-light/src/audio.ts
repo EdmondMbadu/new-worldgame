@@ -1,112 +1,286 @@
 import type { GameEngine } from './engine';
 import type { Settings } from './save';
+
 export class Soundtrack {
   context: AudioContext | null = null;
   private gain: GainNode | null = null;
+  private music: GainNode | null = null;
   private motor: OscillatorNode | null = null;
   private motorGain: GainNode | null = null;
+  private engineLoop: AudioBufferSourceNode | null = null;
+  private engineGain: GainNode | null = null;
+  private engineFilter: BiquadFilterNode | null = null;
   private windGain: GainNode | null = null;
-  private oscillators: AudioNode[] = [];
+  private tireGain: GainNode | null = null;
+  private tireFilter: BiquadFilterNode | null = null;
+  private rainGain: GainNode | null = null;
+  private noiseBuffer: AudioBuffer | null = null;
+  private sources: (AudioBufferSourceNode | OscillatorNode)[] = [];
+  private nodes: AudioNode[] = [];
   private lastCue = '';
   private lastImpact = 0;
   private tuneTime = 0;
   private lastNote = -1;
+  private lastBird = -1;
+  private lastPower = 0;
+  private load: Promise<void> | null = null;
+  private abort = new AbortController();
   private stopped = false;
   constructor(public settings: Settings) {}
   async unlock() {
+    if (this.stopped) return;
     try {
       if (!this.context) {
         const c = new AudioContext();
         this.context = c;
         this.gain = c.createGain();
-        this.gain.connect(c.destination);
+        this.gain.gain.value = 0;
+        const limiter = c.createDynamicsCompressor();
+        limiter.threshold.value = -12;
+        limiter.ratio.value = 5;
+        this.gain.connect(limiter).connect(c.destination);
+        this.nodes.push(limiter);
+        this.music = c.createGain();
+        this.music.connect(this.gain);
         this.motor = c.createOscillator();
         this.motor.type = 'triangle';
         this.motorGain = c.createGain();
         this.motorGain.gain.value = 0;
         this.motor.connect(this.motorGain).connect(this.gain);
         this.motor.start();
-        const buffer = c.createBuffer(1, c.sampleRate * 2, c.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
-        const noise = c.createBufferSource();
-        noise.buffer = buffer;
-        noise.loop = true;
-        const filter = c.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 550;
-        this.windGain = c.createGain();
-        this.windGain.gain.value = 0;
-        noise.connect(filter).connect(this.windGain).connect(this.gain);
-        noise.start();
-        this.oscillators.push(noise, filter);
+        this.sources.push(this.motor);
+        const buffer = c.createBuffer(1, c.sampleRate * 2, c.sampleRate),
+          data = buffer.getChannelData(0);
+        let brown = 0;
+        for (let i = 0; i < data.length; i++) {
+          brown = (brown + (Math.random() * 2 - 1) * 0.025) / 1.025;
+          data[i] = brown * 3;
+        }
+        this.noiseBuffer = buffer;
+        const layer = (type: BiquadFilterType, frequency: number) => {
+          const source = c.createBufferSource();
+          source.buffer = buffer;
+          source.loop = true;
+          const filter = c.createBiquadFilter();
+          filter.type = type;
+          filter.frequency.value = frequency;
+          const gain = c.createGain();
+          gain.gain.value = 0;
+          source.connect(filter).connect(gain).connect(this.gain!);
+          source.start();
+          this.sources.push(source);
+          this.nodes.push(filter, gain);
+          return { gain, filter };
+        };
+        this.windGain = layer('lowpass', 400).gain;
+        const tires = layer('bandpass', 950);
+        this.tireGain = tires.gain;
+        this.tireFilter = tires.filter;
+        this.rainGain = layer('highpass', 1100).gain;
+        // Local CC0 recording is optional: the fallback remains usable offline or if decoding fails.
+        this.load = (async () => {
+          try {
+            const response = await fetch(
+              `${import.meta.env.BASE_URL}audio/engine.wav`,
+              { signal: this.abort.signal },
+            );
+            if (!response.ok) return;
+            const decoded = await c.decodeAudioData(
+              await response.arrayBuffer(),
+            );
+            if (this.stopped || !this.gain) return;
+            let peak = 0;
+            for (let k = 0; k < decoded.numberOfChannels; k++) {
+              const d = decoded.getChannelData(k);
+              for (let i = 0; i < d.length; i++)
+                peak = Math.max(peak, Math.abs(d[i]));
+            }
+            if (peak > 0)
+              for (let k = 0; k < decoded.numberOfChannels; k++) {
+                const d = decoded.getChannelData(k);
+                for (let i = 0; i < d.length; i++) d[i] *= 0.65 / peak;
+              }
+            this.engineLoop = c.createBufferSource();
+            this.engineLoop.buffer = decoded;
+            this.engineLoop.loop = true;
+            this.engineGain = c.createGain();
+            this.engineGain.gain.value = 0;
+            this.engineFilter = c.createBiquadFilter();
+            this.engineFilter.type = 'lowpass';
+            this.engineFilter.frequency.value = 700;
+            this.engineLoop
+              .connect(this.engineFilter)
+              .connect(this.engineGain)
+              .connect(this.gain);
+            this.engineLoop.start();
+            this.sources.push(this.engineLoop);
+            this.nodes.push(this.engineFilter, this.engineGain);
+          } catch {
+            /* Playback is independent of optional asset decoding. */
+          }
+        })();
       }
       if (this.context.state === 'suspended') await this.context.resume();
     } catch {
       /* Muted gameplay remains complete. */
     }
   }
-  tone(hz: number, length: number, volume = 0.035, delay = 0) {
+  tone(hz: number, length: number, volume = 0.025, delay = 0, music = false) {
     const c = this.context;
-    if (!c || !this.gain) return;
+    if (!c || !this.gain || this.stopped) return;
     const o = c.createOscillator(),
       g = c.createGain();
     o.type = 'sine';
     o.frequency.value = hz;
     g.gain.setValueAtTime(0, c.currentTime + delay);
-    g.gain.linearRampToValueAtTime(volume, c.currentTime + delay + 0.03);
+    g.gain.linearRampToValueAtTime(volume, c.currentTime + delay + 0.025);
     g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + delay + length);
-    o.connect(g).connect(this.gain);
+    o.connect(g).connect(music && this.music ? this.music : this.gain);
     o.start(c.currentTime + delay);
-    o.stop(c.currentTime + delay + length + 0.05);
+    o.stop(c.currentTime + delay + length + 0.03);
     o.onended = () => {
       o.disconnect();
       g.disconnect();
     };
   }
-  update(e: GameEngine, dt: number) {
-    if (this.stopped) return;
+  private impact(volume: number, frequency = 240) {
     const c = this.context;
-    if (!c || !this.gain || !this.motor || !this.motorGain || !this.windGain)
+    if (!c || !this.noiseBuffer || !this.gain) return;
+    const n = c.createBufferSource(),
+      filter = c.createBiquadFilter(),
+      g = c.createGain();
+    n.buffer = this.noiseBuffer;
+    filter.type = 'lowpass';
+    filter.frequency.value = frequency;
+    g.gain.setValueAtTime(volume, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.23);
+    n.connect(filter).connect(g).connect(this.gain);
+    n.start();
+    n.stop(c.currentTime + 0.25);
+    n.onended = () => {
+      n.disconnect();
+      filter.disconnect();
+      g.disconnect();
+    };
+  }
+  update(e: GameEngine, dt: number) {
+    const c = this.context;
+    if (
+      this.stopped ||
+      !c ||
+      !this.gain ||
+      !this.motor ||
+      !this.motorGain ||
+      !this.windGain
+    )
       return;
-    const active = e.phase !== 'paused' && e.phase !== 'failed';
+    const active = e.phase !== 'paused' && e.phase !== 'failed',
+      driving = e.phase === 'driving',
+      v = Math.abs(e.speed),
+      talking =
+        typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking;
     this.gain.gain.setTargetAtTime(
       this.settings.sound && active ? this.settings.volume : 0,
       c.currentTime,
+      0.08,
+    );
+    this.music?.gain.setTargetAtTime(talking ? 0.35 : 1, c.currentTime, 0.2);
+    this.motor.frequency.setTargetAtTime(e.rpm / 30, c.currentTime, 0.08);
+    this.motorGain.gain.setTargetAtTime(
+      this.engineLoop ? 0 : driving ? 0.025 + e.throttle * 0.025 : 0.006,
+      c.currentTime,
       0.1,
     );
-    this.motor.frequency.setTargetAtTime(
-      35 + Math.abs(e.speed) * 7,
-      c.currentTime,
-      0.07,
-    );
-    this.motorGain.gain.setTargetAtTime(
-      e.phase === 'driving' ? 0.035 + Math.abs(e.speed) * 0.002 : 0.008,
-      c.currentTime,
-      0.12,
-    );
+    if (this.engineLoop && this.engineGain && this.engineFilter) {
+      this.engineLoop.playbackRate.setTargetAtTime(
+        0.48 + e.rpm / 3800,
+        c.currentTime,
+        0.07,
+      );
+      this.engineGain.gain.setTargetAtTime(
+        driving
+          ? (0.15 + e.throttle * 0.12) * (1 - e.shiftPulse * 0.2)
+          : e.phase === 'ready'
+            ? 0.04
+            : 0.01,
+        c.currentTime,
+        0.09,
+      );
+      this.engineFilter.frequency.setTargetAtTime(
+        380 + e.throttle * 900 + v * 32,
+        c.currentTime,
+        0.1,
+      );
+    }
     this.windGain.gain.setTargetAtTime(
-      active ? 0.012 + e.mission.rain * 0.017 + Math.abs(e.speed) * 0.001 : 0,
+      active ? 0.02 + Math.pow(v / 22, 2) * 0.18 : 0,
       c.currentTime,
       0.15,
     );
+    this.rainGain?.gain.setTargetAtTime(
+      active ? e.mission.rain * 0.35 : 0,
+      c.currentTime,
+      0.2,
+    );
+    this.tireFilter?.frequency.setTargetAtTime(
+      e.surface === 'Mud' ? 330 : e.surface === 'Bridge' ? 180 : 850 + v * 30,
+      c.currentTime,
+      0.1,
+    );
+    this.tireGain?.gain.setTargetAtTime(
+      driving
+        ? Math.min(
+            0.42,
+            v * 0.008 + e.roadPulse * 0.15 + (e.braking > 0.5 ? v * 0.004 : 0),
+          )
+        : 0,
+      c.currentTime,
+      0.05,
+    );
     if (!active) return;
     this.tuneTime += dt;
+    const restoring = e.phase === 'restoring' || e.phase === 'results';
     const note = Math.floor(
-      this.tuneTime / (e.phase === 'restoring' ? 1 : 2.2),
+      this.tuneTime / (restoring ? 1.7 : e.time < 35 ? 1.8 : 3),
     );
     if (note !== this.lastNote) {
       this.lastNote = note;
-      const scale =
-        e.phase === 'restoring' || e.phase === 'results'
-          ? [261.63, 329.63, 392, 523.25, 440, 392, 329.63, 293.66]
-          : [146.83, 220, 293.66, 196, 174.61, 220, 261.63, 196];
-      this.tone(scale[note % 8], 2, 0.023);
-      this.tone(scale[note % 8] * 0.5, 2.6, 0.017, 0.13);
+      const scale = restoring
+        ? [261.63, 329.63, 392, 523.25, 440, 392, 329.63, 293.66]
+        : [146.83, 220, 293.66, 196, 174.61, 220, 261.63, 196];
+      this.tone(scale[note % 8], 2.8, 0.021, 0, true);
+      this.tone(scale[note % 8] * 0.5, 3, 0.014, 0.12, true);
+    }
+    const bird = Math.floor(this.tuneTime / 9);
+    if (
+      bird !== this.lastBird &&
+      e.mission.night < 0.5 &&
+      e.mission.rain < 0.5
+    ) {
+      this.lastBird = bird;
+      this.tone(1800 + Math.sin(bird) * 350, 0.12, 0.007);
+      this.tone(2300, 0.09, 0.004, 0.17);
     }
     if (e.impacts > this.lastImpact) {
       this.lastImpact = e.impacts;
-      this.tone(65, 0.18, 0.16);
+      this.impact(0.8);
+      this.tone(58, 0.17, 0.055);
+    }
+    const power = restoring
+      ? e.restoreTime > 12
+        ? 3
+        : e.restoreTime > 10
+          ? 2
+          : e.restoreTime > 8
+            ? 1
+            : 0
+      : 0;
+    if (power !== this.lastPower) {
+      if (power > this.lastPower) {
+        this.impact(0.1, 1700);
+        this.tone([0, 329.63, 392, 523.25][power], 1.8, 0.04);
+      }
+      this.lastPower = power;
     }
     const cue = e.notice.who + e.notice.text;
     if (cue !== this.lastCue) {
@@ -117,17 +291,21 @@ export class Soundtrack {
         'speechSynthesis' in window
       ) {
         speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(e.notice.text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.98;
-        utterance.volume = this.settings.volume * 0.8;
+        const u = new SpeechSynthesisUtterance(e.notice.text);
+        u.lang = 'en-US';
+        u.rate = 1.02;
+        u.volume = this.settings.volume * 0.85;
         const voice = speechSynthesis
           .getVoices()
           .find((v) => v.localService && v.lang.startsWith('en'));
-        if (voice) utterance.voice = voice;
-        speechSynthesis.speak(utterance);
+        if (voice) u.voice = voice;
+        speechSynthesis.speak(u);
       }
-      this.tone(740, 0.08, 0.025);
+      this.tone(740, 0.075, 0.012);
+      if (e.notice.who === 'ONCOMING VEHICLE') {
+        this.tone(190, 0.4, 0.045);
+        this.tone(238, 0.4, 0.024);
+      }
     }
   }
   silence() {
@@ -138,12 +316,15 @@ export class Soundtrack {
   dispose() {
     if (this.stopped) return;
     this.stopped = true;
+    this.abort.abort();
     this.silence();
-    this.motor?.stop();
-    this.oscillators.forEach((o) => {
-      if (o instanceof AudioBufferSourceNode) o.stop();
-      o.disconnect();
-    });
+    for (const source of this.sources) {
+      try {
+        source.stop();
+      } catch {}
+      source.disconnect();
+    }
+    this.nodes.forEach((n) => n.disconnect());
     if (this.context && this.context.state !== 'closed')
       void this.context.close().catch(() => undefined);
   }

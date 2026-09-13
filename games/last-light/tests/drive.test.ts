@@ -2,29 +2,9 @@ import { beforeAll, describe, it, expect } from 'vitest';
 import { GameEngine, initPhysics, emptyInput } from '../src/engine';
 import { MISSIONS, routeX, clamp, roadX } from '../src/missions';
 beforeAll(() => initPhysics());
-export function pilot(e: GameEngine, alternate = false) {
-  const p = e.position,
-    z = Math.min(e.mission.length, p.z + 7 + Math.abs(e.speed) * 0.55),
-    x = routeX(e.mission, z, alternate);
-  let error = Math.atan2(x - p.x, z - p.z) - e.heading;
-  while (error > Math.PI) error -= 2 * Math.PI;
-  while (error < -Math.PI) error += 2 * Math.PI;
-  const remain = e.mission.length - p.z;
-  const target =
-    remain < 15
-      ? Math.max(0, (remain - 2) * 0.7)
-      : e.surface === 'Mud'
-        ? 6.5
-        : e.surface === 'Bridge'
-          ? 4.5
-          : 9;
-  return {
-    steer: clamp(error * 2.3, -1, 1),
-    throttle: e.speed < target ? 0.8 : 0,
-    brake: e.speed > target + 0.3 ? 0.45 : 0,
-    action: e.canDeliver,
-  };
-}
+import { driveInput } from '../src/qa-driver';
+export const pilot = (e: GameEngine, alternate = false) =>
+  driveInput(e, alternate);
 describe('ordinary driving', () => {
   for (const mission of MISSIONS)
     for (const alt of [false, true])

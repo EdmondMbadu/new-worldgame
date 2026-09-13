@@ -1,5 +1,6 @@
 export type Mission = {
   id: number;
+  variant?: number;
   title: string;
   place: string;
   tagline: string;
@@ -30,7 +31,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Emergency care is back. Three patients have the power they need, and the valley has a brighter tomorrow.',
     length: 1050,
-    seconds: 235,
+    seconds: 160,
     lives: 3,
     rain: 0,
     night: 0,
@@ -76,7 +77,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Five patients can continue treatment. The rain keeps falling; inside, the clinic is warm and bright.',
     length: 1160,
-    seconds: 250,
+    seconds: 180,
     lives: 5,
     rain: 0.65,
     night: 0.12,
@@ -123,7 +124,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Six lives supported by restored emergency care. The riverside community has a dependable source of power.',
     length: 1210,
-    seconds: 270,
+    seconds: 205,
     lives: 6,
     rain: 0.25,
     night: 0.2,
@@ -170,7 +171,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'The maternity ward is bright again. Eight patients and their families can face the night with hope.',
     length: 1280,
-    seconds: 280,
+    seconds: 215,
     lives: 8,
     rain: 0.45,
     night: 0.88,
@@ -216,7 +217,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Twelve patients have power for their care. Five clinics now shine across the region. You brought the light; together, you kept hope alive.',
     length: 1400,
-    seconds: 300,
+    seconds: 235,
     lives: 12,
     rain: 1,
     night: 0.6,
@@ -313,9 +314,13 @@ export type Obstacle = {
   x: number;
   z: number;
   radius: number;
+  depth?: number;
   kind: 'rock' | 'rut' | 'log';
 };
+const obstacleCache = new WeakMap<Mission, Obstacle[]>();
 export function obstacles(m: Mission): Obstacle[] {
+  const existing = obstacleCache.get(m);
+  if (existing) return existing;
   const rand = random(m.seed);
   const list: Obstacle[] = [];
   for (let z = 115; z < m.length - 110; z += 48 + rand() * 30) {
@@ -323,7 +328,8 @@ export function obstacles(m: Mission): Obstacle[] {
     list.push({
       x: roadX(m, z) + (rand() > 0.5 ? 1 : -1) * (2.3 + rand() * 1.8),
       z,
-      radius: 0.65 + rand() * 0.45,
+      radius: 0.85 + rand() * 0.55,
+      depth: 0.16 + rand() * 0.16,
       kind: 'rut',
     });
     if (z > 330 && rand() > 0.6)
@@ -336,7 +342,20 @@ export function obstacles(m: Mission): Obstacle[] {
   }
   if (m.id === 4)
     list.push({ x: roadX(m, 210) - 3, z: 210, radius: 1.3, kind: 'log' });
+  obstacleCache.set(m, list);
   return list;
+}
+export function rutDepthAt(m: Mission, x: number, z: number) {
+  let depth = 0;
+  for (const o of obstacles(m)) {
+    if (o.kind !== 'rut' || Math.abs(z - o.z) > o.radius * 1.8) continue;
+    const r = Math.hypot((x - o.x) / o.radius, (z - o.z) / (o.radius * 1.8));
+    depth = Math.max(depth, (o.depth || 0.2) * (1 - smooth(0, 1, r)));
+  }
+  return depth;
+}
+export function missionVariant(m: Mission, variant = 0): Mission {
+  return variant === 0 ? m : { ...m, variant, seed: m.seed + variant * 7919 };
 }
 export function heightAt(m: Mission, x: number, z: number) {
   const d = roadDistance(m, x, z);
@@ -359,8 +378,10 @@ export function heightAt(m: Mission, x: number, z: number) {
     h += (riverBed - h) * channel;
   }
   if (d < 5 && !onBridge(m, z)) {
-    h += 0.025 * Math.sin(z * 1.7) + 0.025 * Math.sin(z * 3.1 + x * 2);
-    if (isMud(m, x, z)) h += Math.sin(z * 1.9) * 0.055;
+    h += 0.09 * (1 - smooth(0, 5, d));
+    h += 0.014 * Math.sin(z * 1.7) + 0.012 * Math.sin(z * 3.1 + x * 2);
+    if (isMud(m, x, z)) h += Math.sin(z * 1.9) * 0.045;
+    h -= rutDepthAt(m, x, z);
   }
   return h;
 }
@@ -384,18 +405,24 @@ export function makeTerrain(m: Mission) {
     -100,
     -75,
     -60,
-    ...Array.from({ length: 61 }, (_, i) => i * 2 - 60),
+    -40,
+    -25,
+    -16,
+    -10,
+    ...Array.from({ length: 95 }, (_, i) => i * 0.5 - 7),
+    46,
+    60,
     75,
     100,
     140,
     200,
   ].filter((n, i, a) => a.indexOf(n) === i);
   const cols = offsets.length,
-    rows = Math.ceil((m.length + 140) / 2);
+    rows = Math.ceil(m.length + 140);
   const vertices = new Float32Array((rows + 1) * cols * 3);
   const indices: number[] = [];
   for (let j = 0; j <= rows; j++) {
-    const z = j * 2 - 60;
+    const z = j - 60;
     for (let i = 0; i < cols; i++) {
       const x = roadX(m, z) + offsets[i],
         k = (j * cols + i) * 3;
@@ -408,5 +435,5 @@ export function makeTerrain(m: Mission) {
       }
     }
   }
-  return { vertices, indices: new Uint32Array(indices) };
+  return { vertices, indices: new Uint32Array(indices), cols, rows };
 }

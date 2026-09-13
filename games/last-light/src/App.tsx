@@ -4,9 +4,17 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { MISSIONS, clamp, pathLength, roadX, routeX } from "./missions";
+import {
+  MISSIONS,
+  clamp,
+  pathLength,
+  roadX,
+  routeX,
+  missionVariant,
+} from "./missions";
 import {
   defaultSettings,
+  bestKey,
   livesSaved,
   readSave,
   recordResult,
@@ -18,6 +26,7 @@ import type { GameEngine, Input } from "./engine";
 import type { GameWorld } from "./world";
 import type { Controls } from "./input";
 import { Soundtrack } from "./audio";
+import { driveInput } from "./qa-driver";
 
 const base = import.meta.env.BASE_URL;
 const time = (n: number) => {
@@ -329,6 +338,7 @@ function SettingsPanel({
 export default function App() {
   const [save, setSave] = useState(readSave),
     [selected, setSelected] = useState(0),
+    [variant, setVariant] = useState(0),
     [inGame, setInGame] = useState(false),
     [run, setRun] = useState(0),
     [ready, setReady] = useState(false),
@@ -408,7 +418,7 @@ export default function App() {
         await Promise.all([initPhysics(), loadSurfaces()]);
         if (cancelled) return;
         const instance = new GameEngine(
-          MISSIONS[selected],
+          missionVariant(MISSIONS[selected], variant),
           settingsRef.current.mode,
         );
         engine.current = instance;
@@ -449,32 +459,7 @@ export default function App() {
           const dt = (now - last) / 1000;
           last = now;
           let state = input.sample();
-          if (qa && pilotRef.current) {
-            const p = instance.position,
-              z = Math.min(
-                instance.mission.length,
-                p.z + 7 + Math.abs(instance.speed) * 0.55,
-              );
-            const x = routeX(instance.mission, z);
-            let a = Math.atan2(x - p.x, z - p.z) - instance.heading;
-            while (a > Math.PI) a -= Math.PI * 2;
-            while (a < -Math.PI) a += Math.PI * 2;
-            const distance = instance.mission.length - p.z;
-            const target =
-              distance < 15
-                ? Math.max(0, (distance - 2) * 0.7)
-                : instance.surface === "Mud"
-                  ? 6.5
-                  : instance.surface === "Bridge"
-                    ? 4.5
-                    : 8;
-            state = {
-              steer: clamp(a * 2.3, -1, 1),
-              throttle: instance.speed < target ? 0.8 : 0,
-              brake: instance.speed > target + 0.3 ? 0.45 : 0,
-              action: instance.canDeliver,
-            };
-          }
+          if (qa && pilotRef.current) state = driveInput(instance, false, true);
           instance.advance(dt, state, settingsRef.current.singlePress);
           if (instance.result && !committed) {
             committed = true;
@@ -484,7 +469,7 @@ export default function App() {
             instance.phase !== "paused" &&
             document.visibilityState !== "hidden"
           ) {
-            view.render(Math.min(dt, 0.06));
+            view.render(Math.min(dt, 0.06), dt);
             sound.current?.update(instance, Math.min(dt, 0.06));
             if (qa) {
               frameStats.current.push(dt);
@@ -630,6 +615,24 @@ export default function App() {
               </span>
               <span>↗</span>
             </button>
+            <div
+              className="road-edition"
+              role="group"
+              aria-label="Road conditions"
+            >
+              <button
+                aria-pressed={variant === 0}
+                onClick={() => setVariant(0)}
+              >
+                Valley run
+              </button>
+              <button
+                aria-pressed={variant === 1}
+                onClick={() => setVariant(1)}
+              >
+                Fresh tracks
+              </button>
+            </div>
             <div className="hero-meta">
               <span>3D DRIVING ADVENTURE</span>
               <i /> <span>5 CHAPTERS</span>
@@ -665,7 +668,7 @@ export default function App() {
             <div className="chapters">
               {MISSIONS.map((m, i) => {
                 const open = unlocked(save, i),
-                  best = save.best[`${i}:${save.settings.mode}`];
+                  best = save.best[bestKey(i, save.settings.mode, variant)];
                 return (
                   <button
                     key={i}
@@ -803,9 +806,40 @@ export default function App() {
                   </div>
                   <div className="speedometer">
                     <strong>{Math.round(Math.abs(e.speed) * 3.6)}</strong>
-                    <span>KM/H</span>
+                    <span>
+                      KM/H{" "}
+                      <b className="gear">{e.speed < -0.5 ? "R" : e.gear}</b>
+                    </span>
+                    <div className="rpm-track">
+                      <i
+                        style={{
+                          width: `${Math.min(100, (e.rpm / 4900) * 100)}%`,
+                        }}
+                      />
+                    </div>
                     <small>{e.surface.toUpperCase()}</small>
                   </div>
+                  {e.upcomingEncounter && (
+                    <div className="encounter-cue" role="status">
+                      <span className="encounter-mark">!</span>
+                      <div>
+                        <strong>{e.upcomingEncounter.title}</strong>
+                        <span>{e.upcomingEncounter.instruction}</span>
+                      </div>
+                      <b>
+                        {Math.max(
+                          0,
+                          Math.round(e.upcomingEncounter.z - e.progress),
+                        )}{" "}
+                        m
+                      </b>
+                    </div>
+                  )}
+                  {e.elapsed < e.rewardUntil && (
+                    <div className="clean-cue">
+                      ✓ CLEAN PASS <span>{e.cleanEncounters} handled</span>
+                    </div>
+                  )}
                   {save.settings.subtitles && e.elapsed < e.notice.until && (
                     <div className="radio" role="status">
                       <span className="radio-icon">▥</span>
@@ -929,29 +963,31 @@ export default function App() {
                   <div className="cinema-top" />
                   <div className="cinema-bottom">
                     <span className="eyebrow">
-                      {e.restoreTime < 5
+                      {e.restoreTime < 8
                         ? "DELIVERY RECEIVED"
-                        : e.restoreTime < 9
+                        : e.restoreTime < 12
                           ? "POWER IS RETURNING"
                           : "A BRIGHTER TOMORROW"}
                     </span>
                     <h2>
-                      {e.restoreTime < 5
+                      {e.restoreTime < 8
                         ? "You brought the light."
-                        : e.restoreTime < 9
+                        : e.restoreTime < 12
                           ? "One room. Then another."
                           : "Look what you made possible."}
                     </h2>
                     <p>
-                      {e.restoreTime < 5
+                      {e.restoreTime < 8
                         ? "The charged battery gives power now. Solar panels keep hope growing."
-                        : e.restoreTime < 9
+                        : e.restoreTime < 12
                           ? "The clinic is coming back to life."
                           : "The lights are back. The team can keep caring."}
                     </p>
-                    <button className="text-button" onClick={() => e.skip()}>
-                      Continue ↗
-                    </button>
+                    {e.restoreTime >= 11 && (
+                      <button className="text-button" onClick={() => e.skip()}>
+                        Continue ↗
+                      </button>
+                    )}
                   </div>
                 </div>
               )}
@@ -996,8 +1032,13 @@ export default function App() {
                     <div className="result-caption">
                       {time(result.remaining)} to spare ·{" "}
                       {result.mode === "relaxed" ? "Relaxed" : "Standard"} ·
-                      With the clinic team
+                      {result.clean || 0}/{result.encounters || 0} clean passes
+                      · With the clinic team
                     </div>
+                    <p className="array-caption">
+                      Later, the team commissions the solar array for lasting
+                      power.
+                    </p>
                     {selected === 4 && (
                       <div
                         className="finale-lights"
@@ -1117,7 +1158,8 @@ export default function App() {
                     {Math.round(
                       world.current?.renderer.info.render.triangles || 0,
                     )}{" "}
-                    triangles
+                    triangles · p95 {world.current?.performance.p95.toFixed(1)}{" "}
+                    ms
                   </output>
                   <output>
                     {frameStats.current.length

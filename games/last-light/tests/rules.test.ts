@@ -1,4 +1,5 @@
 import { beforeAll, describe, it, expect } from 'vitest';
+import { RESTORE_DURATION } from '../src/vehicle';
 import { GameEngine, initPhysics, emptyInput } from '../src/engine';
 import { MISSIONS, roadX, roadY, heightAt } from '../src/missions';
 import {
@@ -85,7 +86,7 @@ describe('mission rules', () => {
     e.skip();
     e.skip();
     expect(e.phase).toBe('results');
-    expect(e.restoreTime).toBe(14);
+    expect(e.restoreTime).toBe(RESTORE_DURATION);
     expect(e.result).toEqual(result);
     e.dispose();
   });
