@@ -1,5 +1,6 @@
 import { clamp, heightAt, roadX, smooth, type Mission } from './missions';
 import { driverSide, roadSections, type RoadSection } from './road-sections';
+import { routeHeading, toWorld } from './routes';
 export type EncounterKind = RoadSection['kind'];
 export type Encounter = {
   id: string;
@@ -20,6 +21,13 @@ export type Encounter = {
   actorZ: number;
   passedSafely: boolean;
   blockedFor: number;
+  actorOffset: number;
+  actorSpeed: number;
+  phaseTime: number;
+  yieldAmount: number;
+  brakeLights: boolean;
+  indicator: number;
+  waterLevel: number;
 };
 export function makeEncounters(m: Mission): Encounter[] {
   return roadSections(m).map((s, i) => ({
@@ -30,11 +38,14 @@ export function makeEncounters(m: Mission): Encounter[] {
     side: s.safeSide,
     title: {
       washout: 'ROAD WASHED AWAY',
-      minibus: 'BLOCKED ROAD',
+      minibus: 'COMMUNITY MINIBUS',
       bridge: 'SINGLE-LANE BRIDGE',
       tree: 'FALLEN TREE',
       flood: 'FLOODED CROSSING',
       gust: 'EXPOSED DESCENT',
+      ridge: 'HILLSIDE SWITCHBACK',
+      herd: 'LANTERN CROSSING',
+      traffic: 'ONCOMING VEHICLE',
     }[s.kind],
     instruction:
       s.kind === 'bridge'
@@ -42,12 +53,18 @@ export function makeEncounters(m: Mission): Encounter[] {
         : s.kind === 'washout'
           ? `Brake early. Firm strip on your ${driverSide(s.safeSide)}; left detour avoids the washout.`
           : s.kind === 'minibus'
-            ? `Centre blocked. Slow down and pass on your ${driverSide(s.safeSide)}.`
+            ? `The minibus is pulling into its stop. Ease off; pass on your ${driverSide(s.safeSide)} when it settles.`
             : s.kind === 'tree'
               ? `Brake before the branches. Take the marked ${driverSide(s.safeSide)} passage.`
               : s.kind === 'flood'
                 ? `Shallow line on your ${driverSide(s.safeSide)}. Steady throttle, or take the left bypass.`
-                : 'Brake before the bend. Follow the chevrons and keep a steady line.',
+                : s.kind === 'ridge'
+                  ? 'Uphill hairpin and an open drop. Brake early, stay between the reflectors, and follow the turn.'
+                  : s.kind === 'herd'
+                    ? 'A herder is guiding goats home. Slow down behind the lantern line; wait until they clear.'
+                    : s.kind === 'traffic'
+                      ? `Headlights ahead. Keep to your ${driverSide(s.safeSide)}; the driver will give you room.`
+                      : 'Brake before the bend. Follow the chevrons and keep a steady line.',
     warned: false,
     entered: false,
     resolved: false,
@@ -56,9 +73,23 @@ export function makeEncounters(m: Mission): Encounter[] {
     recoveryAtEntry: 0,
     elapsed: 0,
     state: 'waiting',
-    actorZ: s.kind === 'bridge' ? s.z + s.length / 2 + 8 : s.z,
+    actorZ:
+      s.kind === 'bridge'
+        ? s.z + s.length / 2 + 8
+        : s.kind === 'minibus'
+          ? s.z - 30
+          : s.kind === 'traffic'
+            ? s.z + 30
+            : s.z,
     passedSafely: false,
     blockedFor: 0,
+    actorOffset: s.kind === 'traffic' ? -s.safeSide * 2.7 : 0,
+    actorSpeed: 0,
+    phaseTime: 0,
+    yieldAmount: 0,
+    brakeLights: false,
+    indicator: 0,
+    waterLevel: 0,
   }));
 }
 export function warningDistance(speed: number, wet: number) {
@@ -66,12 +97,13 @@ export function warningDistance(speed: number, wet: number) {
   return Math.max(145, v * 3 + (v * v) / (2 * (wet > 0.4 ? 4.5 : 6)) + 20);
 }
 export function encounterPose(m: Mission, event: Encounter) {
-  const z = event.kind === 'bridge' ? event.actorZ : event.z;
+  const moving = ['bridge', 'minibus', 'traffic'].includes(event.kind);
+  const z = moving ? event.actorZ : event.z;
   let offset =
     event.kind === 'bridge'
       ? 0
-      : event.kind === 'minibus'
-        ? -event.side * 0.35
+      : moving
+        ? event.actorOffset
         : -event.side * 1.75;
   if (event.kind === 'bridge' && event.state === 'clearing')
     offset = -event.side * 4.3 * smooth(0, 16, event.z - event.length / 2 - z);
@@ -82,18 +114,19 @@ export function encounterPose(m: Mission, event: Encounter) {
   if (event.kind === 'tree') offset = -event.side * (4.3 - 2.55 * fall);
   const x = roadX(m, z) + offset;
   const heading =
-    Math.atan2(roadX(m, z + 1) - roadX(m, z - 1), 2) +
-    (event.kind === 'bridge'
+    routeHeading(m, z, false, offset) +
+    (event.kind === 'bridge' || event.kind === 'traffic'
       ? Math.PI
       : event.kind === 'tree'
         ? (event.side * Math.PI) / 2
-        : 0.12);
+        : 0);
+  const world = toWorld(m, x, z);
   return {
-    x,
+    x: world.x,
     y:
       heightAt(m, x, z) +
       (event.kind === 'tree' ? 2.55 * Math.sqrt(1 - fall * fall) : 0),
-    z,
+    z: world.z,
     heading,
     tilt,
     rotation: {

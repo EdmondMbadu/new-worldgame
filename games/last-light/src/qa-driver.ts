@@ -1,3 +1,4 @@
+import { ridgeAt, routePoint, stationAhead } from './routes';
 import type { GameEngine, Input } from './engine';
 import { clamp, routeX, roadX, isMud, onBridge, smooth } from './missions';
 
@@ -9,21 +10,33 @@ export function driveInput(
 ): Input {
   const p = e.position,
     m = e.mission;
-  const z = Math.min(m.length, p.z + 7 + Math.abs(e.speed) * 0.6);
+  const z = stationAhead(
+    m,
+    e.progress,
+    5 + Math.abs(e.speed) * 0.55,
+    alternate,
+  );
   let x = routeX(m, z, alternate);
   let encounterLimit = 24;
   const event = e.encounters.find(
     (event) =>
       event.kind !== 'gust' &&
-      event.z - p.z < 125 &&
-      event.z - p.z > -event.length / 2 - 25,
+      event.kind !== 'ridge' &&
+      event.z - e.progress < 125 &&
+      event.z - e.progress > -event.length / 2 - 25,
   );
   if (event && Math.abs(x - roadX(m, z)) < 8) {
-    const distance = event.z - p.z;
-    if (event.kind === 'bridge') {
+    const distance = event.z - e.progress;
+    if (event.kind === 'herd') {
+      if (event.state !== 'clear')
+        encounterLimit = Math.min(
+          6.8,
+          Math.sqrt(Math.max(0, event.z - e.progress - 28) * 6),
+        );
+    } else if (event.kind === 'bridge') {
       const stop = event.z - event.length / 2 - 27;
       if (event.state !== 'clear')
-        encounterLimit = Math.sqrt(Math.max(0, stop - p.z) * 6);
+        encounterLimit = Math.sqrt(Math.max(0, stop - e.progress) * 6);
       else encounterLimit = 5.5;
     } else {
       const blend =
@@ -41,10 +54,11 @@ export function driveInput(
       if (distance < 65) encounterLimit = event.kind === 'flood' ? 5.5 : 6.5;
     }
   }
-  let error = Math.atan2(x - p.x, z - p.z) - e.heading;
+  const point = routePoint(m, z, alternate, x - routeX(m, z, alternate));
+  let error = Math.atan2(point.x - p.x, point.z - p.z) - e.heading;
   while (error > Math.PI) error -= Math.PI * 2;
   while (error < -Math.PI) error += Math.PI * 2;
-  const preview = Math.min(m.length, p.z + 30);
+  const preview = Math.min(m.length, e.progress + 30);
   const mud =
     isMud(m, routeX(m, preview, alternate), preview) || e.surface === 'Mud';
   const bridge =
@@ -52,15 +66,16 @@ export function driveInput(
     Math.abs(routeX(m, preview, alternate) - roadX(m, preview)) < 5;
   const rough = e.obstacles.some(
     (o) =>
-      o.z > p.z - 5 &&
-      o.z < p.z + 55 &&
+      o.z > e.progress - 5 &&
+      o.z < e.progress + 55 &&
       Math.abs(o.x - routeX(m, o.z, alternate)) < 5,
   );
   const target = Math.min(
-    Math.sqrt(Math.max(0, m.length - p.z - 3) * 7.2),
+    Math.sqrt(Math.max(0, m.length - e.progress - 3) * 7.2),
     bridge || e.surface === 'Bridge' ? 5.5 : mud ? 8.5 : fast ? 19 : 11.5,
     Math.abs(error) > 0.45 ? 8 : 24,
     encounterLimit,
+    ridgeAt(m, e.progress + 20) > 0.01 || ridgeAt(m, e.progress) > 0 ? 6.5 : 24,
     rough ? 9.5 : 24,
   );
   return {

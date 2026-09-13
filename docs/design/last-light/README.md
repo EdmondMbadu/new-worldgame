@@ -10,6 +10,8 @@ The second game in the Global Solutions Lab collection follows Lost in Orbit. Th
 - [Upgrade implementation and verification](upgrade-verification.md): shipped behavior, automated and browser checks, build budgets, and remaining device and production-art work.
 - [Night journey upgrade plan](night-journey-upgrade-plan.md): the approved blueprint for five night missions, consequential road encounters, useful headlights and redesigned clinics.
 - [Night journey implementation and verification](night-journey-verification.md): steering correction, implemented night/road/clinic changes, final tests, build budgets, browser checks and remaining device/player validation.
+- [Living roads and village journeys plan](living-roads-upgrade-plan.md): the approved blueprint—reactive traffic, guided livestock crossings, authored 3D roads, richer village scenery, approachable difficulty and staged implementation gates.
+- [Living roads implementation and verification](living-roads-verification.md): dangerous hills and cliff recovery, reactive encounters, village scenes, route coordinates, practice, tests and build budgets.
 - [Concept board](/Users/edmondmbadu/repo/new-worldgame/docs/design/last-light/concept-board.png): journey, dark arrival, and restored clinic. Generated using the built-in image-generation tool as aspirational art direction, not an implemented-game screenshot.
 - [Exact generation prompt](/Users/edmondmbadu/repo/new-worldgame/docs/design/last-light/concept-prompt.txt): source prompt for the concept board.
 

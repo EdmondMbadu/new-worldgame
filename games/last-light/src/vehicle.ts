@@ -7,9 +7,10 @@ import {
   smooth,
   type Mission,
 } from './missions';
+import { roadWidth } from './routes';
 import { roadSections, sectionEnvelope } from './road-sections';
 
-export const ROAD_REVISION = 3;
+export const ROAD_REVISION = 4;
 export const RESTORE_DURATION = 18;
 export const TUNING = {
   speed: 22.2, // 80 km/h on firm, visible road; curves still require braking.
@@ -28,7 +29,12 @@ export type SurfaceSample = {
   wet: number;
 };
 
-export function surfaceAt(m: Mission, x: number, z: number): SurfaceSample {
+export function surfaceAt(
+  m: Mission,
+  x: number,
+  z: number,
+  waterLevel = 0,
+): SurfaceSample {
   for (const s of roadSections(m)) {
     if (
       s.kind === 'flood' &&
@@ -40,7 +46,7 @@ export function surfaceAt(m: Mission, x: number, z: number): SurfaceSample {
         name: 'Water',
         grip: shallow ? 3.5 : 2.3,
         sideGrip: 0.85,
-        speed: shallow ? 7 : 3.8,
+        speed: (shallow ? 7 : 3.8) - waterLevel * 5,
         wet: 1,
       };
     }
@@ -53,7 +59,11 @@ export function surfaceAt(m: Mission, x: number, z: number): SurfaceSample {
       speed: TUNING.speed,
       wet: m.rain,
     };
-  const verge = smooth(5.1, 7.4, roadDistance(m, x, z));
+  const verge = smooth(
+    roadWidth(m, z) + 0.3,
+    roadWidth(m, z) + 2.6,
+    roadDistance(m, x, z),
+  );
   let mud = 0;
   for (const [a, b] of m.mud)
     mud = Math.max(

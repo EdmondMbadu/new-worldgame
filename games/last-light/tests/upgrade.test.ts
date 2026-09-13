@@ -125,12 +125,12 @@ describe('faster driving and meaningful surfaces', () => {
             e.dispose();
           }
         });
-  it('registers a real high-speed collision with a stopped minibus', () => {
+  it('registers a real high-speed collision with a moving minibus approached too fast', () => {
     const m = { ...MISSIONS[0], bend: 0 },
       e = new GameEngine(m);
     try {
       const event = e.encounters.find((event) => event.kind === 'minibus')!,
-        z = event.z - 15,
+        z = event.actorZ - 15,
         x = encounterPose(m, event).x;
       e.body.setTranslation({ x, y: heightAt(m, x, z) + 0.85, z }, true);
       e.body.setRotation({ x: 0, y: 0, z: 0, w: 1 }, true);

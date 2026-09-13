@@ -1,3 +1,6 @@
+import { VillageLife } from './village';
+import { HerdArt } from './herd-art';
+import { bendStatic } from './route-art';
 import * as T from 'three';
 import {
   batch,
@@ -7,7 +10,6 @@ import {
   material,
   mesh,
   label,
-  createPerson,
   geometries,
   materials,
 } from './art';
@@ -47,29 +49,39 @@ export class LivingWorld {
     group: T.Group;
     wheels: T.Object3D[];
     lamps: T.MeshStandardMaterial;
-  }[] = [];
-  private villagers: {
-    person: ReturnType<typeof createPerson>;
-    x: number;
-    z: number;
-    phase: number;
+    brakes: T.MeshStandardMaterial;
+    indicators: T.MeshStandardMaterial[];
   }[] = [];
   private flags: T.Mesh[] = [];
+  private herds: HerdArt[] = [];
+  private village: VillageLife;
   constructor(
     private mission: Mission,
     events: Encounter[],
     low: boolean,
   ) {
-    const stone = material('#676e62', 0.96),
-      wood = material('#625943');
+    const wood = material('#625943');
     for (const event of events) {
       buildRoadEncounter(this.group, mission, event, this.time);
-      if (event.kind === 'washout' || event.kind === 'flood') continue;
+      if (event.kind === 'herd') {
+        const herd = new HerdArt(mission, event);
+        this.group.add(herd.group);
+        this.herds.push(herd);
+        continue;
+      }
+      if (['washout', 'flood', 'ridge'].includes(event.kind)) continue;
       const g = new T.Group(),
         fixed = new T.Group();
       g.add(fixed);
       const lamps = material('#ffc879', 0.2);
-      lamps.emissive.set('#ffb253');
+      lamps.emissive.set('#ffebc0');
+      const brakes = material('#ae3327', 0.3);
+      brakes.emissive.set('#ed3928');
+      const indicators = [-1, 1].map(() => {
+        const mat = material('#f2a23f');
+        mat.emissive.set('#ffa431');
+        return mat;
+      });
       const wheels: T.Object3D[] = [];
       if (event.kind === 'gust') {
         const x = roadX(mission, event.z) + 8,
@@ -170,7 +182,7 @@ export class LivingWorld {
           );
           box(
             fixed,
-            lamps,
+            brakes,
             side * 0.85,
             0.83,
             -len / 2 - 0.03,
@@ -179,6 +191,17 @@ export class LivingWorld {
             0.04,
             0.018,
           );
+          for (const end of [-1, 1])
+            box(
+              fixed,
+              indicators[side > 0 ? 1 : 0],
+              side * 0.94,
+              0.99,
+              end * (len / 2 + 0.055),
+              0.08,
+              0.15,
+              0.025,
+            );
           box(
             fixed,
             metal,
@@ -231,7 +254,7 @@ export class LivingWorld {
         g.add(beam, beam.target);
       }
       this.group.add(g);
-      this.actors.push({ event, group: g, wheels, lamps });
+      this.actors.push({ event, group: g, wheels, lamps, brakes, indicators });
       const signZ = event.z - 110,
         sx = roadX(mission, signZ) + 7,
         sy = heightAt(mission, sx, signZ);
@@ -241,10 +264,12 @@ export class LivingWorld {
         sign,
         label(
           event.kind === 'minibus'
-            ? 'STOPPED VEHICLE'
+            ? 'MINIBUS STOP · SLOW'
             : event.kind === 'bridge'
               ? 'SINGLE LANE · WAIT'
-              : 'TREE · SLOW PASSAGE',
+              : event.kind === 'traffic'
+                ? 'ONCOMING TRAFFIC'
+                : 'TREE · SLOW PASSAGE',
           '#f1ddb4',
           '#5b5237',
           768,
@@ -258,66 +283,15 @@ export class LivingWorld {
         0.08,
       );
       board.rotation.y = Math.PI;
-      this.group.add(batch(sign));
+      batch(sign);
+      bendStatic(sign, mission);
+      this.group.add(sign);
     }
-    // Small roadside places give scale and human activity without blocking the driving corridor.
-    for (const z of [85, mission.length * 0.57]) {
-      const side = z < 100 ? -1 : 1,
-        x = roadX(mission, z) + side * 18,
-        y = heightAt(mission, x, z);
-      const village = new T.Group();
-      village.position.set(x, y, z);
-      const plaster = material(mission.id % 2 ? '#bba786' : '#c3b596'),
-        roof = material('#70817a', 0.55, 0.4),
-        trim = material('#376e61');
-      box(village, plaster, 0, 1.7, 0, 5, 3.4, 4, 0.05);
-      for (const s of [-1, 1]) {
-        const r = box(village, roof, 0, 3.65, s * 1.05, 5.7, 0.12, 2.5);
-        r.rotation.x = s * 0.27;
-      }
-      box(village, trim, 0, 1.1, -2.04, 1.1, 2.2, 0.06);
-      for (const xx of [-1.7, 1.7]) {
-        box(village, trim, xx, 1.95, -2.04, 0.9, 0.9, 0.06);
-        box(village, wood, xx, 0.9, -3.5, 0.9, 0.13, 0.7);
-      }
-      box(village, wood, 0, 0.92, -3.5, 2, 0.14, 0.8);
-      for (let i = 0; i < 5; i++)
-        sphere(
-          village,
-          material(i % 2 ? '#b78d40' : '#738a43'),
-          (i - 2) * 0.25,
-          1.08,
-          -3.5,
-          0.13,
-        );
-      cylinder(village, wood, -3, 2, -1, 0.055, 0.075, 4);
-      cylinder(village, wood, 3, 2, -1, 0.055, 0.075, 4);
-      box(village, wood, 0, 3.2, -1, 6, 0.017, 0.017);
-      this.group.add(batch(village));
-      for (let i = 0; i < 3; i++) {
-        const mat = material(['#c7c0a1', '#6c9b92', '#b77c54'][i]);
-        mat.side = T.DoubleSide;
-        windMaterial(mat, this.time, 0.09);
-        const cloth = mesh(
-          new T.PlaneGeometry(0.8, 1.1, 6, 5),
-          mat,
-          this.group,
-          x + (i - 1) * 1.35,
-          y + 2.7,
-          z - 1,
-        );
-        this.flags.push(cloth);
-      }
-      for (let i = 0; i < (low ? 1 : 2); i++) {
-        const person = createPerson(i ? '#b99665' : '#7d9b8e');
-        const px = x + (i ? 3 : -3),
-          pz = z - 4;
-        person.group.position.set(px, heightAt(mission, px, pz), pz);
-        this.group.add(person.group);
-        this.villagers.push({ person, x: px, z: pz, phase: i * 2 });
-      }
-    }
+    this.village = new VillageLife(mission, low);
+    this.group.add(this.village.group);
   }
+
+  private lastClock = 0;
   update(e: GameEngine, clock: number) {
     this.time.value = clock;
     for (const actor of this.actors) {
@@ -334,34 +308,28 @@ export class LivingWorld {
         p.rotation.w,
       );
       actor.group.visible = Math.abs(e.position.z - p.z) < 320;
-      actor.lamps.emissiveIntensity =
-        actor.event.kind === 'minibus'
-          ? Math.sin(clock * 7) > 0
-            ? 3
-            : 0.15
-          : 1.3;
-      for (const wheel of actor.wheels)
-        if (actor.event.kind === 'bridge' && actor.event.state !== 'clear')
-          wheel.rotation.x = actor.event.elapsed * 7;
-    }
-    for (const v of this.villagers) {
-      const near = Math.abs(e.position.z - v.z) < 38;
-      v.person.group.visible = Math.abs(e.position.z - v.z) < 180;
-      v.person.group.position.x = v.x + Math.sin(clock * 0.4 + v.phase) * 0.45;
-      v.person.group.rotation.y = Math.atan2(
-        e.position.x - v.x,
-        e.position.z - v.z,
+      actor.lamps.emissiveIntensity = 1.3;
+      actor.brakes.emissiveIntensity = actor.event.brakeLights ? 3 : 0.55;
+      actor.indicators.forEach(
+        (mat, i) =>
+          (mat.emissiveIntensity =
+            actor.event.indicator === (i ? 1 : -1) && Math.sin(clock * 6) > 0
+              ? 2.7
+              : 0.03),
       );
-      v.person.head.rotation.y = Math.sin(clock * 0.5 + v.phase) * 0.13;
-      v.person.limbs[0].rotation.z = near
-        ? 1.5 + Math.sin(clock * 5) * 0.18
-        : 0.12;
-      v.person.forearms[0].rotation.x = near ? -0.5 : -0.1;
-      v.person.limbs[2].rotation.x = Math.sin(clock * 2 + v.phase) * 0.07;
-      v.person.limbs[3].rotation.x = -v.person.limbs[2].rotation.x;
+      for (const wheel of actor.wheels)
+        wheel.rotation.x +=
+          (actor.event.actorSpeed * (clock - this.lastClock)) / 0.41;
     }
+    this.herds.forEach((herd) => {
+      herd.update(clock);
+    });
+    this.village.update(clock, e.position);
+    this.lastClock = clock;
   }
+
   dispose() {
-    for (const v of this.villagers) v.person.skin.skeleton.dispose();
+    this.herds.forEach((herd) => herd.dispose());
+    this.village.dispose();
   }
 }

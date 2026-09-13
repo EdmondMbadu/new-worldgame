@@ -1,5 +1,8 @@
 import type { GameEngine } from './engine';
 import type { Settings } from './save';
+import { encounterPose } from './encounters';
+import { herdPose } from './traffic';
+import { clamp } from './missions';
 
 export class Soundtrack {
   context: AudioContext | null = null;
@@ -23,6 +26,7 @@ export class Soundtrack {
   private lastNote = -1;
   private lastBird = -1;
   private lastPower = 0;
+  private lastRoadSound = -1;
   private load: Promise<void> | null = null;
   private abort = new AbortController();
   private stopped = false;
@@ -125,7 +129,14 @@ export class Soundtrack {
       /* Muted gameplay remains complete. */
     }
   }
-  tone(hz: number, length: number, volume = 0.025, delay = 0, music = false) {
+  tone(
+    hz: number,
+    length: number,
+    volume = 0.025,
+    delay = 0,
+    music = false,
+    pan = 0,
+  ) {
     const c = this.context;
     if (!c || !this.gain || this.stopped) return;
     const o = c.createOscillator(),
@@ -135,12 +146,17 @@ export class Soundtrack {
     g.gain.setValueAtTime(0, c.currentTime + delay);
     g.gain.linearRampToValueAtTime(volume, c.currentTime + delay + 0.025);
     g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + delay + length);
-    o.connect(g).connect(music && this.music ? this.music : this.gain);
+    const stereo = c.createStereoPanner();
+    stereo.pan.value = pan;
+    o.connect(g)
+      .connect(stereo)
+      .connect(music && this.music ? this.music : this.gain);
     o.start(c.currentTime + delay);
     o.stop(c.currentTime + delay + length + 0.03);
     o.onended = () => {
       o.disconnect();
       g.disconnect();
+      stereo.disconnect();
     };
   }
   private impact(volume: number, frequency = 240) {
@@ -238,6 +254,44 @@ export class Soundtrack {
       0.05,
     );
     if (!active) return;
+    const beat = Math.floor(e.elapsed * 1.6);
+    if (driving && beat !== this.lastRoadSound) {
+      this.lastRoadSound = beat;
+      const event = e.encounters.find(
+        (event) =>
+          !event.resolved &&
+          ['herd', 'minibus', 'traffic', 'bridge'].includes(event.kind) &&
+          Math.abs(event.z - e.progress) < 65,
+      );
+      if (event) {
+        const p =
+          event.kind === 'herd'
+            ? herdPose(e.mission, event, beat % 3)
+            : encounterPose(e.mission, event);
+        const dx = p.x - e.position.x,
+          dz = p.z - e.position.z,
+          distance = Math.hypot(dx, dz);
+        const pan = clamp(
+          (-Math.cos(e.heading) * dx + Math.sin(e.heading) * dz) / 14,
+          -1,
+          1,
+        );
+        const level = 0.017 * Math.max(0, 1 - distance / 65);
+        if (event.kind === 'herd') {
+          this.tone(1050 + (beat % 3) * 170, 0.24, level, 0, false, pan);
+          this.tone(1780, 0.13, level * 0.35, 0.06, false, pan);
+        } else if (event.actorSpeed !== 0) {
+          this.tone(
+            73 + Math.abs(event.actorSpeed) * 5,
+            0.7,
+            level * 1.5,
+            0,
+            false,
+            pan,
+          );
+        }
+      }
+    }
     this.tuneTime += dt;
     const restoring = e.phase === 'restoring' || e.phase === 'results';
     const note = Math.floor(

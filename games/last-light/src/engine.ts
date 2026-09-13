@@ -1,4 +1,14 @@
 import {
+  ridgeAt,
+  roadWidth,
+  routePoint,
+  routeHeading,
+  toRoute,
+  toWorld,
+  worldHeight,
+} from './routes';
+import { updateTraffic } from './traffic';
+import {
   engineRpm,
   impactDamage,
   ROAD_REVISION,
@@ -60,6 +70,7 @@ export type Result = {
   variant?: number;
   clean?: number;
   encounters?: number;
+  practice?: boolean;
 };
 export type Notice = { who: string; text: string; until: number };
 let initialization: Promise<void> | undefined;
@@ -77,6 +88,9 @@ export class GameEngine {
   elapsed = 0;
   integrity = 100;
   progress = 0;
+  roadPosition = { x: 0, z: 0 };
+  fallingFor = 0;
+  practice = false;
   furthest = 0;
   distance: number;
   speed = 0;
@@ -92,6 +106,7 @@ export class GameEngine {
   recoveries = 0;
   stalledFor = 0;
   safeZ = 8;
+  safeAlt = false;
   isAlt = false;
   wheelSpin = 0;
   throttle = 0;
@@ -180,19 +195,21 @@ export class GameEngine {
       }
     this.obstacles = obstacles(mission);
     for (const o of this.obstacles.filter((o) => o.kind !== 'rut')) {
+      const w = toWorld(mission, o.x, o.z);
       this.world.createCollider(
         RAPIER.ColliderDesc.ball(o.radius)
           .setTranslation(
-            o.x,
+            w.x,
             heightAt(mission, o.x, o.z) + o.radius * 0.25,
-            o.z,
+            w.z,
           )
           .setFriction(0.4),
       );
     }
     this.encounters = makeEncounters(mission);
     for (const event of this.encounters) {
-      if (!['minibus', 'bridge', 'tree'].includes(event.kind)) continue;
+      if (!['minibus', 'bridge', 'tree', 'traffic'].includes(event.kind))
+        continue;
       const p = encounterPose(mission, event);
       const body = this.world.createRigidBody(
         RAPIER.RigidBodyDesc.kinematicPositionBased()
@@ -250,7 +267,8 @@ export class GameEngine {
       z: 1 - 2 * (q.x * q.x + q.y * q.y),
     };
     this.speed = v.x * f.x + v.z * f.z;
-    this.progress = clamp(p.z, 0, this.mission.length);
+    this.roadPosition = toRoute(this.mission, p.x, p.z);
+    this.progress = clamp(this.roadPosition.z, 0, this.mission.length);
   }
   get heading() {
     const q = this.rotation;
@@ -272,21 +290,19 @@ export class GameEngine {
   get needsRecovery() {
     return (
       this.stalledFor > 2.5 ||
-      roadDistance(this.mission, this.position.x, this.position.z) > 12 ||
+      roadDistance(this.mission, this.roadPosition.x, this.progress) >
+        roadWidth(this.mission, this.progress) + 7 ||
       this.rotation.x * this.rotation.x + this.rotation.z * this.rotation.z >
         0.3 ||
       this.position.y <
-        heightAt(this.mission, this.position.x, this.position.z) - 2
+        worldHeight(this.mission, this.position.x, this.position.z) - 2
     );
   }
   private setPose(z: number) {
     this.collisionGrace = 0;
-    const x = routeX(this.mission, z, this.isAlt),
-      a = Math.atan2(routeX(this.mission, z + 2, this.isAlt) - x, 2);
-    this.body.setTranslation(
-      { x, y: heightAt(this.mission, x, z) + 1.05, z },
-      true,
-    );
+    const point = routePoint(this.mission, z, this.isAlt),
+      a = routeHeading(this.mission, z, this.isAlt);
+    this.body.setTranslation({ ...point, y: point.y + 1.05 }, true);
     this.body.setRotation(
       { x: 0, y: Math.sin(a / 2), z: 0, w: Math.cos(a / 2) },
       true,
@@ -303,11 +319,45 @@ export class GameEngine {
     if (this.phase !== 'driving') return;
     this.time = Math.max(0, this.time - 8);
     this.recoveries++;
+    this.fallingFor = 0;
     this.stalledFor = 0;
-    this.setPose(this.safeZ);
+    this.restoreCheckpoint();
     this.say('JO · DISPATCH', 'Back on firm ground. Recovery used 8 seconds.');
     if (this.time <= 0)
       this.fail('The clinic reserve ran out. Try the route again.');
+  }
+  practiceFromCheckpoint() {
+    if (this.phase !== 'failed' && this.phase !== 'paused') return;
+    this.practice = true;
+    this.result = null;
+    this.phase = 'driving';
+    this.time = this.initial;
+    this.integrity = 100;
+    this.fallingFor = 0;
+    this.restoreCheckpoint();
+    this.say(
+      'PRACTICE DRIVE',
+      'Continue from firm ground. Practice deliveries do not change records or unlocks.',
+      6,
+    );
+  }
+  private restoreCheckpoint() {
+    this.isAlt = this.safeAlt;
+    let station = this.safeZ;
+    // Traffic may have reached a previously empty checkpoint. Step back to a
+    // clear part of the same route instead of spawning inside a moving vehicle.
+    while (station > 8) {
+      const point = routePoint(this.mission, station, this.safeAlt);
+      const occupied = this.encounters.some((event) => {
+        if (!['minibus', 'traffic', 'bridge', 'tree'].includes(event.kind))
+          return false;
+        const actor = encounterPose(this.mission, event);
+        return Math.hypot(actor.x - point.x, actor.z - point.z) < 9;
+      });
+      if (!occupied && ridgeAt(this.mission, station) < 0.05) break;
+      station = Math.max(8, station - 12);
+    }
+    this.setPose(station);
   }
   say(who: string, text: string, seconds = 7) {
     this.notice = { who, text, until: this.elapsed + seconds };
@@ -424,17 +474,18 @@ export class GameEngine {
     this.sync();
     const p = this.position,
       m = this.mission;
-    const mud = isMud(m, p.x, p.z),
-      off = roadDistance(m, p.x, p.z) > 6;
+    const road = this.roadPosition;
+    const mud = isMud(m, road.x, road.z),
+      off = roadDistance(m, road.x, road.z) > roadWidth(m, road.z) + 1.2;
     this.surface =
-      onBridge(m, p.z) && Math.abs(p.x - roadX(m, p.z)) < 5
+      onBridge(m, road.z) && Math.abs(road.x - roadX(m, road.z)) < 5
         ? 'Bridge'
         : mud
           ? 'Mud'
           : off
             ? 'Verge'
             : 'Gravel';
-    if (surfaceAt(m, p.x, p.z).name === 'Water') this.surface = 'Water';
+    if (surfaceAt(m, road.x, road.z).name === 'Water') this.surface = 'Water';
     const target =
       // Inputs use the driver's left/right. With +Z forward, screen-right is -X.
       -clamp(input.steer, -1, 1) *
@@ -443,7 +494,14 @@ export class GameEngine {
     this.wheelSurfaces = Array.from({ length: 4 }, (_, i) => {
       const contact = this.vehicle.wheelContactPoint(i);
       const point = contact && this.vehicle.wheelIsInContact(i) ? contact : p;
-      return surfaceAt(m, point.x, point.z);
+      const r = toRoute(m, point.x, point.z);
+      const water =
+        this.encounters.find(
+          (event) =>
+            event.kind === 'flood' &&
+            Math.abs(event.z - r.z) < event.length / 2 + 5,
+        )?.waterLevel ?? 0;
+      return surfaceAt(m, r.x, r.z, water);
     });
     const maxSpeed = this.wheelSurfaces.reduce((n, s) => n + s.speed, 0) / 4;
     const gearEdges = [0, 6, 10, 15, 20, 99];
@@ -468,7 +526,14 @@ export class GameEngine {
       y: 2 * (q.y * q.z - q.w * q.x),
       z: 1 - 2 * (q.x * q.x + q.y * q.y),
     };
-    const parking = this.canDeliver && input.action;
+    const herdAhead = this.encounters.some(
+      (event) =>
+        event.kind === 'herd' &&
+        event.state === 'crossing' &&
+        Math.abs(road.z - event.z) < 15 &&
+        Math.abs(road.x - roadX(m, road.z)) < 5.6,
+    );
+    const parking = (this.canDeliver && input.action) || herdAhead;
     const reverse =
       !parking &&
       input.brake > 0.1 &&
@@ -554,29 +619,45 @@ export class GameEngine {
       Math.abs(this.speed),
     );
     if (damage > 0) this.hurt(damage);
-    if (
-      p.z > m.length + 22 ||
-      p.z < -20 ||
-      roadDistance(m, p.x, p.z) > 60 ||
-      p.y < -45
+    const current = this.roadPosition;
+    const ridge = ridgeAt(m, this.progress);
+    if (ridge > 0.2 && this.position.y < roadY(m, this.progress) - 3)
+      this.fallingFor += dt;
+    if (this.fallingFor > 0 && this.fallingFor < dt * 1.5)
+      this.say(
+        'HOLD ON',
+        'Off the ridge. The recovery team is bringing you back to firm ground.',
+        4,
+      );
+    if (this.fallingFor > 0.9) {
+      this.hurt(8);
+      this.recover();
+    } else if (
+      current.z > m.length + 22 ||
+      current.z < -20 ||
+      roadDistance(m, current.x, current.z) > 60 ||
+      this.position.y < -65
     )
       this.recover();
     this.furthest = Math.max(this.furthest, this.progress);
     if (
-      roadDistance(m, p.x, p.z) < 4 &&
+      roadDistance(m, current.x, current.z) < 3 &&
+      ridge < 0.05 &&
       Math.abs(q.x) < 0.25 &&
       Math.abs(q.z) < 0.25 &&
-      p.z < this.mission.length - 18 &&
+      this.progress < m.length - 18 &&
       !this.encounters.some(
-        (event) => Math.abs(p.z - event.z) < event.length / 2 + 18,
+        (event) => Math.abs(this.progress - event.z) < event.length / 2 + 22,
       )
     ) {
-      this.safeZ = Math.floor(Math.max(8, p.z - 4) / 5) * 5;
+      this.safeZ = Math.floor(Math.max(8, this.progress - 4) / 5) * 5;
+      this.safeAlt = this.isAlt;
     }
-    const offset = routeX(m, p.z, true) - roadX(m, p.z);
+    const offset = routeX(m, this.progress, true) - roadX(m, this.progress);
     if (offset > 5)
       this.isAlt =
-        Math.abs(p.x - routeX(m, p.z, true)) < Math.abs(p.x - roadX(m, p.z));
+        Math.abs(current.x - routeX(m, this.progress, true)) <
+        Math.abs(current.x - roadX(m, this.progress));
     if (Math.floor(this.elapsed * 4) !== Math.floor((this.elapsed - dt) * 4))
       this.distance = pathLength(m, this.progress, this.isAlt);
     const cue = m.radio[this.radioIndex];
@@ -598,9 +679,12 @@ export class GameEngine {
   }
   private updateEncounters(dt: number) {
     for (const event of this.encounters) {
-      const distance = event.z - this.position.z;
+      const distance = event.z - this.progress;
       if (
         !event.warned &&
+        !this.encounters.some(
+          (other) => other !== event && other.warned && !other.resolved,
+        ) &&
         distance < warningDistance(this.speed, this.mission.rain) &&
         distance > -25
       ) {
@@ -609,7 +693,9 @@ export class GameEngine {
       }
       if (
         !event.entered &&
-        distance < (event.kind === 'gust' ? 30 : 145) &&
+        distance <
+          (event.kind === 'gust' ? 30 : event.kind === 'minibus' ? 80 : 145) &&
+        (event.kind !== 'minibus' || this.progress > 445) &&
         distance > -25
       ) {
         event.entered = true;
@@ -620,31 +706,39 @@ export class GameEngine {
       }
       if (event.entered && !event.resolved) {
         event.elapsed += dt;
-        if (event.kind === 'bridge' && event.state !== 'clear') {
-          const entry = event.z - event.length / 2;
-          // Traffic owns the narrow bridge until it reaches its clearing bay.
-          event.actorZ -= dt * 7;
-          event.state =
-            event.actorZ > event.z + event.length / 2
-              ? 'approaching'
-              : event.actorZ > entry
-                ? 'crossing'
-                : 'clearing';
-          if (event.actorZ < entry - 20) {
-            event.state = 'clear';
-            event.instruction =
-              'Bridge clear. Keep centred and cross slowly, then accelerate away.';
-            this.say('BRIDGE CLEAR', event.instruction, 5);
-          }
+        const oldState = event.state;
+        updateTraffic(
+          event,
+          this.mission,
+          { ...this.roadPosition, speed: this.speed },
+          dt,
+        );
+        if (
+          event.state === 'clear' &&
+          oldState !== 'clear' &&
+          ['bridge', 'herd', 'minibus'].includes(event.kind)
+        ) {
+          const message =
+            event.kind === 'herd'
+              ? event.yieldAmount > 0
+                ? 'The herd is home. Thank you for waiting — the road is yours.'
+                : 'The herder kept the goats back. Slow for the next crossing.'
+              : event.kind === 'bridge'
+                ? 'Bridge clear. Stay centred and cross slowly.'
+                : 'Minibus safely in its stop. Your passage is clear.';
+          event.instruction = message;
+          if (!this.upcomingEncounter || this.upcomingEncounter === event)
+            this.say('ROAD CLEAR', message, 4);
         }
-        const local = this.position.x - roadX(this.mission, this.position.z);
+        const local = this.roadPosition.x - roadX(this.mission, this.progress);
         const bypass =
           Math.abs(local) > 8 &&
           Math.abs(
-            this.position.x - routeX(this.mission, this.position.z, true),
+            this.roadPosition.x - routeX(this.mission, this.progress, true),
           ) < 5;
         if (Math.abs(distance) < event.length / 2 + 2 && !bypass) {
-          if (Math.abs(local) > 6) event.passedSafely = false;
+          if (Math.abs(local) > roadWidth(this.mission, this.progress) + 1.2)
+            event.passedSafely = false;
           if (
             event.kind === 'bridge' &&
             (event.state !== 'clear' || Math.abs(this.speed) > 8)
@@ -656,8 +750,18 @@ export class GameEngine {
           )
             event.passedSafely = false;
           if (
-            event.kind === 'minibus' &&
-            (Math.abs(local) < 2 || Math.abs(this.speed) > 10)
+            ['minibus', 'traffic'].includes(event.kind) &&
+            (Math.abs(this.speed) > 12 ||
+              (event.kind === 'minibus' &&
+                event.state !== 'clear' &&
+                Math.abs(local) < 1.65))
+          )
+            event.passedSafely = false;
+          if (event.kind === 'herd' && event.state !== 'clear')
+            event.passedSafely = false;
+          if (
+            event.kind === 'ridge' &&
+            (Math.abs(this.speed) > 13 || this.fallingFor > 0)
           )
             event.passedSafely = false;
           if (
@@ -667,8 +771,15 @@ export class GameEngine {
             event.passedSafely = false;
         }
       }
+      if (event.entered && event.resolved && event.state !== 'clear')
+        updateTraffic(
+          event,
+          this.mission,
+          { ...this.roadPosition, speed: this.speed },
+          dt,
+        );
       const body = this.eventBodies.get(event.id);
-      if (body && event.entered && !event.resolved) {
+      if (body && event.entered) {
         const pose = encounterPose(this.mission, event);
         body.setNextKinematicTranslation({
           x: pose.x,
@@ -697,6 +808,7 @@ export class GameEngine {
     if (this.phase !== 'driving' || !this.canDeliver || this.time <= 0) return;
     const ratio = this.time / this.initial;
     this.result = {
+      practice: this.practice,
       mission: this.mission.id,
       mode: this.mode,
       remaining: this.time,

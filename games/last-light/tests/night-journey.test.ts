@@ -108,7 +108,7 @@ describe('consequential road encounters', () => {
   });
   for (const kind of ['tree', 'bridge'] as const)
     it(`rushing into the ${kind} causes a physical impact`, () => {
-      const m = { ...MISSIONS[kind === 'bridge' ? 2 : 0], bend: 0, mud: [] },
+      const m = { ...MISSIONS[kind === 'bridge' ? 2 : 4], bend: 0, mud: [] },
         e = new GameEngine(m);
       try {
         const event = e.encounters.find((x) => x.kind === kind)!,

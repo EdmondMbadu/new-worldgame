@@ -1,3 +1,4 @@
+import { bendStatic } from './route-art';
 import * as T from 'three';
 import { batch, box, cylinder, label, material, mesh } from './art';
 import { heightAt, roadX, roadY, type Mission } from './missions';
@@ -68,11 +69,17 @@ export function buildRoadEncounter(
       water.opacity = 0.83;
       water.onBeforeCompile = (shader) => {
         shader.uniforms.flowTime = time;
+        shader.uniforms.waterLevel = {
+          get value() {
+            return e.waterLevel;
+          },
+        };
         shader.vertexShader =
-          'varying vec2 flowPosition;\n' + shader.vertexShader;
+          'uniform float waterLevel; varying vec2 flowPosition;\n' +
+          shader.vertexShader;
         shader.vertexShader = shader.vertexShader.replace(
           '#include <begin_vertex>',
-          '#include <begin_vertex>\nflowPosition=(modelMatrix*vec4(transformed,1.0)).xz;',
+          '#include <begin_vertex>\ntransformed.y+=waterLevel;\nflowPosition=(modelMatrix*vec4(transformed,1.0)).xz;',
         );
         shader.fragmentShader =
           'uniform float flowTime;\nvarying vec2 flowPosition;\n' +
@@ -155,5 +162,44 @@ export function buildRoadEncounter(
       box(group, reflector, x, cone.position.y + 0.08, zz, 0.17, 0.08, 0.17);
     }
   }
-  parent.add(batch(group));
+  if (e.kind === 'herd') {
+    const z = e.z - 25;
+    for (const side of [-1, 1]) marker(roadX(m, z) + side * 4.3, z);
+    const strip = box(
+      group,
+      pale,
+      roadX(m, z),
+      heightAt(m, roadX(m, z), z) + 0.08,
+      z,
+      8,
+      0.03,
+      0.35,
+    );
+    strip.castShadow = false;
+    const sign = box(
+      group,
+      label('LANTERN CROSSING · WAIT', '#f1ddb4', '#4d5741', 512, 96),
+      roadX(m, z) + 6.5,
+      roadY(m, z) + 1.8,
+      z,
+      3.5,
+      0.7,
+      0.07,
+    );
+    sign.rotation.y = Math.PI;
+    cylinder(
+      group,
+      timber,
+      roadX(m, z) + 6.5,
+      roadY(m, z) + 0.9,
+      z,
+      0.05,
+      0.055,
+      1.8,
+      6,
+    );
+  }
+  batch(group);
+  bendStatic(group, m);
+  parent.add(group);
 }

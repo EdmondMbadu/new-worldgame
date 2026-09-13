@@ -1,7 +1,16 @@
 import type { Mission } from './missions';
 
 export type RoadSection = {
-  kind: 'washout' | 'minibus' | 'bridge' | 'tree' | 'flood' | 'gust';
+  kind:
+    | 'washout'
+    | 'minibus'
+    | 'bridge'
+    | 'tree'
+    | 'flood'
+    | 'gust'
+    | 'ridge'
+    | 'herd'
+    | 'traffic';
   z: number;
   length: number;
   safeSide: number; // +X is the driver's left when travelling forward along +Z.
@@ -13,6 +22,7 @@ export function roadSections(m: Mission): RoadSection[] {
   const side = m.seed % 2 ? 1 : -1;
   const sections: RoadSection[] = [
     { kind: 'washout', z: 225, length: 24, safeSide: side },
+    { kind: 'ridge', z: 365, length: 145, safeSide: 1 },
     {
       kind: m.bridge ? 'bridge' : 'minibus',
       z: m.bridge ? (m.bridge[0] + m.bridge[1]) / 2 : 525,
@@ -20,7 +30,7 @@ export function roadSections(m: Mission): RoadSection[] {
       safeSide: -side,
     },
     {
-      kind: m.id === 1 || m.id === 4 ? 'flood' : 'tree',
+      kind: m.id === 1 || m.id === 4 ? 'flood' : 'herd',
       z: m.id === 0 ? 810 : 855,
       length: 30,
       safeSide: -side,
@@ -28,17 +38,20 @@ export function roadSections(m: Mission): RoadSection[] {
   ];
   if (m.id > 0)
     sections.push({
-      kind: m.id === 3 ? 'gust' : m.id === 4 ? 'tree' : 'minibus',
+      kind: m.id === 3 ? 'gust' : m.id === 4 ? 'tree' : 'traffic',
       z: m.length - 170,
       length: 12,
       safeSide: side,
     });
+  if (m.id === 1 || m.id === 4)
+    sections.push({ kind: 'herd', z: 705, length: 16, safeSide: side });
+  sections.sort((a, b) => a.z - b.z);
   cache.set(m, sections);
   return sections;
 }
 export function branchSections(m: Mission): [number, number][] {
   return [
-    [135, 305],
+    [135, 285],
     m.fork,
     ...roadSections(m)
       .filter((s) => s.kind === 'flood')

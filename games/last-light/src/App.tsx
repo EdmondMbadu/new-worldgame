@@ -1,3 +1,4 @@
+import { routePoint } from "./routes";
 import {
   useEffect,
   useRef,
@@ -39,14 +40,16 @@ const time = (n: number) => {
 };
 function RouteMap({ engine: e }: { engine: GameEngine }) {
   const m = e.mission;
-  const main = Array.from({ length: 100 }, (_, i) => {
-    const z = (i * m.length) / 99;
-    return `${50 - roadX(m, z) * 0.45},${112 - (z / m.length) * 100}`;
+  const main = Array.from({ length: 240 }, (_, i) => {
+    const z = (i * m.length) / 239;
+    const point = routePoint(m, z);
+    return `${50 - point.x * 0.4},${112 - (point.z / m.length) * 100}`;
   }).join(" ");
   const alternatives = branchSections(m).map(([from, to]) =>
     Array.from({ length: 35 }, (_, i) => {
       const z = from + ((to - from) * i) / 34;
-      return `${50 - routeX(m, z, true) * 0.45},${112 - (z / m.length) * 100}`;
+      const point = routePoint(m, z, true);
+      return `${50 - point.x * 0.4},${112 - (point.z / m.length) * 100}`;
     }).join(" "),
   );
   return (
@@ -62,8 +65,8 @@ function RouteMap({ engine: e }: { engine: GameEngine }) {
       <circle cx="50" cy="12" r="4" className="map-clinic" />
       <path d="M47 12h6m-3-3v6" stroke="#153e36" strokeWidth="1.5" />
       <circle
-        cx={50 - e.position.x * 0.45}
-        cy={112 - (e.progress / m.length) * 100}
+        cx={50 - e.position.x * 0.4}
+        cy={112 - (e.position.z / m.length) * 100}
         r="4"
         className="map-truck"
       />
@@ -858,9 +861,8 @@ export default function App() {
                       <span className="encounter-mark">!</span>
                       <div>
                         <strong>
-                          {e.upcomingEncounter.kind === "bridge" &&
-                          e.upcomingEncounter.state === "clear"
-                            ? "BRIDGE CLEAR"
+                          {e.upcomingEncounter.state === "clear"
+                            ? "ROAD CLEAR"
                             : e.upcomingEncounter.title}
                         </strong>
                         <span>{e.upcomingEncounter.instruction}</span>
@@ -981,6 +983,11 @@ export default function App() {
                       Park inside the marked bay and brake to a stop.
                     </div>
                   )}
+                  {e.practice && (
+                    <div className="approach-prompt">
+                      Practice · records and unlocks stay unchanged
+                    </div>
+                  )}
                   {e.needsRecovery && (
                     <button
                       className="recover-button"
@@ -1034,9 +1041,11 @@ export default function App() {
                 <div className="result-overlay">
                   <section className="result-card">
                     <span className="eyebrow">
-                      {selected === 4
-                        ? "THE REGION SHINES AGAIN"
-                        : "DELIVERY COMPLETE"}
+                      {result.practice
+                        ? "PRACTICE COMPLETE · NO RECORD SAVED"
+                        : selected === 4
+                          ? "THE REGION SHINES AGAIN"
+                          : "DELIVERY COMPLETE"}
                     </span>
                     <div className="stars" aria-label={`${result.stars} stars`}>
                       {[1, 2, 3].map((n) => (
@@ -1069,6 +1078,7 @@ export default function App() {
                       </div>
                     </div>
                     <div className="result-caption">
+                      {result.practice && "Practice only · "}
                       {time(result.remaining)} to spare ·{" "}
                       {result.mode === "relaxed" ? "Relaxed" : "Standard"} ·
                       {result.clean || 0}/{result.encounters || 0} clean passes
@@ -1093,12 +1103,18 @@ export default function App() {
                     <button
                       className="primary"
                       onClick={() =>
-                        selected < 4 ? start(selected + 1) : home()
+                        result.practice
+                          ? start(selected)
+                          : selected < 4
+                            ? start(selected + 1)
+                            : home()
                       }
                     >
-                      {selected < 4
-                        ? "The next clinic is waiting"
-                        : "See the chain of light"}{" "}
+                      {result.practice
+                        ? "Start a scored delivery"
+                        : selected < 4
+                          ? "The next clinic is waiting"
+                          : "See the chain of light"}{" "}
                       <span>↗</span>
                     </button>
                     <div className="result-links">
@@ -1152,6 +1168,15 @@ export default function App() {
                     >
                       Try with more time
                     </button>
+                    <button
+                      className="secondary"
+                      onClick={() => {
+                        e.practiceFromCheckpoint();
+                        controls.current?.clear();
+                      }}
+                    >
+                      Practice from checkpoint · no score saved
+                    </button>
                     <button className="text-button" onClick={home}>
                       Chapter map
                     </button>
@@ -1169,6 +1194,15 @@ export default function App() {
                     </button>
                     <button className="secondary" onClick={settings}>
                       Settings & controls
+                    </button>
+                    <button
+                      className="text-button"
+                      onClick={() => {
+                        e.practiceFromCheckpoint();
+                        controls.current?.clear();
+                      }}
+                    >
+                      Practice from checkpoint · no score saved
                     </button>
                     <button className="text-button" onClick={() => start()}>
                       Restart this delivery

@@ -46,3 +46,7 @@ The earlier aspirational concept board and its separate prompt are in `../../doc
 ## Fonts
 
 The stylesheet requests DM Sans and Barlow Condensed through Google Fonts, with system font fallbacks. Serif titles use Georgia. The game remains playable when the optional font request is unavailable.
+
+## Living roads additions (revision 4)
+
+The switchback and cliff, goat models and articulated gait, minibus light geometry, village architecture, water pumps, footpaths and corrugated roofs are original geometry authored in this repository. No new third-party asset downloads or dependencies were introduced. Village residents reuse the existing locally bundled rigged staff; road/ground surfaces reuse the existing texture sources above. Goat bells and directional traffic tones are synthesized locally with Web Audio. The complete production package remains within the existing 12 MiB limit.

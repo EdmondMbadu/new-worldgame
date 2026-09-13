@@ -78,6 +78,7 @@ export function parseSave(raw: string | null): Save {
       const r = v as Result;
       if (
         r &&
+        !r.practice &&
         Number.isInteger(r.mission) &&
         r.mission >= 0 &&
         r.mission < 5 &&
@@ -94,19 +95,21 @@ export function parseSave(raw: string | null): Save {
         r.remaining <=
           (r.revision === ROAD_REVISION
             ? MISSIONS[r.mission].seconds
-            : r.revision === 2
-              ? [160, 180, 205, 215, 235][r.mission]
-              : [235, 250, 270, 280, 300][r.mission]) *
+            : r.revision === 3
+              ? [160, 180, 190, 185, 215][r.mission]
+              : r.revision === 2
+                ? [160, 180, 205, 215, 235][r.mission]
+                : [235, 250, 270, 280, 300][r.mission]) *
             1.35 &&
         r.lives === MISSIONS[r.mission].lives &&
         (r.revision === undefined ||
-          ([2, ROAD_REVISION].includes(r.revision) &&
+          ([2, 3, ROAD_REVISION].includes(r.revision) &&
             [0, 1].includes(r.variant ?? 0) &&
             Number.isInteger(r.clean) &&
             Number.isInteger(r.encounters) &&
             r.clean! >= 0 &&
             r.clean! <= r.encounters! &&
-            r.encounters! <= 4)) &&
+            r.encounters! <= (r.revision === ROAD_REVISION ? 6 : 4))) &&
         k === resultKey(r)
       )
         base.best[k] = r;
@@ -160,6 +163,7 @@ export function writeSave(save: Save) {
   }
 }
 export function recordResult(save: Save, result: Result): Save {
+  if (result.practice) return save;
   const next = {
     ...save,
     completed: [...save.completed],

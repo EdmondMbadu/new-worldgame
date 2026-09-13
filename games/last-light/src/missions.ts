@@ -1,3 +1,10 @@
+import {
+  remainingDistance,
+  ridgeAt,
+  ridgeElevation,
+  roadWidth,
+  toWorld,
+} from './routes';
 import { branchSections, roadDepression, roadSections } from './road-sections';
 export type Mission = {
   id: number;
@@ -32,7 +39,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Emergency care is back. Three patients have the power they need, and the valley has a brighter tomorrow.',
     length: 1050,
-    seconds: 160,
+    seconds: 200,
     lives: 3,
     rain: 0,
     night: 0.82,
@@ -78,7 +85,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Five patients can continue treatment. The rain keeps falling; inside, the clinic is warm and bright.',
     length: 1160,
-    seconds: 180,
+    seconds: 220,
     lives: 5,
     rain: 0.65,
     night: 0.9,
@@ -125,7 +132,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Six lives supported by restored emergency care. The riverside community has a dependable source of power.',
     length: 1210,
-    seconds: 190,
+    seconds: 230,
     lives: 6,
     rain: 0.25,
     night: 0.86,
@@ -172,7 +179,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'The maternity ward is bright again. Eight patients and their families can face the night with hope.',
     length: 1280,
-    seconds: 185,
+    seconds: 230,
     lives: 8,
     rain: 0.45,
     night: 0.88,
@@ -218,7 +225,7 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Twelve patients have power for their care. Five clinics now shine across the region. You brought the light; together, you kept hope alive.',
     length: 1400,
-    seconds: 215,
+    seconds: 255,
     lives: 12,
     rain: 1,
     night: 0.96,
@@ -288,6 +295,7 @@ export function roadX(m: Mission, z: number) {
 export function roadY(m: Mission, z: number) {
   return (
     5 +
+    ridgeElevation(m, z) +
     Math.sin(z * 0.009) * 3 +
     Math.sin(z * 0.003) * 5 +
     (m.id >= 3 ? z * 0.012 : 0)
@@ -372,7 +380,8 @@ export function missionVariant(m: Mission, variant = 0): Mission {
 export function heightAt(m: Mission, x: number, z: number) {
   const d = roadDistance(m, x, z);
   let h = roadY(m, z);
-  const blend = smooth(6, 26, d);
+  const width = roadWidth(m, z);
+  const blend = smooth(width + 1.2, width + 21, d);
   h +=
     blend *
     (Math.sin(x * 0.055 + z * 0.01) * 7 +
@@ -389,7 +398,12 @@ export function heightAt(m: Mission, x: number, z: number) {
     const riverBed = roadY(m, (m.bridge[0] + m.bridge[1]) / 2) - 6;
     h += (riverBed - h) * channel;
   }
-  if (d < 5 && !onBridge(m, z)) {
+  const ridge = ridgeAt(m, z),
+    offset = x - roadX(m, z);
+  // The abyss is part of the collider, with a short gravel shoulder and a steep face.
+  h -= ridge * (54 + m.id * 7) * smooth(width + 0.75, width + 7, -offset);
+  h += ridge * 16 * smooth(width + 1.2, width + 18, offset);
+  if (d < width && !onBridge(m, z)) {
     h += 0.09 * (1 - smooth(0, 5, d));
     h += 0.014 * Math.sin(z * 1.7) + 0.012 * Math.sin(z * 3.1 + x * 2);
     if (isMud(m, x, z)) h += Math.sin(z * 1.9) * 0.045;
@@ -405,18 +419,9 @@ export function heightAt(m: Mission, x: number, z: number) {
   return h;
 }
 export function pathLength(m: Mission, from = 0, alt = false) {
-  let total = 0;
-  let px = routeX(m, from, alt),
-    py = roadY(m, from);
-  for (let z = from + 2; z <= m.length; z += 2) {
-    const x = routeX(m, z, alt),
-      y = roadY(m, z);
-    total += Math.hypot(2, x - px, y - py);
-    px = x;
-    py = y;
-  }
-  return total;
+  return remainingDistance(m, from, alt);
 }
+
 export function makeTerrain(m: Mission) {
   const offsets = [
     -200,
@@ -424,18 +429,15 @@ export function makeTerrain(m: Mission) {
     -100,
     -75,
     -60,
-    -40,
-    -25,
-    -16,
-    -10,
-    ...Array.from({ length: 95 }, (_, i) => i * 0.5 - 7),
+    -46,
+    ...Array.from({ length: 161 }, (_, i) => i * 0.5 - 40),
     46,
     60,
     75,
     100,
     140,
     200,
-  ].filter((n, i, a) => a.indexOf(n) === i);
+  ];
   const cols = offsets.length,
     rows = Math.ceil(m.length + 140);
   const vertices = new Float32Array((rows + 1) * cols * 3);
@@ -445,9 +447,10 @@ export function makeTerrain(m: Mission) {
     for (let i = 0; i < cols; i++) {
       const x = roadX(m, z) + offsets[i],
         k = (j * cols + i) * 3;
-      vertices[k] = x;
+      const world = toWorld(m, x, z);
+      vertices[k] = world.x;
       vertices[k + 1] = heightAt(m, x, z);
-      vertices[k + 2] = z;
+      vertices[k + 2] = world.z;
       if (i < cols - 1 && j < rows) {
         const a = j * cols + i;
         indices.push(a, a + cols, a + 1, a + 1, a + cols, a + cols + 1);

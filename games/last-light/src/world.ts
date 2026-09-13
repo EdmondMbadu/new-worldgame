@@ -1,3 +1,13 @@
+import { bendStatic } from './route-art';
+import {
+  ridgeAt,
+  roadWidth,
+  routePoint,
+  routeHeading,
+  stationAhead,
+  toRoute,
+  worldHeight,
+} from './routes';
 import * as T from 'three';
 import { GameEngine } from './engine';
 import {
@@ -168,9 +178,12 @@ export class GameWorld {
     });
     materials.add(sm);
     this.sky.add(new T.Points(sg, sm));
+    const staticStart = this.scene.children.length;
     this.buildTerrain(m);
     this.buildNature(m);
     this.buildRoute(m);
+    for (const object of this.scene.children.slice(staticStart))
+      bendStatic(object, m);
     this.living = new LivingWorld(m, engine.encounters, this.low);
     this.scene.add(this.living.group);
     this.truck = createTruck();
@@ -394,9 +407,15 @@ export class GameWorld {
         z = data.vertices[i * 3 + 2];
       uv[i * 2] = x * 0.07;
       uv[i * 2 + 1] = z * 0.07;
-      const d = roadDistance(m, x, z),
+      const logical = toRoute(m, x, z);
+      const d = roadDistance(m, logical.x, logical.z),
         v = 0.8 + Math.sin(x * 0.08 + z * 0.025) * 0.17;
-      const c = new T.Color(d < 7 ? '#9c9973' : '#789760').multiplyScalar(v);
+      const cliff =
+        ridgeAt(m, logical.z) > 0.2 &&
+        data.vertices[i * 3 + 1] < roadY(m, logical.z) - 3;
+      const c = new T.Color(
+        cliff ? '#77766c' : d < 7 ? '#9c9973' : '#789760',
+      ).multiplyScalar(v);
       colors.set([c.r, c.g, c.b], i * 3);
     }
     geometry.setAttribute('uv', new T.BufferAttribute(uv, 2));
@@ -409,7 +428,7 @@ export class GameWorld {
     textures.add(mat.map);
     if (mat.normalMap) textures.add(mat.normalMap);
     mat.vertexColors = true;
-    this.addTerrainChunks(geometry, mat, data.cols, data.rows);
+    this.addTerrainChunks(geometry, mat, data.cols, data.rows, true);
     for (const section of [
       { from: -30, to: m.length + 12, alt: false },
       ...branchSections(m).map(([from, to]) => ({ from, to, alt: true })),
@@ -425,9 +444,7 @@ export class GameWorld {
         end = section.to;
       for (let z = start, j = 0; z <= end; z += 1, j++) {
         const width =
-          onBridge(m, z) && !alt
-            ? 2.5
-            : 4.8 + Math.sin(z * 0.047) * 0.32 + Math.sin(z * 0.18) * 0.1;
+          onBridge(m, z) && !alt ? 2.5 : alt ? 4.8 : roadWidth(m, z);
         for (let i = 0; i < 25; i++) {
           const x = routeX(m, z, alt) + ((i / 24) * 2 - 1) * width;
           p.push(x, heightAt(m, x, z) + 0.055, z);
@@ -586,6 +603,7 @@ export class GameWorld {
     mat: T.Material,
     cols: number,
     rows: number,
+    worldCoordinates = false,
   ) {
     const original = geometry.index!.array;
     for (let first = 0; first < rows; first += 160) {
@@ -613,6 +631,7 @@ export class GameWorld {
       g.computeBoundingSphere();
       const o = mesh(g, mat, this.scene);
       o.castShadow = true;
+      o.userData.routeWorld = worldCoordinates;
       const pos = g.attributes.position;
       this.chunks.push({
         mesh: o,
@@ -653,7 +672,7 @@ export class GameWorld {
       const z = rng() * (m.length + 130) - 45,
         x = roadX(m, z) + (rng() > 0.5 ? 1 : -1) * (11 + rng() * 125);
       if (
-        roadDistance(m, x, z) < 10 ||
+        roadDistance(m, x, z) < roadWidth(m, z) + 5 ||
         (z > m.length - 25 && Math.abs(x) < 30)
       ) {
         obj.position.set(0, -300, 0);
@@ -708,7 +727,8 @@ export class GameWorld {
           (rng() > 0.5 ? 1 : -1) * (6.5 + Math.pow(rng(), 2) * 35);
       obj.position.set(
         x,
-        roadDistance(m, x, z) < 6.3 || (z > m.length - 18 && Math.abs(x) < 24)
+        roadDistance(m, x, z) < roadWidth(m, z) + 1.1 ||
+          (z > m.length - 18 && Math.abs(x) < 24)
           ? -200
           : heightAt(m, x, z),
         z,
@@ -808,7 +828,9 @@ export class GameWorld {
     reflector.emissiveIntensity = 0.35;
     for (let z = 5; z < m.length; z += 18) {
       for (const side of [-1, 1]) {
-        const x = roadX(m, z) + side * 6.4,
+        const x =
+            roadX(m, z) +
+            side * (roadWidth(m, z) + (ridgeAt(m, z) > 0.1 ? 0.3 : 1.6)),
           y = heightAt(m, x, z);
         cylinder(fixtures, post, x, y + 0.45, z, 0.045, 0.05, 0.9, 5);
         box(fixtures, reflector, x, y + 0.8, z, 0.12, 0.18, 0.055);
@@ -822,6 +844,35 @@ export class GameWorld {
       p.rotation.y = Math.PI;
     };
     sign(35, 'CLINIC ↑');
+    sign(273, 'HAIRPIN · 25 km/h');
+    sign(294, 'OPEN EDGE · STAY ON ROAD', 1);
+    for (let z = 302; z < 436; z += 5) {
+      const x = roadX(m, z) - roadWidth(m, z) + 0.1,
+        y = heightAt(m, x, z);
+      cylinder(fixtures, black, x, y + 0.55, z, 0.045, 0.055, 1.1, 6);
+      box(fixtures, reflector, x, y + 1, z, 0.16, 0.28, 0.09);
+      if ((z - 302) % 15 === 0) {
+        const board = box(
+          fixtures,
+          label(
+            Math.sin(routeHeading(m, z + 8) - routeHeading(m, z)) > 0
+              ? '‹ ‹'
+              : '› ›',
+            '#ffdc82',
+            '#263536',
+            256,
+            128,
+          ),
+          x,
+          y + 1.4,
+          z,
+          1.6,
+          0.65,
+          0.08,
+        );
+        board.rotation.y = Math.PI;
+      }
+    }
     for (const [a] of branchSections(m))
       sign(a - 20, '← FIRMER DETOUR   /   SHORT →');
     sign(m.length - 75, 'CLINIC 75 m ↑');
@@ -860,7 +911,8 @@ export class GameWorld {
     this.windTime.value = this.clock;
     this.living.update(e, this.clock);
     for (const chunk of this.chunks)
-      chunk.mesh.visible = chunk.end > p.z - 120 && chunk.start < p.z + 410;
+      chunk.mesh.visible =
+        chunk.end > e.progress - 150 && chunk.start < e.progress + 410;
     if (this.water) {
       const mat = this.water.material as T.MeshStandardMaterial;
       if (mat.normalMap) {
@@ -1086,14 +1138,18 @@ export class GameWorld {
         p.y + (portrait ? 4.3 : 2.85 + speed * 0.2),
         p.z - forward.z * (portrait ? 9.6 : 8.2 + speed * 0.9),
       );
-      const ground = heightAt(m, this.eye.x, this.eye.z);
+      const ground = worldHeight(m, this.eye.x, this.eye.z);
       this.eye.y = Math.max(this.eye.y, ground + 1.8);
       const lead = 10 + speed * 11;
-      const turnX = routeX(m, Math.min(m.length, p.z + lead), e.isAlt);
+      const turn = routePoint(
+        m,
+        stationAhead(m, e.progress, lead, e.isAlt),
+        e.isAlt,
+      );
       this.aim.set(
-        T.MathUtils.lerp(p.x + forward.x * lead, turnX, 0.28),
+        T.MathUtils.lerp(p.x + forward.x * lead, turn.x, 0.28),
         p.y + 0.7,
-        p.z + forward.z * lead,
+        T.MathUtils.lerp(p.z + forward.z * lead, turn.z, 0.28),
       );
       if (!this.settings.reducedMotion)
         this.eye.y +=
