@@ -17,9 +17,8 @@
   <section class="catalog-intro">
     <span class="eyebrow"><i></i> {{ "games.eyebrow" | translate }}</span>
     <h1>
-      {{ "games.title" | translate }}<br /><em>{{
-        "games.titleAccent" | translate
-      }}</em>
+      {{ "games.title" | translate }}
+      <em>{{ "games.titleAccent" | translate }}</em>
     </h1>
     <p>{{ "games.intro" | translate }}</p>
   </section>
@@ -36,37 +35,37 @@
       <div class="game-art">
         <img
           [src]="game.image"
-          [alt]="(game.copy + '.imageAlt') | translate"
+          [alt]="game.copy + '.imageAlt' | translate"
           width="1200"
           height="680"
-          [attr.fetchpriority]="i === 0 ? 'high' : 'low'"
-          [attr.loading]="i === 0 ? 'eager' : 'lazy'"
+          [attr.fetchpriority]="i === 0 ? 'high' : 'auto'"
+          [attr.loading]="i < 2 ? 'eager' : 'lazy'"
         /><span class="mission"
           >{{ "games.mission" | translate }} {{ game.number }}</span
         ><span class="game-type"
-          >3D · {{ (game.copy + '.genre') | translate }}</span
+          >3D · {{ game.copy + ".genre" | translate }}</span
         >
       </div>
       <div class="game-details">
         <div class="game-copy">
-          <span class="eyebrow">{{ (game.copy + '.kicker') | translate }}</span>
+          <span class="eyebrow">{{ game.copy + ".kicker" | translate }}</span>
           <h2>{{ game.title }}</h2>
-          <p>{{ (game.copy + '.description') | translate }}</p>
-          <div class="game-tags">
-            <span>◷ {{ game.duration | translate }}</span
-            ><span>⌘ {{ "games.controls" | translate }}</span
-            ><span>✧ {{ "games.age" | translate }}</span>
-          </div>
+          <p>{{ game.copy + ".description" | translate }}</p>
         </div>
-        <span class="play-button"
-          >{{ "games.play" | translate }}
-          <span aria-hidden="true">↗</span></span
-        >
+        <div class="card-bottom">
+          <span class="game-duration">◷ {{ game.duration | translate }}</span>
+          <span class="play-button"
+            >{{ "games.play" | translate }}
+            <span aria-hidden="true">↗</span></span
+          >
+        </div>
       </div>
     </a>
   </section>
   <footer class="catalog-footer">
-    <span>{{ "games.footer" | translate }}</span
+    <span class="catalog-meta"
+      ><span>⌘ {{ "games.controls" | translate }}</span
+      ><span>✧ {{ "games.age" | translate }}</span></span
     ><span
       >{{ "games.more" | translate }} <span aria-hidden="true">✧</span></span
     >
