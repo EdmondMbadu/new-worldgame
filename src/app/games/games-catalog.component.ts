@@ -12,6 +12,17 @@ const GAMES = [
     title: 'Lost in Orbit',
     image: '/assets/games/lost-in-orbit.svg',
     href: '/games/lost-in-orbit/',
+    copy: 'games.orbit',
+    duration: 'games.duration',
+  },
+  {
+    slug: 'last-light',
+    number: '02',
+    title: 'Last Light',
+    image: '/assets/games/last-light.png',
+    href: '/games/last-light/',
+    copy: 'games.lastLight',
+    duration: 'games.lastLight.duration',
   },
 ];
 
@@ -30,7 +41,7 @@ export class GamesCatalogComponent implements OnInit {
       title: 'Games · Global Solutions Lab',
       robots: 'noindex, nofollow',
       description:
-        'Small adventures for curious minds. Play Lost in Orbit, a free 3D space rescue adventure from Global Solutions Lab.',
+        'Play Lost in Orbit and Last Light: 3D adventures about resourcefulness, rescue, and bringing power to the people who need it.',
       url: 'https://newworld-game.org/games',
     });
   }

@@ -1,59 +1,83 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-
+import { games } from "./games.mjs";
 const dist = fileURLToPath(new URL("../dist/", import.meta.url));
-const entries = [
+function fail(message) {
+  console.error(message);
+  process.exit(1);
+}
+for (const entry of [
   "index.html",
-  "games/lost-in-orbit/index.html",
   "games/index.html",
-];
-for (const entry of entries) {
-  const file = path.join(dist, entry);
-  if (!existsSync(file)) {
-    console.error(
-      `Missing ${entry}. Run npm run build before deploying Hosting.`,
-    );
-    process.exit(1);
-  }
+  ...games.map((g) => `games/${g.slug}/index.html`),
+]) {
+  if (!existsSync(path.join(dist, entry)))
+    fail(`Missing ${entry}. Run npm run build before deploying Hosting.`);
 }
-const html = readFileSync(path.join(dist, entries[1]), "utf8");
-const assetUrls = [
-  ...html.matchAll(/(?:src|href)="(\/games\/lost-in-orbit\/assets\/[^"?#]+)"/g),
-].map((match) => match[1]);
+const statsPath = path.join(dist, "stats.json");
+if (!existsSync(statsPath))
+  fail("Missing Angular bundle metadata. Run the combined npm run build.");
+const inputs = Object.keys(JSON.parse(readFileSync(statsPath, "utf8")).inputs);
 if (
-  assetUrls.length < 2 ||
-  assetUrls.some((url) => !existsSync(path.join(dist, url)))
-) {
-  console.error(
-    "The standalone game is missing built assets. Run npm run build.",
+  inputs.some((input) =>
+    /(?:^|\/)games\/(?:lost-in-orbit|last-light)\/|node_modules\/(?:three|@react-three|@dimforge|react|react-dom)\//.test(
+      input,
+    ),
+  )
+)
+  fail(
+    "Game dependencies leaked into Angular. Games must remain standalone documents.",
   );
-  process.exit(1);
+function files(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const p = path.join(dir, name);
+    return statSync(p).isDirectory() ? files(p) : [p];
+  });
 }
-if (html.includes("ng-version") || html.includes("/src/main.tsx")) {
-  console.error("The game entry is not a standalone production build.");
-  process.exit(1);
+for (const game of games) {
+  const root = path.join(dist, "games", game.slug),
+    html = readFileSync(path.join(root, "index.html"), "utf8");
+  if (html.includes("ng-version") || html.includes("/src/main.tsx"))
+    fail(`${game.name} is not a standalone production build.`);
+  const urls = [
+    ...html.matchAll(/(?:src|href)="(\/games\/[^"?#]+\/assets\/[^"?#]+)"/g),
+  ].map((m) => m[1]);
+  if (urls.length < 2 || urls.some((url) => !existsSync(path.join(dist, url))))
+    fail(`${game.name} is missing entry assets.`);
+  const builtFiles = files(root);
+  let code = 0,
+    total = 0;
+  for (const file of builtFiles) {
+    const bytes = readFileSync(file);
+    const compressed = /\.(js|css|html|json|svg)$/.test(file)
+      ? gzipSync(bytes).byteLength
+      : bytes.byteLength;
+    total += compressed;
+    if (/\.(js|css)$/.test(file)) code += compressed;
+  }
+  if (code > game.codeBudget)
+    fail(
+      `${game.name} code exceeds its ${(game.codeBudget / 1024).toFixed(0)} KiB compressed budget: ${(code / 1024).toFixed(1)} KiB.`,
+    );
+  if (total > game.totalBudget)
+    fail(`${game.name} exceeds its total asset budget.`);
+  if (game.slug === "last-light") {
+    if (!existsSync(path.join(root, "key-art.png")))
+      fail("Last Light is missing its menu art.");
+    for (const file of builtFiles.filter((f) => f.endsWith(".js"))) {
+      const source = readFileSync(file, "utf8");
+      if (
+        source.includes("Run driving QA") ||
+        source.includes("Stop driving QA") ||
+        source.includes("qa-panel")
+      )
+        fail("Development QA controls leaked into Last Light production.");
+    }
+  }
+  console.log(
+    `${game.name}: standalone entry verified; ${(code / 1024).toFixed(1)} KiB code gzip; ${(total / 1024 / 1024).toFixed(2)} MiB total assets.`,
+  );
 }
-console.log(
-  "Hosting verified: Angular + Lost in Orbit, including all game entry assets.",
-);
-
-const statsFile = path.join(dist, 'stats.json');
-if (!existsSync(statsFile)) {
-  console.error('Missing Angular bundle metadata. Run the combined npm run build.');
-  process.exit(1);
-}
-const stats = JSON.parse(readFileSync(statsFile, 'utf8'));
-const angularInputs = Object.keys(stats.inputs);
-if (angularInputs.some((input) => /(?:^|\/)games\/lost-in-orbit\/|node_modules\/(?:three|@react-three|react|react-dom)\//.test(input))) {
-  console.error('Game dependencies leaked into the Angular build. Keep the game in its standalone document.');
-  process.exit(1);
-}
-const assetDir = path.join(dist, 'games/lost-in-orbit/assets');
-const compressedBytes = readdirSync(assetDir).filter((name) => /\.(js|css)$/.test(name)).reduce((bytes, name) => bytes + gzipSync(readFileSync(path.join(assetDir, name))).byteLength, 0);
-if (compressedBytes > 450 * 1024) {
-  console.error(`Game assets exceed the 450 KiB compressed budget: ${(compressedBytes / 1024).toFixed(1)} KiB.`);
-  process.exit(1);
-}
-console.log(`Isolation verified: no game dependencies in Angular; game JS/CSS ${(compressedBytes / 1024).toFixed(1)} KiB gzip.`);
+console.log("Hosting and isolation verified: Angular + both games.");

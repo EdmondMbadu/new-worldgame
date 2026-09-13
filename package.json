@@ -10,13 +10,17 @@
     "test:weekly-brief": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.weekly-brief.spec.json --include=src/app/blogs/nwg-news/nwg-news.component.spec.ts --include=src/app/components/user-management/user-management.component.spec.ts --include=src/app/utils/video-thumbnail.spec.ts",
     "start:app": "ng serve",
     "start:game": "npm --prefix games/lost-in-orbit run dev",
-    "setup:games": "npm --prefix games/lost-in-orbit ci && npm run build:game",
+    "setup:games": "node scripts/setup-games.mjs && npm run build:games",
     "build:app": "ng build",
     "build:game": "npm --prefix games/lost-in-orbit run build",
     "test:game": "npm --prefix games/lost-in-orbit test",
     "verify:hosting": "node scripts/verify-hosting.mjs",
     "preview:site": "node scripts/preview-site.mjs",
-    "prestart:app": "npm run build:game"
+    "prestart:app": "npm run build:games",
+    "start:last-light": "npm --prefix games/last-light run dev",
+    "build:games": "npm run build:game && npm --prefix games/last-light run build",
+    "test:last-light": "npm --prefix games/last-light test",
+    "test:games": "npm run test:game && npm run test:last-light"
   },
   "private": true,
   "dependencies": {

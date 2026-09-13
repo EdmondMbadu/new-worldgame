@@ -16,6 +16,8 @@ const types = {
   ".jpg": "image/jpeg",
   ".ico": "image/x-icon",
   ".mp3": "audio/mpeg",
+  ".wasm": "application/wasm",
+  ".glb": "model/gltf-binary",
   ".woff2": "font/woff2",
 };
 createServer((request, response) => {
@@ -27,8 +29,8 @@ createServer((request, response) => {
     response.writeHead(400).end();
     return;
   }
-  if (pathname === "/games/lost-in-orbit") {
-    response.writeHead(302, { Location: "/games/lost-in-orbit/" }).end();
+  if (/^\/games\/(lost-in-orbit|last-light)$/.test(pathname)) {
+    response.writeHead(302, { Location: pathname + "/" }).end();
     return;
   }
   let file = path.resolve(dist, "." + pathname);
@@ -41,7 +43,7 @@ createServer((request, response) => {
   if (!existsSync(file)) {
     if (
       path.extname(pathname) ||
-      pathname.startsWith("/games/lost-in-orbit/")
+      /^\/games\/(lost-in-orbit|last-light)\//.test(pathname)
     ) {
       response.writeHead(404).end("Not found");
       return;

@@ -28,7 +28,7 @@
     [attr.aria-label]="'games.availableGames' | translate"
   >
     <a
-      *ngFor="let game of games"
+      *ngFor="let game of games; let i = index"
       [href]="game.href"
       class="game-card"
       [attr.aria-label]="('games.play' | translate) + ' ' + game.title"
@@ -36,23 +36,24 @@
       <div class="game-art">
         <img
           [src]="game.image"
-          [alt]="'games.orbit.imageAlt' | translate"
+          [alt]="(game.copy + '.imageAlt') | translate"
           width="1200"
           height="680"
-          fetchpriority="high"
+          [attr.fetchpriority]="i === 0 ? 'high' : 'low'"
+          [attr.loading]="i === 0 ? 'eager' : 'lazy'"
         /><span class="mission"
           >{{ "games.mission" | translate }} {{ game.number }}</span
         ><span class="game-type"
-          >3D · {{ "games.orbit.genre" | translate }}</span
+          >3D · {{ (game.copy + '.genre') | translate }}</span
         >
       </div>
       <div class="game-details">
         <div class="game-copy">
-          <span class="eyebrow">{{ "games.orbit.kicker" | translate }}</span>
+          <span class="eyebrow">{{ (game.copy + '.kicker') | translate }}</span>
           <h2>{{ game.title }}</h2>
-          <p>{{ "games.orbit.description" | translate }}</p>
+          <p>{{ (game.copy + '.description') | translate }}</p>
           <div class="game-tags">
-            <span>◷ {{ "games.duration" | translate }}</span
+            <span>◷ {{ game.duration | translate }}</span
             ><span>⌘ {{ "games.controls" | translate }}</span
             ><span>✧ {{ "games.age" | translate }}</span>
           </div>

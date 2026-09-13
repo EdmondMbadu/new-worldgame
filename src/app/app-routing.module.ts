@@ -9,6 +9,12 @@ import { protectedPathsCanMatch } from './protected/protected-paths.can-match';
 
 const routes: Routes = [
   {
+    path: 'games/last-light',
+    pathMatch: 'full',
+    data: { game: 'last-light' },
+    loadComponent: () => import('./games/game-launcher.component').then((m) => m.GameLauncherComponent),
+  },
+  {
     path: 'games/lost-in-orbit',
     pathMatch: 'full',
     loadComponent: () => import('./games/game-launcher.component').then((m) => m.GameLauncherComponent),

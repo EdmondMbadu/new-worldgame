@@ -1,11 +1,14 @@
+import { games } from "./games.mjs";
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const game = path.join(root, "games/lost-in-orbit");
-if (!existsSync(path.join(game, "node_modules/vite"))) {
+const gamePaths = games.map((game) => path.join(root, "games", game.slug));
+if (
+  gamePaths.some((game) => !existsSync(path.join(game, "node_modules/vite")))
+) {
   console.error(
     "Install the isolated game dependencies first: npm run setup:games",
   );
@@ -15,7 +18,10 @@ function run(command, args, cwd = root) {
   const result = spawnSync(command, args, {
     cwd,
     stdio: "inherit",
-    env: process.env,
+    env: {
+      ...process.env,
+      NG_BUILD_MAX_WORKERS: process.env.NG_BUILD_MAX_WORKERS || "2",
+    },
   });
   if (result.error || result.status !== 0) {
     console.error(
@@ -25,7 +31,7 @@ function run(command, args, cwd = root) {
   }
 }
 // Build the standalone document first. Angular copies it as static files, never imports it.
-run("npm", ["run", "build"], game);
+for (const game of gamePaths) run("npm", ["run", "build"], game);
 run(process.execPath, [
   "node_modules/@angular/cli/bin/ng.js",
   "build",
@@ -39,8 +45,14 @@ cpSync(
   path.join(root, "dist/index.html"),
   path.join(root, "dist/games/index.html"),
 );
-cpSync(path.join(game, "dist"), path.join(root, "dist/games/lost-in-orbit"), {
-  recursive: true,
-});
+for (const game of games) {
+  cpSync(
+    path.join(root, "games", game.slug, "dist"),
+    path.join(root, "dist/games", game.slug),
+    { recursive: true },
+  );
+}
 run(process.execPath, ["scripts/verify-hosting.mjs"]);
-console.log("Build succeeded. The complete site and game are ready in dist/.");
+console.log(
+  "Build succeeded. The complete site and both games are ready in dist/.",
+);

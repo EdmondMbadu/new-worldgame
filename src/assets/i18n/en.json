@@ -13,6 +13,13 @@
     "age": "Ages 9+",
     "footer": "A little play. A little discovery. A world of possibility.",
     "more": "More adventures on the horizon",
+    "lastLight": {
+      "imageAlt": "A truck carries solar panels along a mountain road toward a warmly lit rural clinic.",
+      "genre": "DRIVING ADVENTURE",
+      "kicker": "THE ROAD IS ROUGH. THE REASON IS EVERYTHING.",
+      "description": "Carry solar power across rough roads, rain, and mountain passes. Reach the clinic before its reserve runs out — and watch a dark building come alive with light. Five chapters. One chain of hope.",
+      "duration": "3–5 minutes per chapter"
+    },
     "orbit": {
       "imageAlt": "A small ivory astronaut floats beside a rescue ship among gold energy cells and blue asteroids.",
       "genre": "SPACE ADVENTURE",

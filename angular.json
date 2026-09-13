@@ -39,6 +39,11 @@
                 "glob": "**/*",
                 "input": "games/lost-in-orbit/dist",
                 "output": "/games/lost-in-orbit/"
+              },
+              {
+                "glob": "**/*",
+                "input": "games/last-light/dist",
+                "output": "/games/last-light/"
               }
             ],
             "styles": [
@@ -74,6 +79,19 @@
               ],
               "outputHashing": "all"
             },
+            "games": {
+              "assets": [
+                "src/favicon.ico",
+                "src/assets",
+                "src/sitemap.xml",
+                "src/robots.txt",
+                {
+                  "glob": "**/*",
+                  "input": "node_modules/tinymce",
+                  "output": "/tinymce/"
+                }
+              ]
+            },
             "development": {
               "optimization": false,
               "extractLicenses": false,
@@ -89,6 +107,9 @@
             "prebundle": false
           },
           "configurations": {
+            "games": {
+              "buildTarget": "new-worldgame-ng:build:development,games"
+            },
             "production": {
               "buildTarget": "new-worldgame-ng:build:production"
             },

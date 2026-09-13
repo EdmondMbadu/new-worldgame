@@ -13,6 +13,13 @@
     "age": "À partir de 9 ans",
     "footer": "Un peu de jeu. Un peu de découverte. Un monde de possibilités.",
     "more": "D’autres aventures à l’horizon",
+    "lastLight": {
+      "imageAlt": "Un camion transporte des panneaux solaires sur une route de montagne vers une clinique éclairée.",
+      "genre": "AVENTURE AU VOLANT",
+      "kicker": "LA ROUTE EST DIFFICILE. LA MISSION EST ESSENTIELLE.",
+      "description": "Transportez des équipements solaires sur des routes difficiles, sous la pluie et à travers les montagnes. Atteignez la clinique à temps et regardez-la s’illuminer. Cinq chapitres, une chaîne d’espoir. Jeu en anglais.",
+      "duration": "3–5 minutes par chapitre"
+    },
     "orbit": {
       "imageAlt": "Un petit astronaute flotte près de son vaisseau parmi des cellules dorées et des astéroïdes bleus.",
       "genre": "AVENTURE SPATIALE",
