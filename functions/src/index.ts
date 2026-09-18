@@ -5693,9 +5693,10 @@ export const sendBulkTestEmail = functions
       subject,
       html,
       text: htmlToPlainText(html),
-      // Optional: tracking/categorization
+      // Keep original links: the branded click host lacks a matching TLS certificate.
+      // Both flags must be explicit so account-level tracking cannot rewrite them.
       trackingSettings: {
-        clickTracking: { enable: true, enableText: true },
+        clickTracking: { enable: false, enableText: false },
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-tester'],
@@ -6089,8 +6090,9 @@ export const sendBulkHtml = functions
       subject,
       html,
       text,
+      // Match test sends: direct links avoid the insecure branded tracking hop.
       trackingSettings: {
-        clickTracking: { enable: true, enableText: true },
+        clickTracking: { enable: false, enableText: false },
         openTracking: { enable: true },
       },
       categories: ['bulk-mail-html'],

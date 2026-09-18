@@ -17,7 +17,8 @@
     "community-projection-status:apply": "node scripts/backfill-publication-status-projections.js --apply",
     "moderation:prepare-legacy": "node scripts/prepare-solution-moderation.js",
     "moderation:prepare-legacy:apply": "node scripts/prepare-solution-moderation.js --apply",
-    "test:weekly-brief": "npm run build && node --test test/weekly-brief*.test.js"
+    "test:weekly-brief": "npm run build && node --test test/weekly-brief*.test.js",
+    "test:bulk-email-links": "npm run build && node --test test/bulk-email-links.test.js"
   },
   "engines": {
     "node": "20"
