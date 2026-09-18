@@ -3,11 +3,13 @@ import type { Settings } from './save';
 import { encounterPose } from './encounters';
 import { herdPose } from './traffic';
 import { clamp } from './missions';
+import { JourneyMusic } from './journey-music';
 
 export class Soundtrack {
   context: AudioContext | null = null;
   private gain: GainNode | null = null;
   private music: GainNode | null = null;
+  private playlist: JourneyMusic | null = null;
   private motor: OscillatorNode | null = null;
   private motorGain: GainNode | null = null;
   private engineLoop: AudioBufferSourceNode | null = null;
@@ -50,7 +52,9 @@ export class Soundtrack {
         this.gain.connect(limiter).connect(c.destination);
         this.nodes.push(limiter);
         this.music = c.createGain();
+        this.music.gain.value = 0;
         this.music.connect(this.gain);
+        this.playlist = new JourneyMusic(c, this.music);
         this.motor = c.createOscillator();
         this.motor.type = 'triangle';
         this.motorGain = c.createGain();
@@ -149,7 +153,10 @@ export class Soundtrack {
           }
         })();
       }
-      if (this.context.state === 'suspended') await this.context.resume();
+      // Keep native media play() inside the original user gesture, not after an await.
+      const resumed = this.context.state === 'suspended' ? this.context.resume() : undefined;
+      this.playlist?.unlock();
+      await resumed;
     } catch {
       /* Muted gameplay remains complete. */
     }
@@ -215,7 +222,11 @@ export class Soundtrack {
       !this.windGain
     )
       return;
-    const active = e.phase !== 'paused' && e.phase !== 'failed',
+    const active =
+      e.phase !== 'paused' &&
+      e.phase !== 'failed' &&
+      !document.hidden &&
+      document.hasFocus(),
       driving = e.phase === 'driving',
       v = Math.abs(e.speed),
       talking =
@@ -225,7 +236,13 @@ export class Soundtrack {
       c.currentTime,
       0.08,
     );
-    this.music?.gain.setTargetAtTime(talking ? 0.35 : 1, c.currentTime, 0.2);
+    this.playlist?.update(active && this.settings.sound && this.settings.volume > 0, dt);
+    const recordedMusic = this.playlist && !this.playlist.unavailable;
+    this.music?.gain.setTargetAtTime(
+      recordedMusic ? (talking ? 0.07 : 0.23) : talking ? 0.35 : 1,
+      c.currentTime,
+      0.2,
+    );
     this.motor.frequency.setTargetAtTime(e.rpm / 30, c.currentTime, 0.08);
     this.motorGain.gain.setTargetAtTime(
       this.engineLoop ? 0 : driving ? 0.025 + e.throttle * 0.025 : 0.006,
@@ -364,7 +381,7 @@ export class Soundtrack {
     const note = Math.floor(
       this.tuneTime / (restoring ? 1.7 : e.time < 35 ? 1.8 : 3),
     );
-    if (note !== this.lastNote) {
+    if (!recordedMusic && note !== this.lastNote) {
       this.lastNote = note;
       const scale = restoring
         ? [261.63, 329.63, 392, 523.25, 440, 392, 329.63, 293.66]
@@ -430,6 +447,7 @@ export class Soundtrack {
     }
   }
   silence() {
+    this.playlist?.pause();
     if (this.context && this.gain)
       this.gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
     if ('speechSynthesis' in window) speechSynthesis.cancel();
@@ -439,6 +457,7 @@ export class Soundtrack {
     this.stopped = true;
     this.abort.abort();
     this.silence();
+    this.playlist?.dispose();
     for (const source of this.sources) {
       try {
         source.stop();

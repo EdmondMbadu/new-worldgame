@@ -510,7 +510,8 @@ export default function App() {
             const renderStart = performance.now();
             view.render(Math.min(dt, 0.06), dt);
             view.recordFrame(dt, physicsMs, performance.now() - renderStart);
-            sound.current?.update(instance, Math.min(dt, 0.06));
+            if (!settingsOpenRef.current)
+              sound.current?.update(instance, Math.min(dt, 0.06));
           }
           hudTime += dt;
           if (hudTime > 0.08) {
@@ -583,7 +584,8 @@ export default function App() {
     setAutopilot(false);
   };
   const home = () => {
-    sound.current?.silence();
+    sound.current?.dispose();
+    sound.current = null;
     setInGame(false);
     setShowSettings(false);
     pilotRef.current = false;
@@ -777,12 +779,13 @@ export default function App() {
                 <div className="drive-actions">
                   <button
                     className="icon-button"
-                    onClick={() =>
+                    onClick={() => {
+                      if (!save.settings.sound) void sound.current?.unlock();
                       setSave((s) => ({
                         ...s,
                         settings: { ...s.settings, sound: !s.settings.sound },
-                      }))
-                    }
+                      }));
+                    }}
                     aria-label={
                       save.settings.sound ? "Mute sound" : "Enable sound"
                     }

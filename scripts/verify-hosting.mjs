@@ -66,6 +66,9 @@ for (const game of games) {
   if (game.slug === "last-light") {
     if (!existsSync(path.join(root, "key-art.png")))
       fail("Last Light is missing its menu art.");
+    for (const track of ["morning-on-the-ridge.mp3", "light-at-the-clearing.mp3"])
+      if (!existsSync(path.join(root, "audio", track)))
+        fail(`Last Light is missing soundtrack audio/${track}.`);
     for (const file of builtFiles.filter((f) => f.endsWith(".js"))) {
       const source = readFileSync(file, "utf8");
       if (

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head><meta charset="utf-8"><title>Last Light music playback check</title></head>
+  <body>
+    <h1>Journey music playback check</h1>
+    <p>Development-only: real MP3s, native playback, and the production playlist controller. No game saves are changed.</p>
+    <button id="start">Start music</button>
+    <button id="transition">Seek to transition</button>
+    <button id="pause">Pause</button>
+    <button id="resume">Resume</button>
+    <button id="stop">Release audio</button>
+    <pre id="status" aria-live="polite">Not started</pre>
+    <script type="module">
+      import { JourneyMusic } from '../src/journey-music.ts';
+      let player, context, enabled = false, last = performance.now();
+      document.querySelector('#start').onclick = () => {
+        player?.dispose();
+        if (context) void context.close();
+        context = new AudioContext();
+        const master = context.createGain();
+        master.gain.value = 0.15;
+        master.connect(context.destination);
+        player = new JourneyMusic(context, master);
+        enabled = true;
+        void context.resume();
+        player.unlock();
+      };
+      document.querySelector('#transition').onclick = () => {
+        for (const audio of document.querySelectorAll('audio[data-last-light-track]')) {
+          if (!audio.paused && Number.isFinite(audio.duration))
+            audio.currentTime = audio.duration - 3.5;
+        }
+      };
+      document.querySelector('#pause').onclick = () => { enabled = false; player?.pause(); };
+      document.querySelector('#resume').onclick = () => {
+        enabled = true;
+        void context?.resume();
+        player?.unlock();
+      };
+      document.querySelector('#stop').onclick = () => { enabled = false; player?.dispose(); };
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { enabled = false; player?.pause(); }
+      });
+      window.addEventListener('pagehide', () => player?.dispose());
+      function frame(now) {
+        player?.update(enabled, (now - last) / 1000);
+        last = now;
+        document.querySelector('#status').textContent = JSON.stringify({
+          enabled, context: context?.state,
+          tracks: Array.from(document.querySelectorAll('audio[data-last-light-track]'), audio => ({
+            title: audio.dataset.lastLightTrack, paused: audio.paused,
+            time: Number(audio.currentTime.toFixed(2)),
+            duration: Number(audio.duration.toFixed(2)), ready: audio.readyState,
+            error: audio.error?.code ?? null,
+          })),
+        }, null, 2);
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    </script>
+  </body>
+</html>

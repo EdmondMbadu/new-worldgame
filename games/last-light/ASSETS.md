@@ -2,7 +2,18 @@
 
 ## Original runtime content
 
-The truck, solar kit, clinic interiors and compounds, fallback people, minibuses, bridge, road furniture, terrain, hills, foliage and particles are authored in `src/`. The truck uses shaped body cross sections and separate steering/spin pivots. Canvas-generated material details, wind, tires, impacts, birds and music are original runtime content. Optional spoken radio uses the browser's installed English speech voice; voice availability varies by platform. Game assets are bundled locally.
+The truck, solar kit, clinic interiors and compounds, fallback people, minibuses, bridge, road furniture, terrain, hills, foliage and particles are authored in `src/`. The truck uses shaped body cross sections and separate steering/spin pivots. Canvas-generated material details, wind, tires, impacts, birds and the fallback generated score are original runtime content. Optional spoken radio uses the browser's installed English speech voice; voice availability varies by platform. Game assets are bundled locally.
+
+## User-supplied journey music
+
+The user supplied these tracks on 2026-09-18 for use in Last Light. Both MP3s are bundled unmodified (stereo, 44.1 kHz, 192 kbps). This register records their source; it does not assert a third-party license or independently establish ownership.
+
+| Local file | Supplied filename | Duration | SHA-256 |
+| --- | --- | --- | --- |
+| `public/audio/morning-on-the-ridge.mp3` | `Morning_On_The_Ridge.mp3` | 167.13 s | `3926e424fe6361323af61fd15dd788c9dfcffa622bae828316ff9825fbe468a8` |
+| `public/audio/light-at-the-clearing.mp3` | `Light_at_the_Clearing.mp3` | 177.92 s | `2650fc9979aa7c69d3cfa5959da8295a17bc347bab44fc885e43f10bdc416be1` |
+
+Morning is the main drive song; Clearing follows with a four-second crossfade, then the playlist repeats. Native media streaming avoids full-track PCM buffers; both route through the existing master mix and speech ducking. The two tracks add approximately 7.91 MiB to the downloadable package, changing its limit from 12 to 21 MiB without increasing the code limit or blocking scene loading. Earlier 12 MiB statements below describe their respective historical revisions.
 
 ## Clinic compounds and animated staff
 
