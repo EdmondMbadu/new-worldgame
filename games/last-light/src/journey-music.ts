@@ -22,6 +22,25 @@ export class JourneyMusic {
   private active = false;
   private stopped = false;
 
+  /** A scene may request the arrival song once; never restart an audible track. */
+  request(index: number) {
+    if (this.stopped || !this.tracks[index] || this.tracks[index].failed || index === this.incoming) return;
+    if (index === this.current) {
+      if (this.incoming !== null) {
+        // A quick Next may reverse an arrival transition. Complementary equal-power
+        // curves keep both levels and cursors continuous instead of restarting.
+        this.current = this.incoming;
+        this.incoming = index;
+        this.fade = MUSIC_CROSSFADE - this.fade;
+      }
+      return;
+    }
+    this.incoming = index;
+    this.fade = 0;
+    this.tracks[index].audio.currentTime = 0;
+    this.tracks[index].audio.preload = 'auto';
+  }
+
   constructor(private context: AudioContext, destination: AudioNode) {
     try {
       for (const [index, info] of JOURNEY_TRACKS.entries()) {

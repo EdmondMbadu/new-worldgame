@@ -69,6 +69,14 @@ for (const game of games) {
     for (const track of ["morning-on-the-ridge.mp3", "light-at-the-clearing.mp3"])
       if (!existsSync(path.join(root, "audio", track)))
         fail(`Last Light is missing soundtrack audio/${track}.`);
+    const story = JSON.parse(readFileSync(new URL('../content/drc-clinic-stories.json', import.meta.url), 'utf8'));
+    if (!existsSync(path.join(root, 'story/clinic-evening.webp')))
+      fail('Last Light is missing its clinic story artwork.');
+    for (const clinic of story.clinics) for (const scene of ['opening', 'closing']) {
+      const clip = path.join(root, 'audio/story', `${clinic.id}-${scene}.mp3`);
+      if (!existsSync(clip) || statSync(clip).size < 1000)
+        fail(`Last Light is missing the ${clinic.id} ${scene} narration.`);
+    }
     for (const file of builtFiles.filter((f) => f.endsWith(".js"))) {
       const source = readFileSync(file, "utf8");
       if (
@@ -77,6 +85,8 @@ for (const game of games) {
         source.includes("qa-panel")
       )
         fail("Development QA controls leaked into Last Light production.");
+      if (source.includes('SpeechSynthesisUtterance') || /speechSynthesis\.speak\(/.test(source))
+        fail('Browser speech leaked into Last Light; narration must use scene clips.');
     }
   }
   console.log(

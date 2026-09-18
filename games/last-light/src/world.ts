@@ -58,6 +58,8 @@ export class GameWorld {
   renderer: T.WebGLRenderer;
   scene = new T.Scene();
   camera = new T.PerspectiveCamera(56, 1, 0.15, 900);
+  private storyCameraOffset = 0;
+  private storyCameraOffsetY = 0;
   truck: ReturnType<typeof createTruck>;
   clinic: ReturnType<typeof createClinic>;
   people: ReturnType<typeof createPerson>[] = [];
@@ -354,6 +356,8 @@ export class GameWorld {
       height = this.canvas.clientHeight;
     if (!width || !height) return;
     this.camera.aspect = width / height;
+    if (this.storyCameraOffset !== 0 || this.storyCameraOffsetY !== 0)
+      this.camera.setViewOffset(width, height, this.storyCameraOffset * width, this.storyCameraOffsetY * height, width, height);
     this.camera.fov = width < height ? 65 : 56;
     this.speedFov = this.camera.fov;
     this.camera.updateProjectionMatrix();
@@ -1127,6 +1131,17 @@ export class GameWorld {
       this.camera.updateProjectionMatrix();
     }
     const portrait = this.camera.aspect < 1;
+    // Ease the final composition into the free side of the closing story panel.
+    // The handover remains in the same scene and the player's truck stays visible.
+    const closingFrame = restoring ? this.settings.reducedMotion ? 1 : smooth(14, 18, t) : 0;
+    const offset = closingFrame * (portrait ? 0 : -0.22);
+    const offsetY = closingFrame * (portrait ? .31 : 0);
+    if (Math.abs(offset - this.storyCameraOffset) > .0005 || Math.abs(offsetY - this.storyCameraOffsetY) > .0005) {
+      this.storyCameraOffset = offset;
+      this.storyCameraOffsetY = offsetY;
+      if (offset === 0 && offsetY === 0) this.camera.clearViewOffset();
+      else this.camera.setViewOffset(1000 * this.camera.aspect, 1000, offset * 1000 * this.camera.aspect, offsetY * 1000, 1000 * this.camera.aspect, 1000);
+    }
     if (restoring) {
       const a = this.settings.reducedMotion ? 1 : smooth(0, 5, t);
       const targetEye = new T.Vector3(
@@ -1134,6 +1149,7 @@ export class GameWorld {
         roadY(m, m.length) + (portrait ? 13 : 11),
         m.length - (portrait ? (m.id === 4 ? 28 : 20) : 12),
       );
+      targetEye.lerp(new T.Vector3(portrait ? -20 : -15, roadY(m, m.length) + (portrait ? 10 : 7), m.length + (portrait ? -10 : 2)), closingFrame);
       this.eye
         .set(p.x - forward.x * 8, p.y + 4, p.z - forward.z * 8)
         .lerp(targetEye, a);

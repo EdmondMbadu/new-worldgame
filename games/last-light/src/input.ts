@@ -5,6 +5,16 @@ export class Controls {
   touch = emptyInput();
   private previousMenu = false;
   private controllerActive = false;
+  private acceptsInput = true;
+  private awaitPadRelease = false;
+  get enabled() { return this.acceptsInput; }
+  set enabled(value: boolean) {
+    if (!value) {
+      this.clear();
+      this.awaitPadRelease = true;
+    }
+    this.acceptsInput = value;
+  }
   constructor(
     public settings: Settings,
     private onPause: (force?: boolean) => void,
@@ -15,11 +25,14 @@ export class Controls {
     window.addEventListener('gamepaddisconnected', this.disconnect);
   }
   private down = (e: KeyboardEvent) => {
+    if (!this.enabled) return;
     if (
       e.target instanceof HTMLInputElement ||
       e.target instanceof HTMLSelectElement
     )
       return;
+    // A key held across a story/pause boundary must be released and pressed again.
+    if (e.repeat && !this.held.has(e.code)) return;
     if (e.code === 'Escape') {
       if (!e.repeat) this.onPause();
       e.preventDefault();
@@ -54,6 +67,7 @@ export class Controls {
     this.touch = emptyInput();
   };
   sample(): Input {
+    if (!this.enabled) { this.clear(); return emptyInput(); }
     const k = this.settings.keys,
       h = this.held;
     const state = {
@@ -72,6 +86,13 @@ export class Controls {
     if (pad) {
       this.controllerActive = true;
       const axis = pad.axes[0] || 0;
+      if (this.awaitPadRelease) {
+        this.previousMenu = !!pad.buttons[9]?.pressed;
+        if (Math.abs(axis) > .12 || (pad.buttons[7]?.value || 0) > .05 ||
+          (pad.buttons[6]?.value || 0) > .05 || pad.buttons[0]?.pressed || this.previousMenu)
+          return state;
+        this.awaitPadRelease = false;
+      }
       if (Math.abs(axis) > 0.12)
         state.steer = ((Math.abs(axis) - 0.12) / 0.88) * Math.sign(axis);
       state.throttle = Math.max(state.throttle, pad.buttons[7]?.value || 0);

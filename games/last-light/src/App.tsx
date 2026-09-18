@@ -16,7 +16,6 @@ import {
 import {
   defaultSettings,
   bestKey,
-  livesSaved,
   readSave,
   recordResult,
   unlocked,
@@ -30,6 +29,8 @@ import { Soundtrack } from "./audio";
 import { driveInput } from "./qa-driver";
 import { branchSections } from "./road-sections";
 import { beamMode, nightProfile } from "./night";
+import { CLINICS } from "./clinic-stories";
+import { ClinicStoryView } from "./ClinicStory";
 
 const base = import.meta.env.BASE_URL;
 const time = (n: number) => {
@@ -285,8 +286,9 @@ function SettingsPanel({
         {(
           [
             ["sound", "Sound & music"],
-            ["voice", "Radio voice"],
-            ["subtitles", "Radio subtitles"],
+            ["voice", "Story voice · opening & ending"],
+            ["subtitles", "Story transcript"],
+            ["roadSounds", "Road & vehicle sounds"],
             ["reducedMotion", "Reduced camera motion"],
             ["singlePress", "One-press delivery"],
             ["enhancedVisibility", "Enhanced night visibility"],
@@ -365,6 +367,7 @@ export default function App() {
     [selected, setSelected] = useState(0),
     [variant, setVariant] = useState(0),
     [inGame, setInGame] = useState(false),
+    [opening, setOpening] = useState(false),
     [run, setRun] = useState(0),
     [ready, setReady] = useState(false),
     [loading, setLoading] = useState("Preparing the road"),
@@ -379,11 +382,15 @@ export default function App() {
     world = useRef<GameWorld | null>(null),
     controls = useRef<Controls | null>(null),
     sound = useRef<Soundtrack | null>(null),
+    openingRef = useRef(false),
+    closingPlayed = useRef(false),
+    arrivalMusic = useRef(false),
     settingsOpenRef = useRef(false),
     settingsRef = useRef(save.settings),
     saveRef = useRef(save),
     pilotRef = useRef(false);
   const mission = MISSIONS[selected];
+  const clinic = CLINICS[selected];
   settingsOpenRef.current = showSettings;
   const e = engine.current;
   const qa =
@@ -396,7 +403,7 @@ export default function App() {
     if (world.current) world.current.settings = save.settings;
     if (sound.current) {
       sound.current.settings = save.settings;
-      if (!save.settings.sound || !save.settings.voice) sound.current.silence();
+      if (!save.settings.sound) sound.current.silence();
     }
     setStorageOk(writeSave(save));
   }, [save]);
@@ -471,7 +478,7 @@ export default function App() {
         );
         world.current = view;
         const input = new Controls(settingsRef.current, (force = false) => {
-          if (settingsOpenRef.current) {
+          if (settingsOpenRef.current || openingRef.current || ['restoring', 'results', 'failed'].includes(instance.phase)) {
             input.clear();
             return;
           }
@@ -485,6 +492,7 @@ export default function App() {
           input.clear();
         });
         controls.current = input;
+        input.enabled = !openingRef.current;
         setReady(true);
         last = performance.now();
         let observedResume = instance.resumeRevision;
@@ -494,24 +502,24 @@ export default function App() {
           observedResume = instance.resumeRevision;
           const dt = resumed ? 0 : (now - last) / 1000;
           last = now;
+          input.enabled = !openingRef.current && !settingsOpenRef.current && ['ready', 'driving', 'paused'].includes(instance.phase);
           let state = input.sample();
           if (qa && pilotRef.current) state = driveInput(instance, false, true);
           const stepStart = performance.now();
-          instance.advance(dt, state, settingsRef.current.singlePress);
+          if (!openingRef.current) instance.advance(dt, state, settingsRef.current.singlePress);
           const physicsMs = performance.now() - stepStart;
           if (instance.result && !committed) {
             committed = true;
             setSave((s) => recordResult(s, instance.result!));
           }
           if (
+            !openingRef.current &&
             instance.phase !== "paused" &&
             document.visibilityState !== "hidden"
           ) {
             const renderStart = performance.now();
             view.render(Math.min(dt, 0.06), dt);
             view.recordFrame(dt, physicsMs, performance.now() - renderStart);
-            if (!settingsOpenRef.current)
-              sound.current?.update(instance, Math.min(dt, 0.06));
           }
           hudTime += dt;
           if (hudTime > 0.08) {
@@ -534,7 +542,7 @@ export default function App() {
     };
     void load();
     const interrupt = (event?: Event) => {
-      engine.current?.pause(event?.type || "visibility");
+      if (!openingRef.current) engine.current?.pause(event?.type || "visibility");
       controls.current?.clear();
       sound.current?.silence();
       setTick((t) => t + 1);
@@ -571,10 +579,48 @@ export default function App() {
       node.removeEventListener("webglcontextlost", contextLost);
     };
   }, [inGame, selected, run]);
+  // Story audio starts while the scene loads, and remains owned by this run.
+  useEffect(() => {
+    if (!inGame) return;
+    let raf = 0, last = performance.now(), hud = 0;
+    const frame = (now: number) => {
+      const dt = Math.min(0.06, Math.max(0, (now - last) / 1000));
+      last = now;
+      const audio = sound.current, instance = engine.current;
+      if (audio) {
+        if (settingsOpenRef.current) audio.silence();
+        else if (openingRef.current) { audio.setStory('opening'); audio.updateStory(dt); }
+        else if (instance) {
+          if (instance.phase === 'results') {
+            audio.setStory('closing', !closingPlayed.current);
+            closingPlayed.current = true;
+          } else audio.setStory(null);
+          if ((instance.phase === 'restoring' || instance.phase === 'results') && !arrivalMusic.current) {
+            audio.arrival();
+            arrivalMusic.current = true;
+          }
+          audio.update(instance, dt);
+        }
+      }
+      hud += dt;
+      if (hud > .12) { setTick(t => t + 1); hud = 0; }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [inGame, run]);
   useEffect(() => () => sound.current?.dispose(), []);
   const start = (id = selected) => {
-    sound.current?.dispose();
-    sound.current = new Soundtrack(settingsRef.current);
+    if (sound.current) sound.current.beginChapter(CLINICS[id]);
+    else sound.current = new Soundtrack(settingsRef.current, CLINICS[id]);
+    openingRef.current = true;
+    closingPlayed.current = false;
+    arrivalMusic.current = false;
+    controls.current?.clear();
+    if (controls.current) controls.current.enabled = false;
+    setOpening(true);
+    setReady(false);
+    setLoading('Preparing the road');
     void sound.current.unlock();
     setSelected(id);
     setInGame(true);
@@ -586,24 +632,47 @@ export default function App() {
   const home = () => {
     sound.current?.dispose();
     sound.current = null;
+    openingRef.current = false;
+    setOpening(false);
     setInGame(false);
     setShowSettings(false);
     pilotRef.current = false;
     setAutopilot(false);
   };
   const settings = () => {
-    if (engine.current?.phase !== "paused") engine.current?.pause();
+    if (!openingRef.current && engine.current?.phase !== "paused") engine.current?.pause();
     controls.current?.clear();
     sound.current?.silence();
     setShowSettings(true);
   };
   const returnHref = "/games";
-  const totalLives = livesSaved(save);
   const result = e?.result;
+  const beginDrive = () => {
+    if (!ready || !engine.current || error) return;
+    sound.current?.setStory(null);
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    controls.current?.clear();
+    if (engine.current.phase === 'paused') engine.current.resume();
+    openingRef.current = false;
+    setOpening(false);
+    void sound.current?.unlock();
+    canvas.current?.focus({ preventScroll: true });
+  };
+  const storyVoice = () => {
+    const current = settingsRef.current;
+    if (!current.sound || !current.voice || current.volume === 0) {
+      const next = { ...current, sound: true, voice: true, volume: current.volume || .65 };
+      settingsRef.current = next;
+      if (sound.current) sound.current.settings = next;
+      setSave(s => ({ ...s, settings: next }));
+      sound.current?.resumeNarration();
+    } else sound.current?.toggleNarration();
+    void sound.current?.unlock();
+  };
   return (
     <main
       className={`last-light ${inGame ? "in-game" : "at-home"}`}
-      data-phase={e?.phase || "menu"}
+      data-phase={inGame ? opening ? 'opening' : e?.phase || 'loading' : 'menu'}
     >
       {!inGame && (
         <>
@@ -646,7 +715,7 @@ export default function App() {
             </p>
             <button className="primary start-button" onClick={() => start()}>
               <span>
-                {save.completed.includes(selected)
+                {save.story.completed.includes(selected)
                   ? "Drive again"
                   : "Begin the journey"}
               </span>
@@ -694,18 +763,17 @@ export default function App() {
             <div className="campaign-label">
               <span className="eyebrow">A CHAIN OF LIGHT</span>
               <span>
-                {save.completed.length}/5 CLINICS POWERED
-                {totalLives > 0 && ` · ${totalLives} LIVES SAVED`}
+                {save.story.completed.length}/5 CHAPTERS COMPLETE
               </span>
             </div>
             <div className="chapters">
               {MISSIONS.map((m, i) => {
                 const open = unlocked(save, i),
-                  best = save.best[bestKey(i, save.settings.mode, variant)];
+                  best = save.story.best[bestKey(i, save.settings.mode, variant)];
                 return (
                   <button
                     key={i}
-                    className={`chapter ${selected === i ? "selected" : ""} ${save.completed.includes(i) ? "complete" : ""}`}
+                    className={`chapter ${selected === i ? "selected" : ""} ${save.story.completed.includes(i) ? "complete" : ""}`}
                     disabled={!open}
                     onClick={() => setSelected(i)}
                     aria-pressed={selected === i}
@@ -713,7 +781,7 @@ export default function App() {
                     <span className="chapter-number">
                       {String(i + 1).padStart(2, "0")}{" "}
                       <span>
-                        {save.completed.includes(i) ? "✦" : open ? "↗" : "○"}
+                        {save.story.completed.includes(i) ? "✦" : open ? "↗" : "○"}
                       </span>
                     </span>
                     <strong>{m.title}</strong>
@@ -743,10 +811,29 @@ export default function App() {
             key={run}
             ref={canvas}
             className="game-canvas"
+            tabIndex={-1}
             aria-label={`Last Light: drive to ${mission.place}`}
           />
           <div className="game-vignette" />
-          {!ready && !error && (
+          {!error && (opening || (ready && e?.phase === 'results' && result)) && (
+            <ClinicStoryView
+              key={`${selected}:${run}:${opening ? 'opening' : 'closing'}`}
+              clinic={clinic} chapter={selected} scene={opening ? 'opening' : 'closing'}
+              settings={save.settings} narration={sound.current?.narration || { status: 'idle', progress: 0, scene: null }}
+              onVoice={storyVoice} onSettings={settings} onHome={home}
+              onContinue={opening ? beginDrive : () => result?.practice ? start(selected) : selected < 4 ? start(selected + 1) : home()}
+              onReplay={() => {
+                if (!e) return;
+                sound.current?.setStory(null);
+                controls.current?.clear();
+                e.restoreTime = 0; e.phase = 'restoring';
+                setTick(t => t + 1);
+              }}
+              onTouch={() => setTouch(!touch)} touch={touch} ready={ready} loading={loading}
+              completed={save.story.completed} result={opening ? undefined : result || undefined}
+            />
+          )}
+          {!ready && !error && !opening && (
             <div className="loading-screen">
               <span className="eyebrow">
                 LAST LIGHT / CHAPTER {String(selected + 1).padStart(2, "0")}
@@ -760,14 +847,14 @@ export default function App() {
               </small>
             </div>
           )}
-          {ready && e && (
+          {ready && e && !opening && (
             <>
-              <header className="drive-header">
+              {!['restoring', 'results'].includes(e.phase) && <header className="drive-header">
                 <div className="drive-identity">
                   <span className="eyebrow">
                     LAST LIGHT / {String(selected + 1).padStart(2, "0")}
                   </span>
-                  <strong>{mission.title}</strong>
+                  <strong>{clinic.shortName}</strong>
                 </div>
                 <div className={`reserve ${e.time < 40 ? "urgent" : ""}`}>
                   <span>CLINIC RESERVE</span>
@@ -800,7 +887,7 @@ export default function App() {
                     Ⅱ
                   </button>
                 </div>
-              </header>
+              </header>}
               {["ready", "driving"].includes(e.phase) && (
                 <>
                   <div className="destination">
@@ -873,7 +960,7 @@ export default function App() {
                             ? "ROAD CLEAR"
                             : e.upcomingEncounter.title}
                         </strong>
-                        <span>{e.upcomingEncounter.instruction}</span>
+                        <span>{e.upcomingEncounter.state === 'clear' ? 'PASSAGE OPEN' : 'CAUTION AHEAD'}</span>
                       </div>
                       <b>
                         {Math.max(
@@ -887,55 +974,6 @@ export default function App() {
                   {e.elapsed < e.rewardUntil && (
                     <div className="clean-cue">
                       ✓ CLEAN DRIVING <span>{e.totalClean} handled</span>
-                    </div>
-                  )}
-                  {save.settings.subtitles && e.elapsed < e.notice.until && (
-                    <div className="radio" role="status">
-                      <span className="radio-icon">▥</span>
-                      <div>
-                        <span className="eyebrow">{e.notice.who}</span>
-                        <p>{e.notice.text}</p>
-                      </div>
-                    </div>
-                  )}
-                  {e.phase === "ready" && (
-                    <div className="ready-prompt">
-                      <span className="eyebrow">
-                        YOU ARE AMANI. THE CLINIC IS WAITING.
-                      </span>
-                      <h2>Bring them the light.</h2>
-                      <p>
-                        Protect the panels. Arrive before the reserve runs out.
-                      </p>
-                      <div className="control-hints">
-                        <span>
-                          <kbd>
-                            {save.settings.keys.throttle.replace("Key", "")}
-                          </kbd>{" "}
-                          Drive
-                        </span>
-                        <span>
-                          <kbd>
-                            {save.settings.keys.left.replace("Key", "")}
-                          </kbd>
-                          <kbd>
-                            {save.settings.keys.right.replace("Key", "")}
-                          </kbd>{" "}
-                          Steer
-                        </span>
-                        <span>
-                          <kbd>
-                            {save.settings.keys.brake.replace("Key", "")}
-                          </kbd>{" "}
-                          Brake
-                        </span>
-                      </div>
-                      <button
-                        className="text-button"
-                        onClick={() => setTouch(!touch)}
-                      >
-                        {touch ? "Hide" : "Show"} touch controls
-                      </button>
                     </div>
                   )}
                   {e.canDeliver && (
@@ -1028,7 +1066,7 @@ export default function App() {
                         ? "You brought the light."
                         : e.restoreTime < 12
                           ? "One room. Then another."
-                          : "Look what you made possible."}
+                          : "The team can keep caring."}
                     </h2>
                     <p>
                       {e.restoreTime < 8
@@ -1043,106 +1081,6 @@ export default function App() {
                       </button>
                     )}
                   </div>
-                </div>
-              )}
-              {e.phase === "results" && result && (
-                <div className="result-overlay">
-                  <section className="result-card">
-                    <span className="eyebrow">
-                      {result.practice
-                        ? "PRACTICE COMPLETE · NO RECORD SAVED"
-                        : selected === 4
-                          ? "THE REGION SHINES AGAIN"
-                          : "DELIVERY COMPLETE"}
-                    </span>
-                    <div className="stars" aria-label={`${result.stars} stars`}>
-                      {[1, 2, 3].map((n) => (
-                        <span
-                          key={n}
-                          className={n <= result.stars ? "earned" : ""}
-                        >
-                          ✦
-                        </span>
-                      ))}
-                    </div>
-                    <h2>
-                      {selected === 4
-                        ? "A chain of light."
-                        : "A brighter tomorrow."}
-                    </h2>
-                    <p>{mission.outcome}</p>
-                    <div className="result-stats">
-                      <div>
-                        <strong>{result.score.toLocaleString()}</strong>
-                        <span>POINTS</span>
-                      </div>
-                      <div>
-                        <strong>{result.lives}</strong>
-                        <span>LIVES SAVED</span>
-                      </div>
-                      <div>
-                        <strong>{Math.round(result.integrity)}%</strong>
-                        <span>KIT INTEGRITY</span>
-                      </div>
-                    </div>
-                    <div className="result-caption">
-                      {result.practice && "Practice only · "}
-                      {time(result.remaining)} to spare ·{" "}
-                      {result.mode === "relaxed" ? "Relaxed" : "Standard"} ·
-                      {result.clean || 0}/{result.encounters || 0} clean passes
-                      · With the clinic team
-                    </div>
-                    <p className="array-caption">
-                      Later, the team commissions the solar array for lasting
-                      power.
-                    </p>
-                    {selected === 4 && (
-                      <div
-                        className="finale-lights"
-                        aria-label="Five clinics powered"
-                      >
-                        {MISSIONS.map((m) => (
-                          <span key={m.id}>
-                            ✦<small>{m.place.split(" ")[0]}</small>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                    <button
-                      className="primary"
-                      onClick={() =>
-                        result.practice
-                          ? start(selected)
-                          : selected < 4
-                            ? start(selected + 1)
-                            : home()
-                      }
-                    >
-                      {result.practice
-                        ? "Start a scored delivery"
-                        : selected < 4
-                          ? "The next clinic is waiting"
-                          : "See the chain of light"}{" "}
-                      <span>↗</span>
-                    </button>
-                    <div className="result-links">
-                      <button className="text-button" onClick={() => start()}>
-                        Drive again
-                      </button>
-                      <button className="text-button" onClick={home}>
-                        Chapter map
-                      </button>
-                    </div>
-                    <button
-                      className="text-button arrival-replay"
-                      onClick={() => {
-                        e.restoreTime = 0;
-                        e.phase = "restoring";
-                      }}
-                    >
-                      Watch the lights return
-                    </button>
-                  </section>
                 </div>
               )}
               {e.phase === "failed" && (

@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { JourneyMusic, JOURNEY_TRACKS, MUSIC_CROSSFADE } from '../src/journey-music';
 import { Soundtrack } from '../src/audio';
 import { defaultSettings } from '../src/save';
+import { CLINICS } from '../src/clinic-stories';
 import type { GameEngine } from '../src/engine';
 
 class FakeNode {
@@ -128,6 +129,52 @@ describe('streamed journey score', () => {
     finishFade();
     expect(main.paused).toBe(true);
   });
+  it('requests the arrival track once without restarting its cursor', async () => {
+    await start();
+    main.currentTime = 80;
+    player.request(1);
+    player.update(true, .06);
+    await flush();
+    next.currentTime = 1.2;
+    player.request(1);
+    expect(next.currentTime).toBe(1.2);
+    finishFade();
+    player.request(1);
+    expect(next.currentTime).toBe(1.2);
+    expect(main.paused).toBe(true);
+    expect(next.paused).toBe(false);
+  });
+  it('reverses a quick Next transition continuously, preserving both cursors', async () => {
+    await start();
+    main.currentTime = 80;
+    player.request(1);
+    player.update(true, .06);
+    await flush();
+    for (let i = 0; i < 20; i++) player.update(true, .06);
+    next.currentTime = 1.2;
+    const before = context.gains.map(n => n.gain.setTargetAtTime.mock.lastCall![0]);
+    player.request(0);
+    player.update(true, 0);
+    context.gains.forEach((n, i) => expect(n.gain.setTargetAtTime.mock.lastCall![0]).toBeCloseTo(before[i]));
+    expect(main.currentTime).toBe(80);
+    expect(next.currentTime).toBe(1.2);
+    finishFade();
+    expect(main.paused).toBe(false);
+    expect(next.paused).toBe(true);
+    expect(main.currentTime).toBe(80);
+  });
+  it('cancels a scene request safely before the incoming song has buffered', async () => {
+    await start();
+    next.readyState = 2;
+    player.request(1);
+    player.update(true, .06);
+    await flush();
+    player.request(0);
+    player.update(true, 0);
+    expect(main.paused).toBe(false);
+    expect(next.paused).toBe(true);
+    expect(context.gains[0].gain.setTargetAtTime.mock.lastCall![0]).toBe(1);
+  });
   it('handles the ended boundary even when a frame missed the crossfade window', async () => {
     await start();
     main.currentTime = main.duration;
@@ -249,7 +296,7 @@ describe('streamed journey score', () => {
 });
 
 describe('game audio integration', () => {
-  it('keeps native music connected to volume/mute, lowers it under speech, and stops on failure', async () => {
+  it('keeps music connected to volume/mute, ducks only scene narration, and stops on failure', async () => {
     player.dispose();
     vi.stubGlobal('AudioContext', function () { return context; });
     vi.stubGlobal('window', {});
@@ -270,7 +317,24 @@ describe('game audio integration', () => {
       expect(context.gains[3].gain.setTargetAtTime).toHaveBeenLastCalledWith(0.23, 0, 0.2);
       vi.stubGlobal('speechSynthesis', { speaking: true });
       sound.update(engine, 0.06);
+      expect(context.gains[3].gain.setTargetAtTime).toHaveBeenLastCalledWith(0.23, 0, 0.2);
+      sound.settings.voice = true;
+      sound.setStory('opening');
+      sound.updateStory(0.06); await flush();
+      sound.updateStory(0.06);
       expect(context.gains[3].gain.setTargetAtTime).toHaveBeenLastCalledWith(0.07, 0, 0.2);
+      engine.phase = 'driving';
+      engine.encounters = [];
+      engine.notice = { who: 'DISPATCH', text: 'Recover now', until: 10 };
+      sound.update(engine, 0.06); await flush();
+      expect(sound.narration.scene).toBeNull();
+      expect(FakeAudio.instances.slice(4).every(a => a.paused)).toBe(true);
+      expect(context.gains[3].gain.setTargetAtTime).toHaveBeenLastCalledWith(0.23, 0, 0.2);
+      // The default experience is music-only, with vehicle effects explicitly opt-in.
+      expect(context.gains[6].gain.setTargetAtTime).toHaveBeenLastCalledWith(0, 0, 0.05);
+      sound.settings.roadSounds = true;
+      sound.update(engine, 0.06);
+      expect(context.gains[6].gain.setTargetAtTime).toHaveBeenLastCalledWith(1, 0, 0.05);
       sound.settings.volume = 0;
       sound.update(engine, 0.06);
       expect(audio.paused).toBe(true);
@@ -299,6 +363,27 @@ describe('game audio integration', () => {
       vi.stubGlobal('document', { body: document.body, hidden: true, hasFocus: () => true });
       sound.update(engine, 0.06);
       expect(audio.paused).toBe(true);
+    } finally { sound.dispose(); }
+  });
+  it('reuses the score and audio context between clinics but disposes old narration', async () => {
+    player.dispose();
+    vi.stubGlobal('AudioContext', function () { return context; });
+    vi.stubGlobal('window', {});
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: false })));
+    const sound = new Soundtrack(defaultSettings());
+    try {
+      await sound.unlock(); sound.updateStory(.06); await flush();
+      const score = FakeAudio.instances[2], oldVoice = FakeAudio.instances.slice(4);
+      score.currentTime = 42;
+      sound.beginChapter(CLINICS[1]);
+      await sound.unlock(); sound.updateStory(.06); await flush();
+      sound.updateStory(.06); await flush();
+      expect(context.close).not.toHaveBeenCalled();
+      expect(score.currentTime).toBe(42);
+      expect(oldVoice.every(a => a.paused && a.src === '' && a.remove.mock.calls.length === 1)).toBe(true);
+      expect(FakeAudio.instances[6].src).toContain('nganga-tsanga-opening.mp3');
+      expect(sound.narration.scene).toBe('opening');
+      expect(sound.narration.status).toBe('playing');
     } finally { sound.dispose(); }
   });
 });

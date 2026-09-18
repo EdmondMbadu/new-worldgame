@@ -1,6 +1,7 @@
 import { MISSIONS } from './missions';
 import type { Result } from './engine';
 import { ROAD_REVISION } from './vehicle';
+import { STORY_EDITION } from './clinic-stories';
 export const bestKey = (
   mission: number,
   mode: string,
@@ -15,6 +16,7 @@ export type Settings = {
   sound: boolean;
   voice: boolean;
   subtitles: boolean;
+  roadSounds: boolean;
   reducedMotion: boolean;
   singlePress: boolean;
   brightness: number;
@@ -30,11 +32,13 @@ export type Save = {
   completed: number[];
   best: Record<string, Result>;
   settings: Settings;
+  story: { edition: string; completed: number[]; best: Record<string, Result> };
 };
 export const defaultSettings = (): Settings => ({
   sound: true,
   voice: true,
   subtitles: true,
+  roadSounds: false,
   reducedMotion:
     typeof matchMedia !== 'undefined' &&
     matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -58,6 +62,7 @@ export const freshSave = (): Save => ({
   completed: [],
   best: {},
   settings: defaultSettings(),
+  story: { edition: STORY_EDITION, completed: [], best: {} },
 });
 export function parseSave(raw: string | null): Save {
   const base = freshSave();
@@ -74,7 +79,11 @@ export function parseSave(raw: string | null): Save {
           ),
         ]
       : [];
-    for (const [k, v] of Object.entries(p.best || {})) {
+    const candidates = [
+      { source: p.best, target: base.best },
+      { source: p.story?.edition === STORY_EDITION ? p.story.best : {}, target: base.story.best },
+    ];
+    for (const { source, target } of candidates) for (const [k, v] of Object.entries(source || {})) {
       const r = v as Result;
       if (
         r &&
@@ -119,13 +128,16 @@ export function parseSave(raw: string | null): Save {
                   : 4))) &&
         k === resultKey(r)
       )
-        base.best[k] = r;
+        target[k] = r;
     }
+    // Completion is backed by an accepted record, never copied from the legacy campaign.
+    base.story.completed = [...new Set(Object.values(base.story.best).map((r) => r.mission))];
     const s = p.settings || {};
     for (const k of [
       'sound',
       'voice',
       'subtitles',
+      'roadSounds',
       'reducedMotion',
       'singlePress',
       'enhancedVisibility',
@@ -175,12 +187,16 @@ export function recordResult(save: Save, result: Result): Save {
     ...save,
     completed: [...save.completed],
     best: { ...save.best },
+    story: { edition: STORY_EDITION, completed: [...save.story.completed], best: { ...save.story.best } },
   };
   if (!next.completed.includes(result.mission))
     next.completed.push(result.mission);
   const k = resultKey(result);
   if (!next.best[k] || result.score > next.best[k].score)
     next.best[k] = { ...result };
+  if (!next.story.completed.includes(result.mission)) next.story.completed.push(result.mission);
+  if (!next.story.best[k] || result.score > next.story.best[k].score)
+    next.story.best[k] = { ...result };
   return next;
 }
 export const livesSaved = (save: Save) =>

@@ -23,6 +23,18 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('input adapters', () => {
+  it('blocks keyboard, touch and controller driving while a story owns the screen', () => {
+    controls.enabled = false;
+    key('keydown', 'KeyW');
+    controls.touch = { throttle: 1, steer: .8, brake: 0, action: true };
+    pad = { connected: true, axes: [1], buttons: Array.from({ length: 10 }, () => ({ value: 1, pressed: true })) };
+    expect(controls.sample()).toEqual({ throttle: 0, steer: 0, brake: 0, action: false });
+    pad = null;
+    controls.enabled = true;
+    expect(controls.sample().throttle).toBe(0);
+    key('keydown', 'KeyW');
+    expect(controls.sample().throttle).toBe(1);
+  });
   it('combines steering with accelerator and clears released keys', () => {
     key('keydown', 'KeyW');
     key('keydown', 'KeyD');
@@ -31,6 +43,28 @@ describe('input adapters', () => {
     expect(controls.sample().steer).toBe(0);
     key('keyup', 'KeyW');
     expect(controls.sample().throttle).toBe(0);
+  });
+  it('requires a fresh key press after leaving a story screen', () => {
+    controls.enabled = false;
+    key('keydown', 'KeyW');
+    controls.enabled = true;
+    key('keydown', 'KeyW', true);
+    expect(controls.sample().throttle).toBe(0);
+    key('keyup', 'KeyW');
+    key('keydown', 'KeyW');
+    expect(controls.sample().throttle).toBe(1);
+  });
+  it('waits for neutral gamepad controls after a story boundary', () => {
+    const buttons = Array.from({ length: 10 }, () => ({ value: 0, pressed: false }));
+    buttons[7] = { value: .8, pressed: true };
+    pad = { connected: true, axes: [0], buttons };
+    controls.enabled = false;
+    controls.enabled = true;
+    expect(controls.sample().throttle).toBe(0);
+    buttons[7] = { value: 0, pressed: false };
+    expect(controls.sample().throttle).toBe(0);
+    buttons[7] = { value: .8, pressed: true };
+    expect(controls.sample().throttle).toBe(.8);
   });
   it('supports remapping and arrow-key alternatives', () => {
     controls.settings.keys.throttle = 'KeyI';

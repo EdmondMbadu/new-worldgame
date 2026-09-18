@@ -1,0 +1,88 @@
+{
+  "createdOn": "2026-09-18",
+  "voiceProvider": "ElevenLabs",
+  "voice": "Sarah — Mature, Reassuring, Confident",
+  "voiceId": "EXAVITQu4vr4xnSDxMaL",
+  "voiceModel": "eleven_multilingual_v2",
+  "disclosure": "Scripted clinician · AI voice",
+  "flow": "https://elevenlabs.io/app/flows/jkWkespdnacdDbcW5KDx",
+  "scripts": "content/drc-clinic-stories.json",
+  "recordings": [
+    {
+      "clinic": "ndingi",
+      "scene": "opening",
+      "generation": "He6mVme4BWdDwe6ZIv0E",
+      "duration": 18.76,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "nganga-tsanga",
+      "scene": "opening",
+      "generation": "9IWGpS21CNI7GaN24UFl",
+      "duration": 18.9,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "ndingi",
+      "scene": "closing",
+      "generation": "H7GTENfImoPq3jof2HxE",
+      "duration": 14.44,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "nganga-tsanga",
+      "scene": "closing",
+      "generation": "vIV5Rk4QbozRQ4mmoUks",
+      "duration": 12.03,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "nsioni",
+      "scene": "opening",
+      "generation": "9kX3xcT49w5AbcsVCWtO",
+      "duration": 16.9,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "nsioni",
+      "scene": "closing",
+      "generation": "BctcjEifJ9VFfq1LG9ec",
+      "duration": 11.28,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "kiobo-kwimba",
+      "scene": "opening",
+      "generation": "3tT6XtCOYq859EwyIMlc",
+      "duration": 16.02,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "kiobo-kwimba",
+      "scene": "closing",
+      "generation": "9RXe8tncnTTGhUy1jEW3",
+      "duration": 11.24,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "mont-sinai",
+      "scene": "opening",
+      "generation": "GHK04WUd39bllgafxaco",
+      "duration": 16.16,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    },
+    {
+      "clinic": "mont-sinai",
+      "scene": "closing",
+      "generation": "L0MkbwgQwH5zmaEzUc64",
+      "duration": 12.96,
+      "voice": "EXAVITQu4vr4xnSDxMaL"
+    }
+  ],
+  "art": {
+    "file": "games/last-light/public/story/clinic-evening.webp",
+    "method": "Built-in image generation, resized and encoded as WebP",
+    "prompt": "Use case: illustration-story. Create a production background artwork for the Last Light browser driving game's pre-drive clinic story screen, wide 16:9. Dignified cinematic painterly realistic 3D-game concept art, cream and deep teal with quiet warm gold light, a modest Kongo Central health clinic with cream upper walls and faded blue lower walls, corrugated roof, stone veranda, dusk greenery, a dusty off-white utility pickup carrying a strapped solar panel and battery case. At right foreground show a calm fictional adult Congolese woman clinician, shoulders to waist, looking gently toward camera, simple unbranded cream medical coat, natural expression, hands relaxed. Clear readable warm face in right third, not cropped out. Left 48 percent is naturally dark teal foliage and dusk shade with simple low-detail negative space for live HTML text overlay. Clinic in right middle ground. Light from a small doorway only, no bright artificial spotlight. No patients. This is an illustrative game scene, not documentary evidence of a real clinic. Absolutely NO text, NO letters, NO signs, NO symbols, NO logos, NO interface, NO buttons, NO cards, NO typography, NO watermark, NO red cross, NO border. Subtle texture and beautiful lighting, restrained, human and hopeful, nothing theatrical or distressing.",
+    "provenance": "Fictional illustrative clinician and clinic; shared across chapter openings. Closing uses the live 3D game scene."
+  }
+}

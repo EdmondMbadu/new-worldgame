@@ -6,6 +6,7 @@ import {
   toWorld,
 } from './routes';
 import { branchSections, roadDepression, roadSections } from './road-sections';
+import { CLINICS } from './clinic-stories';
 export type Mission = {
   id: number;
   variant?: number;
@@ -269,6 +270,15 @@ export const MISSIONS: Mission[] = [
     ],
   },
 ];
+// Keep the established road rules and legacy score schema; story facts are separate.
+MISSIONS.forEach((mission, index) => {
+  const clinic = CLINICS[index];
+  mission.place = clinic.shortName;
+  mission.tagline = clinic.context;
+  mission.briefing = clinic.opening;
+  mission.outcome = clinic.closing;
+  mission.radio = [];
+});
 export const clamp = (v: number, a: number, b: number) =>
   Math.max(a, Math.min(b, v));
 export const smooth = (a: number, b: number, v: number) => {

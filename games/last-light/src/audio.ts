@@ -4,11 +4,18 @@ import { encounterPose } from './encounters';
 import { herdPose } from './traffic';
 import { clamp } from './missions';
 import { JourneyMusic } from './journey-music';
+import { SceneNarrator, type NarrationState } from './narration';
+import { CLINICS, type ClinicStory, type StoryScene } from './clinic-stories';
 
 export class Soundtrack {
   context: AudioContext | null = null;
   private gain: GainNode | null = null;
   private music: GainNode | null = null;
+  private effects: GainNode | null = null;
+  private narrator: SceneNarrator | null = null;
+  private narrationGain: GainNode | null = null;
+  private storyScene: StoryScene | null = 'opening';
+  private storyAutoplay = true;
   private playlist: JourneyMusic | null = null;
   private motor: OscillatorNode | null = null;
   private motorGain: GainNode | null = null;
@@ -37,7 +44,32 @@ export class Soundtrack {
   private load: Promise<void> | null = null;
   private abort = new AbortController();
   private stopped = false;
-  constructor(public settings: Settings) {}
+  constructor(public settings: Settings, private clinic: ClinicStory = CLINICS[0]) {}
+  get narration(): NarrationState {
+    return this.narrator?.state ?? { scene: this.storyScene, status: 'idle', progress: 0 };
+  }
+  setStory(scene: StoryScene | null, autoplay = true) {
+    this.storyScene = scene;
+    this.storyAutoplay = autoplay;
+    this.narrator?.select(scene, autoplay);
+  }
+  toggleNarration() { this.narrator?.toggle(); }
+  resumeNarration() { this.narrator?.resume(); }
+  arrival() { this.playlist?.request(1); }
+  beginChapter(clinic: ClinicStory) {
+    this.clinic = clinic;
+    this.storyScene = 'opening';
+    this.storyAutoplay = true;
+    this.narrator?.dispose();
+    if (this.context && this.narrationGain) {
+      this.narrator = new SceneNarrator(this.context, this.narrationGain, clinic);
+      this.narrator.select('opening');
+    }
+    this.lastCue = '';
+    this.lastImpact = 0;
+    this.lastPower = 0;
+    this.playlist?.request(0);
+  }
   async unlock() {
     if (this.stopped) return;
     try {
@@ -55,11 +87,20 @@ export class Soundtrack {
         this.music.gain.value = 0;
         this.music.connect(this.gain);
         this.playlist = new JourneyMusic(c, this.music);
+        this.effects = c.createGain();
+        this.effects.gain.value = 0;
+        this.effects.connect(this.gain);
+        this.narrationGain = c.createGain();
+        this.narrationGain.gain.value = 0.9;
+        this.narrationGain.connect(this.gain);
+        this.narrator = new SceneNarrator(c, this.narrationGain, this.clinic);
+        this.narrator.select(this.storyScene, this.storyAutoplay);
+        this.nodes.push(this.effects, this.narrationGain);
         this.motor = c.createOscillator();
         this.motor.type = 'triangle';
         this.motorGain = c.createGain();
         this.motorGain.gain.value = 0;
-        this.motor.connect(this.motorGain).connect(this.gain);
+        this.motor.connect(this.motorGain).connect(this.effects);
         this.motor.start();
         this.sources.push(this.motor);
         const buffer = c.createBuffer(1, c.sampleRate * 2, c.sampleRate),
@@ -79,7 +120,7 @@ export class Soundtrack {
           filter.frequency.value = frequency;
           const gain = c.createGain();
           gain.gain.value = 0;
-          source.connect(filter).connect(gain).connect(this.gain!);
+          source.connect(filter).connect(gain).connect(this.effects!);
           source.start();
           this.sources.push(source);
           this.nodes.push(filter, gain);
@@ -104,7 +145,7 @@ export class Soundtrack {
             .connect(filter)
             .connect(gain)
             .connect(pan)
-            .connect(this.gain);
+            .connect(this.effects);
           oscillator.start();
           this.sources.push(oscillator);
           this.nodes.push(filter, gain, pan);
@@ -144,7 +185,7 @@ export class Soundtrack {
             this.engineLoop
               .connect(this.engineFilter)
               .connect(this.engineGain)
-              .connect(this.gain);
+              .connect(this.effects!);
             this.engineLoop.start();
             this.sources.push(this.engineLoop);
             this.nodes.push(this.engineFilter, this.engineGain);
@@ -156,6 +197,7 @@ export class Soundtrack {
       // Keep native media play() inside the original user gesture, not after an await.
       const resumed = this.context.state === 'suspended' ? this.context.resume() : undefined;
       this.playlist?.unlock();
+      if (this.storyScene) this.narrator?.unlock();
       await resumed;
     } catch {
       /* Muted gameplay remains complete. */
@@ -182,7 +224,7 @@ export class Soundtrack {
     stereo.pan.value = pan;
     o.connect(g)
       .connect(stereo)
-      .connect(music && this.music ? this.music : this.gain);
+      .connect(music && this.music ? this.music : this.effects!);
     o.start(c.currentTime + delay);
     o.stop(c.currentTime + delay + length + 0.03);
     o.onended = () => {
@@ -202,7 +244,7 @@ export class Soundtrack {
     filter.frequency.value = frequency;
     g.gain.setValueAtTime(volume, c.currentTime);
     g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.23);
-    n.connect(filter).connect(g).connect(this.gain);
+    n.connect(filter).connect(g).connect(this.effects!);
     n.start();
     n.stop(c.currentTime + 0.25);
     n.onended = () => {
@@ -211,6 +253,18 @@ export class Soundtrack {
       g.disconnect();
     };
   }
+  private mix(active: boolean, dt: number, road: boolean) {
+    const c = this.context;
+    if (!c || !this.gain || this.stopped) return;
+    const audible = active && !document.hidden && document.hasFocus() && this.settings.sound && this.settings.volume > 0;
+    this.gain.gain.setTargetAtTime(audible ? this.settings.volume : 0, c.currentTime, 0.08);
+    this.effects?.gain.setTargetAtTime(audible && road && this.settings.roadSounds ? 1 : 0, c.currentTime, 0.05);
+    this.narrator?.update(audible && this.settings.voice && this.storyScene !== null);
+    this.playlist?.update(audible, dt);
+    const recorded = this.playlist && !this.playlist.unavailable;
+    this.music?.gain.setTargetAtTime(recorded ? (this.narrator?.playing ? 0.07 : 0.23) : 1, c.currentTime, 0.2);
+  }
+  updateStory(dt: number) { this.mix(true, dt, false); }
   update(e: GameEngine, dt: number) {
     const c = this.context;
     if (
@@ -228,21 +282,11 @@ export class Soundtrack {
       !document.hidden &&
       document.hasFocus(),
       driving = e.phase === 'driving',
-      v = Math.abs(e.speed),
-      talking =
-        typeof speechSynthesis !== 'undefined' && speechSynthesis.speaking;
-    this.gain.gain.setTargetAtTime(
-      this.settings.sound && active ? this.settings.volume : 0,
-      c.currentTime,
-      0.08,
-    );
-    this.playlist?.update(active && this.settings.sound && this.settings.volume > 0, dt);
+      v = Math.abs(e.speed);
+    // Defence in depth: even a stale scene request cannot speak over a drive.
+    if (driving || e.phase === 'restoring' || e.phase === 'failed') this.setStory(null);
+    this.mix(active, dt, true);
     const recordedMusic = this.playlist && !this.playlist.unavailable;
-    this.music?.gain.setTargetAtTime(
-      recordedMusic ? (talking ? 0.07 : 0.23) : talking ? 0.35 : 1,
-      c.currentTime,
-      0.2,
-    );
     this.motor.frequency.setTargetAtTime(e.rpm / 30, c.currentTime, 0.08);
     this.motorGain.gain.setTargetAtTime(
       this.engineLoop ? 0 : driving ? 0.025 + e.throttle * 0.025 : 0.006,
@@ -423,23 +467,6 @@ export class Soundtrack {
     const cue = e.notice.who + e.notice.text;
     if (cue !== this.lastCue) {
       this.lastCue = cue;
-      if (
-        this.settings.sound &&
-        this.settings.voice &&
-        'speechSynthesis' in window
-      ) {
-        speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(e.notice.text);
-        u.lang = 'en-US';
-        u.rate = 1.02;
-        u.volume = this.settings.volume * 0.85;
-        const voice = speechSynthesis
-          .getVoices()
-          .find((v) => v.localService && v.lang.startsWith('en'));
-        if (voice) u.voice = voice;
-        speechSynthesis.speak(u);
-      }
-      this.tone(740, 0.075, 0.012);
       if (e.notice.who === 'ONCOMING VEHICLE') {
         this.tone(190, 0.4, 0.045);
         this.tone(238, 0.4, 0.024);
@@ -448,6 +475,7 @@ export class Soundtrack {
   }
   silence() {
     this.playlist?.pause();
+    this.narrator?.update(false);
     if (this.context && this.gain)
       this.gain.gain.setTargetAtTime(0, this.context.currentTime, 0.04);
     if ('speechSynthesis' in window) speechSynthesis.cancel();
@@ -458,6 +486,7 @@ export class Soundtrack {
     this.abort.abort();
     this.silence();
     this.playlist?.dispose();
+    this.narrator?.dispose();
     for (const source of this.sources) {
       try {
         source.stop();
