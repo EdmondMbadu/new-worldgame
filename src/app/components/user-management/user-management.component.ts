@@ -54,6 +54,9 @@ type AIInsightsBulkCriteria =
   | 'most_recent'
   | 'second_recent'
   | 'random';
+type AIInsightsFallbackCriteria =
+  | Exclude<AIInsightsBulkCriteria, 'user_selected'>
+  | 'skip';
 
 type AIInsightsBriefLink = {
   label: string;
@@ -89,7 +92,7 @@ type WeeklyAutomationSchedule = {
   subject?: string;
   introHtml?: string;
   criteria?: AIInsightsBulkCriteria;
-  fallbackCriteria?: Exclude<AIInsightsBulkCriteria, 'user_selected'>;
+  fallbackCriteria?: AIInsightsFallbackCriteria;
   includeUnsubscribed?: boolean;
   excludeEmails?: string[];
   videoSummaryUrl?: string;
@@ -247,10 +250,7 @@ export class UserManagementComponent implements OnInit {
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
   aiInsightsMode: 'single' | 'bulk' = 'single';
   aiInsightsBulkCriteria: AIInsightsBulkCriteria = 'user_selected';
-  aiInsightsBulkFallbackCriteria: Exclude<
-    AIInsightsBulkCriteria,
-    'user_selected'
-  > = 'most_recent';
+  aiInsightsBulkFallbackCriteria: AIInsightsFallbackCriteria = 'skip';
   aiInsightsBulkSelections: Array<{
     email: string;
     name: string;
@@ -439,9 +439,10 @@ export class UserManagementComponent implements OnInit {
     { value: 'random', label: 'Random solution' },
   ];
   readonly aiInsightsFallbackCriteriaOptions: Array<{
-    value: Exclude<AIInsightsBulkCriteria, 'user_selected'>;
+    value: AIInsightsFallbackCriteria;
     label: string;
   }> = [
+    { value: 'skip', label: 'Do not send until a solution is selected' },
     { value: 'most_recent', label: 'Most recent solution' },
     { value: 'second_recent', label: 'Second most recent solution' },
     { value: 'random', label: 'Random solution' },
@@ -552,7 +553,7 @@ export class UserManagementComponent implements OnInit {
         time: '09:00',
         recipientEmails: [],
         criteria: 'user_selected',
-        fallbackCriteria: 'most_recent',
+        fallbackCriteria: 'skip',
         includeUnsubscribed: false,
         excludeEmails: [],
         videoSummaryUrl: '',
@@ -602,12 +603,12 @@ export class UserManagementComponent implements OnInit {
 
   private normalizeAIInsightsFallbackCriteria(
     value: unknown
-  ): Exclude<AIInsightsBulkCriteria, 'user_selected'> {
+  ): AIInsightsFallbackCriteria {
     return this.aiInsightsFallbackCriteriaOptions.some(
       (option) => option.value === value
     )
-      ? (value as Exclude<AIInsightsBulkCriteria, 'user_selected'>)
-      : 'most_recent';
+      ? (value as AIInsightsFallbackCriteria)
+      : 'skip';
   }
 
   private normalizeAutomationEmailList(input: unknown): string[] {
@@ -1230,7 +1231,7 @@ export class UserManagementComponent implements OnInit {
     this.aiInsightsMode = 'bulk';
     this.aiInsightsBulkCriteria = schedule.criteria || 'user_selected';
     this.aiInsightsBulkFallbackCriteria =
-      schedule.fallbackCriteria || 'most_recent';
+      schedule.fallbackCriteria || 'skip';
     this.aiInsightsBulkIncludeUnsubscribed = Boolean(
       schedule.includeUnsubscribed
     );
@@ -3519,9 +3520,10 @@ ${solutionSources}`;
 
   private pickSolutionForEmail(
     solutions: Solution[],
-    criteria: 'most_recent' | 'second_recent' | 'random'
+    criteria: AIInsightsFallbackCriteria
   ): Solution | null {
     if (!solutions.length) return null;
+    if (criteria === 'skip') return null;
     const ordered = [...solutions].sort(
       (a, b) => this.solutionDateMs(b) - this.solutionDateMs(a)
     );

@@ -7,7 +7,7 @@ const { resolveBriefVideo: resolveVideoWithProbe, renderBriefVideo } = require('
 const resolveBriefVideo = (url, load) => resolveVideoWithProbe(url, load, async () => true);
 const { CURATED_BRIEF_VIDEOS } = require('../lib/brief-curated-videos');
 const now = Date.now();
-const day = sources.VALIDATION_TTL_MS;
+const day = sources.DAY_MS;
 const source = (overrides = {}) => ({ kind: 'news', title: 'New water treatment study', url: 'https://research.example/study',
   publisher: 'Research Institute', relevance: 'Tests affordable water treatment.', evidence: 'The study tests affordable water treatment in rural communities.',
   date: new Date(now - day).toISOString().slice(0, 10), deadline: '', eligibility: '', nextAction: 'Read the study', score: 90,
@@ -51,16 +51,17 @@ test('editorial gate requires real evidence, matching page and authority', () =>
 });
 test('send-time gate rejects stale validation, old news, low scores and expired deadlines', () => {
   assert.equal(sources.eligibleSource(source(),now),true);
-  for (const patch of [{checkedAt:now-day}, {date:new Date(now-91*day).toISOString()}, {score:74}, {status:'unverified'}, {deadline:new Date(now-2*day).toISOString().slice(0,10)}]) assert.equal(sources.eligibleSource(source(patch),now),false);
+  for (const patch of [{checkedAt:now-sources.VALIDATION_TTL_MS}, {date:new Date(now-91*day).toISOString()}, {score:74}, {status:'unverified'}, {deadline:new Date(now-2*day).toISOString().slice(0,10)}]) assert.equal(sources.eligibleSource(source(patch),now),false);
   assert.equal(sources.eligibleSource(source({kind:'funding',date:'',deadline:'Rolling'}),now),true);
 });
 test('selection removes tracking duplicates and limits repeated publishers', () => {
   const items = [source(), source({url:source().url+'?utm_source=x'}), ...[1,2,3,4,5].map(i=>source({url:`https://research.example/study${i}`,title:`Study ${i}`}))];
   assert.equal(sources.selectBriefSources(items,'news',now).length,2);
 });
-test('versioned cache key changes with context and time period', () => {
+test('versioned cache key changes with context and monthly time period', () => {
   assert.notEqual(sources.briefContextKey('water',0),sources.briefContextKey('energy',0));
-  assert.notEqual(sources.briefContextKey('water',0),sources.briefContextKey('water',5*day));
+  assert.equal(sources.briefContextKey('water',0),sources.briefContextKey('water',29*day));
+  assert.notEqual(sources.briefContextKey('water',0),sources.briefContextKey('water',30*day));
   assert.match(sources.briefContextKey('water',0),/^v2_/);
 });
 test('email source renderer escapes hostile text and does not fill empty results', () => {

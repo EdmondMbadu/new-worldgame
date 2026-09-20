@@ -12,6 +12,8 @@ export interface BriefContent {
   quality?: { cacheId: string; snapshotId: string; pipelineVersion: number; checkedAt: number; accepted: number; rejected: number };
 }
 const pending = new Map<string, Promise<BriefContent>>();
+const DISCOVERY_LIMIT = 6;
+const REPLACEMENT_LIMIT = 3;
 async function parallelMap<T, R>(items: T[], limit: number, worker: (item: T) => Promise<R>): Promise<R[]> {
   const output: R[] = new Array(items.length); let index = 0;
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, async () => {
@@ -29,7 +31,7 @@ export function groundedCandidates(response: any, kind: SourceKind): BriefSource
     return [{ kind, title: String(chunk.web?.title || '').slice(0, 300), url, publisher: '', relevance: '',
       evidence: '', date: '', deadline: '', eligibility: '', nextAction: '', score: 0,
       status: 'unverified' as const, reason: 'Awaiting page review', checkedAt: 0 }];
-  }).slice(0, 15);
+  }).slice(0, DISCOVERY_LIMIT);
 }
 export function reviewedSource(source: BriefSource, page: SourcePage, review: any, now = Date.now()): BriefSource {
   const text = (value: unknown, max = 500) => typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -71,16 +73,19 @@ async function research(apiKey: string, key: string, solutionId: string, context
     Number(cached?.checkedAt) > now - (sources.some(s => s.status === 'verified') ? VALIDATION_TTL_MS : 15 * 60 * 1000) && Number(cached?.checkedAt) <= now;
   if (!fresh) {
     const client = new GoogleGenerativeAI(apiKey);
-    const search = client.getGenerativeModel({ model: 'gemini-2.5-flash', tools: [{ google_search: {} }] } as any,
+    const search = client.getGenerativeModel({ model: 'gemini-2.5-flash', tools: [{ google_search: {} }],
+      generationConfig: { maxOutputTokens: 256, temperature: 0.1 } } as any,
       { timeout: 45000 });
-    const reviewer = client.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: { responseMimeType: 'application/json' } },
+    const reviewer = client.getGenerativeModel({ model: 'gemini-2.5-flash', generationConfig: {
+      responseMimeType: 'application/json', maxOutputTokens: 800, temperature: 0.1,
+    } },
       { timeout: 45000 });
     const discover = async (kind: SourceKind, exclusions: string[] = []): Promise<BriefSource[]> => {
       if (Date.now() > researchDeadline - 45000) return [];
       const result = await search.generateContent(`Today is ${new Date().toISOString().slice(0, 10)}. Research sources for this solution: ${context.slice(0, 10000)}.
-Find 12-15 distinct, specific, authoritative ${kind === 'news' ? 'articles or research publications, preferably within 30 days, no older than 90 days' : 'official funding program or application pages. Prefer open opportunities with explicit eligibility and current deadlines; exclude closed programs and generic foundation homepages'}.
+Find up to ${DISCOVERY_LIMIT} distinct, specific, authoritative ${kind === 'news' ? 'articles or research publications, preferably within 30 days, no older than 90 days' : 'official funding program or application pages. Prefer open opportunities with explicit eligibility and current deadlines; exclude closed programs and generic foundation homepages'}.
 Search several topical synonyms. Prioritize practical relevance and diverse publishers. Use Google Search and cite every source. Do not guess URLs. No directories, social feeds, or generic homepages. Return fewer if necessary.
-Exclude these already considered URLs: ${exclusions.slice(0, 30).join(', ')}`);
+Exclude these already considered URLs: ${exclusions.slice(0, 12).join(', ')}. Keep the response extremely short; source URLs will be read from grounding metadata.`);
       return groundedCandidates(result.response, kind);
     };
     const evaluate = async (candidates: BriefSource[]): Promise<BriefSource[]> => parallelMap(candidates, 3, async source => {
@@ -98,7 +103,7 @@ Retrieved source title: ${source.title}. Final URL: ${page.url}. Page title: ${p
 Accept only an authoritative, specific article/program that is directly relevant and practically useful. Reject homepages, unrelated redirects, soft 404s, login/paywall/challenge screens without substantive content, expired/closed grants, generic advice and duplicate/aggregated coverage. News must have a supported publication date within 90 days. Funding must be an official program page; if the current cycle is unknown leave deadline empty and say to check the cycle. Do not assume the applicant's geography or legal status.
 Return JSON: {"accept":boolean,"pageMatches":boolean,"authoritative":boolean,"title":"accurate page title","publisher":"publisher","relevance":"one concrete sentence tied to the solution, qualified if eligibility is unknown","evidence":"verbatim supporting passage, at least 40 characters","date":"YYYY-MM-DD or empty","dateEvidence":"verbatim passage supporting date, at least 40 characters","deadline":"YYYY-MM-DD, Rolling, or empty","deadlineEvidence":"verbatim passage at least 40 characters","eligibility":"requirements or empty","eligibilityEvidence":"verbatim passage at least 40 characters","nextAction":"short specific link label","score":0-100,"reason":"reason for rejection if any"}.
 Score relevance (40), authority (25), recency/current activity (20), actionability (15). Do not fabricate dates or quotes.
-BEGIN UNTRUSTED PAGE\n${page.text.slice(0, 24000)}\nEND UNTRUSTED PAGE`);
+BEGIN UNTRUSTED PAGE\n${page.text.slice(0, 8000)}\nEND UNTRUSTED PAGE`);
         return reviewedSource(source, page, parseJsonObject(result.response.text()));
       } catch { return { ...source, checkedAt: Date.now(), status: 'unverified', reason: 'Editorial verification unavailable' }; }
     });
@@ -111,7 +116,7 @@ BEGIN UNTRUSTED PAGE\n${page.text.slice(0, 24000)}\nEND UNTRUSTED PAGE`);
         try {
           const replacements = await discover(kind, reviewed.map(s => s.url));
           const seen = new Set(reviewed.map(s => normalizeSourceUrl(s.url)));
-          reviewed.push(...await evaluate(replacements.filter(s => !seen.has(normalizeSourceUrl(s.url))).slice(0, 6)));
+          reviewed.push(...await evaluate(replacements.filter(s => !seen.has(normalizeSourceUrl(s.url))).slice(0, REPLACEMENT_LIMIT)));
         } catch { /* Keep verified results; never pad with unchecked sources. */ }
       }
       return reviewed;

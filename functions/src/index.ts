@@ -3702,6 +3702,7 @@ export const sendAIInsightsEmail = functions.runWith({ timeoutSeconds: 540, memo
 const AI_INSIGHTS_BATCH_SIZE = 3;
 
 type AIInsightsBulkCriteria = 'user_selected' | 'most_recent' | 'second_recent' | 'random';
+type AIInsightsFallbackCriteria = Exclude<AIInsightsBulkCriteria, 'user_selected'> | 'skip';
 
 function normalizeAIInsightsBulkCriteria(
   value: unknown,
@@ -3717,6 +3718,13 @@ function normalizeAIInsightsBulkCriteria(
     return raw;
   }
   return fallback;
+}
+
+function normalizeAIInsightsFallbackCriteria(value: unknown): AIInsightsFallbackCriteria {
+  const raw = String(value || '').trim();
+  return raw === 'most_recent' || raw === 'second_recent' || raw === 'random'
+    ? raw
+    : 'skip';
 }
 
 function parseAutomationExcludedEmailSet(value: unknown): Set<string> {
@@ -3795,7 +3803,7 @@ function pickAIInsightsAutomationSolutionForEmail(
   solutions: any[],
   usersByEmail: Map<string, any>,
   criteria: AIInsightsBulkCriteria,
-  fallbackCriteria: Exclude<AIInsightsBulkCriteria, 'user_selected'>
+  fallbackCriteria: AIInsightsFallbackCriteria
 ): { solution: any | null; pickSource: 'user_selected' | 'fallback'; invalidPreference: boolean } {
   if (!solutions.length) {
     return { solution: null, pickSource: 'fallback', invalidPreference: false };
@@ -3812,6 +3820,9 @@ function pickAIInsightsAutomationSolutionForEmail(
   const user = usersByEmail.get(normalizeEmailForAutomation(email));
   const preferredSolutionId = String(user?.weeklyBriefSolutionId || '').trim();
   if (!preferredSolutionId) {
+    if (fallbackCriteria === 'skip') {
+      return { solution: null, pickSource: 'fallback', invalidPreference: false };
+    }
     return {
       solution: pickAIInsightsAutomationSolution(solutions, fallbackCriteria),
       pickSource: 'fallback',
@@ -3828,6 +3839,10 @@ function pickAIInsightsAutomationSolutionForEmail(
       pickSource: 'user_selected',
       invalidPreference: false,
     };
+  }
+
+  if (fallbackCriteria === 'skip') {
+    return { solution: null, pickSource: 'fallback', invalidPreference: true };
   }
 
   return {
@@ -3869,14 +3884,9 @@ function buildAIInsightsAutomationRecipients(data: {
     data.schedule.criteria,
     'user_selected'
   );
-  const normalizedFallbackCriteria = normalizeAIInsightsBulkCriteria(
-    data.schedule.fallbackCriteria,
-    'most_recent'
+  const fallbackCriteria = normalizeAIInsightsFallbackCriteria(
+    data.schedule.fallbackCriteria
   );
-  const fallbackCriteria: Exclude<AIInsightsBulkCriteria, 'user_selected'> =
-    normalizedFallbackCriteria === 'user_selected'
-      ? 'most_recent'
-      : normalizedFallbackCriteria;
   const excludedEmails = parseAutomationExcludedEmailSet(
     data.schedule.excludeEmails
   );

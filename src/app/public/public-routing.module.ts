@@ -67,6 +67,7 @@ import { SlpReachComponent } from '../components/slp-reach/slp-reach.component';
 import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
 import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/drc-clinic-campaign.component';
 import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
+import { BoundlessSfComponent } from '../blogs/boundless-sf/boundless-sf.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -151,6 +152,7 @@ const routes: Routes = [
   { path: 'chester-report', component: ChesterReportComponent },
   { path: 'community-sponsorship', component: CommunitySponsorshipComponent },
   { path: 'gsl-sponsorship', component: GslSponsorshipComponent },
+  { path: 'boundless-sf', component: BoundlessSfComponent },
   { path: 'solution-launch/:solutionId/fund', component: SlpFundComponent },
   { path: 'solution-launch/:solutionId/partner', component: SlpPartnerComponent },
   { path: 'solution-launch/:solutionId/reach', component: SlpReachComponent },

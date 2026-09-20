@@ -176,6 +176,13 @@ export class SeoService {
         keywords: 'Global Solutions Lab community, global problem solvers, collaborative learning community, educational network',
         url: `${baseUrl}/landing-community`
       },
+      '/boundless-sf': {
+        title: 'Boundless SF | A Civic Innovation Proposal for San Francisco',
+        description: 'Explore Boundless SF, a citywide proposal for civic innovation, youth engagement, public participation, and collaborative problem-solving in San Francisco.',
+        keywords: 'Boundless SF, San Francisco Solutions Lab, civic innovation, participatory democracy, youth engagement, citywide polling',
+        image: `${baseUrl}/assets/img/boundless-sf-proposal-at-a-glance.png`,
+        url: `${baseUrl}/boundless-sf`
+      },
       '/solution-a-thon': {
         title: 'Community Solution-a-thon | Five-Hour Real-World Solution Sprint',
         description: 'Host a five-hour community Solution-a-thon using design science, the Global/Local Community Solutions Lab platform, and AI-supported research to build actionable solutions.',

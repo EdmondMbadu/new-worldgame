@@ -14,12 +14,14 @@ The email's default thumbnail uses the existing Sofia face artwork at `src/asset
 
 ## Source pipeline
 
-- Candidate URLs come from Gemini Google Search grounding metadata, never generated prose. Each category considers at most 15 retrieved sources and one replacement pass of at most 6.
+- Candidate URLs come from Gemini Google Search grounding metadata, never generated prose. Each category considers at most 6 retrieved sources and one replacement pass of at most 3.
 - Public GETs pin DNS-validated addresses, validate every redirect, have bounded time and response size, and reject private/reserved destinations. 429/502/503/504 receive one short retry. PDFs are limited to 2 MB and eight pages.
 - An editorial pass reads actual page text, checks authority, page match, relevance, freshness, eligibility and dates. Supporting quotations must occur in the fetched text. Model review is a quality gate, not a guarantee of editorial infallibility.
 - News needs a supported date within 90 days. Funding deadlines and eligibility need evidence; unknown cycles are labeled. Scores below 75, expired deadlines, known dead links and unverified pages are excluded. Select up to five per category and at most two per host; send fewer if necessary.
-- Cache keys include pipeline version, solution-context hash, and five-day period. Verification is fresh for less than 24 hours; selection rechecks expiry at rendering. Empty caches retry after 15 minutes. Old HTML-only caches are never reused.
+- Cache keys include pipeline version, solution-context hash, and a 30-day period. Verified research is reused within that period; selection still rejects news older than 90 days and expired funding deadlines at rendering. Empty caches retry after 15 minutes. Old HTML-only caches are never reused.
 - Cold research has a 400-second budget. Bulk continuation batches contain three recipients with at most three solutions preparing concurrently. Single calls and the admin preview allow 540 seconds; delivery never retries a failed preparation synchronously within the same batch.
+- Automated delivery is opt-in by default: when the recipient rule is **User-selected solution**, people without a valid selection are skipped instead of receiving a costly fallback brief. Administrators can still explicitly choose a fallback rule.
+- Discovery is capped at six candidates per category, replacement review at three, and Gemini responses have explicit output limits. The dashboard, feedback, video, additional-resource, unsubscribe, and source URLs are unchanged.
 - Structured cache documents retain statuses, supporting evidence, final URLs, and rejection reasons. Immutable `ai_insights_content_snapshots` preserve the records behind each preparation. Send quality metadata references the cache and snapshot. Server-only rules protect these collections from client-authored verification data.
 - Additional manually entered links are checked for reachable substantive pages. A failed optional video or additional link is omitted; resource sections explicitly state when no verified sources are available. There is no fallback to unchecked legacy recommendations.
 

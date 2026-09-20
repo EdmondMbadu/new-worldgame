@@ -74,6 +74,7 @@ import { SlpLocationPickerComponent } from '../components/slp-location-picker/sl
 import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
 import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/drc-clinic-campaign.component';
 import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
+import { BoundlessSfComponent } from '../blogs/boundless-sf/boundless-sf.component';
 
 @NgModule({
   declarations: [
@@ -146,6 +147,7 @@ import { TournamentDetailsComponent } from '../components/tournament-details/tou
     DymaxionComponent,
     DrcClinicCampaignComponent,
     TournamentDetailsComponent,
+    BoundlessSfComponent,
   ],
   imports: [
     CommonModule,

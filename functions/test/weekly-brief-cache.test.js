@@ -36,7 +36,7 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
     const second=await prepareBriefContent('test','solution','water');
     assert.equal(second.quality.snapshotId,first.quality.snapshotId); assert.equal(fetches,6); assert.equal(searches,2);
     const cachePath=`ai_insights_content_cache/${first.quality.cacheId}`;
-    docs.get(cachePath).checkedAt=Date.now()-25*60*60*1000;
+    docs.get(cachePath).checkedAt=Date.now()-31*24*60*60*1000;
     await prepareBriefContent('test','solution','water'); assert.equal(fetches,12); assert.equal(searches,2);
     assert.deepEqual(docs.get(`ai_insights_content_snapshots/${first.quality.snapshotId}`),immutable);
     docs.set('solutions/solution/weeklyBrief/settings',{excludedUrls:['https://news0.org/program']});

@@ -6,7 +6,10 @@ import { createHash } from 'node:crypto';
 import sanitizeHtml = require('sanitize-html');
 
 export const BRIEF_PIPELINE_VERSION = 2;
-export const VALIDATION_TTL_MS = 24 * 60 * 60 * 1000;
+export const DAY_MS = 24 * 60 * 60 * 1000;
+// Brief research is the dominant Gemini cost. Reuse a verified research set for
+// one month; edits to the solution still produce a different content hash.
+export const VALIDATION_TTL_MS = 30 * DAY_MS;
 export type SourceKind = 'news' | 'funding';
 export type SourceStatus = 'verified' | 'dead' | 'unverified' | 'rejected';
 export interface BriefSource {
@@ -19,7 +22,7 @@ export interface SourcePage { url: string; status: number; text: string; title: 
 export const escapeBriefHtml = (s: unknown): string => String(s || '').replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
 export const briefContextKey = (context: string, now = Date.now()): string =>
-  `v${BRIEF_PIPELINE_VERSION}_${Math.floor(now / (5 * VALIDATION_TTL_MS))}_${createHash('sha256').update(context).digest('hex').slice(0, 24)}`;
+  `v${BRIEF_PIPELINE_VERSION}_${Math.floor(now / VALIDATION_TTL_MS)}_${createHash('sha256').update(context).digest('hex').slice(0, 24)}`;
 
 export function normalizeSourceUrl(raw: string): string {
   try {
@@ -139,9 +142,9 @@ export function eligibleSource(source: BriefSource, now = Date.now()): boolean {
   if (source.status !== 'verified' || !source.checkedAt || now - source.checkedAt >= VALIDATION_TTL_MS || source.checkedAt > now + 60000) return false;
   if (source.kind === 'news') {
     const date = Date.parse(source.date);
-    if (!Number.isFinite(date) || date > now + VALIDATION_TTL_MS || now - date > 90 * VALIDATION_TTL_MS) return false;
+    if (!Number.isFinite(date) || date > now + DAY_MS || now - date > 90 * DAY_MS) return false;
   }
-  if (source.deadline && /^\d{4}-\d{2}-\d{2}$/.test(source.deadline) && Date.parse(source.deadline) + VALIDATION_TTL_MS <= now) return false;
+  if (source.deadline && /^\d{4}-\d{2}-\d{2}$/.test(source.deadline) && Date.parse(source.deadline) + DAY_MS <= now) return false;
   return source.score >= 75;
 }
 export function selectBriefSources(sources: BriefSource[], kind: SourceKind, now = Date.now()): BriefSource[] {
