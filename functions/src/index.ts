@@ -14,12 +14,23 @@ import { buildICS } from './ics';
 import { prepareBriefContent, BriefContent } from './brief-research';
 import { resolveBriefVideo, renderBriefVideo, BriefVideo } from './brief-video';
 import { loadNewsVideoWithThumbnail } from './news-video-thumbnail';
-import { fetchSourcePage, pageProblem } from './brief-sources';
+import { BriefSource, fetchSourcePage, pageProblem, selectBriefSources } from './brief-sources';
+import {
+  BRIEF_PACK_RESERVATION_USD,
+  BRIEF_WEEKLY_AI_BUDGET_USD,
+  BriefHistoryItem,
+  BriefPackDefinition,
+  BriefSolutionProfile,
+  briefRecipientHistoryId,
+  buildBriefEditionPlan,
+  mergeBriefHistory,
+  personalizeBriefContent,
+} from './brief-personalization';
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleGenAI } from '@google/genai';
-import { randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
+import { createHash, randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
 import { Buffer } from 'node:buffer';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore – no types published for pdf-parse
@@ -229,6 +240,20 @@ function normalizeEmailForAutomation(value: unknown): string {
 
 function isValidEmailForAutomation(value: string): boolean {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value);
+}
+
+function briefSolutionResearchDescription(solution: any): string {
+  const parts = [solution?.description, solution?.strategyReview, solution?.content]
+    .map(value => String(value || '')
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;|&#160;/gi, ' ')
+      .replace(/&amp;/gi, '&')
+      .replace(/\s+/g, ' ')
+      .trim())
+    .filter(Boolean);
+  return [...new Set(parts)].join(' ').slice(0, 5000);
 }
 
 function normalizeRecipientEmailsForAutomation(input: unknown): string[] {
@@ -1737,6 +1762,11 @@ type AIInsightsPayload = {
   solutionDescription?: string;
   solutionArea?: string;
   sdgs?: string[];
+  location?: string;
+  briefSelectionSource?: 'user_selected' | 'fallback';
+  briefEditionKey?: string;
+  briefPackId?: string;
+  briefProfile?: BriefSolutionProfile;
   meetLink?: string;
   solutionImage?: string;
   videoSummaryUrl?: string;
@@ -3724,7 +3754,7 @@ function normalizeAIInsightsFallbackCriteria(value: unknown): AIInsightsFallback
   const raw = String(value || '').trim();
   return raw === 'most_recent' || raw === 'second_recent' || raw === 'random'
     ? raw
-    : 'skip';
+    : 'most_recent';
 }
 
 function parseAutomationExcludedEmailSet(value: unknown): Set<string> {
@@ -3947,9 +3977,22 @@ function buildAIInsightsAutomationRecipients(data: {
       userFirstName: firstName,
       solutionId: String(picked.solution.solutionId || '').trim(),
       solutionTitle: String(picked.solution.title || 'Untitled Solution').trim(),
-      solutionDescription: String(picked.solution.description || ''),
+      solutionDescription: briefSolutionResearchDescription(picked.solution),
       solutionArea: String(picked.solution.solutionArea || ''),
       sdgs: Array.isArray(picked.solution.sdgs) ? picked.solution.sdgs : [],
+      location: String(
+        user?.location ||
+          picked.solution.targetLocation ||
+          picked.solution.launchLocation ||
+          picked.solution.location ||
+          [
+            picked.solution.city || picked.solution.locationCity,
+            picked.solution.region || picked.solution.state || picked.solution.locationRegion,
+            picked.solution.country || picked.solution.locationCountry,
+          ].filter(Boolean).join(', ') ||
+          ''
+      ).trim(),
+      briefSelectionSource: picked.pickSource,
       meetLink: String(
         picked.solution.meetLink ||
           picked.solution.meetingLink ||
@@ -3976,6 +4019,169 @@ function buildAIInsightsAutomationRecipients(data: {
   return { recipients, stats };
 }
 
+function briefEditionKeyForRun(runKey?: string): string {
+  const explicit = String(runKey || '').match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (explicit) return explicit;
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: DEFAULT_AUTOMATION_TIMEZONE,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(new Date());
+  const value = (type: string) => parts.find(part => part.type === type)?.value || '';
+  return `${value('year')}-${value('month')}-${value('day')}`;
+}
+
+function briefInternalDocId(prefix: string, value: string): string {
+  return `${prefix}_${createHash('sha256').update(value).digest('hex').slice(0, 40)}`;
+}
+
+function briefContentFromStoredSources(data: any): BriefContent {
+  const sources: BriefSource[] = Array.isArray(data?.sources) ? data.sources : [];
+  const funding = selectBriefSources(sources, 'funding');
+  const news = selectBriefSources(sources, 'news');
+  return {
+    fundersHtml: '',
+    newsHtml: '',
+    validFundersCount: funding.length,
+    validNewsCount: news.length,
+    sources,
+    quality: data?.quality,
+    usage: { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
+  };
+}
+
+async function reserveBriefResearchBudget(
+  editionRef: admin.firestore.DocumentReference,
+  packId: string
+): Promise<boolean> {
+  return admin.firestore().runTransaction(async transaction => {
+    const snapshot = await transaction.get(editionRef);
+    const data = snapshot.data() || {};
+    const usage = data.usage || {};
+    const reservations = { ...(data.packReservations || {}) };
+    if (reservations[packId] === 'complete') return true;
+    const actual = Number(usage.actualEstimatedUsd || 0);
+    const reserved = Number(usage.reservedUsd || 0);
+    if (actual + reserved + BRIEF_PACK_RESERVATION_USD > BRIEF_WEEKLY_AI_BUDGET_USD) {
+      const budgetFallbacks = Number(usage.budgetFallbacks || 0) + 1;
+      transaction.set(editionRef, { usage: { ...usage, budgetFallbacks } }, { merge: true });
+      return false;
+    }
+    reservations[packId] = 'reserved';
+    transaction.set(editionRef, {
+      packReservations: reservations,
+      usage: { ...usage, reservedUsd: Number((reserved + BRIEF_PACK_RESERVATION_USD).toFixed(6)) },
+    }, { merge: true });
+    return true;
+  });
+}
+
+async function finalizeBriefResearchBudget(
+  editionRef: admin.firestore.DocumentReference,
+  packId: string,
+  usageDelta: NonNullable<BriefContent['usage']>,
+  succeeded: boolean
+): Promise<void> {
+  await admin.firestore().runTransaction(async transaction => {
+    const snapshot = await transaction.get(editionRef);
+    const data = snapshot.data() || {};
+    const usage = data.usage || {};
+    const reservations = { ...(data.packReservations || {}) };
+    const wasReserved = reservations[packId] === 'reserved';
+    reservations[packId] = succeeded ? 'complete' : 'failed';
+    transaction.set(editionRef, {
+      packReservations: reservations,
+      usage: {
+        ...usage,
+        reservedUsd: Number(Math.max(0, Number(usage.reservedUsd || 0) - (wasReserved ? BRIEF_PACK_RESERVATION_USD : 0)).toFixed(6)),
+        actualEstimatedUsd: Number((Number(usage.actualEstimatedUsd || 0) + usageDelta.estimatedUsd).toFixed(6)),
+        inputTokens: Number(usage.inputTokens || 0) + usageDelta.inputTokens,
+        outputTokens: Number(usage.outputTokens || 0) + usageDelta.outputTokens,
+        calls: Number(usage.calls || 0) + usageDelta.calls,
+        coldPacks: Number(usage.coldPacks || 0) + (usageDelta.calls > 0 ? 1 : 0),
+        cacheHits: Number(usage.cacheHits || 0) + (succeeded && usageDelta.calls === 0 ? 1 : 0),
+        failedPacks: Number(usage.failedPacks || 0) + (succeeded ? 0 : 1),
+      },
+    }, { merge: true });
+  });
+}
+
+async function loadLatestBriefPack(packId: string): Promise<BriefContent | null> {
+  const latestRef = admin.firestore().collection('ai_insights_content_cache')
+    .doc(briefInternalDocId('pack_latest', packId));
+  const snapshot = await latestRef.get();
+  if (!snapshot.exists) return null;
+  const content = briefContentFromStoredSources(snapshot.data());
+  return (content.validFundersCount || content.validNewsCount) ? content : null;
+}
+
+async function prepareSharedBriefPack(
+  pack: BriefPackDefinition,
+  editionRef: admin.firestore.DocumentReference
+): Promise<BriefContent> {
+  const reserved = await reserveBriefResearchBudget(editionRef, pack.id);
+  if (!reserved) {
+    return (await loadLatestBriefPack(pack.id)) || briefContentFromStoredSources({ sources: [] });
+  }
+  try {
+    let content = await prepareBriefContent(
+      GEMINI_KEY,
+      `cohort_${pack.id}`,
+      pack.context
+    );
+    const succeeded = !!(content.validFundersCount || content.validNewsCount);
+    if (succeeded && content.sources?.length) {
+      await admin.firestore().collection('ai_insights_content_cache')
+        .doc(briefInternalDocId('pack_latest', pack.id)).set({
+          packId: pack.id,
+          editionKey: pack.editionKey,
+          sources: content.sources,
+          quality: content.quality || null,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+    } else {
+      content = (await loadLatestBriefPack(pack.id)) || content;
+    }
+    await finalizeBriefResearchBudget(
+      editionRef,
+      pack.id,
+      content.usage || { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
+      succeeded
+    );
+    return content;
+  } catch (error) {
+    await finalizeBriefResearchBudget(
+      editionRef,
+      pack.id,
+      { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
+      false
+    );
+    const latest = await loadLatestBriefPack(pack.id);
+    if (latest) return latest;
+    throw error;
+  }
+}
+
+async function loadBriefHistory(email: string): Promise<BriefHistoryItem[]> {
+  const ref = admin.firestore().collection('ai_insights_content_cache')
+    .doc(briefInternalDocId('recipient_history', briefRecipientHistoryId(email)));
+  const snapshot = await ref.get();
+  return Array.isArray(snapshot.data()?.items) ? snapshot.data()!.items : [];
+}
+
+async function saveBriefHistory(
+  email: string,
+  existing: BriefHistoryItem[],
+  additions: BriefHistoryItem[]
+): Promise<void> {
+  const ref = admin.firestore().collection('ai_insights_content_cache')
+    .doc(briefInternalDocId('recipient_history', briefRecipientHistoryId(email)));
+  await ref.set({
+    recipientHash: briefRecipientHistoryId(email),
+    items: mergeBriefHistory(existing, additions),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
 async function enqueueAIInsightsBulkJob(data: {
   recipients: AIInsightsPayload[];
   concurrency?: number;
@@ -3983,7 +4189,10 @@ async function enqueueAIInsightsBulkJob(data: {
   source?: string;
   automationRunKey?: string;
 }) {
-  const recipients = Array.isArray(data.recipients) ? data.recipients : [];
+  const rawRecipients = Array.isArray(data.recipients) ? data.recipients : [];
+  const editionKey = briefEditionKeyForRun(data.automationRunKey);
+  const editionPlan = buildBriefEditionPlan(rawRecipients, editionKey);
+  const recipients = editionPlan.recipients;
   const concurrency = Math.min(
     Math.max(Number(data.concurrency) || 4, 1),
     6
@@ -4000,6 +4209,8 @@ async function enqueueAIInsightsBulkJob(data: {
       email: r.userEmail,
       solutionId: r.solutionId,
       solutionTitle: r.solutionTitle,
+      briefPackId: r.briefPackId,
+      profileConfidence: r.briefProfile?.confidence,
     })),
     total: recipients.length,
     successCount: 0,
@@ -4014,6 +4225,32 @@ async function enqueueAIInsightsBulkJob(data: {
     },
   });
 
+  const editionDocId = briefInternalDocId('edition', logRef.id);
+  await admin.firestore().collection('ai_insights_content_cache').doc(editionDocId).set({
+    editionKey,
+    logId: logRef.id,
+    source: data.source || 'manual',
+    status: 'preparing',
+    packs: editionPlan.packs,
+    packCount: Object.keys(editionPlan.packs).length,
+    recipientCount: recipients.length,
+    maxEstimatedCostUsd: BRIEF_WEEKLY_AI_BUDGET_USD,
+    reservePerPackUsd: BRIEF_PACK_RESERVATION_USD,
+    packReservations: {},
+    usage: {
+      reservedUsd: 0,
+      actualEstimatedUsd: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      calls: 0,
+      coldPacks: 0,
+      cacheHits: 0,
+      budgetFallbacks: 0,
+      failedPacks: 0,
+    },
+    createdAt: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
   const jobRef = await admin.firestore().collection('ai_insights_bulk_jobs').add({
     status: 'queued',
     createdBy: data.createdBy,
@@ -4022,12 +4259,13 @@ async function enqueueAIInsightsBulkJob(data: {
     recipients,
     concurrency,
     logId: logRef.id,
+    editionDocId,
     batchIndex: 0,
     totalRecipients: recipients.length,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 
-  return { jobId: jobRef.id, logId: logRef.id };
+  return { jobId: jobRef.id, logId: logRef.id, editionDocId };
 }
 
 export const startAIInsightsBulkJob = functions
@@ -4073,6 +4311,7 @@ export const processAIInsightsBulkJob = functions
     const concurrency = Math.min(Math.max(Number(data.concurrency) || 4, 1), 6);
     const createdBy = data.createdBy || 'unknown';
     const logId = data.logId as string | undefined;
+    const editionDocId = String(data.editionDocId || '').trim();
     const batchIndex = Number(data.batchIndex) || 0;
     const totalRecipients = Number(data.totalRecipients) || allRecipients.length;
 
@@ -4147,33 +4386,50 @@ export const processAIInsightsBulkJob = functions
       await logRef.update(updateData);
     };
 
-    // ===== PHASE 1: Pre-generate AI content for unique solutions in this batch =====
-    const uniqueSolutions = new Map<string, AIInsightsPayload>();
-    for (const r of batchRecipients) {
-      const payload = r as AIInsightsPayload;
-      if (payload.solutionId && !uniqueSolutions.has(payload.solutionId)) {
-        uniqueSolutions.set(payload.solutionId, payload);
-      }
-    }
-
-    console.log(`Batch ${batchIndex + 1}: Pre-generating AI content for ${uniqueSolutions.size} unique solutions`);
-
     const contentCache = new Map<string, BriefContent>();
-    await runWithConcurrency(Array.from(uniqueSolutions.values()), 3, async (solution) => {
-      try {
-        const content = await generateSolutionAIContent(
-          solution.solutionId,
-          solution.solutionTitle,
-          solution.solutionDescription,
-          solution.solutionArea,
-          solution.sdgs
-        );
-        contentCache.set(solution.solutionId, content);
-        console.log(`Generated content for solution: ${solution.solutionTitle}`);
-      } catch (error: any) {
-        console.error(`Failed to generate content for solution ${solution.solutionId}:`, error?.message);
-      }
+    const editionRef = editionDocId
+      ? admin.firestore().collection('ai_insights_content_cache').doc(editionDocId)
+      : null;
+    const editionData = editionRef ? (await editionRef.get()).data() || {} : {};
+    const editionPacks = (editionData.packs || {}) as Record<string, BriefPackDefinition>;
+    const uniquePacks = new Map<string, BriefPackDefinition>();
+    batchRecipients.forEach((recipient: AIInsightsPayload) => {
+      const packId = String(recipient.briefPackId || '');
+      if (packId && editionPacks[packId]) uniquePacks.set(packId, editionPacks[packId]);
     });
+
+    if (editionRef && uniquePacks.size) {
+      console.log(`Batch ${batchIndex + 1}: Preparing ${uniquePacks.size} shared research pack(s)`);
+      await runWithConcurrency(Array.from(uniquePacks.values()), 3, async pack => {
+        try {
+          contentCache.set(pack.id, await prepareSharedBriefPack(pack, editionRef));
+        } catch (error: any) {
+          console.error(`Failed to prepare shared research pack ${pack.id}:`, error?.message);
+        }
+      });
+    } else {
+      // Backward compatibility for jobs queued before shared weekly editions existed.
+      const uniqueSolutions = new Map<string, AIInsightsPayload>();
+      batchRecipients.forEach((recipient: AIInsightsPayload) => {
+        if (recipient.solutionId && !uniqueSolutions.has(recipient.solutionId)) {
+          uniqueSolutions.set(recipient.solutionId, recipient);
+        }
+      });
+      console.log(`Batch ${batchIndex + 1}: Preparing ${uniqueSolutions.size} legacy solution brief(s)`);
+      await runWithConcurrency(Array.from(uniqueSolutions.values()), 3, async solution => {
+        try {
+          contentCache.set(solution.solutionId, await generateSolutionAIContent(
+            solution.solutionId,
+            solution.solutionTitle,
+            solution.solutionDescription,
+            solution.solutionArea,
+            solution.sdgs
+          ));
+        } catch (error: any) {
+          console.error(`Failed to generate content for solution ${solution.solutionId}:`, error?.message);
+        }
+      });
+    }
 
     console.log(`Batch ${batchIndex + 1}: Content generation complete. Now sending ${batchRecipients.length} emails...`);
 
@@ -4224,9 +4480,38 @@ export const processAIInsightsBulkJob = functions
       }
 
       try {
-        const cachedContent = contentCache.get(solutionId);
+        const packId = String(recipient.briefPackId || '');
+        const cachedContent = contentCache.get(packId || solutionId);
         if (!cachedContent) {
           throw new Error('Source preparation failed; retry this recipient after checking the job log.');
+        }
+
+        let renderedContent: {
+          fundersHtml: string;
+          newsHtml: string;
+          validFundersCount: number;
+          validNewsCount: number;
+        } = cachedContent;
+        let history: BriefHistoryItem[] = [];
+        let selectedHistory: BriefHistoryItem[] = [];
+        let personalizedQuality: Record<string, unknown> = {};
+        if (packId && recipient.briefProfile && cachedContent.sources) {
+          try {
+            history = await loadBriefHistory(userEmail);
+          } catch (error: any) {
+            console.warn(`Could not load brief history for ${userEmail}:`, error?.message);
+          }
+          const personalized = personalizeBriefContent(
+            cachedContent.sources,
+            recipient.briefProfile,
+            solutionTitle,
+            packId,
+            `${userEmail}:${recipient.briefEditionKey || ''}`,
+            history
+          );
+          renderedContent = personalized;
+          selectedHistory = personalized.selectedUrls;
+          personalizedQuality = personalized.quality;
         }
 
         const extrasKey = JSON.stringify([recipient.videoSummaryUrl || '', recipient.additionalLinks || []]);
@@ -4245,7 +4530,7 @@ export const processAIInsightsBulkJob = functions
 
         const { html, subject: emailSubject } = buildAIInsightsEmailFromCache(
           enrichedRecipient,
-          cachedContent
+          renderedContent
         );
         await sgMail.send({
           to: userEmail,
@@ -4253,7 +4538,17 @@ export const processAIInsightsBulkJob = functions
           subject: emailSubject,
           html,
         });
-        if (cachedContent.quality) batchQuality[solutionId] = cachedContent.quality;
+        if (selectedHistory.length) {
+          await saveBriefHistory(userEmail, history, selectedHistory).catch((error: any) => {
+            console.warn(`Email sent but source history could not be saved for ${userEmail}:`, error?.message);
+          });
+        }
+        batchQuality[solutionId] = {
+          ...(cachedContent.quality || {}),
+          ...personalizedQuality,
+          verifiedFunders: renderedContent.validFundersCount,
+          verifiedNews: renderedContent.validNewsCount,
+        };
         successCount += 1;
         successfulEmails.push(userEmail.toLowerCase());
         console.log(`Batch ${batchIndex + 1}: Email sent to ${userEmail} (${successCount}/${batchRecipients.length})`);
@@ -4287,6 +4582,9 @@ export const processAIInsightsBulkJob = functions
         recipients: remainingRecipients,
         concurrency,
         logId: logRef.id,
+        editionDocId,
+        source: data.source || 'manual',
+        automationRunKey: data.automationRunKey || '',
         batchIndex: batchIndex + 1,
         totalRecipients,
         continuationOf: snap.id,
@@ -4316,6 +4614,20 @@ export const processAIInsightsBulkJob = functions
           completedBatches: batchIndex + 1,
         },
       });
+      if (editionRef) {
+        const finalEdition = (await editionRef.get()).data() || {};
+        await editionRef.set({
+          status: finalStatus,
+          completedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }, { merge: true });
+        await logRef.set({
+          briefEdition: {
+            editionKey: finalEdition.editionKey || '',
+            packCount: Number(finalEdition.packCount || 0),
+            usage: finalEdition.usage || {},
+          },
+        }, { merge: true });
+      }
       console.log(`Bulk job finalized: ${finalSuccessCount}/${total} emails sent successfully`);
     }
   });

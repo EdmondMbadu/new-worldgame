@@ -8,6 +8,7 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
   firestore.FieldValue = {serverTimestamp:()=> 'server-time'};
   const ref = path => ({ get:async()=>({data:()=>docs.get(path)}), set:async value=>docs.set(path, structuredClone(value)), update:async value=>docs.set(path,{...docs.get(path),...structuredClone(value)}) });
   const evidence='This research studies affordable water treatment and practical implementation in rural communities.';
+  const eligibility='Registered nonprofit organizations may apply to this water treatment program.';
   class FakeAI {
     getGenerativeModel(params) {
       return { generateContent: async prompt => {
@@ -19,14 +20,14 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
         reviews++; const url=prompt.match(/Final URL: (https:\/\/[^ ]+)/)[1].replace(/\.$/,'');
         const news=prompt.includes('Category: news'); const date=new Date().toISOString().slice(0,10);
         return {response:{text:()=>JSON.stringify({accept:true,pageMatches:true,authoritative:true,title:url,publisher:'Institute',relevance:'Useful water treatment evidence',evidence,
-          date:news?date:'',dateEvidence:news?`Published on ${date}. This is the publication date of the water treatment study.`:'',score:90})}};
+          date:news?date:'',dateEvidence:news?`Published on ${date}. This is the publication date of the water treatment study.`:'',eligibility:news?'':eligibility,eligibilityEvidence:news?'':eligibility,score:90})}};
       }};
     }
   }
   const original=Module._load;
   Module._load=function(id,parent,isMain){if(id==='firebase-admin')return {firestore};if(id==='@google/generative-ai')return {GoogleGenerativeAI:FakeAI};return original.call(this,id,parent,isMain);};
   const sourceModule=require('../lib/brief-sources'); const oldFetch=sourceModule.fetchSourcePage;
-  sourceModule.fetchSourcePage=async url=>{fetches++;return {url,status:200,title:'Water treatment',text:`${evidence} Published on ${new Date().toISOString().slice(0,10)}. This is the publication date of the water treatment study.`};};
+  sourceModule.fetchSourcePage=async url=>{fetches++;return {url,status:200,title:'Water treatment',text:`${evidence} ${eligibility} Published on ${new Date().toISOString().slice(0,10)}. This is the publication date of the water treatment study.`};};
   const {prepareBriefContent}=require('../lib/brief-research'); Module._load=original;
   try {
     const first=await prepareBriefContent('test','solution','water');

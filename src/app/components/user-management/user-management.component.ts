@@ -250,7 +250,7 @@ export class UserManagementComponent implements OnInit {
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
   aiInsightsMode: 'single' | 'bulk' = 'single';
   aiInsightsBulkCriteria: AIInsightsBulkCriteria = 'user_selected';
-  aiInsightsBulkFallbackCriteria: AIInsightsFallbackCriteria = 'skip';
+  aiInsightsBulkFallbackCriteria: AIInsightsFallbackCriteria = 'most_recent';
   aiInsightsBulkSelections: Array<{
     email: string;
     name: string;
@@ -442,10 +442,10 @@ export class UserManagementComponent implements OnInit {
     value: AIInsightsFallbackCriteria;
     label: string;
   }> = [
-    { value: 'skip', label: 'Do not send until a solution is selected' },
     { value: 'most_recent', label: 'Most recent solution' },
     { value: 'second_recent', label: 'Second most recent solution' },
     { value: 'random', label: 'Random solution' },
+    { value: 'skip', label: 'Do not send until a solution is selected' },
   ];
 
   // component.ts
@@ -553,7 +553,7 @@ export class UserManagementComponent implements OnInit {
         time: '09:00',
         recipientEmails: [],
         criteria: 'user_selected',
-        fallbackCriteria: 'skip',
+        fallbackCriteria: 'most_recent',
         includeUnsubscribed: false,
         excludeEmails: [],
         videoSummaryUrl: '',
@@ -608,7 +608,7 @@ export class UserManagementComponent implements OnInit {
       (option) => option.value === value
     )
       ? (value as AIInsightsFallbackCriteria)
-      : 'skip';
+      : 'most_recent';
   }
 
   private normalizeAutomationEmailList(input: unknown): string[] {
@@ -1231,7 +1231,7 @@ export class UserManagementComponent implements OnInit {
     this.aiInsightsMode = 'bulk';
     this.aiInsightsBulkCriteria = schedule.criteria || 'user_selected';
     this.aiInsightsBulkFallbackCriteria =
-      schedule.fallbackCriteria || 'skip';
+      schedule.fallbackCriteria || 'most_recent';
     this.aiInsightsBulkIncludeUnsubscribed = Boolean(
       schedule.includeUnsubscribed
     );
