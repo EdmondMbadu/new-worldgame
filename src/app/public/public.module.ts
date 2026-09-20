@@ -28,6 +28,7 @@ import { NwgAiComponent } from '../blogs/nwg-ai/nwg-ai.component';
 import { CareersSocialComponent } from '../blogs/careers-social/careers-social.component';
 import { GlobalStatisticalToolsComponent } from '../blogs/global-statistical-tools/global-statistical-tools.component';
 import { NwgNewsComponent } from '../blogs/nwg-news/nwg-news.component';
+import { WeeklyBriefSampleComponent } from '../blogs/weekly-brief-sample/weekly-brief-sample.component';
 import { ArchivePicturesComponent } from '../blogs/archive-pictures/archive-pictures.component';
 import { EvaluatorsComponent } from '../blogs/evaluators/evaluators.component';
 import { CustomGptDesignScienceStoryboardComponent } from '../blogs/custom-gpt-design-science-storyboard/custom-gpt-design-science-storyboard.component';
@@ -99,6 +100,7 @@ import { TournamentDetailsComponent } from '../components/tournament-details/tou
     CareersSocialComponent,
     GlobalStatisticalToolsComponent,
     NwgNewsComponent,
+    WeeklyBriefSampleComponent,
     ArchivePicturesComponent,
     EvaluatorsComponent,
     CustomGptDesignScienceStoryboardComponent,
