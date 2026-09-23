@@ -2,10 +2,9 @@ import * as T from 'three';
 import { batch, box, cylinder, sphere, label, material } from './art';
 import { createStaff } from './staff';
 import { heightAt, roadX, type Mission } from './missions';
-import { roadSections } from './road-sections';
 import { toWorld } from './routes';
 import { bendStatic } from './route-art';
-import { sceneryLayout } from './scenery-layout';
+import { sceneryLayout, VILLAGE_SIGNS, villageSites } from './scenery-layout';
 
 export class VillageLife {
   group = new T.Group();
@@ -32,8 +31,7 @@ export class VillageLife {
     warm.emissive.set('#e6a756');
     warm.emissiveIntensity = 0.35;
     this.lamps.push(warm);
-    const herd = roadSections(m).find((e) => e.kind === 'herd')!;
-    const sites = [85, m.bridge ? 643 : 546, herd.z + 9];
+    const sites = villageSites(m);
     const layout = sceneryLayout(m);
     sites.forEach((z, site) => {
       for (const h of layout.homes.filter((h) => h.site === site)) {
@@ -188,11 +186,7 @@ export class VillageLife {
       const sign = box(
         well,
         label(
-          site === 0
-            ? 'KIJANI • EVENING MARKET'
-            : site === 1
-              ? 'WATER POINT'
-              : 'HERDS CROSS HERE',
+          VILLAGE_SIGNS[m.id]?.[site] ?? 'WATER POINT',
           '#e5d5af',
           '#46574a',
           512,
@@ -218,14 +212,14 @@ export class VillageLife {
         this.workers.push({ actor, x: px, z: pz, phase: site * 1.5 + i * 3.2 });
       }
       // Far courtyards and warm windows establish depth beyond the immediate verge.
-      for (let i = 0; i < 7; i++) {
-        const pz = z + 25 + i * 12,
-          px = roadX(m, pz) - side * (43 + (i % 3) * 13),
-          py = heightAt(m, px, pz);
-        box(fixed, plaster[i % 3], px, py + 1.7, pz, 5, 3.4, 4);
-        box(fixed, roof, px, py + 3.5, pz, 5.5, 0.25, 4.5);
-        box(fixed, warm, px, py + 2, pz - 2.05, 0.7, 0.7, 0.06);
-      }
+      layout.farHomes
+        .filter((f) => f.site === site)
+        .forEach((f, i) => {
+          const py = heightAt(m, f.x, f.z);
+          box(fixed, plaster[i % 3], f.x, py + 1.7, f.z, 5, 3.4, 4);
+          box(fixed, roof, f.x, py + 3.5, f.z, 5.5, 0.25, 4.5);
+          box(fixed, warm, f.x, py + 2, f.z - 2.05, 0.7, 0.7, 0.06);
+        });
     });
     batch(fixed);
     bendStatic(fixed, m);

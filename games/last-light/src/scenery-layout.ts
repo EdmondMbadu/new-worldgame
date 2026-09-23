@@ -1,6 +1,6 @@
-import { ridgeAt, roadWidth, routeHeading, toWorld } from './routes';
+import { pivots, ridgeAt, roadWidth, routeHeading, toWorld } from './routes';
 import { branchSections } from './road-sections';
-import { heightAt, onBridge, random, roadDistance, roadX, routeX, type Mission } from './missions';
+import { heightAt, onBridge, random, riverSpan, riverX, roadDistance, roadX, routeX, type Mission } from './missions';
 import { roadSections } from './road-sections';
 
 /**
@@ -13,7 +13,7 @@ export type Plant = { kind: PlantKind; x: number; z: number; scale: number; yaw:
 export type Boulder = { x: number; z: number; sx: number; sy: number; sz: number; yaw: number };
 export type Mound = { x: number; z: number; scale: number; yaw: number };
 export type Home = { x: number; z: number; yaw: number; width: number; depth: number; site: number; side: number; index: number };
-export type Box = { x: number; z: number; yaw: number; hx: number; hy: number; hz: number; y: number };
+export type Box = { x: number; z: number; yaw: number; hx: number; hy: number; hz: number; y: number; site?: number };
 export type Post = { x: number; z: number; kind: 'reflector' | 'ridge' | 'sign'; text?: string; side: number; instance?: number };
 
 export const TRUNK_RADIUS: Record<PlantKind, number> = {
@@ -27,6 +27,8 @@ export const TRUNK_RADIUS: Record<PlantKind, number> = {
 
 /** 0 is dry savanna, 1 is rainforest. */
 export const LUSH = [0.25, 1, 0.7, 0.55, 0.85];
+/** Relative number of trees per chapter. */
+const DENSITY = [0.85, 1.6, 1.05, 1, 1.15];
 
 export type SceneryLayout = {
   plants: Plant[];
@@ -41,8 +43,28 @@ export type SceneryLayout = {
 const cache = new WeakMap<Mission, SceneryLayout>();
 
 export function villageSites(m: Mission) {
-  const herd = roadSections(m).find((e) => e.kind === 'herd')!;
-  return [85, m.bridge ? 643 : 546, herd.z + 9];
+  return m.villages;
+}
+/** Signs at each village's water point. */
+export const VILLAGE_SIGNS = [
+  ['WATER POINT', 'MARKET DAY · WALKING PACE', 'HERDS CROSS HERE'],
+  ['WATER POINT', 'FOREST SCHOOL', 'WATER POINT'],
+  ['RIVER LANDING', 'MINIBUS STOP', 'WATER POINT'],
+  ['WATER POINT', 'SADDLE VILLAGE', 'WATER POINT'],
+  ['WATER POINT', 'RELAY POINT · ALL CLINICS', 'HERDS CROSS HERE'],
+];
+/** Set-piece ground (markets, slides, creeks) and the river stay clear of scenery. */
+function setPieceClear(m: Mission, x: number, z: number, clearance: number) {
+  for (const s of roadSections(m)) {
+    if (s.kind !== 'market' && s.kind !== 'landslide' && s.kind !== 'planks') continue;
+    if (Math.abs(z - s.z) < s.length / 2 + 10 && Math.abs(x - roadX(m, z)) < 22 + clearance)
+      return true;
+  }
+  const span = riverSpan(m);
+  const river = riverX(m, z);
+  if (span && river !== null && z > span[0] && z < span[1] + 20 && Math.abs(x - river) < m.river!.width / 2 + 3 + clearance * 0.4)
+    return true;
+  return false;
 }
 
 /** Village homes use the same random stream the village art always used. */
@@ -53,9 +75,15 @@ function villages(m: Mission) {
     farHomes: Box[] = [];
   villageSites(m).forEach((z, site) => {
     for (let house = 0; house < 6; house++) {
-      const side = house % 2 ? 1 : -1;
+      let side = house % 2 ? 1 : -1;
       const hz = z + (Math.floor(house / 2) - 1) * 20 + rng() * 5;
       let hx = roadX(m, hz) + side * (15 + rng() * 8);
+      // Homes stand back from the river bank: they move to the dry side of the road.
+      const river = riverX(m, hz);
+      if (river !== null && Math.abs(hx - river) < m.river!.width / 2 + 22) {
+        side = -side;
+        hx = roadX(m, hz) * 2 - hx;
+      }
       // Homes stand clear of the signed detour as well as the main road.
       const alt = routeX(m, hz, true);
       if (Math.abs(alt - roadX(m, hz)) > 1 && Math.sign(alt - roadX(m, hz)) === side && Math.abs(hx - alt) < 13)
@@ -70,7 +98,9 @@ function villages(m: Mission) {
     for (let i = 0; i < 7; i++) {
       const pz = z + 25 + i * 12,
         px = roadX(m, pz) - side * (43 + (i % 3) * 13);
-      farHomes.push({ x: px, z: pz, yaw: 0, hx: 2.5, hy: 1.75, hz: 2, y: 1.7 });
+      const river = riverX(m, pz);
+      if (river !== null && Math.abs(px - river) < m.river!.width / 2 + 12) continue;
+      farHomes.push({ x: px, z: pz, yaw: 0, hx: 2.5, hy: 1.75, hz: 2, y: 1.7, site });
     }
   });
   return { homes, wells, farHomes };
@@ -78,23 +108,32 @@ function villages(m: Mission) {
 
 function posts(m: Mission): Post[] {
   const list: Post[] = [];
+  const slides = roadSections(m).filter((s) => s.kind === 'landslide');
   for (let z = 5; z < m.length; z += 18)
-    for (const side of [-1, 1])
+    for (const side of [-1, 1]) {
+      // Reflectors on the buried side of a landslide lie under the debris.
+      if (slides.some((s) => Math.abs(z - s.z) < s.length / 2 + 6 && side === -s.safeSide)) continue;
       list.push({
         x: roadX(m, z) + side * (roadWidth(m, z) + (ridgeAt(m, z) > 0.1 ? 0.3 : 1.6)),
         z,
         kind: 'reflector',
         side,
       });
-  if (m.bend !== 0)
-    for (let z = 302; z < 436; z += 5)
+    }
+  for (const p of pivots(m))
+    for (let z = p - 63; z < p + 71; z += 5)
       list.push({ x: roadX(m, z) - roadWidth(m, z) + 0.1, z, kind: 'ridge', side: -1 });
   const sign = (z: number, text: string, side = 1) =>
     list.push({ x: roadX(m, z) + side * 7.3, z, kind: 'sign', text, side });
   sign(35, 'CLINIC ↑');
-  if (m.bend !== 0) {
-    sign(273, 'HAIRPIN · 25 km/h');
-    sign(294, 'OPEN EDGE · STAY ON ROAD', 1);
+  for (const p of pivots(m)) {
+    sign(p - 92, 'HAIRPIN · 25 km/h');
+    sign(p - 71, 'OPEN EDGE · STAY ON ROAD', 1);
+  }
+  for (const s of roadSections(m)) {
+    if (s.kind === 'market') sign(s.z - s.length / 2 - 45, 'MARKET · WALKING PACE');
+    if (s.kind === 'planks') sign(s.z - 62, 'PLANK CROSSING · 10 km/h', -1);
+    if (s.kind === 'landslide') sign(s.z - 85, 'LANDSLIDE · ONE LANE', s.safeSide);
   }
   for (const [a] of branchSections(m)) sign(a - 20, '← FIRMER DETOUR   /   SHORT →');
   sign(m.length - 75, 'CLINIC 75 m ↑');
@@ -138,15 +177,17 @@ export function sceneryLayout(m: Mission): SceneryLayout {
     for (const f of farHomes) if (Math.hypot(f.x - x, f.z - z) < 5.5) return true;
     // Keep the cliff shoulder and the reflector line open.
     if (ridgeAt(m, z) > 0.1 && x < roadX(m, z) && Math.abs(x - roadX(m, z)) < 16) return true;
-    return false;
+    return setPieceClear(m, x, z, clearance);
   };
   const plants: Plant[] = [];
-  const count = 950;
+  // The forest crowds the road; the savanna leaves it open to the view.
+  const count = Math.round(950 * (DENSITY[m.id] ?? 1));
+  const nearest = m.id === 1 ? 6.5 : 9;
   for (let i = 0; i < count; i++) {
     const z = rng() * (m.length + 150) - 55;
     const near = rng() < 0.55;
     const side = rng() > 0.5 ? 1 : -1;
-    const x = roadX(m, z) + side * (near ? 9 + rng() * 38 : 40 + rng() * 150);
+    const x = roadX(m, z) + side * (near ? nearest + rng() * 38 : 40 + rng() * 150);
     const nearVillage = sites.some((s) => Math.abs(s - z) < 55);
     const kind = pickKind(lush, rng(), nearVillage);
     const scale =

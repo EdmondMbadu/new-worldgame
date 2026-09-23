@@ -2,11 +2,13 @@ import { bendStatic } from './route-art';
 import { FrameHealth } from './frame-health';
 import { TrafficArt } from './traffic-art';
 import {
+  nearestPivot,
   ridgeAt,
   roadWidth,
   routePoint,
   stationAhead,
   toRoute,
+  toWorld,
   worldHeight,
 } from './routes';
 import * as T from 'three';
@@ -32,6 +34,10 @@ import {
   heightAt,
   isMud,
   onBridge,
+  rainAt,
+  riverLevel,
+  riverSpan,
+  riverX,
   roadDistance,
   roadX,
   roadY,
@@ -45,7 +51,8 @@ import type { Settings } from './save';
 import { surfaceTexture } from './surfaces';
 import { LivingWorld } from './living-world';
 import { surfaceAt } from './vehicle';
-import { branchSections } from './road-sections';
+import { branchSections, roadSections, slideHeight } from './road-sections';
+import { flowingWater } from './set-piece-art';
 import { beamMode, chapterLook, nightProfile } from './night';
 import { createStaff } from './staff';
 import { clinicArchitecture } from './clinic-assets';
@@ -317,7 +324,7 @@ export class GameWorld {
     const rainMat = new T.LineBasicMaterial({
       color: '#b0d0d0',
       transparent: true,
-      opacity: m.rain * 0.27,
+      opacity: Math.max(m.rain, m.rainStart ?? 0) * 0.27,
       depthWrite: false,
     });
     materials.add(rainMat);
@@ -475,6 +482,27 @@ export class GameWorld {
     out.lerp(new T.Color(cliff ? '#6f675c' : '#8e4a2b'), smooth(0.28, 0.62, slope) * (cliff ? 0.95 : 0.75));
     // Wet mud where the mission says so.
     if (isMud(m, lx, lz)) out.lerp(new T.Color('#5a2f1c'), 0.5 * (1 - smooth(5, 9, Math.abs(lx - roadX(m, lz)))));
+    // River banks: dark wet silt at the water, pale sand a little higher.
+    const river = riverX(m, lz);
+    if (river !== null && m.river) {
+      const across = Math.abs(lx - river) - m.river.width / 2;
+      const level = riverLevel(m, lz);
+      out.lerp(new T.Color('#4d3a2a'), (1 - smooth(-1, 3, across)) * smooth(level + 2.5, level - 0.5, y) * 0.9);
+      out.lerp(new T.Color('#b7a27a'), smooth(-0.5, 2, across) * (1 - smooth(3, 9, across)) * 0.55);
+    }
+    // A landslide leaves raw red earth on the slope above it.
+    for (const s of roadSections(m)) {
+      if (s.kind !== 'landslide') continue;
+      const lateral = (lx - roadX(m, lz)) * s.safeSide;
+      const along = Math.abs(lz - s.z);
+      const scar = (1 - smooth(s.length / 2 - 2, s.length / 2 + 10 + Math.max(0, -lateral - 6) * 0.4, along)) * (1 - smooth(0.5, 1.5, lateral)) * (1 - smooth(22, 40, -lateral));
+      out.lerp(new T.Color('#7a3d22'), scar * 0.85);
+    }
+    // The creek bed under the plank crossing.
+    for (const s of roadSections(m)) {
+      if (s.kind !== 'planks') continue;
+      if (Math.abs(lz - s.z) < s.length / 2 + 1 && Math.abs(lx - roadX(m, lz)) < 12.5) out.lerp(new T.Color('#3f2c20'), 0.7);
+    }
     out.multiplyScalar(0.88 + n2 * 0.08);
     return out;
   }
@@ -570,14 +598,20 @@ export class GameWorld {
       const laterite = new T.Color('#b0603a'),
         packed = new T.Color('#8c4629'),
         crown = new T.Color('#bf7449'),
-        mud = new T.Color('#633420');
+        mud = new T.Color('#633420'),
+        freshEarth = new T.Color('#6f3a22'),
+        creekBed = new T.Color('#3f2c20');
+      const slides = roadSections(m).filter((s) => s.kind === 'landslide'),
+        creeks = roadSections(m).filter((s) => s.kind === 'planks');
       for (let z = start, j = 0; z <= end; z += 1, j++) {
         const width =
           onBridge(m, z) && !alt ? 2.5 : alt ? 4.8 : roadWidth(m, z);
         for (let i = 0; i < 25; i++) {
           const across = (i / 24) * 2 - 1;
           const x = routeX(m, z, alt) + across * width;
-          p.push(x, heightAt(m, x, z) + 0.055, z);
+          const underPlanks =
+            !alt && creeks.some((sec) => Math.abs(z - sec.z) < sec.length / 2 + 1.2);
+          p.push(x, heightAt(m, x, z) + (underPlanks ? -0.2 : 0.055), z);
           u.push((x - roadX(m, z)) * 0.5, z * 0.5);
           const muddy = isMud(m, x, z),
             depth = rutDepthAt(m, x, z);
@@ -585,15 +619,23 @@ export class GameWorld {
             -Math.pow((Math.abs(x - routeX(m, z, alt)) - 1.1) / 0.55, 2),
           );
           const edge = smooth(0.78, 1, Math.abs(across));
+          const offset = x - roadX(m, z);
+          const slide = alt
+            ? 0
+            : slides.reduce((h, sec) => Math.max(h, slideHeight(sec, offset, z)), 0);
+          const creek =
+            !alt && creeks.some((sec) => Math.abs(z - sec.z) < sec.length / 2 + 1.2);
           const color = c
             .copy(laterite)
             .lerp(crown, (1 - Math.abs(across)) * 0.35)
             .lerp(packed, track * 0.55)
             .lerp(mud, muddy ? 0.65 : 0)
             .lerp(new T.Color('#8a6a3a'), edge * 0.35)
+            .lerp(freshEarth, smooth(0.02, 0.35, slide) * 0.85)
+            .lerp(creekBed, creek ? 0.75 : 0)
             .multiplyScalar(1 - depth * 1.6);
           colors.push(color.r, color.g, color.b);
-          wet.push(Math.max(surfaceAt(m, x, z).wet, depth > 0.05 ? 0.6 : 0));
+          wet.push(Math.max(surfaceAt(m, x, z).wet, depth > 0.05 ? 0.6 : 0, creek ? 1 : 0, slide > 0.05 ? 0.5 : 0));
           if (i < 24 && z + 1 <= end) {
             const a = j * 25 + i;
             idx.push(a, a + 25, a + 1, a + 1, a + 25, a + 26);
@@ -682,7 +724,7 @@ export class GameWorld {
       }
     }
     this.scene.add(batch(patches));
-    if (m.bridge) {
+    if (m.bridge && !m.river) {
       const water = material('#294a4a', 0.06, 0.1);
       water.envMapIntensity = 1.5;
       const mid = (m.bridge[0] + m.bridge[1]) / 2;
@@ -704,6 +746,9 @@ export class GameWorld {
         textures.add(water.normalMap);
       }
       water.normalScale.set(0.16, 0.16);
+    }
+    if (m.river) this.buildRiver(m);
+    if (m.bridge) {
       const bridge = new T.Group(),
         wood = material('#8a6e4c'),
         rail = material('#c9b48c');
@@ -718,6 +763,47 @@ export class GameWorld {
           box(bridge, rail, roadX(m, z) + side * 2.45, roadY(m, z) + 1.3, z, 0.09, 0.1, 2.85);
       this.scene.add(batch(bridge));
     }
+  }
+  /**
+   * The chapter river: one ribbon in its carved channel, falling gently
+   * downstream, passing under the bridge and bending away before the climb.
+   * Where the banks give way to lower ground, the surface tucks beneath it.
+   */
+  private buildRiver(m: Mission) {
+    const span = riverSpan(m)!;
+    const half = m.river!.width / 2 + 1.6;
+    const cols = 9;
+    const positions: number[] = [],
+      indices: number[] = [];
+    let rows = 0;
+    for (let z = span[0]; z <= span[1]; z += 2.5, rows++) {
+      const centre = riverX(m, z)!;
+      const sink = 3.2 * smooth(span[1] - 60, span[1], z);
+      for (let i = 0; i < cols; i++) {
+        const x = centre - half + (2 * half * i) / (cols - 1);
+        let y = riverLevel(m, z) - sink;
+        // Where the carved banks give way downstream, tuck the surface under the ground.
+        const ground = heightAt(m, x, z);
+        if (z > span[1] - 90 && ground < y - 0.25) y = ground - 0.6;
+        const w = toWorld(m, x, z);
+        positions.push(w.x, y, w.z);
+      }
+    }
+    for (let j = 0; j < rows - 1; j++)
+      for (let i = 0; i < cols - 1; i++) {
+        const a = j * cols + i;
+        indices.push(a, a + cols, a + 1, a + 1, a + cols, a + cols + 1);
+      }
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.Float32BufferAttribute(positions, 3));
+    geo.setIndex(indices);
+    geo.computeVertexNormals();
+    const water = flowingWater(this.windTime, '#2f5557', 1);
+    water.roughness = 0.05;
+    water.envMapIntensity = 1.6;
+    const river = mesh(geo, water, this.scene);
+    river.castShadow = false;
+    river.userData.routeWorld = true;
   }
   private addTerrainChunks(
     geometry: T.BufferGeometry,
@@ -991,7 +1077,8 @@ export class GameWorld {
       lamps.setMatrixAt(k, obj.matrix);
       this.postRest[index] = obj.matrix.clone();
       post.instance = k++;
-      if (ridge && Math.round(post.z - 302) % 15 === 0) {
+      const pivot = nearestPivot(m, post.z) ?? 365;
+      if (ridge && Math.round(post.z - (pivot - 63)) % 15 === 0) {
         const heading = Math.sin(
           Math.atan2(roadX(m, post.z + 8) - roadX(m, post.z), 8),
         );
@@ -1116,7 +1203,8 @@ export class GameWorld {
     this.renderer.toneMappingExposure = sky.exposure * brightness;
     const enhanced = this.settings.enhancedVisibility ? 1.6 : 1;
     this.moonFill.intensity = sky.hemiIntensity * (1 + (enhanced - 1) * sky.darkness);
-    (this.scene.fog as T.FogExp2).density = 0.00072 * (1 + sky.darkness * 0.9) * (1 + m.rain * 0.7) * (m.id === 3 ? 1.5 : 1);
+    const rain = rainAt(m, e.progress);
+    (this.scene.fog as T.FogExp2).density = 0.00072 * (1 + sky.darkness * 0.9) * (1 + rain * 0.7) * (m.id === 3 ? 1.5 : 1);
     atmosphereUniforms.uMist.value = chapterLook(m).mist * (0.45 + 0.55 * sky.darkness);
     atmosphereUniforms.uFogBase.value = p.y - 16;
     const lightning =
@@ -1154,7 +1242,7 @@ export class GameWorld {
       this.clock,
       p,
       (x, z) => worldHeight(m, x, z),
-      smooth(0.45, 0.9, sky.darkness) * (m.rain > 0.5 ? 0.3 : 1),
+      smooth(0.45, 0.9, sky.darkness) * (rain > 0.5 ? 0.3 : 1),
     );
     this.smoke.update(dt, this.clock);
     // Contact feedback: every real knock shakes the operator, not only damage.
@@ -1179,7 +1267,7 @@ export class GameWorld {
     this.truck.tail.emissiveIntensity = e.braking > 0.1 ? 3.5 : 0.7;
     for (const wiper of this.truck.wipers)
       wiper.rotation.z =
-        m.rain > 0.2 ? Math.sin(this.clock * 4.5) * 0.72 : 0.65;
+        rain > 0.2 ? Math.sin(this.clock * 4.5) * 0.72 : 0.65;
     this.truck.cargo.rotation.z =
       Math.sin(this.clock * 21) * e.roadPulse * 0.012;
     this.truck.cargo.position.y =
@@ -1413,9 +1501,12 @@ export class GameWorld {
       this.rainData.set([x, y, z, x - 0.13, y - 0.9, z + 0.04], i);
     }
     this.rain.geometry.attributes.position.needsUpdate = true;
-    this.rain.visible = m.rain > 0;
+    const falling = rainAt(m, e.progress);
+    this.rain.visible = falling > 0.01;
     (this.rain.material as T.LineBasicMaterial).opacity =
-      m.rain * (0.12 + 0.18 * smooth(0, m.length * 0.55, e.progress));
+      m.rainStart === undefined
+        ? falling * (0.12 + 0.18 * smooth(0, m.length * 0.55, e.progress))
+        : falling * 0.3;
     const wet =
       e.wheelSurfaces.reduce((n, s) => n + s.wet, 0) /
       Math.max(1, e.wheelSurfaces.length);

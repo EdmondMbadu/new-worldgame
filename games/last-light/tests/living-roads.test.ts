@@ -23,30 +23,37 @@ import { ROAD_REVISION, surfaceAt } from '../src/vehicle';
 
 beforeAll(initPhysics);
 
+// Every chapter after the first climbs at least one switchback; the highlands have two.
+const hillside = MISSIONS.filter((m) => m.ridges.length > 0);
+const [ridged] = hillside,
+  pivot = ridged.ridges[0];
 describe('a physical hillside route', () => {
   it('has a genuine reversal of world Z and an exact, unambiguous station inverse', () => {
-    for (const m of MISSIONS) {
-      let reversals = 0;
-      for (let s = 280; s < 451; s += 0.7) {
-        for (const offset of [-30, -4, 0, 4, 30]) {
-          const w = toWorld(m, roadX(m, s) + offset, s),
-            r = toRoute(m, w.x, w.z);
-          expect(r.x).toBeCloseTo(roadX(m, s) + offset, 8);
-          expect(r.z).toBeCloseTo(s, 8);
+    expect(hillside.length).toBe(4);
+    expect(MISSIONS[3].ridges.length).toBe(2);
+    for (const m of hillside)
+      for (const p of m.ridges) {
+        let reversals = 0;
+        for (let s = p - 85; s < p + 86; s += 0.7) {
+          for (const offset of [-30, -4, 0, 4, 30]) {
+            const w = toWorld(m, roadX(m, s) + offset, s),
+              r = toRoute(m, w.x, w.z);
+            expect(r.x).toBeCloseTo(roadX(m, s) + offset, 8);
+            expect(r.z).toBeCloseTo(s, 8);
+          }
+          if (routePoint(m, s + 0.7).z < routePoint(m, s).z) reversals++;
         }
-        if (routePoint(m, s + 0.7).z < routePoint(m, s).z) reversals++;
+        expect(reversals).toBeGreaterThan(20);
+        expect(roadY(m, p)).toBeGreaterThan(roadY(m, p - 90) + 10);
+        expect(pathLength(m, p - 25)).toBeGreaterThan(pathLength(m, p + 5));
       }
-      expect(reversals).toBeGreaterThan(20);
-      expect(roadY(m, 365)).toBeGreaterThan(roadY(m, 275) + 10);
-      expect(pathLength(m, 340)).toBeGreaterThan(pathLength(m, 370));
-    }
   });
 
   it('renders and collides with the same road deck and 50+ metre drop', () => {
-    const m = MISSIONS[0],
+    const m = ridged,
       e = new GameEngine(m);
     try {
-      for (const s of [315, 345, 365, 395, 420]) {
+      for (const s of [pivot - 50, pivot - 20, pivot, pivot + 30, pivot + 55]) {
         for (const offset of [0, -roadWidth(m, s) - 8]) {
           const p = routePoint(m, s, false, offset);
           e.world.updateSceneQueries();
@@ -60,31 +67,34 @@ describe('a physical hillside route', () => {
           expect(worldHeight(m, p.x, p.z)).toBeCloseTo(p.y, 8);
         }
       }
-      const deck = routePoint(m, 365),
-        valley = routePoint(m, 365, false, -roadWidth(m, 365) - 10);
-      expect(deck.y - valley.y).toBeGreaterThan(50);
+      for (const h of hillside)
+        for (const p of h.ridges) {
+          const deck = routePoint(h, p),
+            valley = routePoint(h, p, false, -roadWidth(h, p) - 10);
+          expect(deck.y - valley.y).toBeGreaterThan(50);
+        }
     } finally {
       e.dispose();
     }
   });
 
   it('lets a truck fall, then recovers once to the last firm checkpoint with a penalty', () => {
-    const m = MISSIONS[0],
+    const m = ridged,
       e = new GameEngine(m);
     try {
-      const p = routePoint(m, 365, false, -roadWidth(m, 365) - 9);
-      e.body.setTranslation({ ...p, y: roadY(m, 365) + 1 }, true);
+      const p = routePoint(m, pivot, false, -roadWidth(m, pivot) - 9);
+      e.body.setTranslation({ ...p, y: roadY(m, pivot) + 1 }, true);
       e.body.setLinvel({ x: 0, y: 0, z: 0 }, true);
-      e.safeZ = 280;
+      e.safeZ = pivot - 85;
       e.phase = 'driving';
       let lowest = 100;
       for (let i = 0; i < 220 && e.recoveries === 0; i++) {
         e.step(1 / 60, emptyInput());
         lowest = Math.min(lowest, e.position.y);
       }
-      expect(lowest).toBeLessThan(roadY(m, 365) - 7);
+      expect(lowest).toBeLessThan(roadY(m, pivot) - 7);
       expect(e.recoveries).toBe(1);
-      expect(e.progress).toBeCloseTo(280, 0);
+      expect(e.progress).toBeCloseTo(pivot - 85, 0);
       expect(e.time).toBeLessThan(e.initial - 9);
       expect(e.integrity).toBeGreaterThanOrEqual(90);
       expect(e.phase).toBe('driving');
@@ -94,13 +104,13 @@ describe('a physical hillside route', () => {
   });
 
   it('keeps normal progress, distance and checkpoints stable through the backwards leg', () => {
-    const e = new GameEngine(MISSIONS[0]);
+    const e = new GameEngine(ridged);
     try {
       let previousProgress = 0,
         previousZ = 0,
         previousDistance = e.distance,
         backwardsFrames = 0;
-      for (let i = 0; i < 7000 && e.progress < 450; i++) {
+      for (let i = 0; i < 12000 && e.progress < pivot + 85; i++) {
         e.step(1 / 60, driveInput(e));
         if (ridgeAt(e.mission, e.progress) > 0.4) {
           if (e.position.z < previousZ) backwardsFrames++;
@@ -112,7 +122,7 @@ describe('a physical hillside route', () => {
         previousZ = e.position.z;
         previousDistance = e.distance;
       }
-      expect(e.progress).toBeGreaterThan(445);
+      expect(e.progress).toBeGreaterThan(pivot + 80);
       expect(backwardsFrames).toBeGreaterThan(100);
       expect(e.recoveries).toBe(0);
     } finally {
@@ -123,7 +133,10 @@ describe('a physical hillside route', () => {
 
 describe('traffic with room to react', () => {
   const m = { ...MISSIONS[0], bend: 0, mud: [] };
+  // The riverside chapter has the community minibus and the oncoming vehicle.
+  const river = { ...MISSIONS[2], bend: 0, mud: [] };
   it('signals before pulling into the stop and brakes instead of sweeping through an occupied lane', () => {
+    const m = river;
     const e = makeEncounters(m).find((e) => e.kind === 'minibus')!;
     const driver = { x: 0, z: e.z - 90, speed: 6 };
     for (let i = 0; i < 600 && e.actorZ < e.z - 11; i++)
@@ -142,7 +155,7 @@ describe('traffic with room to react', () => {
   });
 
   it('oncoming traffic holds for a stopped player and resumes after the lane clears', () => {
-    const mission = { ...MISSIONS[1], bend: 0 };
+    const mission = river;
     const e = makeEncounters(mission).find((e) => e.kind === 'traffic')!;
     const z = e.actorZ;
     for (let i = 0; i < 240; i++)
@@ -164,6 +177,7 @@ describe('traffic with room to react', () => {
     expect(e.state).toBe('clear');
   });
   it('rewards a careful centre-line pass once the minibus has fully pulled aside', () => {
+    const m = river;
     const e = new GameEngine(m);
     try {
       const bus = e.encounters.find((event) => event.kind === 'minibus')!;
@@ -173,11 +187,13 @@ describe('traffic with room to react', () => {
       e.phase = 'driving';
       for (let i = 0; i < 1100; i++) e.step(1 / 60, emptyInput());
       expect(bus.state).toBe('clear');
+      // Hold the centre line (the road is straight here) at a careful pace.
       for (let i = 0; i < 1900 && !bus.resolved; i++)
         e.step(1 / 60, {
           ...emptyInput(),
           throttle: e.speed < 7 ? 0.5 : 0,
           brake: e.speed > 7.5 ? 0.4 : 0,
+          steer: Math.max(-1, Math.min(1, e.position.x * 0.5 + e.heading * 2)),
         });
       expect(bus.resolved).toBe(true);
       expect(bus.clean).toBe(true);
@@ -281,10 +297,10 @@ describe('fair records and recovery practice', () => {
     }
   });
   it('remembers the checkpoint branch and avoids spawning inside traffic', () => {
-    const m = MISSIONS[0],
+    const m = MISSIONS[2],
       e = new GameEngine(m);
     try {
-      e.safeZ = 510;
+      e.safeZ = 700;
       e.safeAlt = true;
       e.isAlt = false;
       e.phase = 'driving';
@@ -292,7 +308,7 @@ describe('fair records and recovery practice', () => {
       // A newly populated road may occupy the old exact checkpoint. Recovery
       // must remain on its branch and choose a clear point at or behind it.
       const ridge = routePoint(m, e.progress, true);
-      expect(e.progress).toBeLessThanOrEqual(510);
+      expect(e.progress).toBeLessThanOrEqual(700);
       expect(e.traffic.occupied(e.position.x, e.position.z, 12)).toBe(false);
       expect(
         Math.hypot(e.position.x - ridge.x, e.position.z - ridge.z),

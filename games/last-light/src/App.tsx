@@ -758,6 +758,8 @@ export default function App() {
               {(pathLength(mission) / 1000).toFixed(1)} km ·{" "}
               {chapterLook(mission).name.toLowerCase()}
             </span>
+            <span className="preview-region">{mission.region}</span>
+            <span className="preview-signature">{mission.signature}</span>
           </aside>
           <section className="campaign" aria-label="Choose a chapter">
             <div className="campaign-label">

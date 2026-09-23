@@ -2,7 +2,7 @@ import type { GameEngine } from './engine';
 import type { Settings } from './save';
 import { encounterPose } from './encounters';
 import { herdPose } from './traffic';
-import { clamp } from './missions';
+import { clamp, rainAt } from './missions';
 import { JourneyMusic } from './journey-music';
 import { SceneNarrator, type NarrationState } from './narration';
 import { CLINICS, type ClinicStory, type StoryScene } from './clinic-stories';
@@ -324,7 +324,7 @@ export class Soundtrack {
       0.15,
     );
     this.rainGain?.gain.setTargetAtTime(
-      active ? e.mission.rain * 0.35 : 0,
+      active ? rainAt(e.mission, e.progress) * 0.35 : 0,
       c.currentTime,
       0.2,
     );
@@ -441,7 +441,7 @@ export class Soundtrack {
     if (
       bird !== this.lastBird &&
       e.mission.night < 0.5 &&
-      e.mission.rain < 0.5
+      rainAt(e.mission, e.progress) < 0.5
     ) {
       this.lastBird = bird;
       this.tone(1800 + Math.sin(bird) * 350, 0.12, 0.007);

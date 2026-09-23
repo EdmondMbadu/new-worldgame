@@ -20,10 +20,14 @@ import {
 import {
   encounterPose,
   makeEncounters,
+  PARKED,
+  SOLID_ACTORS,
   warningDistance,
   windForce,
   type Encounter,
 } from './encounters';
+import { marketStalls, slideRocks } from './set-pieces';
+import { creekAt, onPlank } from './road-sections';
 import RAPIER from '@dimforge/rapier3d-compat';
 import { bridgeRails, sceneryLayout, TRUNK_RADIUS, worldPose } from './scenery-layout';
 import {
@@ -34,6 +38,7 @@ import {
   obstacles,
   onBridge,
   pathLength,
+  rainAt,
   roadDistance,
   roadX,
   roadY,
@@ -82,6 +87,9 @@ const TERRAIN_GROUPS = (0x0001 << 16) | 0xffff;
 const SHELL_GROUPS = (0x0002 << 16) | 0xfffe;
 // Static scenery ignores terrain and other scenery: only moving bodies test against it.
 const SCENERY_GROUPS = (0x0004 << 16) | 0xfffa;
+/** Height of an actor's body centre above the ground it stands on. */
+const actorLift = (event: Encounter) =>
+  event.kind === 'tree' ? 0.4 : (PARKED[event.kind]?.lift ?? 1);
 export const initPhysics = () =>
   (initialization ??= RAPIER.init() as Promise<void>);
 export class GameEngine {
@@ -259,14 +267,23 @@ export class GameEngine {
           .setFriction(0.4),
       );
     }
+    // Loose boulders on a landslide are solid, like the roadside rocks.
+    for (const rock of slideRocks(mission)) {
+      const w = toWorld(mission, rock.x, rock.z);
+      this.world.createCollider(
+        RAPIER.ColliderDesc.ball(rock.radius)
+          .setTranslation(w.x, rock.y, w.z)
+          .setFriction(0.5),
+      );
+    }
     this.encounters = makeEncounters(mission);
     for (const event of this.encounters) {
-      if (!['minibus', 'bridge', 'tree', 'traffic'].includes(event.kind))
-        continue;
+      if (!SOLID_ACTORS.includes(event.kind)) continue;
       const p = encounterPose(mission, event);
+      const parked = PARKED[event.kind];
       const body = this.world.createRigidBody(
         RAPIER.RigidBodyDesc.kinematicPositionBased()
-          .setTranslation(p.x, p.y + (event.kind === 'tree' ? 0.4 : 1), p.z)
+          .setTranslation(p.x, p.y + actorLift(event), p.z)
           .setRotation(p.rotation),
       );
       this.world.createCollider(
@@ -277,11 +294,13 @@ export class GameEngine {
               z: 0,
               w: Math.SQRT1_2,
             })
-          : RAPIER.ColliderDesc.cuboid(
-              1.02,
-              0.83,
-              event.kind === 'minibus' ? 2.5 : 2.15,
-            )
+          : parked
+            ? RAPIER.ColliderDesc.cuboid(...parked.half)
+            : RAPIER.ColliderDesc.cuboid(
+                1.02,
+                0.83,
+                event.kind === 'minibus' ? 2.5 : 2.15,
+              )
         ).setFriction(0.45),
         body,
       );
@@ -420,8 +439,7 @@ export class GameEngine {
     while (station >= -24) {
       const point = routePoint(this.mission, station, this.safeAlt);
       const occupied = this.encounters.some((event) => {
-        if (!['minibus', 'traffic', 'bridge', 'tree'].includes(event.kind))
-          return false;
+        if (!SOLID_ACTORS.includes(event.kind)) return false;
         const actor = encounterPose(this.mission, event);
         return Math.hypot(actor.x - point.x, actor.z - point.z) < 9;
       });
@@ -565,7 +583,9 @@ export class GameEngine {
           : off
             ? 'Verge'
             : 'Gravel';
-    if (surfaceAt(m, road.x, road.z).name === 'Water') this.surface = 'Water';
+    const sample = surfaceAt(m, road.x, road.z);
+    if (sample.name === 'Water') this.surface = 'Water';
+    else if (sample.name === 'Bridge' && !onBridge(m, road.z)) this.surface = 'Planks';
     const target =
       // Inputs use the driver's left/right. With +Z forward, screen-right is -X.
       -clamp(input.steer, -1, 1) *
@@ -846,6 +866,27 @@ export class GameEngine {
     }
     this.lastAction = input.action;
   }
+  /** Lateral offset from the road centre of a wheel (0 front-left, 1 front-right, …). */
+  wheelOffset(i: number) {
+    const contact = this.vehicle.wheelContactPoint(i);
+    const point = contact && this.vehicle.wheelIsInContact(i) ? contact : null;
+    if (!point) {
+      const q = this.rotation;
+      const heading = Math.atan2(
+        2 * (q.w * q.y + q.x * q.z),
+        1 - 2 * (q.y * q.y + q.x * q.x),
+      );
+      const side = i % 2 ? 0.86 : -0.86;
+      const r = toRoute(
+        this.mission,
+        this.position.x + Math.cos(heading) * side,
+        this.position.z - Math.sin(heading) * side,
+      );
+      return r.x - roadX(this.mission, r.z);
+    }
+    const r = toRoute(this.mission, point.x, point.z);
+    return r.x - roadX(this.mission, r.z);
+  }
   private updateEncounters(dt: number) {
     for (const event of this.encounters) {
       const distance = event.z - this.progress;
@@ -854,7 +895,7 @@ export class GameEngine {
         !this.encounters.some(
           (other) => other !== event && other.warned && !other.resolved,
         ) &&
-        distance < warningDistance(this.speed, this.mission.rain) &&
+        distance < warningDistance(this.speed, rainAt(this.mission, this.progress)) &&
         distance > -25
       ) {
         event.warned = true;
@@ -864,7 +905,8 @@ export class GameEngine {
         !event.entered &&
         distance <
           (event.kind === 'gust' ? 30 : event.kind === 'minibus' ? 80 : 145) &&
-        (event.kind !== 'minibus' || this.progress > 445) &&
+        // A minibus waits to pull in until the driver is off any switchback.
+        (event.kind !== 'minibus' || ridgeAt(this.mission, this.progress) === 0) &&
         distance > -25
       ) {
         event.entered = true;
@@ -882,7 +924,11 @@ export class GameEngine {
           {
             ...this.roadPosition,
             speed: this.speed,
-            occupied: this.traffic.cars.some((car) => {
+            occupied: event.kind === 'market'
+              ? this.traffic.cars.some(
+                  (car) => Math.abs(car.station - event.z) < event.length / 2 + 14,
+                )
+              : this.traffic.cars.some((car) => {
               const pose = encounterPose(this.mission, event);
               return (
                 Math.hypot(car.pose.x - pose.x, car.pose.z - pose.z) < 18 &&
@@ -964,6 +1010,31 @@ export class GameEngine {
             (local * event.side < 1.8 || Math.abs(this.speed) > 10)
           )
             event.passedSafely = false;
+          // Walking pace between the stalls.
+          if (event.kind === 'market' && Math.abs(this.speed) > 5.2)
+            event.passedSafely = false;
+          if (
+            event.kind === 'lorry' &&
+            (Math.abs(this.speed) > 8.5 || local * event.side < 0.2)
+          )
+            event.passedSafely = false;
+          if (
+            event.kind === 'planks' &&
+            creekAt(event, this.progress) > 0.5 &&
+            (Math.abs(this.speed) > 3.7 ||
+              [0, 1].some((i) => onPlank(this.wheelOffset(i)) < 0.5))
+          )
+            event.passedSafely = false;
+          if (
+            event.kind === 'breakdown' &&
+            (Math.abs(this.speed) > 11 || local * event.side < 0.3)
+          )
+            event.passedSafely = false;
+          if (
+            event.kind === 'landslide' &&
+            (Math.abs(this.speed) > 7 || local * event.side < 1.5)
+          )
+            event.passedSafely = false;
         }
       }
       if (
@@ -977,7 +1048,11 @@ export class GameEngine {
           {
             ...this.roadPosition,
             speed: this.speed,
-            occupied: this.traffic.cars.some((car) => {
+            occupied: event.kind === 'market'
+              ? this.traffic.cars.some(
+                  (car) => Math.abs(car.station - event.z) < event.length / 2 + 14,
+                )
+              : this.traffic.cars.some((car) => {
               const pose = encounterPose(this.mission, event);
               return (
                 Math.hypot(car.pose.x - pose.x, car.pose.z - pose.z) < 18 &&
@@ -994,7 +1069,7 @@ export class GameEngine {
         const pose = encounterPose(this.mission, event);
         body.setNextKinematicTranslation({
           x: pose.x,
-          y: pose.y + (event.kind === 'tree' ? 0.4 : 1),
+          y: pose.y + actorLift(event),
           z: pose.z,
         });
         body.setNextKinematicRotation(pose.rotation);
@@ -1105,6 +1180,10 @@ export class GameEngine {
     for (const h of layout.homes) {
       const w = worldPose(m, h.x, h.z, h.yaw);
       cuboid(w.x, w.y + 1.2, w.z, h.width / 2 + 0.3, 1.6, h.depth / 2 + 0.3, w.yaw);
+    }
+    for (const stall of marketStalls(m)) {
+      const w = worldPose(m, stall.x, stall.z);
+      cuboid(w.x, w.y + stall.height / 2, w.z, stall.hx, stall.height / 2, stall.hz, w.yaw);
     }
     for (const well of layout.wells) {
       const w = worldPose(m, well.x, well.z);

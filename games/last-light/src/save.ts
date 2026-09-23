@@ -104,7 +104,9 @@ export function parseSave(raw: string | null): Save {
         r.remaining <=
           (r.revision === ROAD_REVISION
             ? MISSIONS[r.mission].seconds
-            : r.revision === 4
+            : r.revision === 5
+              ? [235, 255, 265, 265, 290][r.mission]
+              : r.revision === 4
               ? [200, 220, 230, 230, 255][r.mission]
               : r.revision === 3
                 ? [160, 180, 190, 185, 215][r.mission]
@@ -114,14 +116,14 @@ export function parseSave(raw: string | null): Save {
             1.35 &&
         r.lives === MISSIONS[r.mission].lives &&
         (r.revision === undefined ||
-          ([2, 3, 4, ROAD_REVISION].includes(r.revision) &&
+          ([2, 3, 4, 5, ROAD_REVISION].includes(r.revision) &&
             [0, 1].includes(r.variant ?? 0) &&
             Number.isInteger(r.clean) &&
             Number.isInteger(r.encounters) &&
             r.clean! >= 0 &&
             r.clean! <= r.encounters! &&
             r.encounters! <=
-              (r.revision === ROAD_REVISION
+              (r.revision === ROAD_REVISION || r.revision === 5
                 ? 18
                 : r.revision === 4
                   ? 6

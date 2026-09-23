@@ -45,14 +45,15 @@ describe('faster driving and meaningful surfaces', () => {
   });
   it('gives separate wheels different, smoothly changing traction at a mud boundary', () => {
     const m = MISSIONS[1],
-      z = 200,
+      edge = m.mud[0][0],
+      z = edge + 20,
       x = roadX(m, z);
     const firm = surfaceAt(m, x + 7, z),
       mud = surfaceAt(m, x + 4, z);
     expect(mud.name).toBe('Mud');
     expect(mud.grip).toBeLessThan(firm.grip);
-    const before = surfaceAt(m, x, 179.99),
-      after = surfaceAt(m, x, 180.01);
+    const before = surfaceAt(m, roadX(m, edge), edge - 0.01),
+      after = surfaceAt(m, roadX(m, edge), edge + 0.01);
     expect(Math.abs(before.grip - after.grip)).toBeLessThan(0.02);
   });
   it('puts rut depressions in the same terrain used for rendering and collision', () => {
@@ -126,7 +127,7 @@ describe('faster driving and meaningful surfaces', () => {
           }
         });
   it('registers a real high-speed collision with a moving minibus approached too fast', () => {
-    const m = { ...MISSIONS[0], bend: 0 },
+    const m = { ...MISSIONS[2], bend: 0 },
       e = new GameEngine(m);
     try {
       const event = e.encounters.find((event) => event.kind === 'minibus')!,

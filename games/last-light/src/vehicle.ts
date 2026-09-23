@@ -2,15 +2,17 @@ import {
   clamp,
   isMud,
   onBridge,
+  rainAt,
   roadDistance,
   roadX,
   smooth,
   type Mission,
 } from './missions';
 import { roadWidth } from './routes';
-import { roadSections, sectionEnvelope } from './road-sections';
+import { creekAt, onPlank, roadSections, sectionEnvelope } from './road-sections';
 
-export const ROAD_REVISION = 5;
+/** Revision 6: every chapter has its own road, places and signature moments. */
+export const ROAD_REVISION = 6;
 export const RESTORE_DURATION = 18;
 export const TUNING = {
   speed: 22.2, // 80 km/h on firm, visible road; curves still require braking.
@@ -35,7 +37,15 @@ export function surfaceAt(
   z: number,
   waterLevel = 0,
 ): SurfaceSample {
+  const rain = rainAt(m, z);
   for (const s of roadSections(m)) {
+    if (s.kind === 'planks' && creekAt(s, z) > 0.2 && Math.abs(x - roadX(m, z)) < 10) {
+      const plank = onPlank(x - roadX(m, z));
+      // Timber runners are firm and a little slick; the creek bed is slow and loose.
+      return plank > 0.5
+        ? { name: 'Bridge', grip: 4.2 - rain * 0.3, sideGrip: 0.95, speed: 8, wet: Math.max(0.35, rain) }
+        : { name: 'Water', grip: 2.4, sideGrip: 0.8, speed: 3, wet: 1 };
+    }
     if (
       s.kind === 'flood' &&
       sectionEnvelope(z, s.z, s.length) > 0.2 &&
@@ -57,7 +67,7 @@ export function surfaceAt(
       grip: 4.4,
       sideGrip: 1.05,
       speed: TUNING.speed,
-      wet: m.rain,
+      wet: rain,
     };
   const verge = smooth(
     roadWidth(m, z) + 0.3,
@@ -74,13 +84,13 @@ export function surfaceAt(
     );
   return {
     name: verge > 0.65 ? 'Verge' : isMud(m, x, z) ? 'Mud' : 'Gravel',
-    grip: 4.8 - mud * 1.4 - verge * 0.9 - m.rain * 0.2,
+    grip: 4.8 - mud * 1.4 - verge * 0.9 - rain * 0.2,
     sideGrip: 1.15 - mud * 0.32 - verge * 0.2,
     speed:
       TUNING.speed * (1 - verge) * (1 - mud) +
       TUNING.mudSpeed * mud * (1 - verge) +
       TUNING.vergeSpeed * verge,
-    wet: Math.max(m.rain, mud),
+    wet: Math.max(rain, mud),
   };
 }
 

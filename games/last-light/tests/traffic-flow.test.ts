@@ -197,15 +197,19 @@ describe('persistent road traffic', () => {
     expect(car.distance).toBeGreaterThan(stopped + 3);
   });
   it('queues oncoming cars on firm ground until the exposed hill clears', () => {
-    const flow = new TrafficFlow(MISSIONS[0]);
-    const car = move(flow, 1, 490, 8);
-    flow.cars = [car];
-    for (let i = 0; i < 900; i++)
-      flow.update(1 / 60, { ...away, station: 365 }, []);
-    expect(car.station).toBeGreaterThanOrEqual(478);
-    expect(car.speed).toBeLessThan(0.3);
-    for (let i = 0; i < 300; i++) flow.update(1 / 60, away, []);
-    expect(car.station).toBeLessThan(478);
+    for (const m of MISSIONS.filter((m) => m.ridges.length))
+      for (const pivot of m.ridges) {
+        const flow = new TrafficFlow(m);
+        const car = move(flow, 1, pivot + 125, 8);
+        flow.cars = [car];
+        for (let i = 0; i < 900; i++)
+          flow.update(1 / 60, { ...away, station: pivot }, []);
+        expect(car.station).toBeGreaterThanOrEqual(pivot + 113);
+        expect(car.speed).toBeLessThan(0.3);
+        for (let i = 0; i < 300; i++)
+          flow.update(1 / 60, { ...away, station: pivot + 140 }, []);
+        expect(car.station).toBeLessThan(pivot + 113);
+      }
   });
   it('does not recycle into view or duplicate a safe-follow reward', () => {
     const flow = new TrafficFlow(flat),

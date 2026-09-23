@@ -7,6 +7,31 @@ import {
 } from './routes';
 import { branchSections, roadDepression, roadSections } from './road-sections';
 import { CLINICS } from './clinic-stories';
+
+export type SectionKind =
+  | 'washout'
+  | 'minibus'
+  | 'bridge'
+  | 'tree'
+  | 'flood'
+  | 'gust'
+  | 'ridge'
+  | 'herd'
+  | 'traffic'
+  | 'market'
+  | 'lorry'
+  | 'planks'
+  | 'breakdown'
+  | 'landslide';
+/** An authored road moment. +X is the driver's left when travelling along +Z. */
+export type SectionSpec = {
+  kind: SectionKind;
+  z: number;
+  length: number;
+  safeSide: number;
+};
+/** One sine component: amplitude (m), angular frequency (rad/m), phase (rad). */
+export type Wave = [number, number, number];
 export type Mission = {
   id: number;
   variant?: number;
@@ -18,9 +43,12 @@ export type Mission = {
   length: number;
   seconds: number;
   lives: number;
+  /** Rain at the clinic. With `rainStart`, the weather arrives during the drive. */
   rain: number;
+  rainStart?: number;
   night: number;
   seed: number;
+  /** Scales every lateral bend; 0 straightens the road and removes the switchbacks. */
   bend: number;
   sky: string;
   sun: string;
@@ -28,6 +56,33 @@ export type Mission = {
   bridge?: [number, number];
   fork: [number, number];
   radio: { at: number; who: string; text: string }[];
+  /** The landscape this chapter crosses, shown on the chapter card. */
+  region: string;
+  /** The chapter's signature moment, shown before the drive. */
+  signature: string;
+  /** Half-width of the ordinary road deck (m). */
+  width: number;
+  /** Lateral shape of the road. */
+  curve: Wave[];
+  /** Vertical rolling of the road deck. */
+  hills: Wave[];
+  /** Overall climb (+) or descent (−) in metres per metre. */
+  grade: number;
+  /** A broad low point in the road profile, e.g. a river valley. */
+  basin?: { at: number; depth: number; spread: number };
+  /** Hillside switchback centres (stations). Each is a radius-preserving bend. */
+  ridges: number[];
+  /** Depth of the open drop beside each switchback (m). */
+  cliff: number;
+  /** Beyond the corridor: how far valleys fall, hills rise, and how quickly they trade sides. */
+  vista: { drop: number; rise: number; roll: number };
+  sections: SectionSpec[];
+  /** Signed firm bypasses in addition to the fork and flood bypasses. */
+  detours: [number, number][];
+  /** Village centres (stations). */
+  villages: number[];
+  /** A river that follows the road and passes under the bridge. */
+  river?: { side: number; width: number };
 };
 export const MISSIONS: Mission[] = [
   {
@@ -49,32 +104,34 @@ export const MISSIONS: Mission[] = [
     sky: '#172b40',
     sun: '#ffe1a3',
     mud: [
-      [280, 320],
-      [710, 760],
+      [330, 370],
+      [690, 735],
     ],
-    fork: [450, 610],
-    radio: [
-      {
-        at: 35,
-        who: 'MINA · CLINIC',
-        text: 'You are on your way. Keep the panels safe — every light here is waiting for you.',
-      },
-      {
-        at: 210,
-        who: 'JO · DISPATCH',
-        text: 'Deep ruts ahead. Ease off before the rough ground; let the suspension work.',
-      },
-      {
-        at: 410,
-        who: 'JO · DISPATCH',
-        text: 'Road splits ahead. Right is shorter and rough. Left is a longer, firmer road. Both reach us.',
-      },
-      {
-        at: 840,
-        who: 'MINA · CLINIC',
-        text: 'I can hear the engine. Follow the teal signs into our courtyard.',
-      },
+    fork: [600, 770],
+    radio: [],
+    region: 'Open savanna valley',
+    signature: 'Market day in the village · goats at dusk',
+    width: 5.2,
+    // Long, open sweeps down into a wide valley.
+    curve: [
+      [30, 0.0047, 0.35],
+      [8, 0.0135, 1.1],
     ],
+    hills: [
+      [3.5, 0.0085, 0.2],
+      [5, 0.0031, 0.9],
+    ],
+    grade: -0.011,
+    ridges: [],
+    cliff: 54,
+    vista: { drop: 74, rise: 26, roll: 0.0036 },
+    sections: [
+      { kind: 'washout', z: 250, length: 24, safeSide: 1 },
+      { kind: 'market', z: 470, length: 44, safeSide: 1 },
+      { kind: 'herd', z: 880, length: 30, safeSide: -1 },
+    ],
+    detours: [[160, 310]],
+    villages: [85, 470, 889],
   },
   {
     id: 1,
@@ -88,40 +145,43 @@ export const MISSIONS: Mission[] = [
     length: 1160,
     seconds: 255,
     lives: 5,
-    rain: 0.65,
+    rain: 0.8,
+    rainStart: 0.05,
     night: 0.9,
     seed: 41,
-    bend: 1.2,
+    bend: 1,
     sky: '#182c37',
     sun: '#dbe1c3',
     mud: [
-      [180, 260],
-      [500, 600],
-      [860, 915],
+      [395, 470],
+      [1010, 1050],
     ],
-    fork: [410, 660],
-    radio: [
-      {
-        at: 45,
-        who: 'JO · DISPATCH',
-        text: 'The Kijani team sends their thanks. They have marked this road for you.',
-      },
-      {
-        at: 150,
-        who: 'JO · DISPATCH',
-        text: 'Mud ahead. Steady throttle, gentle steering. Braking early gives you options.',
-      },
-      {
-        at: 370,
-        who: 'JO · DISPATCH',
-        text: 'At the fork, the left-hand ridge is firmer. The short route is muddy.',
-      },
-      {
-        at: 960,
-        who: 'MINA · CLINIC',
-        text: 'We have made a dry space for the battery. Come through the front gate.',
-      },
+    fork: [330, 530],
+    radio: [],
+    region: 'Rain forest',
+    signature: 'The rain arrives · a lorry bogged in the mud',
+    width: 4.4,
+    // A narrow road that winds between the trunks.
+    curve: [
+      [4.5, 0.06, 0.9],
+      [12, 0.013, 2.1],
+      [10, 0.0052, 0.3],
     ],
+    hills: [
+      [4.5, 0.011, 0.3],
+      [2.5, 0.023, 1.4],
+    ],
+    grade: 0.004,
+    ridges: [640],
+    cliff: 54,
+    vista: { drop: 30, rise: 58, roll: 0.0061 },
+    sections: [
+      { kind: 'tree', z: 235, length: 12, safeSide: -1 },
+      { kind: 'lorry', z: 432, length: 22, safeSide: 1 },
+      { kind: 'flood', z: 900, length: 30, safeSide: -1 },
+    ],
+    detours: [],
+    villages: [85, 780, 1000],
   },
   {
     id: 2,
@@ -133,42 +193,47 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Six lives supported by restored emergency care. The riverside community has a dependable source of power.',
     length: 1210,
-    seconds: 265,
+    seconds: 270,
     lives: 6,
     rain: 0.25,
     night: 0.86,
     seed: 68,
-    bend: 1.1,
+    bend: 1,
     sky: '#193444',
     sun: '#fce2bb',
     mud: [
-      [240, 285],
-      [900, 965],
+      [335, 372],
+      [1110, 1140],
     ],
-    bridge: [490, 560],
-    fork: [430, 620],
-    radio: [
-      {
-        at: 70,
-        who: 'MINA · CLINIC',
-        text: 'The river is high. Our guide has put markers on the safe part of the bridge.',
-      },
-      {
-        at: 370,
-        who: 'JO · DISPATCH',
-        text: 'Bridge ahead: keep to the centre, under 20 kilometres an hour. The left fork goes around.',
-      },
-      {
-        at: 650,
-        who: 'JO · DISPATCH',
-        text: 'You are across. The clinic has heard the good news.',
-      },
-      {
-        at: 1020,
-        who: 'MINA · CLINIC',
-        text: 'We can see your headlights. The receiving team is at the gate.',
-      },
+    bridge: [640, 700],
+    fork: [585, 770],
+    radio: [],
+    region: 'River country',
+    signature: 'Timber plank crossing · the broken bridge',
+    width: 4.8,
+    // The road follows the river's meanders down to the crossing.
+    curve: [
+      [24, 0.0062, 1.4],
+      [8, 0.0165, 0.4],
     ],
+    hills: [
+      [2.5, 0.012, 0.6],
+      [3, 0.0045, 2.2],
+    ],
+    grade: 0.006,
+    basin: { at: 670, depth: 16, spread: 300 },
+    ridges: [905],
+    cliff: 60,
+    vista: { drop: 46, rise: 44, roll: 0.0047 },
+    sections: [
+      { kind: 'planks', z: 250, length: 16, safeSide: 1 },
+      { kind: 'minibus', z: 455, length: 12, safeSide: 1 },
+      { kind: 'bridge', z: 670, length: 60, safeSide: 1 },
+      { kind: 'traffic', z: 1065, length: 12, safeSide: -1 },
+    ],
+    detours: [[180, 320]],
+    villages: [80, 450, 1110],
+    river: { side: 1, width: 17 },
   },
   {
     id: 3,
@@ -180,41 +245,44 @@ export const MISSIONS: Mission[] = [
     outcome:
       'The maternity ward is bright again. Eight patients and their families can face the night with hope.',
     length: 1280,
-    seconds: 265,
+    seconds: 285,
     lives: 8,
     rain: 0.45,
     night: 0.88,
     seed: 93,
-    bend: 1.4,
+    bend: 1,
     sky: '#223647',
     sun: '#a3c9d5',
     mud: [
-      [260, 300],
-      [740, 800],
+      [250, 285],
+      [1000, 1040],
     ],
-    fork: [460, 680],
-    radio: [
-      {
-        at: 50,
-        who: 'MINA · CLINIC',
-        text: 'The ward is quiet. We are doing everything we can. You bring the power; we will keep caring.',
-      },
-      {
-        at: 205,
-        who: 'JO · DISPATCH',
-        text: 'Follow the reflectors. The next curve is tighter than it looks.',
-      },
-      {
-        at: 410,
-        who: 'JO · DISPATCH',
-        text: 'Left-hand route is wider. Keep your headlights on the markers.',
-      },
-      {
-        at: 1060,
-        who: 'MINA · CLINIC',
-        text: 'The porch is just ahead. I will be there with a torch.',
-      },
+    fork: [770, 970],
+    radio: [],
+    region: 'Highland escarpment',
+    signature: 'Twin switchbacks · a breakdown marked with branches',
+    width: 4.5,
+    // Short straights between tight highland bends, climbing all the way.
+    curve: [
+      [15, 0.0092, 0.5],
+      [9, 0.0165, 2.2],
+      [3.5, 0.05, 1.3],
     ],
+    hills: [
+      [3, 0.013, 1],
+      [2, 0.024, 0.2],
+    ],
+    grade: 0.02,
+    ridges: [395, 640],
+    cliff: 82,
+    vista: { drop: 96, rise: 72, roll: 0.0042 },
+    sections: [
+      { kind: 'washout', z: 205, length: 24, safeSide: -1 },
+      { kind: 'breakdown', z: 875, length: 16, safeSide: 1 },
+      { kind: 'gust', z: 1110, length: 12, safeSide: -1 },
+    ],
+    detours: [[115, 265]],
+    villages: [85, 518, 1040],
   },
   {
     id: 4,
@@ -226,48 +294,47 @@ export const MISSIONS: Mission[] = [
     outcome:
       'Twelve patients have power for their care. Five clinics now shine across the region. You brought the light; together, you kept hope alive.',
     length: 1400,
-    seconds: 290,
+    seconds: 300,
     lives: 12,
     rain: 1,
+    rainStart: 0.55,
     night: 0.96,
     seed: 121,
-    bend: 1.45,
+    bend: 1,
     sky: '#172a35',
     sun: '#c5d9cf',
     mud: [
-      [220, 280],
-      [680, 760],
-      [1060, 1120],
+      [300, 345],
+      [1170, 1210],
     ],
-    bridge: [520, 580],
-    fork: [450, 650],
-    radio: [
-      {
-        at: 45,
-        who: 'JO · DISPATCH',
-        text: 'Kijani, Mawingu, Mto and Nyota are all on the radio. Everyone is with you.',
-      },
-      {
-        at: 175,
-        who: 'JO · DISPATCH',
-        text: 'A fallen tree leaves a passage ahead. Keep to the marked side.',
-      },
-      {
-        at: 390,
-        who: 'JO · DISPATCH',
-        text: 'The bridge is narrow. The ridge route to the left remains open.',
-      },
-      {
-        at: 800,
-        who: 'MINA · CLINIC',
-        text: 'Our crew is ready. One more delivery, Amani. One more clinic.',
-      },
-      {
-        at: 1190,
-        who: 'JO · DISPATCH',
-        text: 'There it is. All those lights on the hills are the places you helped.',
-      },
+    bridge: [690, 750],
+    fork: [640, 820],
+    radio: [],
+    region: 'Storm country',
+    signature: 'A fresh landslide · every hazard, one last time',
+    width: 4.6,
+    curve: [
+      [20, 0.008, 1],
+      [11, 0.0142, 0.1],
+      [5, 0.024, 1.7],
     ],
+    hills: [
+      [4, 0.0095, 0.8],
+      [5, 0.0037, 2.6],
+    ],
+    grade: -0.006,
+    ridges: [480],
+    cliff: 70,
+    vista: { drop: 62, rise: 50, roll: 0.0052 },
+    sections: [
+      { kind: 'landslide', z: 240, length: 26, safeSide: 1 },
+      { kind: 'bridge', z: 720, length: 60, safeSide: 1 },
+      { kind: 'flood', z: 960, length: 30, safeSide: 1 },
+      { kind: 'herd', z: 1110, length: 16, safeSide: -1 },
+      { kind: 'tree', z: 1250, length: 12, safeSide: 1 },
+    ],
+    detours: [],
+    villages: [80, 600, 1119],
   },
 ];
 // Keep the established road rules and legacy score schema; story facts are separate.
@@ -296,20 +363,40 @@ export function random(seed: number) {
 }
 export function roadX(m: Mission, z: number) {
   const end = 1 - smooth(m.length - 110, m.length - 30, z);
-  return (
-    (Math.sin(z * 0.014 + m.id * 0.4) * 15 + Math.sin(z * 0.006) * 24) *
-    m.bend *
-    end
-  );
+  let x = 0;
+  for (const [amplitude, frequency, phase] of m.curve)
+    x += Math.sin(z * frequency + phase) * amplitude;
+  return x * m.bend * end;
 }
 export function roadY(m: Mission, z: number) {
-  return (
-    5 +
-    ridgeElevation(m, z) +
-    Math.sin(z * 0.009) * 3 +
-    Math.sin(z * 0.003) * 5 +
-    (m.id >= 3 ? z * 0.012 : 0)
-  );
+  let y = 5 + ridgeElevation(m, z) + m.grade * z;
+  for (const [amplitude, frequency, phase] of m.hills)
+    y += Math.sin(z * frequency + phase) * amplitude;
+  if (m.basin)
+    y -= m.basin.depth * Math.exp(-Math.pow((z - m.basin.at) / m.basin.spread, 2));
+  return y;
+}
+/** Rain at a station: chapters with `rainStart` see the weather arrive mid-drive. */
+export function rainAt(m: Mission, z: number) {
+  if (m.rainStart === undefined) return m.rain;
+  return m.rainStart + (m.rain - m.rainStart) * smooth(m.length * 0.2, m.length * 0.55, z);
+}
+/** The river's centre line (route x) at a station, when the chapter has one. */
+export function riverX(m: Mission, z: number) {
+  if (!m.river || !m.bridge) return null;
+  const mid = (m.bridge[0] + m.bridge[1]) / 2;
+  // Upstream it runs beside the road on one side, crosses under the bridge,
+  // then continues downstream on the other side.
+  const side = m.river.side * Math.tanh((mid - z) / 38);
+  const away = Math.max(0, z - mid - 50) * 0.45;
+  const meander = Math.sin(z * 0.017 + 1.3) * 8 + Math.sin(z * 0.0071 + 0.4) * 7;
+  return roadX(m, z) + side * (38 + meander) - m.river.side * away;
+}
+/** Water surface of the river: always falling downstream, level with the bridge channel. */
+export function riverLevel(m: Mission, z: number) {
+  if (!m.bridge) return -Infinity;
+  const mid = (m.bridge[0] + m.bridge[1]) / 2;
+  return roadY(m, mid) - 4.4 - (z - mid) * 0.018;
 }
 export function forkOffset(m: Mission, z: number) {
   return branchSections(m).reduce((offset, [a, b]) => {
@@ -400,21 +487,29 @@ export function heightAt(m: Mission, x: number, z: number) {
       Math.sin(x * 0.018 - z * 0.019) * 8 +
       Math.max(0, d - 55) * 0.09);
   h += macroRelief(m, x - roadX(m, z), z, d);
+  const river = riverX(m, z);
   if (m.bridge) {
     const b =
       smooth(m.bridge[0] - 25, m.bridge[0], z) *
       (1 - smooth(m.bridge[1], m.bridge[1] + 25, z));
+    // A chapter river confines the crossing channel to its own banks.
+    const banks =
+      river === null
+        ? 1
+        : 1 - smooth(m.river!.width / 2 + 6, m.river!.width / 2 + 22, Math.abs(x - river));
     const channel =
       b *
+      banks *
       smooth(2.7, 7, Math.abs(x - roadX(m, z))) *
       smooth(5, 9, Math.abs(x - routeX(m, z, true)));
     const riverBed = roadY(m, (m.bridge[0] + m.bridge[1]) / 2) - 6;
     h += (riverBed - h) * channel;
   }
+  if (river !== null) h = riverBanks(m, x, z, h, river, d, width);
   const ridge = ridgeAt(m, z),
     offset = x - roadX(m, z);
   // The abyss is part of the collider, with a short gravel shoulder and a steep face.
-  h -= ridge * (54 + m.id * 7) * smooth(width + 0.75, width + 7, -offset);
+  h -= ridge * m.cliff * smooth(width + 0.75, width + 7, -offset);
   h += ridge * 16 * smooth(width + 1.2, width + 18, offset);
   if (d < width && !onBridge(m, z)) {
     h += 0.09 * (1 - smooth(0, 5, d));
@@ -431,19 +526,59 @@ export function heightAt(m: Mission, x: number, z: number) {
   h += (roadY(m, m.length) - h) * clinicSite;
   return h;
 }
+/** Stations where the chapter river is visible: it bends away before the next switchback. */
+export function riverSpan(m: Mission): [number, number] | null {
+  if (!m.river || !m.bridge) return null;
+  const bridge = m.bridge;
+  const next = m.ridges.find((r) => r > bridge[1]);
+  return [-60, (next ?? m.length + 170) - 110];
+}
+/**
+ * The river runs in its own channel: a bed below the water, banks just above
+ * it, then a blend back to the natural slope. The drivable corridors, the
+ * switchbacks and the river's downstream end are left untouched.
+ */
+function riverBanks(
+  m: Mission,
+  x: number,
+  z: number,
+  h: number,
+  river: number,
+  d: number,
+  width: number,
+) {
+  const span = riverSpan(m)!;
+  const half = m.river!.width / 2;
+  const across = Math.abs(x - river);
+  const fade =
+    smooth(span[0] - 40, span[0], z) *
+    (1 - smooth(span[1] - 60, span[1], z)) *
+    (1 - ridgeAt(m, z));
+  const weight =
+    fade *
+    (1 - smooth(half + 3, half + 18, across)) *
+    smooth(width + 5, width + 12, d);
+  if (weight <= 0) return h;
+  const level = riverLevel(m, z);
+  const target =
+    across < half
+      ? level - 1.4 - 1.3 * (1 - smooth(0, half, across))
+      : level + 0.9 + (across - half) * 0.18;
+  return h + (target - h) * weight;
+}
 /**
  * Beyond the drivable corridor the land opens into vistas: one side falls
- * away into a broad valley while the other rises into forested hills. The
- * sides trade places along the route. Only affects ground > 45 m from the road.
+ * away into a broad valley while the other rises into hills. The sides trade
+ * places along the route. Only affects ground > 45 m from the road.
  */
 export function macroRelief(m: Mission, offset: number, z: number, d = Math.abs(offset)) {
   const reach = smooth(45, 190, d);
   if (reach <= 0) return 0;
-  const valleySide = Math.sin(z * 0.0042 + m.id * 1.7 + 0.6);
+  const valleySide = Math.sin(z * m.vista.roll + m.id * 1.7 + 0.6);
   const s = Math.sign(offset) || 1;
   const toward = valleySide * s;
-  const drop = -52 * Math.max(0, toward) * reach;
-  const rise = 38 * Math.max(0, -toward) * smooth(60, 260, d);
+  const drop = -m.vista.drop * Math.max(0, toward) * reach;
+  const rise = m.vista.rise * Math.max(0, -toward) * smooth(60, 260, d);
   const hills =
     (Math.sin(offset * 0.021 + z * 0.013 + m.id) * 0.6 +
       Math.sin(offset * 0.0071 - z * 0.009 + m.seed) * 0.8) *

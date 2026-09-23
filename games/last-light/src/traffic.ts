@@ -137,6 +137,15 @@ export function updateTraffic(
       if (distance < -20) e.state = 'clear';
     }
     if (e.state === 'crossing' && e.phaseTime > 9.6) e.state = 'clear';
+  } else if (e.kind === 'market') {
+    // People cross between the stalls unless a vehicle is hurrying through;
+    // then they wait at the verge. Nobody steps out in front of a moving truck.
+    const distance = e.z - player.z;
+    const hurried =
+      distance < 80 &&
+      distance > -e.length / 2 - 6 &&
+      Math.abs(player.speed) > 5.5;
+    e.state = hurried || player.occupied ? 'waiting' : 'crossing';
   } else if (e.kind === 'flood') {
     // The runoff rises during the approach, then holds for the committed crossing.
     if (e.z - player.z > 65) e.waterLevel = smooth(0, 8, e.elapsed) * 0.16;

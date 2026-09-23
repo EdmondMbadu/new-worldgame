@@ -1,21 +1,33 @@
 import { heightAt, roadX, routeX, smooth, type Mission } from './missions';
 
+/** Switchback centres in effect: a straightened test road has none. */
+export const pivots = (m: Mission) => (m.bend === 0 ? [] : m.ridges);
 /** Route coordinates are stable stations, not world Z. A radius-preserving bend
  * has an exact inverse: progress cannot jump to the neighbouring switchback leg.
- * Terrain, road art and collision vertices all use this same mapping. */
+ * Chapters may have several bends; their discs never overlap, so composing
+ * them keeps the inverse exact. Terrain, road art and collision vertices all
+ * use this same mapping. */
 function turn(m: Mission, radius: number) {
-  return m.bend === 0
-    ? 0
-    : (2.23 + m.id * 0.025) * (1 - smooth(15, 90, radius));
+  return (2.23 + m.id * 0.025) * (1 - smooth(15, 90, radius));
 }
-function map(m: Mission, x: number, z: number, inverse: boolean) {
-  const cx = roadX(m, 365),
+function warp(m: Mission, pivot: number, x: number, z: number, sign: number) {
+  const cx = roadX(m, pivot),
     dx = x - cx,
-    dz = z - 365;
-  const angle = turn(m, Math.hypot(dx, dz)) * (inverse ? -1 : 1);
+    dz = z - pivot;
+  const radius = Math.hypot(dx, dz);
+  if (radius >= 90) return { x, z };
+  const angle = turn(m, radius) * sign;
   const c = Math.cos(angle),
     s = Math.sin(angle);
-  return { x: cx + dx * c + dz * s, z: 365 - dx * s + dz * c };
+  return { x: cx + dx * c + dz * s, z: pivot - dx * s + dz * c };
+}
+function map(m: Mission, x: number, z: number, inverse: boolean) {
+  let p = { x, z };
+  const list = pivots(m);
+  if (inverse)
+    for (let i = list.length - 1; i >= 0; i--) p = warp(m, list[i], p.x, p.z, -1);
+  else for (const pivot of list) p = warp(m, pivot, p.x, p.z, 1);
+  return p;
 }
 export const toWorld = (m: Mission, x: number, station: number) =>
   map(m, x, station, false);
@@ -53,18 +65,31 @@ export function worldHeight(m: Mission, x: number, z: number) {
   return heightAt(m, p.x, p.z);
 }
 export function ridgeAt(m: Mission, station: number) {
-  return m.bend === 0
-    ? 0
-    : smooth(290, 314, station) * (1 - smooth(419, 445, station));
+  let ridge = 0;
+  for (const p of pivots(m))
+    ridge = Math.max(
+      ridge,
+      smooth(p - 75, p - 51, station) * (1 - smooth(p + 54, p + 80, station)),
+    );
+  return ridge;
+}
+/** The switchback whose approach or exit contains this station, if any. */
+export function nearestPivot(m: Mission, station: number) {
+  let best: number | undefined;
+  for (const p of pivots(m))
+    if (best === undefined || Math.abs(p - station) < Math.abs(best - station))
+      best = p;
+  return best;
 }
 export function roadWidth(m: Mission, station: number) {
   const ridge = ridgeAt(m, station);
-  if (!ridge) return 4.8 + Math.sin(station * 0.047) * 0.32;
+  const base = m.width + Math.sin(station * 0.047) * 0.32;
+  if (!ridge) return base;
   const a = toWorld(m, roadX(m, station - 0.1), station - 0.1);
   const b = toWorld(m, roadX(m, station + 0.1), station + 0.1);
   // Compensate the bend's lateral shear, keeping a usable 6.8–8.2 m corridor.
   const scale = Math.hypot(b.x - a.x, b.z - a.z) / 0.2;
-  return (4.8 * (1 - ridge) + (4.1 - m.id * 0.15) * ridge) * scale;
+  return (base * (1 - ridge) + (4.1 - m.id * 0.15) * ridge) * scale;
 }
 const distanceCache = new WeakMap<Mission, [Float64Array, Float64Array]>();
 export function remainingDistance(
@@ -94,11 +119,13 @@ export function remainingDistance(
 }
 
 export function ridgeElevation(m: Mission, station: number) {
-  return m.bend === 0
-    ? 0
-    : (18 + m.id * 1.5) *
-        smooth(275, 354, station) *
-        (1 - smooth(390, 505, station));
+  let rise = 0;
+  for (const p of pivots(m))
+    rise +=
+      (18 + m.id * 1.5) *
+      smooth(p - 90, p - 11, station) *
+      (1 - smooth(p + 25, p + 140, station));
+  return rise;
 }
 export function stationAhead(
   m: Mission,

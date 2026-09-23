@@ -47,9 +47,24 @@ export function makeEncounters(m: Mission): Encounter[] {
       ridge: 'HILLSIDE SWITCHBACK',
       herd: 'LANTERN CROSSING',
       traffic: 'ONCOMING VEHICLE',
+      market: 'MARKET DAY',
+      lorry: 'LORRY BOGGED IN MUD',
+      planks: 'PLANK CROSSING',
+      breakdown: 'BROKEN-DOWN TRUCK',
+      landslide: 'LANDSLIDE',
     }[s.kind],
     instruction:
-      s.kind === 'bridge'
+      s.kind === 'market'
+        ? 'People are crossing between the stalls. Walking pace through the market: under 18 km/h.'
+        : s.kind === 'lorry'
+          ? `A lorry is stuck on your ${driverSide(-s.safeSide)}. Crawl past on the firm ${driverSide(s.safeSide)} side, or take the left detour.`
+          : s.kind === 'planks'
+            ? 'Two timber runners cross the creek. Line up straight and crawl over, or take the left detour.'
+            : s.kind === 'breakdown'
+              ? `Branches mark a broken-down truck on your ${driverSide(-s.safeSide)}. Slow down and pass on your ${driverSide(s.safeSide)}.`
+              : s.kind === 'landslide'
+                ? `Earth and rock cover the road. Crawl through the marked passage on your ${driverSide(s.safeSide)}.`
+                : s.kind === 'bridge'
         ? 'Wait behind the line until the truck clears. The left ridge bypass stays open.'
         : s.kind === 'washout'
           ? `Brake early. Firm strip on your ${driverSide(s.safeSide)}; left detour avoids the washout.`
@@ -94,6 +109,13 @@ export function makeEncounters(m: Mission): Encounter[] {
     stopTime: 0,
   }));
 }
+/** Stationary vehicles: their body stands in the closed half of the road. */
+export const PARKED: Partial<Record<EncounterKind, { offset: number; half: [number, number, number]; lift: number }>> = {
+  lorry: { offset: 1.95, half: [1.22, 1.42, 3.6], lift: 1.5 },
+  breakdown: { offset: 2.3, half: [1.02, 1.05, 2.7], lift: 1.1 },
+};
+/** Encounters whose actor has a physical body. */
+export const SOLID_ACTORS: EncounterKind[] = ['minibus', 'bridge', 'tree', 'traffic', 'lorry', 'breakdown'];
 export function warningDistance(speed: number, wet: number) {
   const v = Math.abs(speed);
   return Math.max(145, v * 3 + (v * v) / (2 * (wet > 0.4 ? 4.5 : 6)) + 20);
@@ -101,12 +123,15 @@ export function warningDistance(speed: number, wet: number) {
 export function encounterPose(m: Mission, event: Encounter) {
   const moving = ['bridge', 'minibus', 'traffic'].includes(event.kind);
   const z = moving ? event.actorZ : event.z;
+  const parked = PARKED[event.kind];
   let offset =
     event.kind === 'bridge'
       ? 0
       : moving
         ? event.actorOffset
-        : -event.side * 1.75;
+        : parked
+          ? -event.side * parked.offset
+          : -event.side * 1.75;
   if (event.kind === 'bridge' && event.state === 'clearing')
     offset = -event.side * 4.3 * smooth(0, 16, event.z - event.length / 2 - z);
   if (event.kind === 'bridge' && event.state === 'clear')

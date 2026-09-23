@@ -1,7 +1,16 @@
 import { ridgeAt, routePoint, stationAhead } from './routes';
 import type { GameEngine, Input } from './engine';
+import type { Encounter } from './encounters';
 import { clamp, routeX, roadX, isMud, onBridge, smooth } from './missions';
 
+/** Lateral line (m toward the safe side) and speed (m/s) for passing a hazard. */
+const PASSING_LINE: Partial<Record<Encounter['kind'], [number, number]>> = {
+  washout: [3.35, 6.5],
+  flood: [3.35, 5.5],
+  lorry: [2.6, 6],
+  breakdown: [2.2, 8],
+  landslide: [2.9, 5],
+};
 /** Ordinary-input test driver. Reads road signs/encounters; never edits simulation state. */
 export function driveInput(
   e: GameEngine,
@@ -33,7 +42,11 @@ export function driveInput(
       event.z - e.progress < 125 &&
       event.z - e.progress > -event.length / 2 - 25,
   );
-  if (event && Math.abs(x - roadX(m, z)) < 8) {
+  // Only hazards on the driver's own route matter; a signed bypass goes around them.
+  const onRoute =
+    !!event &&
+    Math.abs(routeX(m, event.z, alternate) - roadX(m, event.z)) < 2;
+  if (event && onRoute && Math.abs(x - roadX(m, z)) < 8) {
     const distance = event.z - e.progress;
     if (event.kind === 'herd') {
       if (event.state !== 'clear')
@@ -46,6 +59,14 @@ export function driveInput(
       if (event.state !== 'clear')
         encounterLimit = Math.sqrt(Math.max(0, stop - e.progress) * 6);
       else encounterLimit = 5.5;
+    } else if (event.kind === 'market' || event.kind === 'planks') {
+      // Crawl through at a steady walking pace; the planks need the centre line.
+      const crawl = event.kind === 'market' ? 4.2 : 2.9;
+      const entry = event.z - event.length / 2 - 4;
+      if (e.progress < event.z + event.length / 2 + 2)
+        encounterLimit = Math.sqrt(
+          crawl * crawl + 5 * Math.max(0, entry - e.progress),
+        );
     } else {
       const blend =
         smooth(event.z - 90, event.z - 35, z) *
@@ -55,11 +76,9 @@ export function driveInput(
             event.z + event.length / 2 + 35,
             z,
           ));
-      x +=
-        event.side *
-        (event.kind === 'washout' || event.kind === 'flood' ? 3.35 : 3.15) *
-        blend;
-      if (distance < 65) encounterLimit = event.kind === 'flood' ? 5.5 : 6.5;
+      const line = PASSING_LINE[event.kind] ?? [3.15, 6.5];
+      x += event.side * line[0] * blend;
+      if (distance < 65) encounterLimit = line[1];
     }
   }
   // Read visible road users and use the same steer/pedals as a player. A
@@ -89,6 +108,7 @@ export function driveInput(
   );
   const hazard =
     event &&
+    onRoute &&
     !['minibus', 'traffic'].includes(event.kind) &&
     event.z - e.progress < 85 &&
     Math.abs(routeX(m, z, alternate) - roadX(m, z)) < 8;
@@ -96,8 +116,19 @@ export function driveInput(
   if (!hazard && !onRidge) {
     if (lead) {
       const gap = lead.station - e.progress;
+      // Never overtake where the signed bypass splits from or rejoins the road.
+      const split = [0, 30, 60].some(
+        (ahead) =>
+          Math.abs(
+            routeX(m, e.progress + ahead, true) - roadX(m, e.progress + ahead),
+          ) > 0.3 &&
+          Math.abs(
+            routeX(m, e.progress + ahead, true) - roadX(m, e.progress + ahead),
+          ) < 12,
+      );
       const pass =
         !conservative &&
+        !split &&
         incoming.length === 0 &&
         ridgeAt(m, e.progress + 25) < 0.01;
       x =
@@ -108,12 +139,17 @@ export function driveInput(
           encounterLimit,
           Math.max(0, lead.speed + (gap - 17) * 0.5),
         );
+      // An abandoned overtake never cuts in beside the car: hold the outside
+      // line and drop back behind it first.
+      const beside = e.roadPosition.x - routeX(m, e.progress, alternate) > 0.6;
+      if (!pass && beside && gap > -9 && gap < 11)
+        x = routeX(m, z, alternate) + 2.15;
     } else if (incoming.some((car) => car.station - e.progress < 85)) {
       x = routeX(m, z, alternate) - 2.35;
     }
   }
   if (
-    hazard &&
+    (hazard || onRidge) &&
     lead &&
     lead.station > e.progress &&
     lead.station - e.progress < 55

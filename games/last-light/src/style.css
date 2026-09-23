@@ -266,6 +266,20 @@ button:active:not(:disabled) {
 .preview-distance {
   color: #c0cabc;
 }
+.mission-preview > .preview-region {
+  margin-top: 12px;
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #e5d7af;
+}
+.mission-preview > .preview-signature {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #f1ead3;
+}
 .campaign {
   padding: 20px 0 0;
   position: relative;

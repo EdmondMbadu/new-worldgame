@@ -1,4 +1,4 @@
-import type { Mission } from './missions';
+import { rainAt, type Mission } from './missions';
 export const NIGHT_PROFILES = [
   {
     name: 'MOONLIT VALLEY',
@@ -85,9 +85,10 @@ export function darknessAt(m: Mission, progress: number) {
   return t * t * (3 - 2 * t);
 }
 export function beamMode(m: Mission, speed: number, progress?: number) {
+  const rain = progress === undefined ? m.rain : rainAt(m, progress);
   if (progress !== undefined && darknessAt(m, progress) < 0.3)
-    return m.rain > 0.3 ? 'DAY LIGHTS · RAIN' : 'DAYLIGHT';
-  return m.id === 3 || (m.rain > 0.6 && speed < 13)
+    return rain > 0.3 ? 'DAY LIGHTS · RAIN' : 'DAYLIGHT';
+  return m.id === 3 || (rain > 0.6 && speed < 13)
     ? 'FOG BEAMS'
     : speed > 10
       ? 'HIGH BEAMS'

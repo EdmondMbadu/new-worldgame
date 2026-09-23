@@ -17,6 +17,7 @@ import { encounterPose, type Encounter } from './encounters';
 import { heightAt, roadX, smooth, type Mission } from './missions';
 import type { GameEngine } from './engine';
 import { buildRoadEncounter } from './road-art';
+import { SetPieceArt } from './set-piece-art';
 
 export function windMaterial(
   mat: T.MeshStandardMaterial,
@@ -69,7 +70,19 @@ export class LivingWorld {
         this.herds.push(herd);
         continue;
       }
-      if (['washout', 'flood', 'ridge'].includes(event.kind)) continue;
+      if (
+        [
+          'washout',
+          'flood',
+          'ridge',
+          'market',
+          'lorry',
+          'planks',
+          'breakdown',
+          'landslide',
+        ].includes(event.kind)
+      )
+        continue;
       const g = new T.Group(),
         fixed = new T.Group();
       g.add(fixed);
@@ -289,7 +302,10 @@ export class LivingWorld {
     }
     this.village = new VillageLife(mission, low);
     this.group.add(this.village.group);
+    this.setPieces = new SetPieceArt(mission, events, low, this.time);
+    this.group.add(this.setPieces.group);
   }
+  private setPieces: SetPieceArt;
 
   private lastClock = 0;
   update(e: GameEngine, clock: number) {
@@ -325,11 +341,16 @@ export class LivingWorld {
       herd.update(clock);
     });
     this.village.update(clock, e.position);
+    this.setPieces.update(
+      { ...e.position, station: e.progress, speed: e.speed },
+      clock,
+    );
     this.lastClock = clock;
   }
 
   dispose() {
     this.herds.forEach((herd) => herd.dispose());
     this.village.dispose();
+    this.setPieces.dispose();
   }
 }

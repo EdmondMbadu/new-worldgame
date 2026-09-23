@@ -1,7 +1,11 @@
-import { clamp, random, routeX, smooth, type Mission } from './missions';
-import { ridgeAt, routePoint, toRoute, worldHeight } from './routes';
+import { clamp, random, roadX, routeX, smooth, type Mission } from './missions';
+import { pivots, ridgeAt, routePoint, toRoute, worldHeight } from './routes';
 import { encounterPose, type Encounter } from './encounters';
-import { roadSections } from './road-sections';
+import { BLOCKERS, roadSections } from './road-sections';
+
+/** A blocker on the main road that routine traffic passes (not one inside a signed bypass). */
+const onTrafficLane = (m: Mission, z: number) =>
+  Math.abs(routeX(m, z, true) - roadX(m, z)) < 1;
 
 export type TrafficPose = {
   x: number;
@@ -42,10 +46,11 @@ export const trafficLaneOffset = (
 ) => {
   let lane = -direction * (2.35 - ridgeAt(m, station) * 0.2);
   for (const section of roadSections(m))
-    if (section.kind === 'tree') {
+    if (BLOCKERS.includes(section.kind) && onTrafficLane(m, section.z)) {
+      // Single file past the blocker only; waiting cars stay in their own lane.
       const blend =
-        smooth(section.z - 55, section.z - 24, station) *
-        (1 - smooth(section.z + 24, section.z + 55, station));
+        smooth(section.z - 40, section.z - 16, station) *
+        (1 - smooth(section.z + 16, section.z + 40, station));
       lane += (section.safeSide * 3.25 - lane) * blend;
     }
   return lane;
@@ -156,9 +161,11 @@ export class TrafficFlow {
       const path = paths[direction > 0 ? 0 : 1];
       let station =
         i === 0 ? 62 : 145 + ((i - 1) * (mission.length - 210)) / (count - 1);
-      // Start with an empty exposed bend. Its approaching lights gather at the far end.
-      if (station > 275 && station < 452)
-        station = direction > 0 ? 260 - i * 12 : 470 + i * 12;
+      // Start with empty exposed bends. Their approaching lights gather at the far end.
+      for (let pass = 0; pass < 3; pass++)
+        for (const p of pivots(mission))
+          if (station > p - 90 && station < p + 87)
+            station = direction > 0 ? p - 105 - i * 12 : p + 105 + i * 12;
       const kind = i % 3 === 0 ? 'pickup' : 'compact';
       const distance = path.atStation(station),
         sample = path.sample(distance);
@@ -265,15 +272,24 @@ export class TrafficFlow {
         target = Math.min(target, 5.8);
       // Give the player priority on the exposed ascent. Opposing cars wait on
       // firm ground beyond its exit; their following cars form a spaced queue.
-      if (car.direction < 0 && car.station > 478 && player.station < 492) {
-        const gap = car.distance - car.path.atStation(482);
+      const next = pivots(m).find((p) => player.station < p + 127);
+      if (next !== undefined && car.direction < 0 && car.station > next + 113) {
+        const gap = car.distance - car.path.atStation(next + 117);
         target = Math.min(target, Math.sqrt(Math.max(0, gap) * 5));
         if (gap < 45) car.state = 'yielding';
       }
       // Road users also yield to the lantern crossing, including its admission window.
       for (const event of events) {
+        const blocker =
+          BLOCKERS.includes(event.kind) && onTrafficLane(m, event.z);
+        // Everyone slows to walking pace through the market.
         if (
-          event.kind === 'tree' &&
+          event.kind === 'market' &&
+          Math.abs(car.station - event.z) < event.length / 2 + 25
+        )
+          target = Math.min(target, 3.6);
+        if (
+          blocker &&
           car.direction < 0 &&
           car.station > event.z + 40 &&
           (player.station < event.z + 55 ||
@@ -316,7 +332,7 @@ export class TrafficFlow {
           }
         }
         if (
-          event.kind === 'tree' &&
+          blocker &&
           car.direction > 0 &&
           car.station < event.z - 50 &&
           this.cars.some(
