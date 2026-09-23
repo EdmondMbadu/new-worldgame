@@ -134,6 +134,8 @@ function model(pickup: boolean, color: string) {
 }
 
 export class TrafficArt {
+  /** Lamps throw real light only as the day fades. */
+  lightScale = 1;
   group = new T.Group();
   private actors: {
     car: TrafficCar;
@@ -287,7 +289,7 @@ export class TrafficArt {
     nearby.sort((a, b) => a.distance - b.distance);
     this.lights.forEach((light, i) => {
       const car = nearby[i]?.car;
-      light.intensity = car ? 38 : 0;
+      light.intensity = car ? 38 * this.lightScale : 0;
       if (!car) return;
       const p = car.pose;
       light.position.set(

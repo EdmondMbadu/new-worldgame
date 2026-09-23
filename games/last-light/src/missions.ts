@@ -399,6 +399,7 @@ export function heightAt(m: Mission, x: number, z: number) {
     (Math.sin(x * 0.055 + z * 0.01) * 7 +
       Math.sin(x * 0.018 - z * 0.019) * 8 +
       Math.max(0, d - 55) * 0.09);
+  h += macroRelief(m, x - roadX(m, z), z, d);
   if (m.bridge) {
     const b =
       smooth(m.bridge[0] - 25, m.bridge[0], z) *
@@ -430,12 +431,35 @@ export function heightAt(m: Mission, x: number, z: number) {
   h += (roadY(m, m.length) - h) * clinicSite;
   return h;
 }
+/**
+ * Beyond the drivable corridor the land opens into vistas: one side falls
+ * away into a broad valley while the other rises into forested hills. The
+ * sides trade places along the route. Only affects ground > 45 m from the road.
+ */
+export function macroRelief(m: Mission, offset: number, z: number, d = Math.abs(offset)) {
+  const reach = smooth(45, 190, d);
+  if (reach <= 0) return 0;
+  const valleySide = Math.sin(z * 0.0042 + m.id * 1.7 + 0.6);
+  const s = Math.sign(offset) || 1;
+  const toward = valleySide * s;
+  const drop = -52 * Math.max(0, toward) * reach;
+  const rise = 38 * Math.max(0, -toward) * smooth(60, 260, d);
+  const hills =
+    (Math.sin(offset * 0.021 + z * 0.013 + m.id) * 0.6 +
+      Math.sin(offset * 0.0071 - z * 0.009 + m.seed) * 0.8) *
+    16 *
+    reach;
+  return drop + rise + hills;
+}
 export function pathLength(m: Mission, from = 0, alt = false) {
   return remainingDistance(m, from, alt);
 }
 
-export function makeTerrain(m: Mission) {
-  const offsets = [
+/** Lateral terrain sample offsets from the road centre (m). */
+export const TERRAIN_OFFSETS = (() => {
+  return [
+    -330,
+    -265,
     -200,
     -140,
     -100,
@@ -449,7 +473,12 @@ export function makeTerrain(m: Mission) {
     100,
     140,
     200,
+    265,
+    330,
   ];
+})();
+export function makeTerrain(m: Mission) {
+  const offsets = TERRAIN_OFFSETS;
   const cols = offsets.length,
     rows = Math.ceil(m.length + 140);
   const vertices = new Float32Array((rows + 1) * cols * 3);

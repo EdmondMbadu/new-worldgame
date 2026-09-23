@@ -28,7 +28,7 @@ import type { Controls } from "./input";
 import { Soundtrack } from "./audio";
 import { driveInput } from "./qa-driver";
 import { branchSections } from "./road-sections";
-import { beamMode, nightProfile } from "./night";
+import { beamMode, chapterLook } from "./night";
 import { CLINICS } from "./clinic-stories";
 import { ClinicStoryView } from "./ClinicStory";
 
@@ -756,7 +756,7 @@ export default function App() {
             <span>{mission.place}</span>
             <span className="preview-distance">
               {(pathLength(mission) / 1000).toFixed(1)} km ·{" "}
-              {nightProfile(mission).name.toLowerCase()}
+              {chapterLook(mission).name.toLowerCase()}
             </span>
           </aside>
           <section className="campaign" aria-label="Choose a chapter">
@@ -944,7 +944,7 @@ export default function App() {
                       <small className="traffic-status">{e.trafficHint}</small>
                     )}
                     <small className="beam-status">
-                      ◌ {beamMode(e.mission, Math.abs(e.speed))}
+                      ◌ {beamMode(e.mission, Math.abs(e.speed), e.progress)}
                     </small>
                   </div>
                   {e.upcomingEncounter && (

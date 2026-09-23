@@ -31,6 +31,8 @@ export class Soundtrack {
   private nodes: AudioNode[] = [];
   private lastCue = '';
   private lastImpact = 0;
+  private lastContact = 0;
+  private lastKnock = 0;
   private tuneTime = 0;
   private lastNote = -1;
   private lastBird = -1;
@@ -67,6 +69,8 @@ export class Soundtrack {
     }
     this.lastCue = '';
     this.lastImpact = 0;
+    this.lastContact = 0;
+    this.lastKnock = 0;
     this.lastPower = 0;
     this.playlist?.request(0);
   }
@@ -447,6 +451,16 @@ export class Soundtrack {
       this.lastImpact = e.impacts;
       this.impact(0.8);
       this.tone(58, 0.17, 0.055);
+    } else if ((e.contactSerial ?? 0) > this.lastContact) {
+      // Non-damaging knocks still sound physical: a body thud scaled by force.
+      this.impact(0.2 + (e.contactStrength ?? 0) * 0.5, 320);
+      this.tone(72, 0.1, 0.03 * (0.5 + (e.contactStrength ?? 0)));
+    }
+    this.lastContact = e.contactSerial ?? 0;
+    if ((e.knocked?.length ?? 0) > this.lastKnock) {
+      this.lastKnock = e.knocked.length;
+      this.impact(0.28, 1400);
+      this.tone(640, 0.05, 0.012);
     }
     const power = restoring
       ? e.restoreTime > 12

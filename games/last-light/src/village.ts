@@ -1,10 +1,11 @@
 import * as T from 'three';
 import { batch, box, cylinder, sphere, label, material } from './art';
 import { createStaff } from './staff';
-import { heightAt, roadX, random, type Mission } from './missions';
+import { heightAt, roadX, type Mission } from './missions';
 import { roadSections } from './road-sections';
 import { toWorld } from './routes';
 import { bendStatic } from './route-art';
+import { sceneryLayout } from './scenery-layout';
 
 export class VillageLife {
   group = new T.Group();
@@ -19,13 +20,12 @@ export class VillageLife {
     private m: Mission,
     low: boolean,
   ) {
-    const rng = random(m.seed + 724),
-      fixed = new T.Group();
-    const plaster = ['#bdad91', '#947b5d', '#c3b699'].map((c) => material(c));
-    const roof = material('#738582', 0.58, 0.35),
+    const fixed = new T.Group();
+    const plaster = ['#c98a5e', '#a8603c', '#ddd2bc'].map((c) => material(c, 0.92));
+    const roof = material('#8a6a52', 0.62, 0.4),
       timber = material('#61503c'),
       stone = material('#827c65');
-    const trim = material('#447e75'),
+    const trim = material('#2f6f8f'),
       iron = material('#667573', 0.4, 0.55),
       soil = material('#8c8066');
     const warm = material('#dbaa68');
@@ -34,17 +34,19 @@ export class VillageLife {
     this.lamps.push(warm);
     const herd = roadSections(m).find((e) => e.kind === 'herd')!;
     const sites = [85, m.bridge ? 643 : 546, herd.z + 9];
+    const layout = sceneryLayout(m);
     sites.forEach((z, site) => {
-      for (let house = 0; house < (low ? 4 : 6); house++) {
-        const side = house % 2 ? 1 : -1;
-        const hz = z + (Math.floor(house / 2) - 1) * 20 + rng() * 5;
-        const hx = roadX(m, hz) + side * (15 + rng() * 8);
+      for (const h of layout.homes.filter((h) => h.site === site)) {
+        const house = h.index,
+          side = h.side,
+          hz = h.z,
+          hx = h.x;
         const y = heightAt(m, hx, hz);
         const home = new T.Group();
         home.position.set(hx, y, hz);
-        home.rotation.y = (side > 0 ? -0.7 : 0.65) + (rng() - 0.5) * 0.35;
-        const width = 4.7 + rng() * 1.8,
-          depth = 4.3 + rng(),
+        home.rotation.y = h.yaw;
+        const width = h.width,
+          depth = h.depth,
           wall = plaster[house % 3];
         box(home, stone, 0, -0.3, 0, width + 0.6, 1.2, depth + 0.6);
         box(home, wall, 0, 1.4, 0, width, 2.8, depth, 0.05);

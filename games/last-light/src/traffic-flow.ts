@@ -32,6 +32,8 @@ export type TrafficCar = {
   followTime: number;
   laps: number;
   state: 'cruising' | 'following' | 'yielding' | 'impact';
+  /** Displacement from a collision: the car is shoved, spins a little, then recovers its lane. */
+  shove?: { x: number; z: number; yaw: number; vx: number; vz: number; vyaw: number };
 };
 export const trafficLaneOffset = (
   m: Mission,
@@ -211,6 +213,16 @@ export class TrafficFlow {
       (c) => Math.hypot(c.pose.x - x, c.pose.z - z) < radius,
     );
   }
+  /** Push a struck car along the contact normal (world m/s) with a little spin. */
+  push(id: number, vx: number, vz: number, spin: number) {
+    const car = this.cars[id];
+    const s = (car.shove ??= { x: 0, z: 0, yaw: 0, vx: 0, vz: 0, vyaw: 0 });
+    const cap = Math.hypot(vx, vz);
+    const k = cap > 6 ? 6 / cap : 1;
+    s.vx += vx * k;
+    s.vz += vz * k;
+    s.vyaw += clamp(spin, -1.6, 1.6);
+  }
   hit(id: number) {
     const car = this.cars[id];
     car.clean = false;
@@ -388,6 +400,24 @@ export class TrafficFlow {
       const sample = car.path.sample(car.distance);
       car.pose = sample.pose;
       car.station = sample.station;
+      const shove = car.shove;
+      if (shove) {
+        shove.x += shove.vx * dt;
+        shove.z += shove.vz * dt;
+        shove.yaw += shove.vyaw * dt;
+        const drag = Math.exp(-dt * 3.2),
+          settle = Math.exp(-dt * (car.contactHeld ? 0.05 : 0.45));
+        shove.vx *= drag;
+        shove.vz *= drag;
+        shove.vyaw *= drag;
+        if (Math.hypot(shove.vx, shove.vz) < 0.3) {
+          shove.x *= settle;
+          shove.z *= settle;
+          shove.yaw *= settle;
+        }
+        car.pose = { ...car.pose, x: car.pose.x + shove.x, z: car.pose.z + shove.z, yaw: car.pose.yaw + shove.yaw };
+        if (Math.abs(shove.x) + Math.abs(shove.z) + Math.abs(shove.yaw) < 0.01) car.shove = undefined;
+      }
       car.wheelSpin += Math.abs(car.distance - oldDistance) / 0.36;
       if (moveLimit < car.speed * dt) {
         car.speed = moveLimit / dt;
@@ -416,6 +446,7 @@ export class TrafficFlow {
           !this.occupied(entry.pose.x, entry.pose.z, 20)
         ) {
           car.distance = start;
+          car.shove = undefined;
           car.pose = entry.pose;
           car.previous = { ...entry.pose };
           car.station = entry.station;

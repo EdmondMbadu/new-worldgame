@@ -25,6 +25,7 @@ import {
   type Encounter,
 } from './encounters';
 import RAPIER from '@dimforge/rapier3d-compat';
+import { bridgeRails, sceneryLayout, TRUNK_RADIUS, worldPose } from './scenery-layout';
 import {
   clamp,
   heightAt,
@@ -75,6 +76,12 @@ export type Result = {
 };
 export type Notice = { who: string; text: string; until: number };
 let initialization: Promise<void> | undefined;
+// Terrain is group 1. The truck's outline shells skip it (the chassis box and the
+// wheel rays already own ground contact), which keeps them cheap to simulate.
+const TERRAIN_GROUPS = (0x0001 << 16) | 0xffff;
+const SHELL_GROUPS = (0x0002 << 16) | 0xfffe;
+// Static scenery ignores terrain and other scenery: only moving bodies test against it.
+const SCENERY_GROUPS = (0x0004 << 16) | 0xfffa;
 export const initPhysics = () =>
   (initialization ??= RAPIER.init() as Promise<void>);
 export class GameEngine {
@@ -127,6 +134,12 @@ export class GameEngine {
   rewardUntil = 0;
   encounters: Encounter[];
   traffic: TrafficFlow;
+  /** Posts and signs the truck has knocked over (index into the scenery layout). */
+  knocked: { index: number; vx: number; vz: number; at: number }[] = [];
+  /** Increments on every physical contact, damaging or not; strength 0..1. */
+  contactSerial = 0;
+  contactStrength = 0;
+  private chassisHandles = new Set<number>();
   private trafficBodies: RAPIER.RigidBody[] = [];
   private trafficColliders = new Map<number, number>();
   wheelSurfaces: ReturnType<typeof surfaceAt>[] = [];
@@ -162,7 +175,9 @@ export class GameEngine {
       RAPIER.ColliderDesc.trimesh(
         this.terrain.vertices,
         this.terrain.indices,
-      ).setFriction(0.8),
+      )
+        .setFriction(0.8)
+        .setCollisionGroups(TERRAIN_GROUPS),
     );
     this.body = this.world.createRigidBody(
       RAPIER.RigidBodyDesc.dynamic()
@@ -183,6 +198,33 @@ export class GameEngine {
         .setContactForceEventThreshold(14000),
       this.body,
     );
+    // The chassis box sets mass and handling. Massless shells give the rest of the
+    // visible truck (nose, cab, bed, tail) a physical outline, so contact happens
+    // where the paint is instead of half a metre inside it.
+    this.chassisHandles.add(this.body.collider(0).handle);
+    for (const [hx, hy, hz, x, y, z] of [
+      [0.93, 0.28, 0.34, 0, 0.12, 2.1],
+      [0.93, 0.28, 0.3, 0, 0.16, -2.12],
+      [0.84, 0.34, 0.98, 0, 1.1, 0.04],
+      [0.9, 0.24, 0.66, 0, 0.62, -1.6],
+    ]) {
+      const shell = this.world.createCollider(
+        RAPIER.ColliderDesc.cuboid(hx, hy, hz)
+          .setTranslation(x, y, z)
+          .setDensity(0)
+          .setCollisionGroups(SHELL_GROUPS)
+          .setFriction(0.3)
+          .setRestitution(0.08)
+          .setActiveEvents(
+            RAPIER.ActiveEvents.CONTACT_FORCE_EVENTS |
+              RAPIER.ActiveEvents.COLLISION_EVENTS,
+          )
+          .setContactForceEventThreshold(14000),
+        this.body,
+      );
+      this.chassisHandles.add(shell.handle);
+    }
+    this.buildScenery(mission);
     this.vehicle = this.world.createVehicleController(this.body);
     this.vehicle.indexUpAxis = 1;
     this.vehicle.setIndexForwardAxis = 2;
@@ -671,34 +713,42 @@ export class GameEngine {
     });
     let collisionStarted = false;
     let trafficDamage = 0;
-    const chassis = this.body.collider(0).handle;
+    const chassis = this.chassisHandles;
     // CCD can stop a fast impact without emitting a contact-force event.
     // A new chassis contact plus measured speed loss still represents a real hit.
     this.contactQueue.drainCollisionEvents((a, b, start) => {
-      if (start && (a === chassis || b === chassis)) {
-        collisionStarted = true;
-        const id = this.trafficColliders.get(a === chassis ? b : a);
-        if (id !== undefined) {
-          const car = this.traffic.cars[id];
-          const dx = car.pose.x - p.x,
-            dz = car.pose.z - p.z,
-            length = Math.hypot(dx, dz) || 1;
-          const closing =
-            ((v.x - Math.sin(car.pose.yaw) * car.speed) * dx +
-              (v.z - Math.cos(car.pose.yaw) * car.speed) * dz) /
-            length;
-          trafficDamage = Math.max(
-            trafficDamage,
-            clamp((closing - 2) * 1.3, 0, 22),
-          );
-          this.traffic.hit(id);
+      if (!start || (!chassis.has(a) && !chassis.has(b))) return;
+      const other = chassis.has(a) ? b : a;
+      collisionStarted = true;
+      const id = this.trafficColliders.get(other);
+      if (id !== undefined) {
+        const car = this.traffic.cars[id];
+        const dx = car.pose.x - p.x,
+          dz = car.pose.z - p.z,
+          length = Math.hypot(dx, dz) || 1;
+        const closing =
+          ((v.x - Math.sin(car.pose.yaw) * car.speed) * dx +
+            (v.z - Math.cos(car.pose.yaw) * car.speed) * dz) /
+          length;
+        trafficDamage = Math.max(
+          trafficDamage,
+          clamp((closing - 2) * 1.3, 0, 22),
+        );
+        // Momentum goes somewhere: the struck car is shoved and turns away.
+        if (closing > 0.5) {
+          const nx = dx / length,
+            nz = dz / length;
+          const lateral = nx * Math.cos(car.pose.yaw) - nz * Math.sin(car.pose.yaw);
+          this.traffic.push(id, nx * closing * 0.55, nz * closing * 0.55, lateral * closing * 0.18);
         }
+        this.traffic.hit(id);
       }
     });
     this.collisionGrace = collisionStarted
       ? 0.08
       : Math.max(0, this.collisionGrace - dt);
     this.sync();
+    this.sweepPosts();
     this.wheelSpin += (this.speed * dt) / 0.43;
     const speedLost = Math.max(
       0,
@@ -718,6 +768,10 @@ export class GameEngine {
       this.previousSprings[i] = spring;
     }
     this.roadPulse = Math.max(this.roadPulse, clamp(compression / 7, 0, 1));
+    if (collisionStarted) {
+      this.contactSerial++;
+      this.contactStrength = clamp(Math.max(speedLost / 9, contactForce / 60000), 0.06, 1);
+    }
     const damage = impactDamage(
       contactForce > 14000 || this.collisionGrace > 0 ? speedLost : 0,
       grounded && this.body.linvel().y > v.y + 2 ? -v.y : 0,
@@ -960,6 +1014,163 @@ export class GameEngine {
         }
       }
     }
+  }
+  /**
+   * Solid roadside scenery shares the art's deterministic layout. All of it is
+   * merged into one static trimesh of closed shapes: one collider instead of
+   * hundreds keeps the per-step physics cost where it was.
+   */
+  private buildScenery(m: Mission) {
+    const layout = sceneryLayout(m);
+    const reach = (x: number, z: number) => roadDistance(m, x, z) < 45;
+    const v: number[] = [],
+      f: number[] = [];
+    const prism = (x: number, y0: number, y1: number, z: number, r0: number, r1: number, sides = 8) => {
+      const base = v.length / 3;
+      for (let i = 0; i < sides; i++) {
+        const a = (i / sides) * Math.PI * 2;
+        v.push(x + Math.cos(a) * r0, y0, z + Math.sin(a) * r0);
+        v.push(x + Math.cos(a) * r1, y1, z + Math.sin(a) * r1);
+      }
+      v.push(x, y0, z, x, y1, z);
+      const bottom = base + sides * 2,
+        top = bottom + 1;
+      for (let i = 0; i < sides; i++) {
+        const a = base + i * 2,
+          b = base + ((i + 1) % sides) * 2;
+        f.push(a, b, a + 1, a + 1, b, b + 1, bottom, b, a, top, a + 1, b + 1);
+      }
+    };
+    const cuboid = (x: number, y: number, z: number, hx: number, hy: number, hz: number, yaw: number) => {
+      const base = v.length / 3,
+        c = Math.cos(yaw),
+        s = Math.sin(yaw);
+      for (const dy of [-hy, hy])
+        for (const [dx, dz] of [
+          [-hx, -hz],
+          [hx, -hz],
+          [hx, hz],
+          [-hx, hz],
+        ])
+          v.push(x + dx * c + dz * s, y + dy, z - dx * s + dz * c);
+      const quads = [
+        [0, 1, 2, 3],
+        [4, 7, 6, 5],
+        [0, 4, 5, 1],
+        [1, 5, 6, 2],
+        [2, 6, 7, 3],
+        [3, 7, 4, 0],
+      ];
+      for (const [a, b, cc, d] of quads) f.push(base + a, base + b, base + cc, base + a, base + cc, base + d);
+    };
+    const t = (1 + Math.sqrt(5)) / 2;
+    const ico = [
+      [-1, t, 0], [1, t, 0], [-1, -t, 0], [1, -t, 0], [0, -1, t], [0, 1, t],
+      [0, -1, -t], [0, 1, -t], [t, 0, -1], [t, 0, 1], [-t, 0, -1], [-t, 0, 1],
+    ].map(([a, b, c]) => {
+      const l = Math.hypot(a, b, c);
+      return [a / l, b / l, c / l];
+    });
+    const icoFaces = [
+      0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11, 1, 5, 9, 5, 11, 4, 11, 10, 2, 10, 7, 6, 7, 1, 8,
+      3, 9, 4, 3, 4, 2, 3, 2, 6, 3, 6, 8, 3, 8, 9, 4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9, 8, 1,
+    ];
+    for (const plant of layout.plants) {
+      const radius = TRUNK_RADIUS[plant.kind] * plant.scale;
+      if (!radius || !reach(plant.x, plant.z)) continue;
+      const w = worldPose(m, plant.x, plant.z);
+      const height = (plant.kind === 'baobab' ? 6.5 : 4.2) * plant.scale;
+      prism(w.x, w.y - 0.5, w.y + height, w.z, radius * 1.05, radius * 0.8);
+    }
+    for (const b of layout.boulders) {
+      if (!reach(b.x, b.z)) continue;
+      const w = worldPose(m, b.x, b.z, b.yaw);
+      const c = Math.cos(w.yaw),
+        s = Math.sin(w.yaw),
+        base = v.length / 3,
+        cy = w.y - b.sy * 0.25;
+      for (const [x0, y0, z0] of ico) {
+        const x = x0 * b.sx * 0.95,
+          y = Math.max(y0, -0.55) * b.sy * 0.95,
+          z = z0 * b.sz * 0.95;
+        v.push(w.x + x * c + z * s, cy + y, w.z - x * s + z * c);
+      }
+      for (const k of icoFaces) f.push(base + k);
+    }
+    for (const d of layout.mounds) {
+      if (!reach(d.x, d.z)) continue;
+      const w = worldPose(m, d.x, d.z);
+      prism(w.x, w.y - 0.3, w.y + 2.6 * d.scale, w.z, 0.95 * d.scale, 0.12 * d.scale, 7);
+    }
+    for (const h of layout.homes) {
+      const w = worldPose(m, h.x, h.z, h.yaw);
+      cuboid(w.x, w.y + 1.2, w.z, h.width / 2 + 0.3, 1.6, h.depth / 2 + 0.3, w.yaw);
+    }
+    for (const well of layout.wells) {
+      const w = worldPose(m, well.x, well.z);
+      prism(w.x, w.y - 0.3, w.y + 1.3, w.z, 1.3, 1.2, 10);
+    }
+    for (const home of layout.farHomes) {
+      const w = worldPose(m, home.x, home.z);
+      cuboid(w.x, w.y + home.y, w.z, home.hx, home.hy, home.hz, w.yaw);
+    }
+    for (const r of bridgeRails(m)) {
+      const w = toWorld(m, r.x, r.z);
+      cuboid(w.x, roadY(m, r.z) + r.y, w.z, r.hx, r.hy, r.hz, r.yaw);
+    }
+    if (f.length)
+      this.world.createCollider(
+        RAPIER.ColliderDesc.trimesh(new Float32Array(v), new Uint32Array(f))
+          .setCollisionGroups(SCENERY_GROUPS)
+          .setFriction(0.6)
+          .setRestitution(0.1),
+      );
+    // Posts and signs are knocked flying by a geometric sweep, not colliders.
+    this.posts = layout.posts.map((post, index) => {
+      const w = worldPose(m, post.x, post.z, Math.PI);
+      const sign = post.kind === 'sign';
+      const along = { x: Math.cos(w.yaw), z: -Math.sin(w.yaw) };
+      const samples = sign
+        ? [-1.8, -0.9, 0, 0.9, 1.8].map((o) => ({ x: w.x + along.x * o, z: w.z + along.z * o }))
+        : [{ x: w.x, z: w.z }];
+      return { index, station: post.z, radius: sign ? 0.3 : 0.12, samples };
+    });
+  }
+  private posts: { index: number; station: number; radius: number; samples: { x: number; z: number }[] }[] = [];
+  private sweepPosts() {
+    const p = this.position,
+      q = this.rotation;
+    const fx = 2 * (q.x * q.z + q.w * q.y),
+      fz = 1 - 2 * (q.x * q.x + q.y * q.y);
+    const len = Math.hypot(fx, fz) || 1;
+    const ax = fx / len,
+      az = fz / len;
+    const v = this.body.linvel();
+    for (const post of this.posts) {
+      if (Math.abs(post.station - this.progress) > 9) continue;
+      if (this.knocked.some((k) => k.index === post.index)) continue;
+      for (const s of post.samples) {
+        const dx = s.x - p.x,
+          dz = s.z - p.z;
+        const forward = dx * ax + dz * az,
+          lateral = dx * az - dz * ax;
+        if (Math.abs(forward) < 2.45 + post.radius && Math.abs(lateral) < 0.95 + post.radius) {
+          this.knock(post.index, v);
+          break;
+        }
+      }
+    }
+  }
+  private knock(index: number, v: { x: number; y: number; z: number }) {
+    if (this.knocked.some((k) => k.index === index)) return;
+    const sign = sceneryLayout(this.mission).posts[index]?.kind === 'sign';
+    this.knocked.push({ index, vx: v.x, vz: v.z, at: this.elapsed });
+    const drag = sign ? 0.955 : 0.985;
+    const lv = this.body.linvel();
+    this.body.setLinvel({ x: lv.x * drag, y: lv.y, z: lv.z * drag }, true);
+    this.roadPulse = Math.max(this.roadPulse, sign ? 0.55 : 0.3);
+    this.contactSerial++;
+    this.contactStrength = sign ? 0.22 : 0.1;
   }
   private trafficRotation(p: { yaw: number; pitch: number }) {
     const sy = Math.sin(p.yaw / 2),
