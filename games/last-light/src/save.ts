@@ -22,7 +22,7 @@ export type Settings = {
   brightness: number;
   enhancedVisibility: boolean;
   reducedFlashes: boolean;
-  quality: 'auto' | 'high' | 'low';
+  quality: 'auto' | 'high' | 'medium' | 'low';
   mode: 'standard' | 'relaxed';
   volume: number;
   keys: Record<string, string>;
@@ -146,7 +146,7 @@ export function parseSave(raw: string | null): Save {
       'reducedFlashes',
     ] as const)
       if (typeof s[k] === 'boolean') base.settings[k] = s[k];
-    if (['auto', 'high', 'low'].includes(s.quality))
+    if (['auto', 'high', 'medium', 'low'].includes(s.quality))
       base.settings.quality = s.quality;
     if (['standard', 'relaxed'].includes(s.mode)) base.settings.mode = s.mode;
     if (Number.isFinite(s.brightness))

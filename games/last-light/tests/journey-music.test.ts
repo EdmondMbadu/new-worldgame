@@ -86,8 +86,9 @@ describe('streamed journey score', () => {
     });
   });
   it('starts with Morning and primes both native players silently inside the gesture', async () => {
-    expect(main.src).toContain('audio/morning-on-the-ridge.mp3');
-    expect(next.src).toContain('audio/light-at-the-clearing.mp3');
+    // Without a known fast connection, the 96 kbps copies stream.
+    expect(main.src).toContain('audio/lite/morning-on-the-ridge.mp3');
+    expect(next.src).toContain('audio/lite/light-at-the-clearing.mp3');
     expect(context.gains.every((n) => n.gain.value === 0)).toBe(true);
     player.unlock();
     expect(main.play).toHaveBeenCalledTimes(1);

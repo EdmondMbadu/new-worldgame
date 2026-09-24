@@ -11,9 +11,10 @@ export const games = [
     slug: "last-light",
     name: "Last Light",
     port: 5175,
-    codeBudget: 1200 * 1024,
-    // Streamed music + ten short local voice clips and one compressed story still.
-    // Code budget stays unchanged; story assets load only for the current chapter.
-    totalBudget: 24 * 1024 * 1024,
+    // Physics ships as a separate streamed .wasm, so JS + CSS stay small.
+    codeBudget: 500 * 1024,
+    // Full and lite music, ten short voice clips, WebP textures and art.
+    // Story assets load only for the current chapter.
+    totalBudget: 18 * 1024 * 1024,
   },
 ];

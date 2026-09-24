@@ -35,14 +35,21 @@ export function roadSections(m: Mission): RoadSection[] {
   cache.set(m, sections);
   return sections;
 }
+const branchCache = new WeakMap<Mission, [number, number][]>();
 export function branchSections(m: Mission): [number, number][] {
-  return [
-    ...m.detours,
-    m.fork,
-    ...roadSections(m)
-      .filter((s) => s.kind === 'flood')
-      .map((s) => [s.z - 75, s.z + 75] as [number, number]),
-  ];
+  let list = branchCache.get(m);
+  if (!list)
+    branchCache.set(
+      m,
+      (list = [
+        ...m.detours,
+        m.fork,
+        ...roadSections(m)
+          .filter((s) => s.kind === 'flood')
+          .map((s) => [s.z - 75, s.z + 75] as [number, number]),
+      ]),
+    );
+  return list;
 }
 export function sectionEnvelope(z: number, centre: number, length: number) {
   const t = Math.max(

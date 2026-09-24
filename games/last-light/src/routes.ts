@@ -1,4 +1,4 @@
-import { heightAt, roadX, routeX, smooth, type Mission } from './missions';
+import { heightAt, perStation, roadX, routeX, smooth, type Mission } from './missions';
 
 /** Switchback centres in effect: a straightened test road has none. */
 export const pivots = (m: Mission) => (m.bend === 0 ? [] : m.ridges);
@@ -10,8 +10,17 @@ export const pivots = (m: Mission) => (m.bend === 0 ? [] : m.ridges);
 function turn(m: Mission, radius: number) {
   return (2.23 + m.id * 0.025) * (1 - smooth(15, 90, radius));
 }
+const centres = new WeakMap<Mission, Map<number, number>>();
+/** Each switchback's centre line position, computed once per chapter. */
+function centre(m: Mission, pivot: number) {
+  let map = centres.get(m);
+  if (!map) centres.set(m, (map = new Map()));
+  let x = map.get(pivot);
+  if (x === undefined) map.set(pivot, (x = roadX(m, pivot)));
+  return x;
+}
 function warp(m: Mission, pivot: number, x: number, z: number, sign: number) {
-  const cx = roadX(m, pivot),
+  const cx = centre(m, pivot),
     dx = x - cx,
     dz = z - pivot;
   const radius = Math.hypot(dx, dz);
@@ -64,7 +73,7 @@ export function worldHeight(m: Mission, x: number, z: number) {
   const p = toRoute(m, x, z);
   return heightAt(m, p.x, p.z);
 }
-export function ridgeAt(m: Mission, station: number) {
+export const ridgeAt = perStation(function ridgeAt(m: Mission, station: number) {
   let ridge = 0;
   for (const p of pivots(m))
     ridge = Math.max(
@@ -72,7 +81,7 @@ export function ridgeAt(m: Mission, station: number) {
       smooth(p - 75, p - 51, station) * (1 - smooth(p + 54, p + 80, station)),
     );
   return ridge;
-}
+});
 /** The switchback whose approach or exit contains this station, if any. */
 export function nearestPivot(m: Mission, station: number) {
   let best: number | undefined;
@@ -81,7 +90,7 @@ export function nearestPivot(m: Mission, station: number) {
       best = p;
   return best;
 }
-export function roadWidth(m: Mission, station: number) {
+export const roadWidth = perStation(function roadWidth(m: Mission, station: number) {
   const ridge = ridgeAt(m, station);
   const base = m.width + Math.sin(station * 0.047) * 0.32;
   if (!ridge) return base;
@@ -90,7 +99,7 @@ export function roadWidth(m: Mission, station: number) {
   // Compensate the bend's lateral shear, keeping a usable 6.8–8.2 m corridor.
   const scale = Math.hypot(b.x - a.x, b.z - a.z) / 0.2;
   return (base * (1 - ridge) + (4.1 - m.id * 0.15) * ridge) * scale;
-}
+});
 const distanceCache = new WeakMap<Mission, [Float64Array, Float64Array]>();
 export function remainingDistance(
   m: Mission,

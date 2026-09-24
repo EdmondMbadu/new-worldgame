@@ -1,8 +1,16 @@
+import { fastNetwork } from './network';
 export const JOURNEY_TRACKS = [
   { title: 'Morning on the Ridge', file: 'morning-on-the-ridge.mp3' },
   { title: 'Light at the Clearing', file: 'light-at-the-clearing.mp3' },
 ] as const;
 export const MUSIC_CROSSFADE = 4;
+/**
+ * The supplied 192 kbps songs play as delivered on fast, unmetered connections.
+ * Elsewhere a 96 kbps copy of the same recording streams without competing
+ * with the road for bandwidth.
+ */
+export const musicUrl = (file: string, full = fastNetwork()) =>
+  `${import.meta.env.BASE_URL}audio/${full ? '' : 'lite/'}${file}`;
 
 type Track = {
   audio: HTMLAudioElement;
@@ -56,7 +64,7 @@ export class JourneyMusic {
         const track = { audio, source, gain, pending: false, blocked: false, failed: false };
         this.tracks.push(track);
         audio.onerror = () => { track.failed = true; };
-        audio.src = `${import.meta.env.BASE_URL}audio/${info.file}`;
+        audio.src = musicUrl(info.file);
         document.body.appendChild(audio);
       }
     } catch {

@@ -33,6 +33,12 @@ import { CLINICS } from "./clinic-stories";
 import { ClinicStoryView } from "./ClinicStory";
 
 const base = import.meta.env.BASE_URL;
+/** Phones get a 960 px menu image (80 KB); larger screens the full one (210 KB). */
+const KEY_ART =
+  typeof innerWidth !== 'undefined' &&
+  innerWidth * Math.min(devicePixelRatio || 1, 2) > 1100
+    ? 'key-art.webp'
+    : 'key-art-small.webp';
 const time = (n: number) => {
   const seconds = Math.ceil(Math.max(0, n));
   return `${Math.floor(seconds / 60)
@@ -277,11 +283,13 @@ function SettingsPanel({
           >
             <option value="auto">Auto · adapts to this device</option>
             <option value="high">High</option>
-            <option value="low">Low · lighter rendering</option>
+            <option value="medium">Balanced</option>
+            <option value="low">Light · older phones and slow graphics</option>
           </select>
         </label>
         <p className="setting-note">
-          Graphics changes apply to the next drive.
+          Graphics changes apply to the next drive. Auto starts from what this
+          device can do and lowers resolution, then detail, if the drive stutters.
         </p>
         {(
           [
@@ -407,6 +415,21 @@ export default function App() {
     }
     setStorageOk(writeSave(save));
   }, [save]);
+  // While the menu is open, fetch what the first drive needs, so pressing
+  // Begin on a slow connection does not start from zero. Data saver skips it.
+  useEffect(() => {
+    if (inGame) return;
+    const saver = (navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection?.saveData;
+    if (saver) return;
+    const timer = setTimeout(() => {
+      void import("./engine").then((m) => m.initPhysics()).catch(() => {});
+      void import("./world").catch(() => {});
+      void import("./surfaces").then((m) => m.loadSurfaces()).catch(() => {});
+      void import("./staff").then((m) => m.loadStaff()).catch(() => {});
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [inGame]);
   const pause = () => {
     const x = engine.current;
     if (!x) return;
@@ -477,6 +500,9 @@ export default function App() {
           settingsRef.current,
         );
         world.current = view;
+        setLoading("Lighting the road");
+        await view.prepare();
+        if (cancelled) return;
         const input = new Controls(settingsRef.current, (force = false) => {
           if (settingsOpenRef.current || openingRef.current || ['restoring', 'results', 'failed'].includes(instance.phase)) {
             input.clear();
@@ -678,7 +704,7 @@ export default function App() {
         <>
           <div
             className="key-art"
-            style={{ backgroundImage: `url(${base}key-art.png)` }}
+            style={{ backgroundImage: `url(${base}${KEY_ART})` }}
           />
           <div className="home-shade" />
           <header className="home-header">
@@ -1173,6 +1199,8 @@ export default function App() {
                     {autopilot ? "Stop" : "Run"} driving QA
                   </button>
                   <output>
+                    tier {world.current ? ["light", "balanced", "high"][world.current.tier] : "-"} ·
+                    res {world.current ? Math.round(world.current.governor.scale * 100) : 100}% ·{" "}
                     phase {e.phase} · z {e.progress.toFixed(0)} ·{" "}
                     {e.integrity.toFixed(0)}% · {tick} frames ·{" "}
                     {world.current?.renderer.info.render.calls} calls ·{" "}

@@ -260,12 +260,6 @@ export class LivingWorld {
           }
       }
       batch(fixed);
-      if (event.kind !== 'tree') {
-        const beam = new T.SpotLight('#fff1ca', 85, 90, 0.48, 0.6, 1.3);
-        beam.position.set(0, 1, 2.6);
-        beam.target.position.set(0, 0, 30);
-        g.add(beam, beam.target);
-      }
       this.group.add(g);
       this.actors.push({ event, group: g, wheels, lamps, brakes, indicators });
       const signZ = event.z - 110,
@@ -304,12 +298,20 @@ export class LivingWorld {
     this.group.add(this.village.group);
     this.setPieces = new SetPieceArt(mission, events, low, this.time);
     this.group.add(this.setPieces.group);
+    // One headlight beam serves whichever road vehicle is nearest. A fixed
+    // number of lights means no shader recompiles as vehicles come and go.
+    this.beam.position.set(0, -500, 0);
+    this.group.add(this.beam, this.beam.target);
   }
+  private beam = new T.SpotLight('#fff1ca', 0, 90, 0.48, 0.6, 1.3);
+  private beamOffset = new T.Vector3();
   private setPieces: SetPieceArt;
 
   private lastClock = 0;
   update(e: GameEngine, clock: number) {
     this.time.value = clock;
+    let nearest = 220,
+      lit: T.Group | null = null;
     for (const actor of this.actors) {
       const p = encounterPose(this.mission, actor.event);
       actor.group.position.set(
@@ -324,6 +326,11 @@ export class LivingWorld {
         p.rotation.w,
       );
       actor.group.visible = Math.abs(e.position.z - p.z) < 320;
+      const distance = Math.hypot(e.position.x - p.x, e.position.z - p.z);
+      if (actor.event.kind !== 'tree' && actor.group.visible && distance < nearest) {
+        nearest = distance;
+        lit = actor.group;
+      }
       actor.lamps.emissiveIntensity = 1.3;
       actor.brakes.emissiveIntensity = actor.event.brakeLights ? 3 : 0.55;
       actor.indicators.forEach(
@@ -337,6 +344,13 @@ export class LivingWorld {
         wheel.rotation.x +=
           (actor.event.actorSpeed * (clock - this.lastClock)) / 0.41;
     }
+    if (lit) {
+      lit.updateMatrixWorld();
+      this.beam.position.copy(this.beamOffset.set(0, 1, 2.6).applyMatrix4(lit.matrixWorld));
+      this.beam.target.position.copy(this.beamOffset.set(0, 0, 30).applyMatrix4(lit.matrixWorld));
+      this.beam.target.updateMatrixWorld();
+    }
+    this.beam.intensity = lit ? 85 : 0;
     this.herds.forEach((herd) => {
       herd.update(clock);
     });

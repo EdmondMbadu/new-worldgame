@@ -127,29 +127,33 @@ export class PostFX {
     private renderer: T.WebGLRenderer,
     scene: T.Scene,
     private camera: T.PerspectiveCamera,
-    private high: boolean,
+    options: { msaa: number; shafts: boolean; bloom: boolean },
   ) {
     const size = renderer.getDrawingBufferSize(new T.Vector2());
     const target = new T.WebGLRenderTarget(Math.max(1, size.x), Math.max(1, size.y), {
       type: T.HalfFloatType,
-      samples: high ? 4 : 0,
+      samples: options.msaa,
     });
-    if (high) {
+    // Sun shafts read scene depth.
+    if (options.shafts) {
       target.depthTexture = new T.DepthTexture(Math.max(1, size.x), Math.max(1, size.y));
       target.depthTexture.type = T.UnsignedIntType;
     }
     this.composer = new EffectComposer(renderer, target);
     this.composer.addPass(new RenderPass(scene, camera));
-    if (high) {
+    if (options.shafts) {
       this.shafts = new SunShaftsPass();
       this.composer.addPass(this.shafts);
+    }
+    if (options.bloom) {
       this.bloom = new UnrealBloomPass(new T.Vector2(size.x / 2, size.y / 2), 0.4, 0.55, 0.92);
       this.composer.addPass(this.bloom);
     }
     this.grade = new GradePass();
     this.composer.addPass(this.grade);
     this.composer.addPass(new OutputPass());
-    if (!high) {
+    // Without multisampling, a cheap edge filter keeps silhouettes clean.
+    if (!options.msaa) {
       this.fxaa = new FXAAPass();
       this.composer.addPass(this.fxaa);
     }

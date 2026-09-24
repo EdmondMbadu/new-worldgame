@@ -1,20 +1,118 @@
 import * as T from 'three';
 import { GLTFLoader, type GLTF } from 'three/addons/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 let source: GLTF | null = null;
 let pending: Promise<void> | null = null;
 export const loadStaff = () =>
   (pending ??= (async () => {
     try {
-      source = await new GLTFLoader().loadAsync(
+      // The character is meshopt-compressed: about a third of its original size.
+      source = await new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).loadAsync(
         `${import.meta.env.BASE_URL}models/clinic-staff.glb`,
       );
     } catch {
       /* Existing local figures remain available if optional art fails. */
     }
   })());
+/**
+ * The character arrives as ten skinned parts (ten draw calls, twenty with
+ * shadows). The parts share one skeleton; their skins differ only by a
+ * constant offset, so they merge into one mesh with the part colours carried
+ * per vertex. Every clone then shares these buffers and adds its own colours.
+ */
+type Merged = {
+  attributes: Record<string, T.BufferAttribute>;
+  index: T.BufferAttribute;
+  parts: { name: string; color: T.Color }[];
+  part: Uint8Array;
+  sphere: T.Sphere;
+};
+let merged: Merged | null | undefined;
+function mergeParts(scene: T.Object3D): Merged | null {
+  const meshes: T.SkinnedMesh[] = [];
+  scene.updateMatrixWorld(true);
+  scene.traverse((o) => {
+    if ((o as T.SkinnedMesh).isSkinnedMesh) meshes.push(o as T.SkinnedMesh);
+  });
+  if (!meshes.length) return null;
+  const ref = meshes[0];
+  const inverses = ref.skeleton.boneInverses;
+  let vertices = 0,
+    indices = 0;
+  const offsets: T.Matrix4[] = [];
+  for (const mesh of meshes) {
+    const g = mesh.geometry;
+    if (!g.index || !g.attributes.skinIndex || !g.attributes.skinWeight || mesh.skeleton.bones.length !== ref.skeleton.bones.length)
+      return null;
+    if (mesh.skeleton.bones.some((b, i) => b !== ref.skeleton.bones[i]) || !mesh.bindMatrix.equals(ref.bindMatrix)) return null;
+    const x = inverses[0].clone().invert().multiply(mesh.skeleton.boneInverses[0]);
+    for (let i = 1; i < inverses.length; i++) {
+      const xi = inverses[i].clone().invert().multiply(mesh.skeleton.boneInverses[i]);
+      if (xi.elements.some((v, k) => Math.abs(v - x.elements[k]) > 1e-4)) return null;
+    }
+    offsets.push(x);
+    vertices += g.attributes.position.count;
+    indices += g.index.count;
+  }
+  const position = new Float32Array(vertices * 3),
+    normal = new Float32Array(vertices * 3),
+    skinIndex = new Uint16Array(vertices * 4),
+    skinWeight = new Float32Array(vertices * 4),
+    index = new Uint32Array(indices),
+    part = new Uint8Array(vertices);
+  const parts: Merged['parts'] = [];
+  const v = new T.Vector3(),
+    n = new T.Vector3(),
+    normalMatrix = new T.Matrix3();
+  let base = 0,
+    at = 0;
+  meshes.forEach((mesh, k) => {
+    const g = mesh.geometry,
+      x = offsets[k];
+    normalMatrix.getNormalMatrix(x);
+    const p = g.attributes.position,
+      nn = g.attributes.normal,
+      si = g.attributes.skinIndex,
+      sw = g.attributes.skinWeight;
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i).applyMatrix4(x);
+      position.set([v.x, v.y, v.z], (base + i) * 3);
+      if (nn) {
+        n.fromBufferAttribute(nn, i).applyMatrix3(normalMatrix).normalize();
+        normal.set([n.x, n.y, n.z], (base + i) * 3);
+      }
+      for (let j = 0; j < 4; j++) {
+        skinIndex[(base + i) * 4 + j] = si.getComponent(i, j);
+        skinWeight[(base + i) * 4 + j] = sw.getComponent(i, j);
+      }
+      part[base + i] = k;
+    }
+    for (let i = 0; i < g.index!.count; i++) index[at++] = g.index!.getX(i) + base;
+    base += p.count;
+    const mat = mesh.material as T.MeshStandardMaterial;
+    parts.push({ name: mat.name, color: mat.color.clone() });
+  });
+  const geometry = new T.BufferGeometry();
+  geometry.setAttribute('position', new T.BufferAttribute(position, 3));
+  geometry.computeBoundingSphere();
+  return {
+    attributes: {
+      position: geometry.attributes.position as T.BufferAttribute,
+      normal: new T.BufferAttribute(normal, 3),
+      skinIndex: new T.Uint16BufferAttribute(skinIndex, 4),
+      skinWeight: new T.BufferAttribute(skinWeight, 4),
+    },
+    index: new T.BufferAttribute(index, 1),
+    parts,
+    part,
+    sphere: geometry.boundingSphere!.clone(),
+  };
+}
+let staffMaterial: T.MeshStandardMaterial | null = null;
 export function createStaff(color: string, skin: string, scale = 1) {
   if (!source) return null;
+  if (merged === undefined) merged = mergeParts(source.scene);
   const group = new T.Group(),
     model = clone(source.scene);
   const bounds = new T.Box3().setFromObject(model),
@@ -25,9 +123,50 @@ export function createStaff(color: string, skin: string, scale = 1) {
   group.scale.setScalar(scale);
   group.add(model);
   const mats: T.Material[] = [];
+  const recolored = (name: string, original: T.Color) => {
+    const c = original.clone();
+    if (/LightBrown|Red_Dark|LightBlue/.test(name)) c.set(color);
+    if (/Skin/.test(name)) c.set(skin).multiplyScalar(name === 'Skin_Darker' ? 0.8 : 1);
+    return c;
+  };
+  if (merged) {
+    const parts: T.SkinnedMesh[] = [];
+    model.traverse((o) => {
+      if ((o as T.SkinnedMesh).isSkinnedMesh) parts.push(o as T.SkinnedMesh);
+    });
+    const ref = parts[0];
+    const geometry = new T.BufferGeometry();
+    for (const [name, attribute] of Object.entries(merged.attributes)) geometry.setAttribute(name, attribute);
+    geometry.setIndex(merged.index);
+    const palette = merged.parts.map((p) => recolored(p.name, p.color));
+    const rgb = new Uint8Array(merged.part.length * 3);
+    merged.part.forEach((k, i) => {
+      const c = palette[k];
+      rgb[i * 3] = Math.round(c.r * 255);
+      rgb[i * 3 + 1] = Math.round(c.g * 255);
+      rgb[i * 3 + 2] = Math.round(c.b * 255);
+    });
+    geometry.setAttribute('color', new T.Uint8BufferAttribute(rgb, 3, true));
+    if (!staffMaterial || !staffMaterial.userData.alive) {
+      staffMaterial = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.82 });
+      staffMaterial.userData.alive = true;
+    }
+    const body = new T.SkinnedMesh(geometry, staffMaterial);
+    body.name = 'StaffBody';
+    body.castShadow = true;
+    body.receiveShadow = true;
+    // Room for every pose of the walk, wave and carry.
+    body.boundingSphere = new T.Sphere(merged.sphere.center.clone(), merged.sphere.radius * 1.6);
+    body.position.copy(ref.position);
+    body.quaternion.copy(ref.quaternion);
+    body.scale.copy(ref.scale);
+    ref.parent!.add(body);
+    body.bind(ref.skeleton, ref.bindMatrix);
+    for (const part of parts) part.parent?.remove(part);
+  }
   model.traverse((o) => {
     const mesh = o as T.Mesh;
-    if (!mesh.isMesh) return;
+    if (!mesh.isMesh || mesh.name === 'StaffBody') return;
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     mesh.frustumCulled = false;

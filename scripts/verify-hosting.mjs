@@ -64,11 +64,17 @@ for (const game of games) {
   if (total > game.totalBudget)
     fail(`${game.name} exceeds its total asset budget.`);
   if (game.slug === "last-light") {
-    if (!existsSync(path.join(root, "key-art.png")))
-      fail("Last Light is missing its menu art.");
+    for (const art of ["key-art.webp", "key-art-small.webp"])
+      if (!existsSync(path.join(root, art)))
+        fail("Last Light is missing its menu art.");
+    if (!existsSync(path.join(root, "sw.js")))
+      fail("Last Light is missing its offline cache worker.");
+    if (!builtFiles.some((f) => f.endsWith(".wasm")))
+      fail("Last Light is missing its physics module.");
     for (const track of ["morning-on-the-ridge.mp3", "light-at-the-clearing.mp3"])
-      if (!existsSync(path.join(root, "audio", track)))
-        fail(`Last Light is missing soundtrack audio/${track}.`);
+      for (const dir of ["audio", "audio/lite"])
+        if (!existsSync(path.join(root, dir, track)))
+          fail(`Last Light is missing soundtrack ${dir}/${track}.`);
     const story = JSON.parse(readFileSync(new URL('../content/drc-clinic-stories.json', import.meta.url), 'utf8'));
     if (!existsSync(path.join(root, 'story/clinic-evening.webp')))
       fail('Last Light is missing its clinic story artwork.');

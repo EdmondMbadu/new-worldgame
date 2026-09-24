@@ -346,6 +346,24 @@ MISSIONS.forEach((mission, index) => {
   mission.outcome = clinic.closing;
   mission.radio = [];
 });
+/**
+ * Terrain, road and collision builders sample hundreds of thousands of points,
+ * row by row: every point on a row shares the same station. These per-station
+ * profiles remember their last station per chapter, so a row pays for them once.
+ */
+export function perStation(fn: (m: Mission, z: number) => number) {
+  const last = new WeakMap<Mission, { z: number; value: number }>();
+  return (m: Mission, z: number) => {
+    const hit = last.get(m);
+    if (hit && hit.z === z) return hit.value;
+    const value = fn(m, z);
+    if (hit) {
+      hit.z = z;
+      hit.value = value;
+    } else last.set(m, { z, value });
+    return value;
+  };
+}
 export const clamp = (v: number, a: number, b: number) =>
   Math.max(a, Math.min(b, v));
 export const smooth = (a: number, b: number, v: number) => {
@@ -361,21 +379,21 @@ export function random(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-export function roadX(m: Mission, z: number) {
+export const roadX = perStation(function roadX(m: Mission, z: number) {
   const end = 1 - smooth(m.length - 110, m.length - 30, z);
   let x = 0;
   for (const [amplitude, frequency, phase] of m.curve)
     x += Math.sin(z * frequency + phase) * amplitude;
   return x * m.bend * end;
-}
-export function roadY(m: Mission, z: number) {
+});
+export const roadY = perStation(function roadY(m: Mission, z: number) {
   let y = 5 + ridgeElevation(m, z) + m.grade * z;
   for (const [amplitude, frequency, phase] of m.hills)
     y += Math.sin(z * frequency + phase) * amplitude;
   if (m.basin)
     y -= m.basin.depth * Math.exp(-Math.pow((z - m.basin.at) / m.basin.spread, 2));
   return y;
-}
+});
 /** Rain at a station: chapters with `rainStart` see the weather arrive mid-drive. */
 export function rainAt(m: Mission, z: number) {
   if (m.rainStart === undefined) return m.rain;
@@ -396,16 +414,16 @@ export function riverX(m: Mission, z: number) {
 export function riverLevel(m: Mission, z: number) {
   if (!m.bridge) return -Infinity;
   const mid = (m.bridge[0] + m.bridge[1]) / 2;
-  return roadY(m, mid) - 4.4 - (z - mid) * 0.018;
+  return deckAt(m, mid) - 4.4 - (z - mid) * 0.018;
 }
-export function forkOffset(m: Mission, z: number) {
+export const forkOffset = perStation(function forkOffset(m: Mission, z: number) {
   return branchSections(m).reduce((offset, [a, b]) => {
     const t = (z - a) / (b - a);
     return t > 0 && t < 1
       ? Math.max(offset, Math.pow(Math.sin(t * Math.PI), 2) * 27)
       : offset;
   }, 0);
-}
+});
 export function routeX(m: Mission, z: number, alt = false) {
   return roadX(m, z) + (alt ? forkOffset(m, z) : 0);
 }
@@ -502,7 +520,7 @@ export function heightAt(m: Mission, x: number, z: number) {
       banks *
       smooth(2.7, 7, Math.abs(x - roadX(m, z))) *
       smooth(5, 9, Math.abs(x - routeX(m, z, true)));
-    const riverBed = roadY(m, (m.bridge[0] + m.bridge[1]) / 2) - 6;
+    const riverBed = deckAt(m, (m.bridge[0] + m.bridge[1]) / 2) - 6;
     h += (riverBed - h) * channel;
   }
   if (river !== null) h = riverBanks(m, x, z, h, river, d, width);
@@ -523,8 +541,17 @@ export function heightAt(m: Mission, x: number, z: number) {
     smooth(m.length - 24, m.length - 2, z) *
     (1 - smooth(m.length + 38, m.length + 53, z)) *
     (1 - smooth(18, 30, Math.abs(x)));
-  h += (roadY(m, m.length) - h) * clinicSite;
+  if (clinicSite > 0) h += (deckAt(m, m.length) - h) * clinicSite;
   return h;
+}
+/** Road height at a fixed station (bridge, clinic), remembered per chapter. */
+const decks = new WeakMap<Mission, Map<number, number>>();
+function deckAt(m: Mission, z: number) {
+  let map = decks.get(m);
+  if (!map) decks.set(m, (map = new Map()));
+  let y = map.get(z);
+  if (y === undefined) map.set(z, (y = roadY(m, z)));
+  return y;
 }
 /** Stations where the chapter river is visible: it bends away before the next switchback. */
 export function riverSpan(m: Mission): [number, number] | null {

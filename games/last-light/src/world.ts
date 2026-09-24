@@ -71,7 +71,24 @@ import { LUSH, sceneryLayout, villageSites, worldPose, type Post } from './scene
 import { Birds, Fireflies, mistDecks, ridgelines, routeBounds, Smoke, valleyWater } from './landscape';
 import { CameraRig } from './camera-rig';
 import { PostFX } from './post';
+import { detectTier, deviceHints, FrameGovernor, TIERS, type Tier } from './quality';
+import { sharpenSurfaces } from './surfaces';
 
+/** Terrain palette, parsed once instead of once per vertex. */
+const PALETTE = {
+  dry: new T.Color('#b39a58'),
+  grass: new T.Color('#5c7a30'),
+  lushGrass: new T.Color('#3e6926'),
+  earth: new T.Color('#9b4f2d'),
+  rock: new T.Color('#6f675c'),
+  bank: new T.Color('#8e4a2b'),
+  mud: new T.Color('#5a2f1c'),
+  silt: new T.Color('#4d3a2a'),
+  sand: new T.Color('#b7a27a'),
+  scar: new T.Color('#7a3d22'),
+  creek: new T.Color('#3f2c20'),
+  roadEdge: new T.Color('#8a6a3a'),
+};
 type Chunk = { mesh: T.Object3D; start: number; end: number; ahead: number; behind: number };
 type Knock = { index: number; t: number; vx: number; vz: number; spin: number };
 
@@ -98,10 +115,17 @@ export class GameWorld {
   private sky: T.Mesh;
   private skyScene = new T.Scene();
   private moon: T.Mesh;
-  private low = false;
+  /** Rendering tier chosen for this drive (and lowered by the governor if needed). */
+  tier: Tier = 2;
+  governor: FrameGovernor;
+  private get low() {
+    return this.tier === 0;
+  }
+  private terrainMeshes: T.Object3D[] = [];
+  private thinned: { mesh: T.InstancedMesh; full: number; kind: 'grass' | 'hills' }[] = [];
+  private builtTier: Tier = 2;
   frames = new FrameHealth();
   private trafficArt: TrafficArt;
-  private adaptTimer = 0;
   private particles: Float32Array;
   private disposed = false;
   private environmentTarget: T.WebGLRenderTarget | null = null;
@@ -137,6 +161,7 @@ export class GameWorld {
   private burst = 0;
   private waterLevel = 0;
   private scratchColor = new T.Color();
+  private greenColor = new T.Color();
   performance = { p95: 0, fps: 0, calls: 0, triangles: 0 };
   constructor(
     public canvas: HTMLCanvasElement,
@@ -147,15 +172,15 @@ export class GameWorld {
     const night = nightProfile(m);
     const look = chapterLook(m);
     this.skyNow = skyState(m, 0);
-    this.low =
-      settings.quality === 'low' ||
-      (settings.quality === 'auto' && matchMedia('(pointer:coarse)').matches);
     this.renderer = new T.WebGLRenderer({
       canvas,
       antialias: false,
       powerPreference: 'high-performance',
     });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, this.low ? 1 : 1.5));
+    this.tier = detectTier(settings, deviceHints(this.renderer.getContext()));
+    this.builtTier = this.tier;
+    this.governor = new FrameGovernor(this.tier, settings.quality === 'auto');
+    this.renderer.setPixelRatio(this.pixelRatio());
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = T.PCFSoftShadowMap;
     this.renderer.outputColorSpace = T.SRGBColorSpace;
@@ -169,7 +194,7 @@ export class GameWorld {
     this.moonFill = new T.HemisphereLight(this.skyNow.hemiSky, this.skyNow.hemiGround, this.skyNow.hemiIntensity);
     this.scene.add(this.moonFill);
     this.sun.castShadow = true;
-    const shadow = this.low ? 1024 : 2048;
+    const shadow = TIERS.shadowMap[this.tier];
     this.sun.shadow.mapSize.set(shadow, shadow);
     this.sun.shadow.camera.left = -62;
     this.sun.shadow.camera.right = 62;
@@ -221,7 +246,7 @@ export class GameWorld {
       );
       light.position.set(x, 0.66, 2.3);
       light.target.position.set(x, -0.5, 55);
-      light.castShadow = x < 0;
+      light.castShadow = x < 0 && TIERS.headlightShadows[this.tier];
       light.shadow.mapSize.set(this.low ? 512 : 1024, this.low ? 512 : 1024);
       light.shadow.camera.near = 0.3;
       light.shadow.camera.far = night.beam;
@@ -317,7 +342,7 @@ export class GameWorld {
         );
       }
     this.scene.add(batch(bay));
-    this.rainData = new Float32Array((this.low ? 200 : 550) * 6);
+    this.rainData = new Float32Array(TIERS.rain[this.tier] * 6);
     const rainGeo = new T.BufferGeometry();
     rainGeo.setAttribute('position', new T.BufferAttribute(this.rainData, 3));
     geometries.add(rainGeo);
@@ -361,7 +386,7 @@ export class GameWorld {
     this.dust.frustumCulled = false;
     this.scene.add(this.dust);
     this.dirtTruck();
-    this.post = new PostFX(this.renderer, this.scene, this.camera, !this.low);
+    this.post = new PostFX(this.renderer, this.scene, this.camera, TIERS.post[this.tier]);
     this.scene.traverse((o) => {
       const mat = (o as T.Mesh).material;
       if (Array.isArray(mat)) mat.forEach(atmospheric);
@@ -374,8 +399,53 @@ export class GameWorld {
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(canvas);
     this.resize();
+  }
+  /** Device pixels per CSS pixel: the tier's cap, scaled down when frames run long. */
+  private pixelRatio() {
+    return Math.min(devicePixelRatio || 1, TIERS.pixelCap[this.tier]) * (this.governor?.scale ?? 1);
+  }
+  private applyResolution() {
+    this.renderer.setPixelRatio(this.pixelRatio());
+    this.post.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+  }
+  /** Step the costly features down to the governor's tier, in place. */
+  private applyTier() {
+    const tier = this.tier;
+    this.post.dispose();
+    this.post = new PostFX(this.renderer, this.scene, this.camera, TIERS.post[tier]);
+    const size = TIERS.shadowMap[tier];
+    if (this.sun.shadow.mapSize.x !== size) {
+      this.sun.shadow.map?.dispose();
+      this.sun.shadow.map = null;
+      this.sun.shadow.mapSize.set(size, size);
+    }
+    for (const mesh of this.terrainMeshes) mesh.castShadow = TIERS.terrainShadows[tier];
+    this.headlights.forEach((light, i) => (light.castShadow = i === 0 && TIERS.headlightShadows[tier]));
+    for (const { mesh, full, kind } of this.thinned)
+      mesh.count = Math.round((full * TIERS[kind][tier]) / TIERS[kind][this.builtTier]);
+    this.applyResolution();
+  }
+  /**
+   * Compile every shader the drive needs before the first frame. The scene
+   * renders into the post-processing target, so the programs are compiled for
+   * that target (compiling for the screen instead built a second, unused set).
+   * Where the browser can compile in parallel, this runs off the main thread
+   * and the loading screen stays responsive.
+   */
+  async prepare() {
+    const target = this.post.composer.readBuffer;
+    this.renderer.setRenderTarget(target);
+    try {
+      await this.renderer.compileAsync(this.scene, this.camera);
+    } catch {
+      /* The first frame compiles whatever remains. */
+    } finally {
+      this.renderer.setRenderTarget(null);
+    }
+    if (this.disposed) return;
     this.render(0);
-    this.renderer.compile(this.scene, this.camera);
+    // Sharper surface images stream in once the drive is running.
+    if (this.tier > 0) setTimeout(() => void sharpenSurfaces(), 3000);
   }
   private resize() {
     const width = this.canvas.clientWidth,
@@ -468,27 +538,27 @@ export class GameWorld {
     const width = roadWidth(m, lz);
     const n1 = valueNoise(lx * 0.018, lz * 0.018) * 2 - 1;
     const n2 = (valueNoise(lx * 0.11 + 31, lz * 0.11) * 0.6 + valueNoise(lx * 0.37, lz * 0.37 + 7) * 0.4) * 2 - 1;
-    const dry = this.scratchColor.set('#b39a58');
-    const green = new T.Color('#5c7a30').lerp(new T.Color('#3e6926'), lush);
+    const dry = this.scratchColor.copy(PALETTE.dry);
+    const green = this.greenColor.copy(PALETTE.grass).lerp(PALETTE.lushGrass, lush);
     out.copy(dry).lerp(green, clamp(0.25 + lush * 0.75 + n1 * 0.35, 0, 1));
     // Laterite shoulders and bare patches.
-    const earth = new T.Color('#9b4f2d');
+    const earth = PALETTE.earth;
     const verge = 1 - smooth(width + 0.4, width + 4.5 + n2 * 1.5, d);
     const bare = smooth(0.45, 0.85, n2 * 0.5 + 0.5) * 0.45 * (1 - lush * 0.6);
     out.lerp(earth, clamp(verge * 0.92 + bare, 0, 1));
     // Steep faces expose earth; the ridge's abyss is rock.
     const slope = 1 - normalY;
     const cliff = ridgeAt(m, lz) > 0.2 && y < roadY(m, lz) - 3;
-    out.lerp(new T.Color(cliff ? '#6f675c' : '#8e4a2b'), smooth(0.28, 0.62, slope) * (cliff ? 0.95 : 0.75));
+    out.lerp(cliff ? PALETTE.rock : PALETTE.bank, smooth(0.28, 0.62, slope) * (cliff ? 0.95 : 0.75));
     // Wet mud where the mission says so.
-    if (isMud(m, lx, lz)) out.lerp(new T.Color('#5a2f1c'), 0.5 * (1 - smooth(5, 9, Math.abs(lx - roadX(m, lz)))));
+    if (isMud(m, lx, lz)) out.lerp(PALETTE.mud, 0.5 * (1 - smooth(5, 9, Math.abs(lx - roadX(m, lz)))));
     // River banks: dark wet silt at the water, pale sand a little higher.
     const river = riverX(m, lz);
     if (river !== null && m.river) {
       const across = Math.abs(lx - river) - m.river.width / 2;
       const level = riverLevel(m, lz);
-      out.lerp(new T.Color('#4d3a2a'), (1 - smooth(-1, 3, across)) * smooth(level + 2.5, level - 0.5, y) * 0.9);
-      out.lerp(new T.Color('#b7a27a'), smooth(-0.5, 2, across) * (1 - smooth(3, 9, across)) * 0.55);
+      out.lerp(PALETTE.silt, (1 - smooth(-1, 3, across)) * smooth(level + 2.5, level - 0.5, y) * 0.9);
+      out.lerp(PALETTE.sand, smooth(-0.5, 2, across) * (1 - smooth(3, 9, across)) * 0.55);
     }
     // A landslide leaves raw red earth on the slope above it.
     for (const s of roadSections(m)) {
@@ -496,12 +566,12 @@ export class GameWorld {
       const lateral = (lx - roadX(m, lz)) * s.safeSide;
       const along = Math.abs(lz - s.z);
       const scar = (1 - smooth(s.length / 2 - 2, s.length / 2 + 10 + Math.max(0, -lateral - 6) * 0.4, along)) * (1 - smooth(0.5, 1.5, lateral)) * (1 - smooth(22, 40, -lateral));
-      out.lerp(new T.Color('#7a3d22'), scar * 0.85);
+      out.lerp(PALETTE.scar, scar * 0.85);
     }
     // The creek bed under the plank crossing.
     for (const s of roadSections(m)) {
       if (s.kind !== 'planks') continue;
-      if (Math.abs(lz - s.z) < s.length / 2 + 1 && Math.abs(lx - roadX(m, lz)) < 12.5) out.lerp(new T.Color('#3f2c20'), 0.7);
+      if (Math.abs(lz - s.z) < s.length / 2 + 1 && Math.abs(lx - roadX(m, lz)) < 12.5) out.lerp(PALETTE.creek, 0.7);
     }
     out.multiplyScalar(0.88 + n2 * 0.08);
     return out;
@@ -630,7 +700,7 @@ export class GameWorld {
             .lerp(crown, (1 - Math.abs(across)) * 0.35)
             .lerp(packed, track * 0.55)
             .lerp(mud, muddy ? 0.65 : 0)
-            .lerp(new T.Color('#8a6a3a'), edge * 0.35)
+            .lerp(PALETTE.roadEdge, edge * 0.35)
             .lerp(freshEarth, smooth(0.02, 0.35, slide) * 0.85)
             .lerp(creekBed, creek ? 0.75 : 0)
             .multiplyScalar(1 - depth * 1.6);
@@ -837,7 +907,10 @@ export class GameWorld {
       );
       g.computeBoundingSphere();
       const o = mesh(g, mat, this.scene);
-      o.castShadow = true;
+      // Terrain self-shadowing is the costliest part of the sun's shadow pass.
+      // The road deck lies on the ground and never needs to cast.
+      o.castShadow = worldCoordinates && TIERS.terrainShadows[this.tier];
+      if (worldCoordinates) this.terrainMeshes.push(o);
       o.userData.routeWorld = worldCoordinates;
       const pos = g.attributes.position;
       // Terrain stations come from the route; world z is not monotonic on the switchback.
@@ -893,7 +966,7 @@ export class GameWorld {
     // Forested hills: thousands of canopy clumps on the far slopes.
     const hill = hillCanopyGeometry(palette);
     const hillMat = foliageMaterial(this.windTime, 0.03);
-    const hillCount = Math.round((this.low ? 1400 : 3200) * (0.45 + lush * 0.55));
+    const hillCount = Math.round(TIERS.hills[this.tier] * (0.45 + lush * 0.55));
     const hills = new T.InstancedMesh(hill, hillMat, hillCount);
     const rng = mulberry(m.seed * 7 + 3);
     let placed = 0;
@@ -915,6 +988,7 @@ export class GameWorld {
       placed++;
     }
     hills.count = placed;
+    this.thinned.push({ mesh: hills, full: placed, kind: 'hills' });
     hills.receiveShadow = true;
     hills.castShadow = false;
     hills.computeBoundingSphere();
@@ -923,7 +997,7 @@ export class GameWorld {
     const lushTip = new T.Color('#d9c27a').lerp(new T.Color('#9bb24a'), lush);
     const clump = grassClumpGeometry(lush > 0.6 ? '#3f5a22' : '#5a5a2a', '#' + lushTip.getHexString());
     const grassMat = foliageMaterial(this.windTime, 0.18 + m.rain * 0.08, { double: true, grass: true });
-    const grassCount = this.low ? 2200 : 5200;
+    const grassCount = TIERS.grass[this.tier];
     const grassChunks: T.Matrix4[][] = Array.from({ length: chunkCount }, () => []);
     for (let i = 0; i < grassCount; i++) {
       const z = rng() * (m.length + 100) - 30;
@@ -945,6 +1019,7 @@ export class GameWorld {
     grassChunks.forEach((list, c) => {
       if (!list.length) return;
       const inst = new T.InstancedMesh(clump, grassMat, list.length);
+      this.thinned.push({ mesh: inst, full: list.length, kind: 'grass' });
       list.forEach((mtx, i) => inst.setMatrixAt(i, mtx));
       inst.receiveShadow = true;
       inst.computeBoundingSphere();
@@ -995,7 +1070,7 @@ export class GameWorld {
     const pebbleGeo = new T.IcosahedronGeometry(1, 0);
     geometries.add(pebbleGeo);
     const pebbleMat = material('#8a5a40', 0.9);
-    const pebbles = new T.InstancedMesh(pebbleGeo, pebbleMat, this.low ? 600 : 1500);
+    const pebbles = new T.InstancedMesh(pebbleGeo, pebbleMat, TIERS.pebbles[this.tier]);
     for (let i = 0; i < pebbles.count; i++) {
       const z = rng() * m.length,
         x = roadX(m, z) + (rng() - 0.5) * 8.8;
@@ -1015,16 +1090,16 @@ export class GameWorld {
     this.scene.add(ridgelines(m, bounds, m.id >= 2));
     this.scene.add(valleyWater(this.waterLevel, bounds));
     this.scene.add(mistDecks(this.waterLevel, bounds, look.mist));
-    this.birds = new Birds(this.low ? 9 : 17);
+    this.birds = new Birds(TIERS.birds[this.tier]);
     this.scene.add(this.birds.mesh);
-    this.fireflies = new Fireflies(this.low ? 60 : 140);
+    this.fireflies = new Fireflies(TIERS.fireflies[this.tier]);
     this.scene.add(this.fireflies.points);
     const fires = villageSites(m).map((z, i) => {
       const x = roadX(m, z) + (i % 2 ? -1 : 1) * 19;
       const w = worldPose(m, x, z + 8);
       return new T.Vector3(w.x, w.y, w.z);
     });
-    this.smoke = new Smoke(fires, this.low ? 8 : 16);
+    this.smoke = new Smoke(fires, TIERS.smoke[this.tier]);
     this.scene.add(this.smoke.points);
     const ember = material('#ff9a4a', 0.6);
     ember.emissive.set('#ff7a2a');
@@ -1587,19 +1662,11 @@ export class GameWorld {
       calls: this.renderer.info.render.calls,
       triangles: this.renderer.info.render.triangles,
     };
-    this.adaptTimer += dt;
-    if (this.adaptTimer > 5) {
-      this.adaptTimer = 0;
-      if (
-        this.settings.quality === 'auto' &&
-        stats.p95 > (this.low ? 40 : 25) &&
-        this.renderer.getPixelRatio() > 0.75
-      ) {
-        this.renderer.setPixelRatio(
-          Math.max(0.75, this.renderer.getPixelRatio() - 0.15),
-        );
-        this.post.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
-      }
+    const change = this.governor.sample(dt);
+    if (change === 'scale') this.applyResolution();
+    if (change === 'tier') {
+      this.tier = this.governor.tier;
+      this.applyTier();
     }
   }
   dispose() {

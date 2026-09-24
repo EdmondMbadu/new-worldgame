@@ -566,6 +566,15 @@ export function createTruck() {
     tailgate,
   };
 }
+let sharedPerson: T.MeshStandardMaterial | null = null;
+/** Every built-in figure shares one vertex-coloured material. */
+function personMaterial() {
+  if (!sharedPerson || !materials.has(sharedPerson)) {
+    sharedPerson = new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.92 });
+    materials.add(sharedPerson);
+  }
+  return sharedPerson;
+}
 export function createPerson(shirt: string, skin = '#67432d', scale = 1) {
   const group = new T.Group(),
     rootBone = new T.Bone();
@@ -698,21 +707,26 @@ export function createPerson(shirt: string, skin = '#67432d', scale = 1) {
     1.18,
     0.127,
   );
-  const merged: T.BufferGeometry[] = [],
-    mats: T.Material[] = [];
+  // One draw call per figure: each part's colour becomes a vertex colour.
+  const all: T.BufferGeometry[] = [];
   for (const [mat, gs] of parts) {
-    const g = mergeGeometries(gs, false)!;
-    gs.forEach((x) => x.dispose());
-    merged.push(g);
-    mats.push(mat);
+    const c = (mat as T.MeshStandardMaterial).color;
+    for (const g of gs) {
+      const n = g.attributes.position.count,
+        rgb = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) rgb.set([c.r, c.g, c.b], i * 3);
+      g.setAttribute('color', new T.Float32BufferAttribute(rgb, 3));
+      all.push(g);
+    }
   }
-  const geometry = mergeGeometries(merged, true)!;
-  merged.forEach((g) => g.dispose());
+  const geometry = mergeGeometries(all, false)!;
+  all.forEach((g) => g.dispose());
   geometries.add(geometry);
-  const skinned = new T.SkinnedMesh(geometry, mats);
+  const skinned = new T.SkinnedMesh(geometry, personMaterial());
   skinned.castShadow = true;
   skinned.receiveShadow = true;
-  skinned.frustumCulled = false;
+  // Figures keep their pose within a couple of metres of their origin.
+  skinned.boundingSphere = new T.Sphere(new T.Vector3(0, 0.95, 0), 1.4);
   group.add(skinned);
   group.updateMatrixWorld(true);
   skinned.bind(new T.Skeleton(bones));
