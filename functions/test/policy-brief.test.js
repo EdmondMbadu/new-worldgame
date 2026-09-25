@@ -49,6 +49,14 @@ test('keeps only references actually cited in the document', () => {
   assert.equal(parsePolicyBrief(brief).references.length, 2);
 });
 
+test('recovers the author byline from older saved briefs without splitting names at initials', () => {
+  const brief = clone();
+  delete brief.authors;
+  brief.aboutAuthors = 'Prepared by Dr. A. Rivera, Sam Lee. Based on a strategy developed through Global Solutions Lab; the recommendations represent the team\'s proposal.';
+  assert.equal(parsePolicyBrief(brief).authors, 'Dr. A. Rivera, Sam Lee');
+  assert.match(policyBriefToText(parsePolicyBrief(brief)), /Prepared by: Dr\. A\. Rivera, Sam Lee/);
+});
+
 test('binds claim segments to grounding metadata, including both SDK segment shapes', () => {
   const response = researchResponse();
   response.candidates[0].groundingMetadata.groundingSupports[1].segment = 'A second supported finding.';
@@ -80,6 +88,7 @@ test('replaces model-supplied bibliography and authors with source-bound metadat
   const output = clone();
   output.references = [{ id: 'R1', title: 'Invented', url: 'https://example.com/fake' }];
   output.aboutAuthors = 'An invented government endorsement';
+  output.authors = 'An invented author';
   const progress = [];
   const result = await generatePolicyBrief(request, {
     research: async () => researchResponse(),
@@ -91,6 +100,7 @@ test('replaces model-supplied bibliography and authors with source-bound metadat
   }, new Date('2026-09-25T12:00:00Z'), async (message) => { progress.push(message); });
   assert.deepEqual(result.references, fixture.references);
   assert.ok(result.aboutAuthors.startsWith('Prepared by Clinic team.'));
+  assert.equal(result.authors, 'Clinic team');
   assert.equal(result.audience, request.context.audience);
   assert.equal(result.jurisdiction, request.context.jurisdiction);
   assert.equal(result.generatedOn, '2026-09-25');

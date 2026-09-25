@@ -14,6 +14,7 @@ export interface PolicyBriefReference {
 export interface PolicyBrief {
   version: 1;
   title: string;
+  authors: string;
   audience: string;
   jurisdiction: string;
   decision: string;
@@ -91,9 +92,13 @@ export function parsePolicyBrief(value: unknown): PolicyBrief {
   });
   const ids = new Set(references.map((r) => r.id));
   if (ids.size !== references.length) throw new Error('Duplicate policy brief references.');
+  const aboutAuthors = text(raw.aboutAuthors, 'aboutAuthors', 700);
+  // Older saved briefs kept the server-supplied names only in the closing attribution.
+  const legacyAuthors = aboutAuthors.match(/^Prepared by ([\s\S]+?)\. Based on a strategy developed through Global Solutions Lab\b/)?.[1];
   const brief: PolicyBrief = {
     version: 1,
     title: text(raw.title, 'title', 160),
+    authors: text(raw.authors ?? legacyAuthors ?? 'Solution team (authorship to confirm)', 'authors', 400),
     audience: text(raw.audience, 'audience', 300),
     jurisdiction: text(raw.jurisdiction, 'jurisdiction', 300),
     decision: text(raw.decision, 'decision', 650),
@@ -122,7 +127,7 @@ export function parsePolicyBrief(value: unknown): PolicyBrief {
     pathway: strings(raw.pathway, 'pathway', 3, 3, 160),
     nextSteps: text(raw.nextSteps, 'nextSteps', 900),
     uncertainties: strings(raw.uncertainties, 'uncertainties', 1, 4, 500),
-    aboutAuthors: text(raw.aboutAuthors, 'aboutAuthors', 700),
+    aboutAuthors,
     references,
     generatedOn: text(raw.generatedOn, 'generatedOn', 10),
   };
@@ -142,7 +147,7 @@ export function parsePolicyBrief(value: unknown): PolicyBrief {
 export function policyBriefToText(b: PolicyBrief): string {
   const citations = (ids: string[]) => ids.map((id) => `[${id}]`).join(' ');
   return [
-    b.title, `Policy Brief | ${b.generatedOn}`, `For: ${b.audience}`, `Jurisdiction: ${b.jurisdiction}`,
+    b.title, `Policy Brief | ${b.generatedOn}`, `Prepared by: ${b.authors}`, `For: ${b.audience}`, `Jurisdiction: ${b.jurisdiction}`,
     b.statusNote, 'Decision requested:', b.decision,
     'Key messages:', ...b.keyMessages.map((m) => `• ${m}`),
     'Introduction:', b.introduction, 'Context and importance of the problem:', b.context,

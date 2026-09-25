@@ -110,6 +110,7 @@ export async function generatePolicyBrief(
     decision: String(request.context?.decision || '').trim().slice(0, 650),
   };
   const generatedOn = now.toISOString().slice(0, 10);
+  const authors = request.authors?.trim().slice(0, 400) || 'the solution team (authorship to confirm)';
   const material = `Research this policy decision using primary official sources and original research. Search the relevant government's official domains and the relevant UN agency first. Find 4–8 directly useful sources. Exclude vendor marketing, social media and news summaries. Clearly distinguish drafts from enacted policy.\n\n${JSON.stringify({ asOf: generatedOn, context, strategy: request.source })}`;
   await progress('Researching policy context and evidence…');
   const research = extractPolicyResearch(await ai.research(material));
@@ -125,13 +126,14 @@ export async function generatePolicyBrief(
     const raw = JSON.parse(output.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, ''));
     const brief = parsePolicyBrief({
       ...raw,
+      authors,
       audience: context.audience || raw.audience,
       jurisdiction: context.jurisdiction || raw.jurisdiction,
       statusNote: /to (?:be )?(?:confirm|select)|to confirm/i.test(context.jurisdiction || raw.jurisdiction || '') && !/working draft/i.test(raw.statusNote || '')
         ? `Working draft. Confirm the pilot jurisdiction, responsible institutions and authority before submission. ${raw.statusNote || ''}`.trim().slice(0, 450)
         : raw.statusNote,
       references: research.references,
-      aboutAuthors: `Prepared by ${request.authors?.trim().slice(0, 400) || 'the solution team (authorship to confirm)'}. Based on a strategy developed through Global Solutions Lab; the recommendations represent the team's proposal.`,
+      aboutAuthors: `Prepared by ${authors}. Based on a strategy developed through Global Solutions Lab; the recommendations represent the team's proposal.`,
       generatedOn,
     });
     const content = JSON.stringify({ ...brief, references: [], generatedOn: '' });

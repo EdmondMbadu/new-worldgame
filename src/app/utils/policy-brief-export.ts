@@ -18,7 +18,7 @@ const citedFinding = (e: PolicyBrief['evidence'][number]) =>
 /** Selectable text, vector graphics, and native links; no image rasterization or remote assets. */
 export function createPolicyBriefPdf(brief: PolicyBrief): jsPDF {
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
-  pdf.setProperties({ title: brief.title, subject: 'Policy brief', author: brief.aboutAuthors, creator: 'Global Solutions Lab' });
+  pdf.setProperties({ title: brief.title, subject: 'Policy brief', author: brief.authors, creator: 'Global Solutions Lab' });
   const margin = 18;
   const width = 174;
   const bottom = 274;
@@ -118,6 +118,7 @@ export function createPolicyBriefPdf(brief: PolicyBrief): jsPDF {
   font(9); color(MUTED); pdf.text(brief.generatedOn, margin + width, y, { align: 'right' });
   y += 10;
   paragraph(brief.title, { size: 24, bold: true, color: GREEN, gap: 1 });
+  paragraph(`Prepared by: ${brief.authors}`, { size: 10, bold: true, color: GREEN, gap: 3 });
   paragraph(`For: ${brief.audience}`, { size: 9.5, bold: true, gap: 1 });
   paragraph(`Jurisdiction: ${brief.jurisdiction}`, { size: 9.5, color: MUTED, gap: 4 });
   if (brief.statusNote) paragraph(brief.statusNote, { size: 9.5, color: MUTED, gap: 4 });
@@ -206,6 +207,7 @@ export function buildPolicyBriefDocx(brief: PolicyBrief): Document {
   const children: Array<Paragraph | Table> = [
     new Paragraph({ text: 'GLOBAL SOLUTIONS LAB / POLICY BRIEF', style: 'Kicker' }),
     new Paragraph({ text: display(brief.title), heading: HeadingLevel.TITLE, keepNext: true }),
+    p(`Prepared by: ${brief.authors}`, true, true),
     p(`For: ${brief.audience} | ${brief.generatedOn}`, true), p(`Jurisdiction: ${brief.jurisdiction}`),
     ...(brief.statusNote ? [p(brief.statusNote)] : []),
     h('Decision requested'), p(brief.decision, true),
@@ -243,7 +245,7 @@ export function buildPolicyBriefDocx(brief: PolicyBrief): Document {
     p(`Sources accessed ${brief.generatedOn}.`),
   ];
   return new Document({
-    title: brief.title, subject: 'Policy Brief', creator: 'Global Solutions Lab',
+    title: brief.title, subject: 'Policy Brief', creator: brief.authors,
     styles: {
       default: { document: { run: { font: 'Calibri', size: 22, color: INK }, paragraph: { spacing: { line: 276, after: 100 } } } },
       paragraphStyles: [

@@ -30,6 +30,7 @@ describe('Policy brief source and exports', () => {
     // Test the uncompressed PDF's structure to distinguish text from raster-only exports.
     expect(pdf.output()).toContain('/Subtype /Link');
     expect(pdf.output()).toContain('/BaseFont /Helvetica');
+    expect(String(pdf.internal.pages[1])).toContain('Prepared by: GSL demonstration team');
   });
 
   it('produces an editable Word file from the same structured document', async () => {
