@@ -73,6 +73,7 @@ import { CameraRig } from './camera-rig';
 import { PostFX } from './post';
 import { detectTier, deviceHints, FrameGovernor, TIERS, type Tier } from './quality';
 import { sharpenSurfaces } from './surfaces';
+import { createClinicCare } from './clinic-care';
 
 /** Terrain palette, parsed once instead of once per vertex. */
 const PALETTE = {
@@ -105,6 +106,8 @@ export class GameWorld {
   camera = new T.PerspectiveCamera(56, 1, 0.15, 3200);
   private storyCameraOffset = 0;
   private storyCameraOffsetY = 0;
+  private openingShot: 'care' | 'road' | null = null;
+  private care: ReturnType<typeof createClinicCare>;
   truck: ReturnType<typeof createTruck>;
   clinic: ReturnType<typeof createClinic>;
   people: ReturnType<typeof createPerson>[] = [];
@@ -125,6 +128,9 @@ export class GameWorld {
   /** Rendering tier chosen for this drive (and lowered by the governor if needed). */
   tier: Tier = 2;
   governor: FrameGovernor;
+  private pendingGraphics: 'scale' | 'tier' | null = null;
+  private viewportWidth = 0;
+  private viewportHeight = 0;
   private get low() {
     return this.tier === 0;
   }
@@ -283,6 +289,9 @@ export class GameWorld {
     this.clinic.root.rotation.y = Math.PI;
     const architecture = clinicArchitecture(m.id);
     this.clinic.root.add(architecture.root);
+    this.care = createClinicCare(m.id);
+    this.care.root.position.set(0, .36, 4.8);
+    this.clinic.root.add(this.care.root);
     this.clinicWingGlow = architecture.glow;
     this.scene.add(this.clinic.root);
     for (let i = 0; i < 7; i++) {
@@ -403,7 +412,9 @@ export class GameWorld {
     this.updateEnvironment(true);
     if (import.meta.env.DEV) Object.assign(window as any, { __lastLight: this, __atm: atmospheric, __T: T });
     this.renderer.info.autoReset = false;
-    this.resizeObserver = new ResizeObserver(() => this.resize());
+    // Resizing clears WebGL's drawing buffer. Always replace that cleared frame,
+    // even if gameplay is paused or a static briefing has stopped the RAF render.
+    this.resizeObserver = new ResizeObserver(() => { if (this.resize()) this.render(0); });
     this.resizeObserver.observe(canvas);
     this.resize();
   }
@@ -412,8 +423,9 @@ export class GameWorld {
     return Math.min(devicePixelRatio || 1, TIERS.pixelCap[this.tier]) * (this.governor?.scale ?? 1);
   }
   private applyResolution() {
-    this.renderer.setPixelRatio(this.pixelRatio());
-    this.post.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+    // Keep the displayed canvas intact. Scale only the offscreen scene buffers;
+    // the final pass upsamples into the stable canvas without exposing a clear.
+    this.post.setSize(this.canvas.clientWidth, this.canvas.clientHeight, this.pixelRatio());
   }
   /** Step the costly features down to the governor's tier, in place. */
   private applyTier() {
@@ -457,7 +469,9 @@ export class GameWorld {
   private resize() {
     const width = this.canvas.clientWidth,
       height = this.canvas.clientHeight;
-    if (!width || !height) return;
+    if (!width || !height || (width === this.viewportWidth && height === this.viewportHeight)) return false;
+    this.viewportWidth = width;
+    this.viewportHeight = height;
     this.camera.aspect = width / height;
     if (this.storyCameraOffset !== 0 || this.storyCameraOffsetY !== 0)
       this.camera.setViewOffset(width, height, this.storyCameraOffset * width, this.storyCameraOffsetY * height, width, height);
@@ -465,7 +479,8 @@ export class GameWorld {
     this.speedFov = this.camera.fov;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
-    this.post?.setSize(width, height);
+    this.post?.setSize(width, height, this.pixelRatio());
+    return true;
   }
   /** Bake the current sky into image-based lighting and reflections. */
   private updateEnvironment(force = false) {
@@ -1238,8 +1253,19 @@ export class GameWorld {
   }
   render(dt: number, frameDelta = dt) {
     if (this.disposed) return;
+    // Apply buffer changes BEFORE drawing, never after presenting a valid frame.
+    // In particular setPixelRatio() implicitly clears the screen through setSize().
+    const graphics = this.pendingGraphics;
+    this.pendingGraphics = null;
+    if (graphics === 'tier') {
+      this.tier = this.governor.tier;
+      this.applyTier();
+    } else if (graphics === 'scale') this.applyResolution();
     const e = this.engine,
       m = e.mission;
+    const preview = this.openingTime !== null && !this.settings.reducedMotion;
+    const careShot = preview && this.openingTime! < 8;
+    const viewProgress = careShot ? m.length : e.progress;
     this.clock += dt;
     const alpha = e.phase === 'driving' ? e.interpolation : 1;
     this.renderedPosition
@@ -1269,9 +1295,11 @@ export class GameWorld {
     atmosphereUniforms.uTime.value = this.clock;
     this.living.update(e, this.clock);
     this.trafficArt.update(e, alpha, this.settings.reducedMotion);
+    this.care.root.visible = careShot || e.progress > m.length - 100;
+    if (this.care.root.visible) this.care.update(this.openingTime ?? this.clock, this.settings.reducedMotion);
     for (const chunk of this.chunks)
       chunk.mesh.visible =
-        chunk.end > e.progress - chunk.behind && chunk.start < e.progress + chunk.ahead;
+        chunk.end > viewProgress - chunk.behind && chunk.start < viewProgress + chunk.ahead;
     if (this.water) {
       const mat = this.water.material as T.MeshStandardMaterial;
       if (mat.normalMap) {
@@ -1288,7 +1316,7 @@ export class GameWorld {
     const rain = rainAt(m, e.progress);
     (this.scene.fog as T.FogExp2).density = 0.00072 * (1 + sky.darkness * 0.9) * (1 + rain * 0.7) * (m.id === 3 ? 1.5 : 1);
     atmosphereUniforms.uMist.value = chapterLook(m).mist * (0.45 + 0.55 * sky.darkness);
-    atmosphereUniforms.uFogBase.value = p.y - 16;
+    atmosphereUniforms.uFogBase.value = (careShot ? roadY(m, m.length) : p.y) - 16;
     const lightning =
       m.id === 4 &&
       !this.settings.reducedFlashes &&
@@ -1521,7 +1549,6 @@ export class GameWorld {
     // Ease the final composition into the free side of the closing story panel.
     // The handover remains in the same scene and the player's truck stays visible.
     const closingFrame = restoring ? this.settings.reducedMotion ? 1 : smooth(14, 18, t) : 0;
-    const preview = this.openingTime !== null && !this.settings.reducedMotion;
     const offset = preview ? (portrait ? 0 : -0.22) : closingFrame * (portrait ? 0 : -0.22);
     const offsetY = preview ? (portrait ? .26 : .17) : closingFrame * (portrait ? .31 : 0);
     if (Math.abs(offset - this.storyCameraOffset) > .0005 || Math.abs(offsetY - this.storyCameraOffsetY) > .0005) {
@@ -1532,16 +1559,26 @@ export class GameWorld {
     }
     if (preview) {
       const seconds = this.openingTime!;
+      const shot = careShot ? 'care' : 'road';
       const side = new T.Vector3(forward.z, 0, -forward.x);
       const roadShot = p.clone().addScaledVector(forward, -22).addScaledVector(side, 14).add(new T.Vector3(0, 21, 0));
       const kitShot = p.clone().addScaledVector(forward, -5.4).addScaledVector(side, 4.5).add(new T.Vector3(0, 3.7, 0));
       const driveShot = p.clone().addScaledVector(forward, portrait ? -9.6 : -8.1).add(new T.Vector3(0, portrait ? 4.3 : 2.8, 0));
-      const cargo = smooth(7, 9, seconds), departure = smooth(10.5, 14, seconds);
+      const cargo = smooth(12, 14, seconds), departure = smooth(16, 20, seconds);
       this.eye.copy(roadShot).lerp(kitShot, cargo).lerp(driveShot, departure);
       this.eye.y = Math.max(this.eye.y, worldHeight(m, this.eye.x, this.eye.z) + 1.6);
       this.aim.copy(p).addScaledVector(forward, T.MathUtils.lerp(35, -1, cargo)).add(new T.Vector3(0, 1, 0));
       this.aim.lerp(p.clone().addScaledVector(forward, 10).add(new T.Vector3(0, .7, 0)), departure);
-      this.rig.place(this.eye, this.aim, dt, this.camera);
+      if (careShot) {
+        const y = roadY(m, m.length), move = smooth(0, 8, seconds);
+        // Low porch roofs in these compounds need a camera below the awning.
+        const careHeight = m.id === 1 || m.id === 4 ? 2.6 : 3.8;
+        this.eye.set(T.MathUtils.lerp(-4.8, -3.4, move), y + careHeight, m.length + 6);
+        this.aim.set(.1, y + 1.4, m.length + 14.2);
+      }
+      // Separate locations use a clean cut, never a flight through the landscape.
+      this.rig.place(this.eye, this.aim, dt, this.camera, shot !== this.openingShot);
+      this.openingShot = shot;
     } else if (restoring) {
       const a = this.settings.reducedMotion ? 1 : smooth(0, 5, t);
       const targetEye = new T.Vector3(
@@ -1586,13 +1623,14 @@ export class GameWorld {
     }
     this.sky.position.copy(this.camera.position);
     // The sun's shadow volume follows the truck; low sun, long shadows.
-    this.sun.position.copy(p).addScaledVector(sky.lightDir, 200);
-    this.sun.target.position.set(p.x + forward.x * 14, p.y, p.z + forward.z * 14);
+    const lightCentre = careShot ? new T.Vector3(0, roadY(m, m.length), m.length + 14) : p;
+    this.sun.position.copy(lightCentre).addScaledVector(sky.lightDir, 200);
+    this.sun.target.position.set(lightCentre.x + forward.x * 14, lightCentre.y, lightCentre.z + forward.z * 14);
     for (let i = 0; i < this.rainData.length; i += 6) {
       const a = i / 6;
-      const x = p.x + Math.sin(a * 78.23) * 24;
-      const z = p.z + Math.cos(a * 14.23) * 25;
-      const y = p.y + ((((a * 0.77 - this.clock * 15) % 20) + 20) % 20);
+      const x = lightCentre.x + Math.sin(a * 78.23) * 24;
+      const z = lightCentre.z + Math.cos(a * 14.23) * 25;
+      const y = lightCentre.y + ((((a * 0.77 - this.clock * 15) % 20) + 20) % 20);
       this.rainData.set([x, y, z, x - 0.13, y - 0.9, z + 0.04], i);
     }
     this.rain.geometry.attributes.position.needsUpdate = true;
@@ -1683,11 +1721,7 @@ export class GameWorld {
       triangles: this.renderer.info.render.triangles,
     };
     const change = this.governor.sample(dt);
-    if (change === 'scale') this.applyResolution();
-    if (change === 'tier') {
-      this.tier = this.governor.tier;
-      this.applyTier();
-    }
+    if (change && this.pendingGraphics !== 'tier') this.pendingGraphics = change;
   }
   dispose() {
     if (this.disposed) return;
@@ -1696,6 +1730,7 @@ export class GameWorld {
     this.living.dispose();
     this.people.forEach((p) => p.skin.skeleton.dispose());
     this.staff.forEach((p) => p?.dispose());
+    this.care.dispose();
     this.environmentTarget?.dispose();
     this.post.dispose();
     this.renderer.dispose();

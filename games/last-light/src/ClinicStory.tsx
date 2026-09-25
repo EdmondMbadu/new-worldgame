@@ -6,6 +6,7 @@ import type { Result } from './engine';
 import { MISSIONS, type Mission } from './missions';
 import { DrivingGuide, keyLabel } from './DrivingGuide';
 import { OpeningBriefing, openingBeat } from './OpeningBriefing';
+import { OPENING_STORIES } from './opening-story';
 import './clinic-story.css';
 
 type Props = {
@@ -34,7 +35,8 @@ type Props = {
 export function ClinicStoryView(p: Props) {
   const { clinic, scene, settings, narration, result } = p;
   const opening = scene === 'opening';
-  const urgent = opening && clinic.id === 'ndingi';
+  const urgent = opening;
+  const story = OPENING_STORIES[p.chapter];
   const beat = settings.reducedMotion ? 0 : openingBeat(p.previewTime || 0);
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => { heading.current?.focus({ preventScroll: true }); }, [clinic.id, scene]);
@@ -57,11 +59,11 @@ export function ClinicStoryView(p: Props) {
       <div className="story-scroll">
         <div className="story-content">
           <span className="story-scene-caption story-scene-caption--mobile">{sceneCaption}</span>
-          <p className="story-clinic-name">{urgent ? <><span className="incoming-signal" aria-hidden="true" /> Ndingi calling <span className="story-call-tag">{narration.status === 'ended' ? 'MESSAGE RECEIVED' : 'INCOMING MESSAGE'}</span></> : clinic.name}</p>
-          {urgent && <p className="story-fiction">A dramatized delivery · inspired by a completed solar project</p>}
-          <h1 id="clinic-story-heading" ref={heading} tabIndex={-1}>{urgent ? <>The clinic is on its <em>last reserve.</em></> : opening ? clinic.headline : result?.practice ? 'A journey well practised.' : finished ? 'A chain of light.' : 'The team can keep caring.'}</h1>
+          <p className="story-clinic-name">{urgent ? <><span className="incoming-signal" aria-hidden="true" /> {clinic.shortName} calling <span className="story-call-tag">{narration.status === 'ended' ? 'MESSAGE RECEIVED' : 'INCOMING MESSAGE'}</span></> : clinic.name}</p>
+          {urgent && <p className="story-fiction">A dramatized delivery · {clinic.stage === 'online' ? 'inspired by a completed solar project' : 'inspired by a real clinic preparing for solar'}</p>}
+          <h1 id="clinic-story-heading" ref={heading} tabIndex={-1}>{urgent ? <>{story.lead} <em>{story.emphasis}</em></> : result?.practice ? 'A journey well practised.' : finished ? 'A chain of light.' : 'The team can keep caring.'}</h1>
           <p className="story-location">{clinic.location}</p>
-          <p className="story-context">{urgent ? 'Bring a charged battery and solar panels to Ndingi. Reach the courtyard before the backup power runs out—and keep the kit safe.' : opening ? clinic.context : result?.practice ? 'The kit has reached the team. Start a full delivery when you are ready to record your journey.' : 'The kit has reached the clinic team. Take a breath. Your delivery is complete.'}</p>
+          <p className="story-context">{urgent ? story.objective : result?.practice ? 'The kit has reached the team. Start a full delivery when you are ready to record your journey.' : 'The kit has reached the clinic team. Take a breath. Your delivery is complete.'}</p>
 
           {!opening && <div className="story-facts" aria-label="Documented clinic project">
             {clinic.capacityKw !== null ? <>

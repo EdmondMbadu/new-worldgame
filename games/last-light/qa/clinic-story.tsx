@@ -40,16 +40,21 @@ function StoryQA() {
       engine.phase = scene === 'closing' ? 'results' : 'ready';
       engine.restoreTime = 18;
       world = new GameWorld(canvas.current!, engine, settings.current);
+      await world.prepare();
+      if (cancelled) return;
       setReady(true);
-      let last = performance.now();
+      let last = performance.now(), renderedPreview = -1;
       const frame = (now: number) => {
         if (cancelled || !world || !engine) return;
         const dt = Math.min(.06, (now - last) / 1000); last = now;
-        if (scene === 'opening' && id === 0 && !settings.current.reducedMotion) {
+        if (scene === 'opening' && !settings.current.reducedMotion) {
           if (!previewPaused.current && !document.hidden) previewTime.current = Math.min(OPENING_DURATION, previewTime.current + dt);
           world.openingTime = previewTime.current;
         }
-        if (!previewPaused.current) world.render(dt, dt);
+        if (!previewPaused.current || previewTime.current !== renderedPreview) {
+          world.render(previewPaused.current ? 0 : dt, dt);
+          renderedPreview = previewTime.current;
+        }
         if (scene === 'opening') sound.current?.updateStory(dt);
         else sound.current?.update(engine, dt);
         tick(n => n + 1);
@@ -90,6 +95,14 @@ function StoryQA() {
     } catch (error) { setReport(`FAIL — ${error}\n${rows.join('\n')}`); }
     finally { await context.close(); }
   };
-  return scene ? <main className="last-light in-game"><canvas ref={canvas} className="game-canvas" /><ClinicStoryView clinic={CLINICS[id]} chapter={id} scene={scene} settings={settings.current} narration={sound.current?.narration || {scene:null,status:'idle',progress:0}} onVoice={() => {sound.current?.toggleNarration();void sound.current?.unlock();}} onHome={home} onSettings={home} onContinue={home} onReplay={home} touch={touch} onTouch={() => setTouch(v => !v)} ready={ready} loading="Preparing preview" previewTime={previewTime.current} previewPaused={previewPaused.current} onPreviewPause={() => {previewPaused.current = !previewPaused.current; tick(n => n + 1);}} completed={Array.from({length:id+1},(_,i)=>i)} result={scene==='closing' ? {mission:id,mode:'standard',score:1752,stars:3,integrity:100,remaining:74,lives:MISSIONS[id].lives,clean:9,encounters:10} : undefined} /></main> : <main style={{padding:30}}><h1>Story verification</h1><p>Development fixture · no saves written. Preview the real scene components and decode every local recording.</p><label>Clinic <select value={id} onChange={e=>setId(Number(e.target.value))}>{CLINICS.map((c,i)=><option key={c.id} value={i}>{c.name}</option>)}</select></label><p><label><input type="checkbox" checked={settings.current.reducedMotion} onChange={e => {settings.current.reducedMotion = e.target.checked; tick(n => n + 1);}} /> Reduced motion</label> <label><input type="checkbox" checked={!settings.current.sound} onChange={e => {settings.current.sound = !e.target.checked; tick(n => n + 1);}} /> Sound off</label> <label><input type="checkbox" checked={touch} onChange={e => setTouch(e.target.checked)} /> Touch controls</label></p><p><button onClick={()=>show('opening')}>Preview opening</button> <button onClick={()=>show('closing')}>Preview ending</button> <button onClick={()=>void validate()}>Validate all voice files</button></p><pre style={{whiteSpace:'pre-wrap'}}>{report}</pre></main>;
+  return scene ? <main className="last-light in-game">
+    {scene === 'opening' && <div style={{position:'fixed',bottom:4,right:8,zIndex:30,background:'#132d30',padding:6,fontSize:11}}>
+      <label>Preview shot <select aria-label="Preview shot" value={previewPaused.current ? String(previewTime.current) : 'auto'} onChange={event => {
+        previewPaused.current = event.target.value !== 'auto';
+        if (previewPaused.current) previewTime.current = Number(event.target.value);
+        tick(n => n + 1);
+      }}><option value="auto">Play sequence</option><option value="0">The call</option><option value="5">The care</option><option value="10">The road</option><option value="14">The kit</option><option value="18">Your turn</option></select></label>
+    </div>}
+    <canvas ref={canvas} className="game-canvas" /><ClinicStoryView clinic={CLINICS[id]} chapter={id} scene={scene} settings={settings.current} narration={sound.current?.narration || {scene:null,status:'idle',progress:0}} onVoice={() => {sound.current?.toggleNarration();void sound.current?.unlock();}} onHome={home} onSettings={home} onContinue={home} onReplay={home} touch={touch} onTouch={() => setTouch(v => !v)} ready={ready} loading="Preparing preview" previewTime={previewTime.current} previewPaused={previewPaused.current} onPreviewPause={() => {previewPaused.current = !previewPaused.current; tick(n => n + 1);}} completed={Array.from({length:id+1},(_,i)=>i)} result={scene==='closing' ? {mission:id,mode:'standard',score:1752,stars:3,integrity:100,remaining:74,lives:MISSIONS[id].lives,clean:9,encounters:10} : undefined} /></main> : <main style={{padding:30}}><h1>Story verification</h1><p>Development fixture · no saves written. Preview the real scene components and decode every local recording.</p><label>Clinic <select value={id} onChange={e=>setId(Number(e.target.value))}>{CLINICS.map((c,i)=><option key={c.id} value={i}>{c.name}</option>)}</select></label><p><label><input type="checkbox" checked={settings.current.reducedMotion} onChange={e => {settings.current.reducedMotion = e.target.checked; tick(n => n + 1);}} /> Reduced motion</label> <label><input type="checkbox" checked={!settings.current.sound} onChange={e => {settings.current.sound = !e.target.checked; tick(n => n + 1);}} /> Sound off</label> <label><input type="checkbox" checked={touch} onChange={e => setTouch(e.target.checked)} /> Touch controls</label></p><p><button onClick={()=>show('opening')}>Preview opening</button> <button onClick={()=>show('closing')}>Preview ending</button> <button onClick={()=>void validate()}>Validate all voice files</button></p><pre style={{whiteSpace:'pre-wrap'}}>{report}</pre></main>;
 }
 createRoot(document.getElementById('root')!).render(<StoryQA />);

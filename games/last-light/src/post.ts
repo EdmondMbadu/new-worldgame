@@ -158,8 +158,8 @@ export class PostFX {
       this.composer.addPass(this.fxaa);
     }
   }
-  setSize(width: number, height: number) {
-    this.composer.setPixelRatio(this.renderer.getPixelRatio());
+  setSize(width: number, height: number, pixelRatio = this.renderer.getPixelRatio()) {
+    this.composer.setPixelRatio(pixelRatio);
     this.composer.setSize(width, height);
   }
   render(f: PostFrame) {

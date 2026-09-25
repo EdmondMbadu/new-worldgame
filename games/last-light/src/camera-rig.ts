@@ -135,6 +135,9 @@ export class CameraRig {
     const k = this.eye.lengthSq() === 0 ? 1 : 1 - Math.exp(-dt * (input.reducedMotion ? 12 : 7));
     if (this.eye.lengthSq() === 0) this.eye.copy(eye);
     else this.eye.lerp(eye, k);
+    // The interpolated camera can still be inside a rising bank, even when its
+    // destination is clear. Resolve clearance at the position we actually render.
+    this.eye.y = Math.max(this.eye.y, input.groundAt(this.eye.x, this.eye.z) + 1.6);
     if (this.aim.lengthSq() === 0) this.aim.copy(aim);
     else this.aim.lerp(aim, 1 - Math.exp(-dt * 10));
     camera.position.copy(this.eye);
@@ -143,9 +146,9 @@ export class CameraRig {
   }
 
   /** For scripted shots (the clinic restoration) that set eye/aim directly. */
-  place(eye: T.Vector3, aim: T.Vector3, dt: number, camera: T.PerspectiveCamera, snappy = false) {
-    const k = 1 - Math.exp(-Math.max(dt, 0.001) * (snappy ? 12 : 6));
-    if (this.eye.lengthSq() === 0) this.eye.copy(eye);
+  place(eye: T.Vector3, aim: T.Vector3, dt: number, camera: T.PerspectiveCamera, cut = false) {
+    const k = 1 - Math.exp(-Math.max(dt, 0.001) * 6);
+    if (cut || this.eye.lengthSq() === 0) this.eye.copy(eye);
     else this.eye.lerp(eye, k);
     this.aim.copy(aim);
     camera.position.copy(this.eye);

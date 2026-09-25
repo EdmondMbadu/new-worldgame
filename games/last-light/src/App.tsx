@@ -544,7 +544,7 @@ export default function App() {
             committed = true;
             setSave((s) => recordResult(s, instance.result!));
           }
-          const preview = openingRef.current && instance.mission.id === 0 && !settingsRef.current.reducedMotion;
+          const preview = openingRef.current && !settingsRef.current.reducedMotion;
           const visible = document.visibilityState !== 'hidden' && document.hasFocus();
           if (preview && visible && !settingsOpenRef.current && !previewPausedRef.current) {
             view.openingTime = Math.min(OPENING_DURATION, (view.openingTime || 0) + Math.min(dt, .06));
@@ -927,7 +927,7 @@ export default function App() {
                   </button>
                 </div>
               </header>}
-              {selected === 0 && <DriveCoach key={`${selected}:${run}`} engine={e} touch={touch} controller={controls.current?.device === 'controller'} />}
+              <DriveCoach key={`${selected}:${run}`} engine={e} touch={touch} controller={controls.current?.device === 'controller'} />
               {["ready", "driving"].includes(e.phase) && (
                 <>
                   <div className="destination">
@@ -1209,6 +1209,16 @@ export default function App() {
                   >
                     {autopilot ? "Stop" : "Run"} driving QA
                   </button>
+                  <button onClick={async () => {
+                    // Development-only regression aid: request the same adaptive
+                    // graphics changes as slow frames, even with manual quality.
+                    // This affects this QA drive only; saved settings stay intact.
+                    const { FrameGovernor } = await import('./quality');
+                    const view = world.current;
+                    if (!view) return;
+                    view.governor = new FrameGovernor(view.tier, true);
+                    for (let i = 0; i < 300; i++) view.recordFrame(.04, 2, 35);
+                  }}>Stress graphics QA</button>
                   <output>
                     tier {world.current ? ["light", "balanced", "high"][world.current.tier] : "-"} ·
                     res {world.current ? Math.round(world.current.governor.scale * 100) : 100}% ·{" "}
