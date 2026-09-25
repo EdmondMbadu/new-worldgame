@@ -35,6 +35,7 @@ import { Email } from '../components/create-playground/create-playground.compone
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
+import { tournamentEntryIds } from '../utils/tournament-entries';
 import {
   StrategyReviewSyncMetadata,
   strategyReviewSourceAnswers,
@@ -1577,15 +1578,24 @@ export class SolutionService {
       .valueChanges();
   }
 
-  /**
-   * Loads only the sanitized card projections that Firestore permits anonymous
-   * visitors to read. Requested order is retained so tournament entries do not
-   * jump around when switching between signed-in and public views.
-   */
+  /** Both tournament pages resolve entries before counting, excluding stale IDs. */
+  getTournamentSolutions(ids: string[], authenticated: boolean): Observable<Solution[]> {
+    return authenticated
+      ? this.getSolutionsByIds(ids)
+      : this.getPublicSolutionsByIds(ids);
+  }
+
+  /** Anonymous visitors only receive sanitized public card projections. */
   getPublicSolutionsByIds(ids: string[]): Observable<Solution[]> {
-    const requestedIds = Array.from(
-      new Set((ids || []).map((id) => String(id || '').trim()).filter(Boolean))
-    );
+    return this.loadSolutionsByIds('publicCommunitySolutions', ids);
+  }
+
+  getSolutionsByIds(ids: string[]): Observable<Solution[]> {
+    return this.loadSolutionsByIds('solutions', ids);
+  }
+
+  private loadSolutionsByIds(collection: string, ids: string[]): Observable<Solution[]> {
+    const requestedIds = tournamentEntryIds(ids);
     if (!requestedIds.length) return of([] as Solution[]);
 
     const chunks: string[][] = [];
@@ -1596,7 +1606,7 @@ export class SolutionService {
     return combineLatest(
       chunks.map((chunk) =>
         this.afs
-          .collection<Solution>('publicCommunitySolutions', (ref) =>
+          .collection<Solution>(collection, (ref) =>
             ref.where('solutionId', 'in', chunk)
           )
           .valueChanges({ idField: 'solutionId' })
@@ -1614,29 +1624,8 @@ export class SolutionService {
           if (solution) ordered.push(solution);
           return ordered;
         }, []);
-      }),
-      catchError((error) => {
-        console.error('Unable to load public tournament solutions.', error);
-        return of([] as Solution[]);
       })
     );
-  }
-  // solution.service.ts
-  getSolutionsByIds(ids: string[]) {
-    if (!ids.length) return of([]);
-    /* Firestore ‘in’ supports ≤30 values – chunk if needed */
-    const chunks: string[][] = [];
-    for (let i = 0; i < ids.length; i += 30) chunks.push(ids.slice(i, i + 30));
-
-    return combineLatest(
-      chunks.map((chunk) =>
-        this.afs
-          .collection<Solution>('solutions', (ref) =>
-            ref.where('solutionId', 'in', chunk)
-          )
-          .valueChanges({ idField: 'solutionId' })
-      )
-    ).pipe(map((arr) => arr.flat()));
   }
 
   // === Start a broadcast ===

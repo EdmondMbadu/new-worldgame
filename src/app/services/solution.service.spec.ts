@@ -18,8 +18,11 @@ describe('SolutionService', () => {
         .and.callFake((name: string, query: (ref: any) => unknown) => {
           collectionName = name;
           query({ where });
+          const [, operator, ids] = where.calls.mostRecent().args;
           return {
-            valueChanges: () => of(collectionValues),
+            valueChanges: () => of(operator === 'in'
+              ? collectionValues.filter((solution) => ids.includes(solution.solutionId))
+              : collectionValues),
           };
         }),
     };
@@ -89,5 +92,38 @@ describe('SolutionService', () => {
       'first',
       'second',
     ]);
+  });
+
+  it('resolves six references to five existing submissions for both tournament views', async () => {
+    const ids = ['one', 'two', 'three', 'four', 'five', 'deleted'];
+    collectionValues = ids.slice(0, 5).reverse().map((solutionId) => ({ solutionId }));
+    for (const authenticated of [true, false]) {
+      const solutions = await firstValueFrom(service.getTournamentSolutions(ids, authenticated));
+      expect(solutions.map((solution) => solution.solutionId)).toEqual(ids.slice(0, 5));
+      expect(collectionName).toBe(authenticated ? 'solutions' : 'publicCommunitySolutions');
+    }
+  });
+
+  it('ignores empty and duplicate references without inflating the count', async () => {
+    collectionValues = [{ solutionId: 'one' }, { solutionId: 'two' }];
+    const solutions = await firstValueFrom(
+      service.getTournamentSolutions(['one', '', ' one ', 'two', 'two'], true)
+    );
+    expect(where).toHaveBeenCalledOnceWith('solutionId', 'in', ['one', 'two']);
+    expect(solutions.length).toBe(2);
+  });
+
+  it('does not query Firestore for an empty tournament', async () => {
+    expect(await firstValueFrom(service.getTournamentSolutions([], true))).toEqual([]);
+    expect(await firstValueFrom(service.getTournamentSolutions([' '], false))).toEqual([]);
+    expect(where).not.toHaveBeenCalled();
+  });
+
+  it('loads more than 30 entries in bounded batches without truncating the count', async () => {
+    const ids = Array.from({ length: 65 }, (_, i) => `entry-${i}`);
+    collectionValues = ids.map((solutionId) => ({ solutionId }));
+    const solutions = await firstValueFrom(service.getTournamentSolutions(ids, true));
+    expect(where.calls.allArgs().map((args) => args[2].length)).toEqual([30, 30, 5]);
+    expect(solutions.map((solution) => solution.solutionId)).toEqual(ids);
   });
 });

@@ -4,9 +4,9 @@
       [showMoreOrLess]="true" 
       [sideBarSmall]="true" 
       [sideBarBig]="false" 
-      [email]="this.auth.currentUser.email"
-      [firstName]="this.auth.currentUser.firstName"
-      [lastName]="this.auth.currentUser.lastName"
+      [email]="this.auth.currentUser?.email || ''"
+      [firstName]="this.auth.currentUser?.firstName || ''"
+      [lastName]="this.auth.currentUser?.lastName || ''"
       [path]="'home'" 
       [currentPageTournament]="true">
     </app-navbar>
@@ -26,8 +26,9 @@
       </div>
 
       <!-- Loading spinner -->
-      <div *ngIf="isLoading" class="flex justify-center py-12">
-        <svg class="w-10 h-10 text-gray-400 animate-spin" viewBox="0 0 24 24">
+      <div *ngIf="isLoading" role="status" class="flex justify-center py-12">
+        <span class="sr-only">Loading tournaments…</span>
+        <svg aria-hidden="true" class="w-10 h-10 text-gray-400 animate-spin" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="10"
                   stroke="currentColor" stroke-width="4" class="opacity-25"/>
           <path d="M4 12a8 8 0 018-8"
@@ -37,7 +38,16 @@
       </div>
 
       <!-- Empty state -->
-      <p *ngIf="!isLoading && tournaments.length === 0"
+      <div *ngIf="loadError" role="alert" class="py-8 text-center text-gray-700 dark:text-gray-300">
+        <p>Unable to load tournaments. Please try again.</p>
+        <button type="button" (click)="retry()" class="mt-3 font-semibold underline">Try again</button>
+      </div>
+      <div *ngIf="countsError && !loadError" role="alert" class="mb-6 text-center text-gray-700 dark:text-gray-300">
+        <p>Unable to load submission counts.</p>
+        <button type="button" (click)="retryCounts()" class="mt-2 font-semibold underline">Retry counts</button>
+      </div>
+
+      <p *ngIf="!isLoading && !loadError && tournaments.length === 0"
          class="text-center text-gray-600 dark:text-gray-400">
         No active tournaments at the moment.
       </p>
@@ -45,14 +55,15 @@
       <!-- List -->
       <div class="space-y-6" *ngIf="tournaments.length">
 
-        <div *ngFor="let t of tournaments"
+        <div *ngFor="let t of tournaments; let i = index; trackBy: trackTournament"
              [routerLink]="['/tournament-details', t.tournamentId]"
              class="flex flex-col md:flex-row bg-white dark:bg-gray-800
                     rounded-lg overflow-hidden shadow-md hover:shadow-lg
                     transition cursor-pointer">
 
-          <img [src]="coverImage(t)" alt="cover"
-               class="w-full md:w-1/3 object-cover">
+          <img [src]="coverImage(t)" [alt]="t.title || 'Tournament cover'"
+               [attr.loading]="i === 0 ? 'eager' : 'lazy'" decoding="async"
+               width="640" height="360" class="aspect-video w-full md:w-1/3 object-cover">
 
           <div class="flex w-full flex-col justify-between p-4 sm:p-6">
             <div>
@@ -66,8 +77,8 @@
             </div>
 
             <div class="mt-4 flex flex-wrap gap-3 text-sm text-gray-700 dark:text-gray-300 sm:gap-8">
-              <div>Participants:
-                <span class="font-semibold">{{ participantsCount(t) }}</span>
+              <div>Submitted solutions:
+                <span class="font-semibold" aria-live="polite">{{ submittedSolutionCount(t) }}</span>
               </div>
               <div>Deadline:
                 <span class="font-semibold">

@@ -1,15 +1,16 @@
 // tournament-details.component.ts
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { switchMap, take, takeUntil } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, map, shareReplay, startWith, switchMap, takeUntil, tap } from 'rxjs/operators';
 import { Tournament } from 'src/app/models/tournament';
 import { Solution } from 'src/app/models/solution';
 import { TournamentService } from 'src/app/services/tournament.service';
 import { SolutionService } from 'src/app/services/solution.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { firstValueFrom, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, firstValueFrom, of, Subject } from 'rxjs';
 import { isSolutionOwner } from 'src/app/utils/solution-ownership';
+import { tournamentEntryIds } from 'src/app/utils/tournament-entries';
 
 @Component({
     selector: 'app-tournament-details',
@@ -23,12 +24,21 @@ export class TournamentDetailsComponent implements OnInit, OnDestroy {
   isAuthor = false;
   isPostDeadline = false;
   uploadBusy = false;
-  /* NEW state */
+  isLoading = true;
+  loadError = false;
+  entriesLoading = true;
+  entriesError = false;
+  pickerLoading = false;
+  pickerError = false;
   solutions: Solution[] = [];
   pickerOpen = false;
   submitBusy = false;
   isAuthenticated = false;
   private readonly destroy$ = new Subject<void>();
+  private readonly reload$ = new BehaviorSubject(0);
+  private readonly retryEntries$ = new BehaviorSubject(0);
+  private readonly pickerRequested$ = new BehaviorSubject(false);
+  private viewerId = '';
 
   editing = false;
   tempTitle = '';
@@ -57,58 +67,114 @@ export class TournamentDetailsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     window.scrollTo(0, 0);
 
-    // Resolve auth once before choosing the full or public-safe data path.
-    // Anonymous visitors still receive the tournament and sanitized cards.
-    this.auth.user$
-      .pipe(take(1), takeUntil(this.destroy$))
-      .subscribe((viewer) => {
-        this.isAuthenticated = !!viewer?.uid;
-
-        this.route.paramMap
-          .pipe(
-            switchMap((p) => this.tourneySvc.getById(p.get('id')!)),
-            takeUntil(this.destroy$)
-          )
-          .subscribe((t) => {
+    const viewer$ = this.auth.user$.pipe(
+      map((viewer) => viewer?.uid || ''),
+      distinctUntilChanged(),
+      tap((uid) => {
+        this.viewerId = uid;
+        this.isAuthenticated = !!uid;
+        this.isAuthor = !!uid && this.t?.authorId === uid;
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+    const tournament$ = combineLatest([
+      this.route.paramMap.pipe(map((p) => p.get('id')!), distinctUntilChanged()),
+      this.reload$,
+    ]).pipe(
+      switchMap(([id]) => {
+        this.isLoading = true;
+        this.loadError = false;
+        this.t = undefined;
+        this.completedSolutions = [];
+        this.pickerOpen = false;
+        this.pickerRequested$.next(false);
+        return this.tourneySvc.getById(id).pipe(
+          tap((t) => {
+            this.isLoading = false;
             if (!t) {
-              this.router.navigate(['/active-tournaments']);
+              void this.router.navigate(['/active-tournaments']);
               return;
             }
-            this.t = t;
+            this.t = { ...t, tournamentId: t.tournamentId || id };
             this.currentWinnerId = t.winningSolution || undefined;
-
-            /* is the logged-in user the author? */
-            this.isAuthor =
-              this.isAuthenticated &&
-              t.authorId === this.auth.currentUser?.uid;
-
-            /* is deadline in the past? */
+            this.isAuthor = !!this.viewerId && t.authorId === this.viewerId;
             this.isPostDeadline = new Date() > new Date(t.deadline ?? '');
-            if (this.isAuthenticated) {
-              this.solSvc
-                .getAuthenticatedUserAllSolutions()
-                .pipe(takeUntil(this.destroy$))
-                .subscribe((sols) => {
-                  this.solutions = sols.filter((s) => s.finished === 'true');
-                });
-            } else {
-              this.solutions = [];
-            }
-            /* load solutions if any */
-            if (t.submittedSolutions?.length) {
-              const submittedSolutions$ = this.isAuthenticated
-                ? this.solSvc.getMany(t.submittedSolutions)
-                : this.solSvc.getPublicSolutionsByIds(t.submittedSolutions);
-              submittedSolutions$
-                .pipe(takeUntil(this.destroy$))
-                .subscribe((sols) => {
-                  this.completedSolutions = sols;
-                });
-            } else {
-              this.completedSolutions = [];
-            }
-          });
-      });
+          }),
+          catchError(() => {
+            this.isLoading = false;
+            this.loadError = true;
+            return EMPTY;
+          }),
+          startWith(undefined)
+        );
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
+
+    // Render the tournament without waiting for auth or the entry queries.
+    tournament$.pipe(takeUntil(this.destroy$)).subscribe();
+    const entryRequest$ = tournament$.pipe(
+      map((t) => ({ tournamentId: t?.tournamentId, ids: tournamentEntryIds(t?.submittedSolutions) })),
+      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b))
+    );
+    combineLatest([entryRequest$, viewer$, this.retryEntries$]).pipe(
+      switchMap(([{ ids }, uid]) => {
+        this.entriesLoading = true;
+        this.entriesError = false;
+        this.completedSolutions = [];
+        return this.solSvc.getTournamentSolutions(ids, !!uid).pipe(
+          catchError(() => {
+            this.entriesError = true;
+            return of(null);
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe((solutions) => {
+      this.completedSolutions = solutions ?? [];
+      this.entriesLoading = false;
+    });
+
+    // A visitor reading the tournament does not need their four personal-solution queries.
+    combineLatest([viewer$, this.pickerRequested$]).pipe(
+      switchMap(([uid, requested]) => {
+        this.pickerError = false;
+        this.pickerLoading = !!uid && requested;
+        if (!uid || !requested) return of([] as Solution[]);
+        return this.solSvc.getAuthenticatedUserAllSolutions().pipe(
+          map((solutions) => solutions.filter((s) => s.finished === 'true')),
+          catchError(() => {
+            this.pickerError = true;
+            return of([] as Solution[]);
+          })
+        );
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe((solutions) => {
+      this.solutions = solutions;
+      this.pickerLoading = false;
+    });
+  }
+
+  retry(): void {
+    this.reload$.next(this.reload$.value + 1);
+  }
+
+  retryEntries(): void {
+    this.retryEntries$.next(this.retryEntries$.value + 1);
+  }
+
+  retryPicker(): void {
+    this.pickerRequested$.next(true);
+  }
+
+  get availableSolutions(): Solution[] {
+    const submittedIds = new Set(tournamentEntryIds(this.t?.submittedSolutions));
+    return this.solutions.filter((solution) => !submittedIds.has(solution.solutionId!));
+  }
+
+  trackSolution(index: number, solution: Solution): string | number {
+    return solution.solutionId || index;
   }
 
   ngOnDestroy(): void {
@@ -231,6 +297,7 @@ export class TournamentDetailsComponent implements OnInit, OnDestroy {
   openSolutionPicker() {
     if (!this.requireLogin()) return;
     this.pickerOpen = !this.pickerOpen;
+    this.pickerRequested$.next(this.pickerOpen);
   }
   /** AUTHOR-ONLY – upload extra reference file */
   async addReferenceFile(fileList: FileList | null) {
@@ -255,7 +322,8 @@ export class TournamentDetailsComponent implements OnInit, OnDestroy {
   }
   /* user clicked a solution chip */
   async attachSolution(sol: Solution) {
-    if (!this.requireLogin() || this.submitBusy) {
+    if (!this.requireLogin() || this.submitBusy ||
+        tournamentEntryIds(this.t?.submittedSolutions).includes(sol.solutionId!)) {
       return;
     }
     this.submitBusy = true;
@@ -279,9 +347,9 @@ export class TournamentDetailsComponent implements OnInit, OnDestroy {
         await this.solSvc.addEvaluatorsToSolution(evaluators, sol.solutionId!);
       }
 
-      /* update local list immediately */
-      this.completedSolutions.push(sol);
+      // The live entry query owns the list, avoiding a duplicate when it updates before this write finishes.
       this.pickerOpen = false;
+      this.pickerRequested$.next(false);
     } finally {
       this.submitBusy = false;
     }
