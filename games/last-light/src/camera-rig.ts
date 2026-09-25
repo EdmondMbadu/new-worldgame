@@ -47,6 +47,14 @@ export class CameraRig {
   roll = 0;
   private ready = false;
 
+  /** A skipped/completed briefing always hands off at the truck, never mid-flight. */
+  finishIntro() {
+    this.started = true;
+    this.introWeight = 0;
+    this.eye.set(0, 0, 0);
+    this.aim.set(0, 0, 0);
+  }
+
   addTrauma(amount: number) {
     this.trauma = clamp(this.trauma + amount, 0, 1);
   }

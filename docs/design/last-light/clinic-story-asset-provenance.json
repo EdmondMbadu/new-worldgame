@@ -11,9 +11,13 @@
     {
       "clinic": "ndingi",
       "scene": "opening",
-      "generation": "He6mVme4BWdDwe6ZIv0E",
-      "duration": 18.76,
-      "voice": "EXAVITQu4vr4xnSDxMaL"
+      "generation": "gMTV6qsOuDkxdhic4vt9",
+      "duration": 10.17,
+      "voice": "EXAVITQu4vr4xnSDxMaL",
+      "updatedOn": "2026-09-24",
+      "flow": "https://elevenlabs.io/app/flows/HvzMoO7Ue00t22qYrAkD",
+      "encoding": "MP3 56 kbps mono 44.1 kHz",
+      "note": "Revised urgent scripted clinic call; fictional reserve, not a statement about current clinic conditions."
     },
     {
       "clinic": "nganga-tsanga",

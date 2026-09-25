@@ -1,5 +1,11 @@
 # Last Light — Adventure 02
 
+## Ndingi opening and first-drive guidance
+
+Ndingi begins with a clearly labeled dramatized clinic call: backup power is running low, and the player carries a charged battery and solar panels. A 14-second, skippable visual sequence moves from the existing clinician illustration to the actual valley, truck cargo and departure camera. The route diagram samples the selected mission, including its bypasses. Start delivery becomes available as soon as the scene loads, independent of narration or animation. Pause animation stops the visual sequence; story audio has its own pause/replay control. Reduced motion keeps the clinician composition still. Phone layouts put Start delivery and the controls before the optional narration transcript. Real project statistics live under About the real project.
+
+Arrow keys are the primary instructions: hold ↑ to drive, ← / → to steer, and ↓ to slow/stop (continue holding after stopping to reverse). Letter-key remapping, touch and controllers remain available. The reserve starts only on acceleration, so experimenting with steering or brakes before departure is free. Ndingi supplies brief movement and rough-ground prompts; handover uses a visible Deliver kit button with the current shortcut. The revised local Sarah narration is 10.17 seconds, MP3 56 kbps mono, approximately 70 KiB. The development-only `qa/clinic-story.html` fixture can preview muted, touch and reduced-motion openings without writing player saves.
+
 A standalone 3D driving game for the Global Solutions Lab games collection. Play as Amani, carrying solar panels and a charged battery to five clinics before their emergency reserve expires. Reach the courtyard, stop safely, hand over the kit, and watch the clinic become bright and active.
 
 ## Run

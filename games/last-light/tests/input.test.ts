@@ -23,6 +23,22 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe('input adapters', () => {
+  it('supports arrow-only steering, driving and braking and reports the active device', () => {
+    const buttons = Array.from({ length: 10 }, () => ({ value: 0, pressed: false }));
+    pad = { connected: true, axes: [0], buttons };
+    controls.sample();
+    expect(controls.device).toBe('controller');
+    key('keydown', 'ArrowUp'); key('keydown', 'ArrowLeft');
+    expect(controls.sample()).toMatchObject({ throttle: 1, steer: -1 });
+    expect(controls.device).toBe('keyboard');
+    key('keyup', 'ArrowLeft'); key('keydown', 'ArrowRight');
+    expect(controls.sample().steer).toBe(1);
+    key('keyup', 'ArrowUp'); key('keyup', 'ArrowRight'); key('keydown', 'ArrowDown');
+    expect(controls.sample()).toMatchObject({ throttle: 0, steer: 0, brake: 1 });
+    key('keyup', 'ArrowDown'); buttons[7] = { value: .8, pressed: true };
+    expect(controls.sample().throttle).toBe(.8);
+    expect(controls.device).toBe('controller');
+  });
   it('blocks keyboard, touch and controller driving while a story owns the screen', () => {
     controls.enabled = false;
     key('keydown', 'KeyW');
@@ -107,6 +123,7 @@ describe('input adapters', () => {
     controls.sample();
     expect(pause).toHaveBeenCalledTimes(1);
     events.dispatchEvent(new Event('gamepaddisconnected'));
+    expect(controls.device).toBe('keyboard');
     expect(pause).toHaveBeenCalledTimes(2);
     expect(pause).toHaveBeenLastCalledWith(true);
   });

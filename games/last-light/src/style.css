@@ -657,6 +657,18 @@ button:active:not(:disabled) {
   color: #fffae6;
   text-shadow: 0 1px 8px #05271e;
 }
+.drive-coach { position: absolute; z-index: 3; left: 50%; bottom: 95px; transform: translateX(-50%); width: min(480px, 68vw); padding: 14px 22px; border: 1px solid #e5cf8e44; border-radius: 9px; text-align: center; color: #f8f0dc; background: #0b252ce8; box-shadow: 0 8px 25px #04191d33; }
+.drive-coach--ready { bottom: auto; top: 29%; }
+.drive-coach .eyebrow { color: #efcd89; font-size: 8px; letter-spacing: 1.5px; }
+.drive-coach p { font-size: 18px; line-height: 1.4; margin: 8px 0; }
+.drive-coach small { color: #c2cfc2; font-size: 11px; }
+.drive-coach .text-button { font-size: 11px; min-height: 44px; padding: 8px 12px; }
+.delivery-key { display: inline-flex; margin-left: 12px; padding: 3px 7px; border: 1px solid currentColor; border-radius: 4px; font-size: 11px; }
+@media (max-width: 650px) {
+  .drive-coach { width: calc(100% - 40px); bottom: 155px; padding: 12px 18px; }
+  .drive-coach--ready { top: 30%; bottom: auto; }
+  .drive-coach p { font-size: 16px; }
+}
 .ready-prompt h2 {
   font-family: Georgia, serif;
   font-weight: 400;

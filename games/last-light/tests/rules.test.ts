@@ -29,6 +29,23 @@ describe('mission rules', () => {
     expect(e.position).toEqual(p);
     e.dispose();
   });
+  it('lets a new driver try steering and braking before acceleration starts the reserve', () => {
+    const e = new GameEngine(MISSIONS[0]);
+    try {
+      const position = { ...e.position };
+      for (let i = 0; i < 180; i++) e.step(1 / 60, { ...emptyInput(), steer: i % 2 ? -1 : 1, brake: 1 });
+      expect(e.phase).toBe('ready');
+      expect(e.time).toBe(e.initial);
+      expect(e.position).toEqual(position);
+      e.pause('settings'); e.resume();
+      e.step(1 / 60, { ...emptyInput(), steer: 1 });
+      expect(e.phase).toBe('ready');
+      expect(e.time).toBe(e.initial);
+      e.step(1 / 60, { ...emptyInput(), throttle: 1 });
+      expect(e.phase).toBe('driving');
+      expect(e.time).toBeLessThan(e.initial);
+    } finally { e.dispose(); }
+  });
   it('bounds foreground hitch catch-up without a pause modal or clock penalty for dropped time', () => {
     const e = new GameEngine(MISSIONS[0]);
     try {

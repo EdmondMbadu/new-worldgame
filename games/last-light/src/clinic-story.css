@@ -105,3 +105,119 @@
   .story-scene-caption { font-size: 7px; }
 }
 @media (prefers-reduced-motion: reduce) { .clinic-story { animation: none; } .story-audio-track i { transition: none; } }
+
+/* The call, the road, the kit: one briefing with a continuously available exit. */
+.clinic-story--urgent .story-scroll { right: 50%; }
+.clinic-story--urgent .story-content { width: auto; margin-right: 0; padding-right: 30px; }
+.clinic-story--urgent .story-content h1 { font-size: clamp(42px, 4.5vw, 68px); max-width: 560px; margin-bottom: 16px; }
+.clinic-story--urgent h1 em { color: #f3c578; font-style: normal; }
+.clinic-story--urgent .story-art { animation: opening-drift 14s ease-out both; transform-origin: 76% 38%; transition: opacity 1.1s ease; }
+.clinic-story--urgent:not([data-opening-beat="0"]) .story-art { opacity: 0; }
+.clinic-story--urgent .story-shade { background: linear-gradient(90deg, #0a2025 0%, #0d282bf5 35%, #0d282bc2 48%, #0d282b08 72%), linear-gradient(0deg, #061a20c9, transparent 60%); }
+.clinic-story--urgent .story-clinic-name { display: flex; align-items: center; gap: 9px; color: #f2c078; font-size: 11px; margin-bottom: 9px; }
+.incoming-signal { width: 7px; height: 7px; border-radius: 50%; background: #f1ba72; box-shadow: 0 0 0 5px #f1ba7217; animation: call-signal 2s ease-out 3; }
+.story-call-tag { margin-left: 8px; font-size: 8px; letter-spacing: 1.1px; color: #b8c5bb; }
+.story-fiction { font-size: 10px; line-height: 1.5; color: #bac9c1; margin: 0 0 18px; }
+.clinic-story--urgent .story-location { font-size: 11px; margin-bottom: 14px; }
+.clinic-story--urgent .story-context { font-size: 14px; line-height: 1.65; max-width: 470px; }
+.clinic-story--urgent .story-message { padding: 13px 0 11px; }
+.clinic-story--urgent .story-transcript { font-size: 14px; line-height: 1.55; }
+.clinic-story--urgent .story-primary { min-height: 58px; }
+.story-clock-note { margin: 9px 0 0; color: #beccc3; font-size: 11px; line-height: 1.5; }
+.driving-guide { display: flex; gap: 22px; align-items: center; margin: 20px 0 14px; color: #e4e9dd; }
+.arrow-pad { display: grid; grid-template-columns: repeat(3, 31px); grid-template-rows: repeat(2, 30px); gap: 4px; flex: 0 0 auto; }
+.arrow-pad kbd { font: 21px/1 system-ui, sans-serif; color: #f8e0ac; width: 31px; height: 30px; border: 1px solid #d6dfcd66; border-bottom-width: 3px; border-radius: 5px; background: #e7efd90b; }
+.arrow-pad kbd:first-child { grid-column: 2; }
+.arrow-pad kbd:nth-child(2) { grid-column: 1; }
+.guide-legend { display: grid; grid-template-columns: auto auto; gap: 7px 20px; font-size: 12px; }
+.guide-legend span { display: flex; gap: 7px; align-items: center; }
+.guide-legend b { color: #f6d398; font: 15px system-ui, sans-serif; }
+.guide-legend small { font-size: 10px; color: #b3c2b8; align-self: center; }
+.guide-touch { color: #f4d393; font-size: 25px; white-space: nowrap; }
+.driving-guide strong { font-size: 13px; font-weight: 500; }
+.driving-guide p { font-size: 12px; line-height: 1.5; margin: 5px 0 0; }
+.opening-visual { position: absolute; z-index: 2; right: 4vw; bottom: 36px; width: min(420px, 38vw); padding: 12px 23px 10px; border: 1px solid #cfdbc02e; border-radius: 10px; background: linear-gradient(130deg, #112a2beb, #0b2027df); box-shadow: 0 16px 60px #04131740; backdrop-filter: blur(10px); }
+.opening-sequence-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 28px; margin-bottom: 12px; }
+.opening-sequence-top > span { font-size: 8px; letter-spacing: 1.7px; color: #bac9bc; }
+.opening-sequence-top button { font-size: 10px; min-height: 44px; padding: 5px 0; }
+.opening-beats { display: flex; gap: 12px; margin-bottom: 12px; }
+.opening-beats span { flex: 1; font-size: 7px; letter-spacing: 1px; color: #879a92; }
+.opening-beats i { display: block; height: 2px; background: #9fb6aa33; margin-bottom: 8px; transition: background .6s; }
+.opening-beats .is-active { color: #e7ca93; }
+.opening-beats .is-active i { background: #edc780; }
+.opening-shot-copy { animation: story-enter .7s ease both; min-height: 100px; }
+.opening-shot-copy > .eyebrow { font-size: 8px; color: #e9c382; letter-spacing: 2px; }
+.opening-shot-copy h2 { font: 24px/1.15 Georgia, serif; color: #f5eed9; margin: 8px 0; text-wrap: balance; }
+.opening-shot-copy p { font-size: 12px; line-height: 1.6; color: #c1cec2; margin: 0; }
+.briefing-route { width: 100%; height: 78px; margin-top: 5px; overflow: visible; }
+.briefing-route path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.briefing-bypass { stroke: #c3cbb277; stroke-width: 1; stroke-dasharray: 3 4; }
+.briefing-road-base { stroke: #cdd8bb33; stroke-width: 3; }
+.briefing-road-trace { stroke: #edc582; stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.clinic-story--urgent:not([data-opening-beat="0"]) .briefing-road-trace { animation: trace-road 3.5s ease-in-out both; }
+.briefing-start { fill: #e9eada; }
+.briefing-destination { fill: #efce91; }
+.briefing-route text { fill: #bfccc0; font: 7px 'DM Sans', sans-serif; letter-spacing: 1px; }
+.opening-visual-caption { font-size: 8px; color: #aebeb4; margin: 6px 0 2px; }
+.clinic-story--urgent .story-scene-caption { display: none; }
+.clinic-story--urgent .story-project .story-facts { margin-block: 15px; }
+.story-preview-paused *, .story-preview-paused .story-art { animation-play-state: paused !important; }
+.story-still .story-art, .story-still .incoming-signal, .story-still .opening-shot-copy, .story-still .briefing-road-trace { animation: none !important; transition: none; }
+.story-still .briefing-road-trace { stroke-dashoffset: 0; }
+@keyframes opening-drift { from { transform: scale(1.04); } to { transform: scale(1); } }
+@keyframes call-signal { 0% { box-shadow: 0 0 0 0 #efbd6b66; } 85%, 100% { box-shadow: 0 0 0 9px #efbd6b00; } }
+@keyframes trace-road { to { stroke-dashoffset: 0; } }
+@media (min-width: 950px) and (max-height: 800px) {
+  .clinic-story--urgent .story-content h1 { font-size: 47px; margin-bottom: 12px; }
+  .clinic-story--urgent .story-fiction { margin-bottom: 12px; }
+  .clinic-story--urgent .story-context { font-size: 13px; margin-bottom: 14px; }
+  .clinic-story--urgent .story-location { margin-bottom: 10px; }
+  .clinic-story--urgent .story-transcript { font-size: 13px; margin: 9px 0; }
+  .clinic-story--urgent .story-message { padding-block: 11px 6px; }
+  .clinic-story--urgent .driving-guide { margin: 15px 0 8px; }
+  .opening-visual { bottom: 26px; }
+}
+@media (min-width: 651px) and (max-width: 949px) {
+  .clinic-story--urgent .story-scroll { right: 43%; }
+  .clinic-story--urgent .story-content { padding-right: 15px; }
+  .clinic-story--urgent .story-content h1 { font-size: 41px; }
+  .opening-visual { right: 3vw; width: 35vw; padding: 18px; }
+  .opening-shot-copy h2 { font-size: 23px; }
+  .guide-legend { grid-template-columns: auto; gap: 4px; }
+  .story-call-tag { display: none; }
+}
+@media (max-width: 650px) {
+  .clinic-story--urgent .story-scroll { right: 0; }
+  .clinic-story--urgent .story-art { background-size: auto 370px; background-position: 82% top; }
+  .clinic-story--urgent .story-shade { background: linear-gradient(0deg, #0d262a 35%, #0d262af2 68%, #0d262a00 96%); }
+  .clinic-story--urgent .story-content { display: flex; flex-direction: column; margin: 100px 0 0; padding: 24px 22px 28px; background: linear-gradient(0deg, #0d262a 88%, #0d262a00); }
+  .clinic-story--urgent .story-content h1 { font-size: 39px; line-height: 1.05; margin-bottom: 12px; }
+  .clinic-story--urgent .story-clinic-name { margin-bottom: 8px; }
+  .clinic-story--urgent .story-fiction { font-size: 9px; margin-bottom: 12px; max-width: 285px; }
+  .clinic-story--urgent .story-location { font-size: 10px; margin-bottom: 10px; }
+  .clinic-story--urgent .story-context { font-size: 13px; margin-bottom: 3px; }
+  .clinic-story--urgent .story-primary { order: 1; margin-top: 14px; flex: 0 0 auto; }
+  .clinic-story--urgent .story-clock-note { order: 2; font-size: 10px; }
+  .clinic-story--urgent .driving-guide { order: 3; margin: 17px 0; gap: 17px; }
+  .clinic-story--urgent .story-message { order: 4; margin-top: 4px; }
+  .clinic-story--urgent .story-details { order: 5; }
+  .clinic-story--urgent .story-footnote { order: 6; margin-top: 12px; }
+  .guide-legend { grid-template-columns: auto; gap: 4px; font-size: 11px; }
+  .guide-legend small { margin-top: 2px; }
+  .opening-visual { top: 70px; bottom: auto; left: 18px; right: auto; width: auto; max-width: 60%; padding: 0; border: none; box-shadow: none; background: none; backdrop-filter: none; }
+  .opening-visual .opening-sequence-top { justify-content: flex-end; margin: 0; }
+  .opening-sequence-top > span, .opening-beats, .opening-shot-copy, .opening-visual .briefing-route, .opening-visual-caption { display: none; }
+  .opening-sequence-top button { background: #0c262bc9; padding: 8px 12px; border-radius: 5px; }
+}
+@media (max-height: 550px) and (orientation: landscape) {
+  .clinic-story--urgent .story-content h1 { font-size: 35px; }
+  .opening-visual { padding: 12px 18px; bottom: 15px; }
+  .opening-sequence-top, .opening-beats { margin-bottom: 8px; }
+  .opening-shot-copy { min-height: 85px; }
+  .opening-shot-copy h2 { font-size: 21px; }
+  .opening-visual .briefing-route { max-height: 80px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clinic-story--urgent .story-art, .incoming-signal, .opening-shot-copy, .briefing-road-trace { animation: none !important; transition: none !important; }
+  .briefing-road-trace { stroke-dashoffset: 0; }
+}

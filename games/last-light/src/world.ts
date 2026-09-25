@@ -93,6 +93,13 @@ type Chunk = { mesh: T.Object3D; start: number; end: number; ahead: number; behi
 type Knock = { index: number; t: number; vx: number; vz: number; spin: number };
 
 export class GameWorld {
+  /** Briefing camera only. Physics, route progress and the reserve remain frozen. */
+  openingTime: number | null = null;
+
+  finishOpening() {
+    this.openingTime = null;
+    this.rig.finishIntro();
+  }
   renderer: T.WebGLRenderer;
   scene = new T.Scene();
   camera = new T.PerspectiveCamera(56, 1, 0.15, 3200);
@@ -1514,15 +1521,28 @@ export class GameWorld {
     // Ease the final composition into the free side of the closing story panel.
     // The handover remains in the same scene and the player's truck stays visible.
     const closingFrame = restoring ? this.settings.reducedMotion ? 1 : smooth(14, 18, t) : 0;
-    const offset = closingFrame * (portrait ? 0 : -0.22);
-    const offsetY = closingFrame * (portrait ? .31 : 0);
+    const preview = this.openingTime !== null && !this.settings.reducedMotion;
+    const offset = preview ? (portrait ? 0 : -0.22) : closingFrame * (portrait ? 0 : -0.22);
+    const offsetY = preview ? (portrait ? .26 : .17) : closingFrame * (portrait ? .31 : 0);
     if (Math.abs(offset - this.storyCameraOffset) > .0005 || Math.abs(offsetY - this.storyCameraOffsetY) > .0005) {
       this.storyCameraOffset = offset;
       this.storyCameraOffsetY = offsetY;
       if (offset === 0 && offsetY === 0) this.camera.clearViewOffset();
       else this.camera.setViewOffset(1000 * this.camera.aspect, 1000, offset * 1000 * this.camera.aspect, offsetY * 1000, 1000 * this.camera.aspect, 1000);
     }
-    if (restoring) {
+    if (preview) {
+      const seconds = this.openingTime!;
+      const side = new T.Vector3(forward.z, 0, -forward.x);
+      const roadShot = p.clone().addScaledVector(forward, -22).addScaledVector(side, 14).add(new T.Vector3(0, 21, 0));
+      const kitShot = p.clone().addScaledVector(forward, -5.4).addScaledVector(side, 4.5).add(new T.Vector3(0, 3.7, 0));
+      const driveShot = p.clone().addScaledVector(forward, portrait ? -9.6 : -8.1).add(new T.Vector3(0, portrait ? 4.3 : 2.8, 0));
+      const cargo = smooth(7, 9, seconds), departure = smooth(10.5, 14, seconds);
+      this.eye.copy(roadShot).lerp(kitShot, cargo).lerp(driveShot, departure);
+      this.eye.y = Math.max(this.eye.y, worldHeight(m, this.eye.x, this.eye.z) + 1.6);
+      this.aim.copy(p).addScaledVector(forward, T.MathUtils.lerp(35, -1, cargo)).add(new T.Vector3(0, 1, 0));
+      this.aim.lerp(p.clone().addScaledVector(forward, 10).add(new T.Vector3(0, .7, 0)), departure);
+      this.rig.place(this.eye, this.aim, dt, this.camera);
+    } else if (restoring) {
       const a = this.settings.reducedMotion ? 1 : smooth(0, 5, t);
       const targetEye = new T.Vector3(
         portrait ? (m.id === 4 ? -25 : -20) : -21,

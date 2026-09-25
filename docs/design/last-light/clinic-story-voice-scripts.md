@@ -10,9 +10,11 @@ Warm, calm, conversational, grounded in the clinic team's work. Natural breathin
 
 Context: already powered in the real campaign; this chapter is a re-created delivery. The documented real project is 2.0 kW and serves five named care areas. No population number is verified here.
 
-Opening, approximately 25–30 seconds:
+Opening, revised 2026-09-24, recorded duration 10.17 seconds:
 
-> Care does not stop when the sun goes down. Welcome to Ndingi. This journey re-creates a solar delivery inspired by a completed project. In the story, bring the battery and panels safely to our team. Follow the marked road, protect the kit, and stop in the receiving courtyard. You bring the power. We will keep caring.
+> Ndingi calling. Our backup power is running low, and care is still under way. Bring the charged battery to the courtyard. Follow the marked road and keep the kit safe. We're ready for you.
+
+The visible briefing labels this reserve emergency as a dramatized delivery inspired by a completed solar project. The charged battery supplies immediate night-time power; rooftop solar appears later during commissioning.
 
 Closing, approximately 15–20 seconds:
 

@@ -542,11 +542,8 @@ export class GameEngine {
       return;
     }
     if (this.phase === 'ready') {
-      if (
-        input.throttle > 0.05 ||
-        input.brake > 0.05 ||
-        Math.abs(input.steer) > 0.1
-      )
+      // Let a new driver try steering/braking without spending the clinic reserve.
+      if (input.throttle > 0.05)
         this.phase = 'driving';
       else return;
     }

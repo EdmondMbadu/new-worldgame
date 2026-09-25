@@ -1,6 +1,7 @@
 import { emptyInput, type Input } from './engine';
 import type { Settings } from './save';
 export class Controls {
+  device: 'keyboard' | 'controller' = 'keyboard';
   held = new Set<string>();
   touch = emptyInput();
   private previousMenu = false;
@@ -33,6 +34,7 @@ export class Controls {
       return;
     // A key held across a story/pause boundary must be released and pressed again.
     if (e.repeat && !this.held.has(e.code)) return;
+    this.device = 'keyboard';
     if (e.code === 'Escape') {
       if (!e.repeat) this.onPause();
       e.preventDefault();
@@ -60,6 +62,7 @@ export class Controls {
       this.clear();
       this.onPause(true);
       this.controllerActive = false;
+      this.device = 'keyboard';
     }
   };
   clear = () => {
@@ -84,6 +87,7 @@ export class Controls {
     state.action = state.action || this.touch.action;
     const pad = navigator.getGamepads?.().find((p) => p?.connected);
     if (pad) {
+      if (!this.controllerActive) this.device = 'controller';
       this.controllerActive = true;
       const axis = pad.axes[0] || 0;
       if (this.awaitPadRelease) {
@@ -93,6 +97,8 @@ export class Controls {
           return state;
         this.awaitPadRelease = false;
       }
+      if (Math.abs(axis) > .12 || (pad.buttons[7]?.value || 0) > .05 || (pad.buttons[6]?.value || 0) > .05 || pad.buttons[0]?.pressed)
+        this.device = 'controller';
       if (Math.abs(axis) > 0.12)
         state.steer = ((Math.abs(axis) - 0.12) / 0.88) * Math.sign(axis);
       state.throttle = Math.max(state.throttle, pad.buttons[7]?.value || 0);

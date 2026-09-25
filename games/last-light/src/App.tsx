@@ -31,6 +31,9 @@ import { branchSections } from "./road-sections";
 import { beamMode, chapterLook } from "./night";
 import { CLINICS } from "./clinic-stories";
 import { ClinicStoryView } from "./ClinicStory";
+import { OPENING_DURATION } from "./OpeningBriefing";
+import { DriveCoach } from "./DriveCoach";
+import { keyLabel } from "./DrivingGuide";
 
 const base = import.meta.env.BASE_URL;
 /** Phones get a 960 px menu image (80 KB); larger screens the full one (210 KB). */
@@ -161,16 +164,16 @@ function TouchControls({
           if (controls) controls.touch.steer = 0;
         }}
       >
-        <span>‹</span>
+        <span>←</span>
         <span className="steering-label">STEER</span>
-        <span>›</span>
+        <span>→</span>
       </div>
       <div className="pedals">
         {engine &&
           (engine.canDeliver || engine.needsRecovery) &&
           button("action", engine.canDeliver ? "DELIVER" : "RECOVER")}
-        {button("brake", "BRAKE")}
-        {button("throttle", "DRIVE")}
+        {button("brake", "↓ BRAKE")}
+        {button("throttle", "↑ DRIVE")}
       </div>
     </div>
   );
@@ -355,7 +358,7 @@ function SettingsPanel({
           ))}
         </div>
         <p className="setting-note">
-          Arrow keys also work. Controller: steer with the left stick, triggers
+          Arrow keys: hold ↑ to drive, ← → to steer, ↓ to slow or stop. Keep holding ↓ after stopping to reverse. The letter keys above also work. Controller: steer with the left stick, triggers
           to drive/brake, A / × to deliver. Recover a stuck truck with the
           contextual action or the on-screen button.
         </p>
@@ -376,6 +379,7 @@ export default function App() {
     [variant, setVariant] = useState(0),
     [inGame, setInGame] = useState(false),
     [opening, setOpening] = useState(false),
+    [previewPaused, setPreviewPaused] = useState(false),
     [run, setRun] = useState(0),
     [ready, setReady] = useState(false),
     [loading, setLoading] = useState("Preparing the road"),
@@ -391,6 +395,7 @@ export default function App() {
     controls = useRef<Controls | null>(null),
     sound = useRef<Soundtrack | null>(null),
     openingRef = useRef(false),
+    previewPausedRef = useRef(false),
     closingPlayed = useRef(false),
     arrivalMusic = useRef(false),
     settingsOpenRef = useRef(false),
@@ -400,6 +405,7 @@ export default function App() {
   const mission = MISSIONS[selected];
   const clinic = CLINICS[selected];
   settingsOpenRef.current = showSettings;
+  previewPausedRef.current = previewPaused;
   const e = engine.current;
   const qa =
     import.meta.env.DEV &&
@@ -538,11 +544,12 @@ export default function App() {
             committed = true;
             setSave((s) => recordResult(s, instance.result!));
           }
-          if (
-            !openingRef.current &&
-            instance.phase !== "paused" &&
-            document.visibilityState !== "hidden"
-          ) {
+          const preview = openingRef.current && instance.mission.id === 0 && !settingsRef.current.reducedMotion;
+          const visible = document.visibilityState !== 'hidden' && document.hasFocus();
+          if (preview && visible && !settingsOpenRef.current && !previewPausedRef.current) {
+            view.openingTime = Math.min(OPENING_DURATION, (view.openingTime || 0) + Math.min(dt, .06));
+            view.render(Math.min(dt, .06), dt);
+          } else if (!openingRef.current && instance.phase !== "paused" && visible) {
             const renderStart = performance.now();
             view.render(Math.min(dt, 0.06), dt);
             view.recordFrame(dt, physicsMs, performance.now() - renderStart);
@@ -614,7 +621,7 @@ export default function App() {
       last = now;
       const audio = sound.current, instance = engine.current;
       if (audio) {
-        if (settingsOpenRef.current) audio.silence();
+        if (settingsOpenRef.current || document.hidden || !document.hasFocus()) audio.silence();
         else if (openingRef.current) { audio.setStory('opening'); audio.updateStory(dt); }
         else if (instance) {
           if (instance.phase === 'results') {
@@ -645,6 +652,7 @@ export default function App() {
     controls.current?.clear();
     if (controls.current) controls.current.enabled = false;
     setOpening(true);
+    setPreviewPaused(false);
     setReady(false);
     setLoading('Preparing the road');
     void sound.current.unlock();
@@ -675,6 +683,7 @@ export default function App() {
   const result = e?.result;
   const beginDrive = () => {
     if (!ready || !engine.current || error) return;
+    world.current?.finishOpening();
     sound.current?.setStory(null);
     if ('speechSynthesis' in window) speechSynthesis.cancel();
     controls.current?.clear();
@@ -847,6 +856,8 @@ export default function App() {
             <ClinicStoryView
               key={`${selected}:${run}:${opening ? 'opening' : 'closing'}`}
               clinic={clinic} chapter={selected} scene={opening ? 'opening' : 'closing'}
+              mission={e?.mission || mission} previewTime={world.current?.openingTime || 0}
+              previewPaused={previewPaused || showSettings} onPreviewPause={() => setPreviewPaused(v => !v)}
               settings={save.settings} narration={sound.current?.narration || { status: 'idle', progress: 0, scene: null }}
               onVoice={storyVoice} onSettings={settings} onHome={home}
               onContinue={opening ? beginDrive : () => result?.practice ? start(selected) : selected < 4 ? start(selected + 1) : home()}
@@ -916,6 +927,7 @@ export default function App() {
                   </button>
                 </div>
               </header>}
+              {selected === 0 && <DriveCoach key={`${selected}:${run}`} engine={e} touch={touch} controller={controls.current?.device === 'controller'} />}
               {["ready", "driving"].includes(e.phase) && (
                 <>
                   <div className="destination">
@@ -1041,9 +1053,8 @@ export default function App() {
                             controls.current.touch.action = false;
                         }}
                       >
-                        {save.settings.singlePress ? "Press" : "Hold"}{" "}
-                        {save.settings.keys.action.replace("Key", "")} · Deliver
-                        solar kit
+                        {save.settings.singlePress ? 'Deliver kit' : 'Hold to deliver kit'}
+                        {!touch && <small className="delivery-key">{controls.current?.device === 'controller' ? 'A / ×' : keyLabel(save.settings, 'action')}</small>}
                       </button>
                       <div className="delivery-track">
                         <i
