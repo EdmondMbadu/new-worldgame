@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "compilerOptions": { "resolveJsonModule": true },
+  "include": [
+    "src/app/utils/policy-brief.spec.ts",
+    "src/app/components/playground-steps/policy-brief-report.spec.ts"
+  ]
+}

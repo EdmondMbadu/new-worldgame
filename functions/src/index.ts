@@ -29,6 +29,9 @@ import {
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generatePolicyBrief, POLICY_BRIEF_RESEARCH_SYSTEM, POLICY_BRIEF_WRITING_SYSTEM } from './policy-brief-generation';
+import { preparePolicyResearchSources } from './policy-brief-sources';
+import { policyBriefToText } from './shared/policy-brief';
 import { GoogleGenAI } from '@google/genai';
 import { createHash, randomUUID } from 'crypto'; // Node‑built‑in: no uuid pkg needed
 import { Buffer } from 'node:buffer';
@@ -7549,7 +7552,7 @@ export const onAvatarChatPrompt = functions
  */
 export const onReportRequest = functions
   .region('us-central1')
-  .runWith({ timeoutSeconds: 180, memory: '1GB' })
+  .runWith({ timeoutSeconds: 240, memory: '1GB' })
   .firestore.document('users/{uid}/report-requests/{docId}')
   .onCreate(async (snap) => {
     const data = snap.data() || {};
@@ -7571,6 +7574,33 @@ export const onReportRequest = functions
       });
 
       const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+      if (data.reportTypeId === 'policy-brief') {
+        const researchModel = genAI.getGenerativeModel({
+          model: 'gemini-2.5-flash',
+          systemInstruction: POLICY_BRIEF_RESEARCH_SYSTEM,
+          generationConfig: { temperature: 0.15, maxOutputTokens: 6500, thinkingConfig: { thinkingBudget: 1024 } },
+          tools: [{ google_search: {} }],
+        } as any);
+        const writingModel = genAI.getGenerativeModel({
+          model: 'gemini-2.5-flash',
+          systemInstruction: POLICY_BRIEF_WRITING_SYSTEM,
+          generationConfig: { temperature: 0.15, maxOutputTokens: 10000, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 1024 } } as any,
+        });
+        const policyBrief = await generatePolicyBrief(data.policyBriefRequest, {
+          research: async (input) => preparePolicyResearchSources((await researchModel.generateContent(input, { timeout: 70000 })).response),
+          write: async (input) => (await writingModel.generateContent(input, { timeout: 70000 })).response.text(),
+        }, new Date(), async (message) => {
+          await snap.ref.update({ status: { state: 'PROCESSING', message } });
+        });
+        await snap.ref.update({
+          status: { state: 'COMPLETED' },
+          policyBrief,
+          response: policyBriefToText(policyBrief),
+          sources: policyBrief.references.map(({ title, url }) => ({ title, url })),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return;
+      }
       const modelConfig: Record<string, unknown> = {
         model: 'gemini-2.5-flash',
         generationConfig: {
@@ -7759,7 +7789,11 @@ If live web-search grounding is temporarily unavailable, still produce the Fundi
       console.error('onReportRequest error:', err?.message || err);
       const errorMsg = err instanceof Error ? err.message : String(err);
       let userFriendlyError = 'An unexpected error occurred. Please try again.';
-      if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
+      if (data.reportTypeId === 'policy-brief') {
+        userFriendlyError = errorMsg.includes('POLICY_EVIDENCE_UNAVAILABLE')
+          ? 'We could not find enough source-linked policy evidence. Try again with a more specific issue or jurisdiction.'
+          : 'The policy brief could not be completed and checked. Please try again.';
+      } else if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
         userFriendlyError =
           'Your request was blocked due to content safety guidelines. Please try a different prompt.';
       } else if (errorMsg.includes('quota') || errorMsg.includes('429')) {

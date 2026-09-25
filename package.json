@@ -7,6 +7,7 @@
     "build": "node scripts/build-site.mjs",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "test:policy-brief": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.policy-brief.spec.json --include=src/app/utils/policy-brief.spec.ts --include=src/app/components/playground-steps/policy-brief-report.spec.ts",
     "test:tournaments": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.tournaments.spec.json --include=src/app/services/solution.service.spec.ts --include=src/app/components/active-tournaments/active-tournaments.component.spec.ts --include=src/app/components/tournament-details/tournament-details.component.spec.ts",
     "test:weekly-brief": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.weekly-brief.spec.json --include=src/app/blogs/nwg-news/nwg-news.component.spec.ts --include=src/app/components/user-management/user-management.component.spec.ts --include=src/app/utils/video-thumbnail.spec.ts",
     "start:app": "ng serve",

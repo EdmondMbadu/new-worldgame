@@ -1,6 +1,9 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, NgZone, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
+import { PolicyBrief, PolicyBriefContext, POLICY_BRIEF_REPORT, parsePolicyBrief, policyBriefToText } from '../../../../functions/src/shared/policy-brief';
+import { buildPolicyBriefSource } from 'src/app/utils/policy-brief-source';
+import { buildPolicyBriefPdf, buildPolicyBriefDocx } from 'src/app/utils/policy-brief-export';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { Comment, Evaluator, Roles, Solution } from 'src/app/models/solution';
@@ -384,6 +387,9 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   showReportModal = false;
   reportInstruction = '';
   selectedReportTypeId = 'funding-sources';
+  policyBriefContext: PolicyBriefContext = { audience: '', jurisdiction: '', decision: '' };
+  policyBrief: PolicyBrief | null = null;
+  private reportResultTypeId = '';
   private reportDocSub?: Subscription;
   private reportTimeoutHandle?: ReturnType<typeof setTimeout>;
   private reportPdfCache: ReportPdfCacheEntry | null = null;
@@ -816,6 +822,7 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
 
   reportGroups: ReportGroup[] = [
     { id: 'funder', label: 'Funder' },
+    { id: 'policy', label: 'Policy' },
     { id: 'summary', label: 'Summary' },
     { id: 'teacher', label: 'Teacher' },
     { id: 'social', label: 'Social Media' },
@@ -905,6 +912,9 @@ STYLE REQUIREMENTS:
 - Be succinct and decision-ready
 - Use short sentences or compact bullet lists
 - Do not add any other sections or formatting`,
+    },
+    {
+      ...POLICY_BRIEF_REPORT,
     },
     {
       id: 'business-plan',
@@ -3958,7 +3968,7 @@ Infographic requirements:
             ...this.buildReportCoverBlocks(title),
             new Paragraph({ children: [new PageBreak()] }),
             this.draftSectionLabel('Generated Report', '0F766E'),
-            this.draftHeading(this.getSelectedReportType()?.title || 'Report', 1),
+            this.draftHeading(this.getReportTypeForExport()?.title || 'Report', 1),
             ...blocks,
           ],
         },
@@ -3967,7 +3977,7 @@ Infographic requirements:
   }
 
   private buildReportCoverBlocks(title: string): DraftDocxBlock[] {
-    const reportType = this.getSelectedReportType()?.title || 'Report';
+    const reportType = this.getReportTypeForExport()?.title || 'Report';
     const peopleMeta = this.getReportPeopleMetadata();
     const dateStr = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
@@ -3975,7 +3985,7 @@ Infographic requirements:
       day: 'numeric',
     });
     const context = this.clampText(
-      this.getSelectedReportType()?.summary ||
+      this.getReportTypeForExport()?.summary ||
         this.reportInstruction ||
         'Generated from the current Step 5 draft and formatted for review, sharing, and follow-up action.',
       520
@@ -4069,6 +4079,7 @@ Infographic requirements:
   private primaryReportIds = [
     'executive-summary',
     'business-model-canvas',
+    'policy-brief',
     'business-plan',
     'funder-brief',
     'funding-sources',
@@ -4092,6 +4103,24 @@ Infographic requirements:
     return this.reportTypes.find((type) => type.id === this.selectedReportTypeId);
   }
 
+  getReportTypeForExport(): ReportType | undefined {
+    return this.reportTypes.find((type) => type.id === (this.reportResultTypeId || this.selectedReportTypeId));
+  }
+
+  private buildPolicyBriefRequest() {
+    return {
+      source: this.currentSolution ? buildPolicyBriefSource({
+        title: this.currentSolution.title || '',
+        draft: this.currentDraftText || this.toPlainTextWithBreaks(this.currentSolution.strategyReview),
+        description: this.toPlainTextWithBreaks(this.currentSolution.description),
+        supportingSteps: this.toPlainTextWithBreaks(this.extractStatusResponses()),
+      }) : '',
+      authors: this.getReportPeopleMetadata().value,
+      context: { ...this.policyBriefContext },
+      instruction: this.reportInstruction || POLICY_BRIEF_REPORT.instruction,
+    };
+  }
+
   async generateReport() {
     if (!this.auth.currentUser?.uid) {
       this.reportError = 'Please sign in to generate a report.';
@@ -4107,6 +4136,9 @@ Infographic requirements:
     this.resetReportState();
     this.reportLoading = true;
     const reportType = this.getSelectedReportType();
+    const isPolicyBrief = reportType?.id === 'policy-brief';
+    const policyBriefRequest = isPolicyBrief ? this.buildPolicyBriefRequest() : undefined;
+    this.reportResultTypeId = reportType?.id || '';
     this.reportStatus = reportType
       ? `Generating ${reportType.title}...`
       : 'Generating report...';
@@ -4123,9 +4155,9 @@ Infographic requirements:
       this.reportLoading = false;
       this.reportStatus = '';
       this.reportError =
-        'Report generation took too long. Please retry. For Funding Sources, we now target exactly 10 opportunities to keep generation under 1-2 minutes.';
+        'Report generation took too long. Please retry.';
       this.reportDocSub?.unsubscribe();
-    }, 125000);
+    }, isPolicyBrief ? 250000 : 125000);
 
     this.reportDocSub = docRef.valueChanges().subscribe((snapshot) => {
       if (!snapshot?.status) {
@@ -4134,7 +4166,7 @@ Infographic requirements:
 
       const state = snapshot.status.state;
       if (state === 'PROCESSING') {
-        this.reportStatus = 'AI is writing your report...';
+        this.reportStatus = snapshot.status.message || 'AI is writing your report...';
       } else if (state === 'COMPLETED') {
         if (this.reportTimeoutHandle) {
           clearTimeout(this.reportTimeoutHandle);
@@ -4142,7 +4174,16 @@ Infographic requirements:
         }
         this.reportLoading = false;
         this.reportStatus = '';
-        this.reportText = this.sanitizeGeneratedReportText(snapshot.response ?? '');
+        try {
+          this.policyBrief = isPolicyBrief ? parsePolicyBrief(snapshot.policyBrief) : null;
+        } catch {
+          this.reportError = 'The policy brief is incomplete or has invalid citations. Please generate it again.';
+          this.reportDocSub?.unsubscribe();
+          return;
+        }
+        this.reportText = this.policyBrief
+          ? policyBriefToText(this.policyBrief)
+          : this.sanitizeGeneratedReportText(snapshot.response ?? '');
         this.reportFormatted = this.formatAiFeedback(this.reportText);
         this.reportDocSub?.unsubscribe();
       } else if (state === 'ERRORED') {
@@ -4161,7 +4202,7 @@ Infographic requirements:
     });
 
     try {
-      await docRef.set({ prompt });
+      await docRef.set({ prompt, reportTypeId: reportType?.id || 'custom', ...(policyBriefRequest ? { policyBriefRequest } : {}) });
       this.showReportModal = false;
     } catch (error) {
       console.error('Report generation request failed', error);
@@ -4213,10 +4254,12 @@ Infographic requirements:
     let success = false;
     try {
       await this.waitForUiPaint();
-      const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
+      const isImpactBmcReport = this.getReportTypeForExport()?.id === 'business-model-canvas';
       let doc: Document;
 
-      if (isImpactBmcReport) {
+      if (this.getReportTypeForExport()?.id === 'policy-brief' && this.policyBrief) {
+        doc = buildPolicyBriefDocx(this.policyBrief);
+      } else if (isImpactBmcReport) {
         this.reportDownloadStatus = 'Formatting Business Model Canvas...';
         await this.waitForUiPaint();
         const parsed = this.parseImpactBmcReport(this.reportText);
@@ -4296,7 +4339,7 @@ Infographic requirements:
     text: string;
     title: string;
   } {
-    const reportTypeId = this.selectedReportTypeId || 'report';
+    const reportTypeId = this.getReportTypeForExport()?.id || 'report';
     const title = this.buildReportTitle();
     const filename = this.buildReportFileName('pdf');
     const text =
@@ -4333,6 +4376,9 @@ Infographic requirements:
     },
     showProgress: boolean
   ): Promise<ReportPdfCacheEntry> {
+    if (input.reportTypeId === 'policy-brief' && this.policyBrief) {
+      return { key: input.key, filename: input.filename, blob: buildPolicyBriefPdf(this.policyBrief) };
+    }
     const html =
       input.reportTypeId === 'business-model-canvas'
         ? this.buildStyledImpactBmcReportPrintHtml(input.text, input.title)
@@ -4468,6 +4514,8 @@ Infographic requirements:
     }
     this.reportError = '';
     this.reportText = '';
+    this.policyBrief = null;
+    this.reportResultTypeId = '';
     this.reportFormatted = '';
     this.reportDownloadStatus = '';
     this.clearReportPdfCache();
@@ -4894,6 +4942,9 @@ Niveau de préparation: ______`;
 
   private buildReportPrompt(): string {
     const reportType = this.getSelectedReportType();
+    if (reportType?.id === 'policy-brief') {
+      return this.buildPolicyBriefRequest().source ? 'Report Type: Policy Brief' : '';
+    }
     const instruction = (this.reportInstruction || reportType?.instruction || '').trim();
     const reportSource = this.buildReportSourceForAi();
 
@@ -5227,7 +5278,7 @@ INTEGRITY RULES:
 
   private buildReportFileName(extension: 'pdf' | 'docx'): string {
     const title = (this.currentSolution?.title || 'report').toLowerCase();
-    const reportType = (this.selectedReportTypeId || 'report').toLowerCase();
+    const reportType = (this.getReportTypeForExport()?.id || 'report').toLowerCase();
     const safeTitle = title.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     const safeType = reportType.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     return `${safeTitle || 'report'}-${safeType || 'report'}.${extension}`;
@@ -5235,7 +5286,7 @@ INTEGRITY RULES:
 
   private buildReportTitle(): string {
     const projectTitle = (this.currentSolution?.title || '').trim();
-    const reportTitle = this.getSelectedReportType()?.title?.trim() || 'Report';
+    const reportTitle = this.getReportTypeForExport()?.title?.trim() || 'Report';
     if (projectTitle && projectTitle.toLowerCase() !== reportTitle.toLowerCase()) {
       return `${projectTitle} — ${reportTitle}`;
     }
@@ -5274,7 +5325,7 @@ INTEGRITY RULES:
   }
 
   private async downloadReportPdfStyled(text: string, title: string, filename: string): Promise<void> {
-    const html = this.selectedReportTypeId === 'business-model-canvas'
+    const html = this.getReportTypeForExport()?.id === 'business-model-canvas'
       ? this.buildStyledImpactBmcReportPrintHtml(text, title)
       : this.buildStyledReportPrintHtml(text, title);
     await this.renderPaginatedHtmlToPdf(html, filename);
@@ -5300,7 +5351,7 @@ INTEGRITY RULES:
   }
 
   private buildReportPrintShell(title: string, bodyHtml: string): string {
-    const reportType = this.escapeHtml(this.getSelectedReportType()?.title || 'Report');
+    const reportType = this.escapeHtml(this.getReportTypeForExport()?.title || 'Report');
     const solutionTitle = this.escapeHtml(this.currentSolution?.title || 'Untitled Solution');
     const peopleMeta = this.getReportPeopleMetadata();
     const peopleLabel = this.escapeHtml(peopleMeta.label);
@@ -5314,7 +5365,7 @@ INTEGRITY RULES:
     );
     const context = this.escapeHtml(
       this.clampText(
-        this.getSelectedReportType()?.summary ||
+        this.getReportTypeForExport()?.summary ||
           this.reportInstruction ||
           'Generated from the current Step 5 draft and formatted for review, sharing, and follow-up action.',
         520
@@ -5679,7 +5730,7 @@ INTEGRITY RULES:
   private buildReportDocxParagraphs(text: string): Array<Paragraph | Table> {
     const lines = text.split(/\r?\n/).map((line) => line.trim());
     const blocks: DraftDocxBlock[] = [];
-    const isImpactBmcReport = this.selectedReportTypeId === 'business-model-canvas';
+    const isImpactBmcReport = this.getReportTypeForExport()?.id === 'business-model-canvas';
     let bmcTableInserted = false;
     let skipBmcBody = false;
 

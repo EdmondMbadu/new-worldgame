@@ -2,6 +2,7 @@
   "name": "functions",
   "scripts": {
     "build": "tsc",
+    "test:policy-brief": "npm run build && node --test test/policy-brief.test.js",
     "build:watch": "tsc --watch",
     "test:moderation": "npm run build && node --test test/solution-moderation-core.test.js",
     "test:campaign": "npm run build && node --test test/campaign-pages.test.js",

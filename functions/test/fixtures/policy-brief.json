@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "title": "Keep Rural Clinics Powered Through Accountable Energy Service Contracts",
+  "audience": "Health and energy planning officials (demonstration audience)",
+  "jurisdiction": "To be selected before implementation",
+  "decision": "Authorize a joint assessment of underserved clinics and develop a costed pilot proposal with service standards, funded maintenance and independent review before any procurement decision.",
+  "statusNote": "Working draft for demonstration. The jurisdiction, responsible institutions, local evidence and legal authority require confirmation.",
+  "keyMessages": [
+    "Reliable electricity supports essential clinical services; a connection alone does not establish that power is available when care requires it. [R1]",
+    "The proposed approach would purchase dependable service with maintenance and monitoring, rather than treating equipment installation as the final outcome.",
+    "Begin with facility assessment and a bounded pilot decision. Expansion should depend on affordability, equitable coverage and independently reviewed performance."
+  ],
+  "introduction": "This illustrative strategy addresses a practical planning question: how can public authorities turn investment in clinic electricity into dependable service? It proposes a joint health-energy pilot, with responsibilities agreed before equipment is selected. The intended beneficiaries are patients and staff in underserved rural facilities. No local service survey, approved budget or implementing partner has yet been established for this demonstration.",
+  "context": "WHO's 2023 guidance identifies reliable electricity as an input to essential health services and describes the need to understand facility requirements, select suitable energy solutions and strengthen institutional capacity. [R1] For this proposal, the policy issue is therefore broader than technology choice: who specifies the service, pays recurring costs and responds when systems fail? The consequences of inaction should be measured locally through interruption logs and service records, rather than inferred from global estimates. The proposal does not establish that a particular existing programme has failed or that a service contract will outperform alternatives in every setting.",
+  "evidence": [
+    {
+      "finding": "WHO identifies electricity needs across health-care services and describes country support that connects needs assessment, institutional capacity and an enabling implementation framework.",
+      "implication": "Define the clinical services to protect before specifying equipment. Energy and health teams should jointly document the required service level; this guidance does not supply a local engineering design.",
+      "sourceIds": ["R1"]
+    },
+    {
+      "finding": "WHO's facility electrification database distinguishes electricity access from supply reliability and offers indicators for both.",
+      "implication": "Measure reliable service separately from installation or connection counts. Confirm survey dates, coverage and comparability before applying a national indicator to an individual clinic.",
+      "sourceIds": ["R2"]
+    }
+  ],
+  "options": [
+    {
+      "kind": "status-quo",
+      "name": "Continue current arrangements",
+      "approach": "Retain existing supply and maintenance responsibilities while collecting facility-level performance data.",
+      "benefits": "Avoids an immediate new contractual commitment and creates a baseline for comparison.",
+      "tradeoffs": "May leave existing service interruptions unresolved. The scale and distribution of that risk are not yet established locally.",
+      "feasibility": "Confirm current contracts, budgets and accountable owners. This is a baseline option, not a claim that present services are inadequate everywhere.",
+      "sourceIds": []
+    },
+    {
+      "kind": "preferred",
+      "name": "Pilot accountable energy service",
+      "approach": "Develop a competitively procured pilot with explicit uptime, maintenance, response and reporting requirements.",
+      "benefits": "Would connect payment and oversight to continued service, with one documented route for fault resolution.",
+      "tradeoffs": "Creates recurring fiscal commitments and demands procurement and monitoring capacity. Small or remote clinics could be excluded unless coverage criteria address this.",
+      "feasibility": "Proceed only after assessment, legal review, market engagement and a costed comparison. Suitable technology and commercial terms remain open.",
+      "sourceIds": []
+    },
+    {
+      "kind": "alternative",
+      "name": "Public ownership with maintenance",
+      "approach": "Purchase suitable equipment through public procurement and separately fund maintenance, staff training and replacement planning.",
+      "benefits": "Preserves direct public control over assets and may fit existing procurement practice.",
+      "tradeoffs": "Separating installation and maintenance can fragment accountability unless responsibilities, resources and escalation routes are explicit.",
+      "feasibility": "Compare whole-life costs and staffing requirements with the service option. Verify available technical capacity before selecting either delivery model.",
+      "sourceIds": []
+    }
+  ],
+  "recommendations": [
+    {
+      "action": "Establish a joint facility baseline and define the essential services to protect.",
+      "lead": "Proposed health planning lead with energy specialists and clinic representatives; roles to confirm.",
+      "timing": "Proposed first phase, before selecting sites or equipment.",
+      "resources": "Facility visits, load assessment, outage records and staff time. Obtain a cost estimate before authorization.",
+      "measure": "Every proposed pilot site has an agreed service profile, documented supply baseline and named accountable lead."
+    },
+    {
+      "action": "Prepare an options appraisal and costed pilot for the authorized decision-maker.",
+      "lead": "Proposed procurement and finance leads, with legal and clinical input.",
+      "timing": "After the baseline; before procurement approval.",
+      "resources": "Whole-life costing, market engagement and independent technical review. Include maintenance and replacement liabilities.",
+      "measure": "The appraisal compares all three options using common service, affordability and equity criteria and identifies the required approvals."
+    },
+    {
+      "action": "Agree a monitoring and review gate before any wider rollout.",
+      "lead": "Proposed health monitoring team with an independent reviewer and community representation.",
+      "timing": "Before pilot launch; review timing to be set in the approved pilot plan.",
+      "resources": "Service logs, fault reporting, verification visits and a funded review. Set reporting requirements proportionate to local capacity.",
+      "measure": "A published review compares service reliability, recurring cost and access across sites against the baseline and recommends adapt, expand or stop."
+    }
+  ],
+  "pathway": [
+    "Agree service standards and funded responsibilities",
+    "Deliver and maintain dependable clinic electricity",
+    "Support more consistent essential clinical services"
+  ],
+  "nextSteps": "The immediate request is approval to develop a locally grounded pilot proposal, not approval for unrestricted rollout. Convene the relevant planning leads and affected clinic representatives, confirm authority, and agree the assessment scope. Bring the costed options appraisal back to the authorized body before committing procurement funds. Reliable service, affordable obligations and fair access should determine whether the pilot proceeds.",
+  "uncertainties": [
+    "Local outage patterns, facility demand and unequal access: resolve through site assessment and consultation with staff and patients.",
+    "Legal authority, procurement route and available fiscal space: confirm with the jurisdiction's responsible officials before making commitments.",
+    "Comparative whole-life cost and delivery capacity: test through market engagement and an independently reviewed options appraisal."
+  ],
+  "aboutAuthors": "Demonstration brief prepared to test the Global Solutions Lab policy brief format. It illustrates a proposed strategy; it is not an approved programme or a statement by WHO or a government.",
+  "references": [
+    {
+      "id": "R1",
+      "title": "WHO (2023). Electricity in health-care facilities.",
+      "url": "https://www.who.int/news-room/fact-sheets/detail/electricity-in-health-care-facilities"
+    },
+    {
+      "id": "R2",
+      "title": "WHO. Database on electrification of health-care facilities.",
+      "url": "https://www.who.int/data/gho/data/themes/database-on-electrification-of-health-care-facilities"
+    }
+  ],
+  "generatedOn": "2026-09-25"
+}
