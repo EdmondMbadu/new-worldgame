@@ -8,3 +8,6 @@ export const storyClip = (clinic: ClinicStory, scene: StoryScene) =>
   `${import.meta.env.BASE_URL}audio/story/${clinic.id}-${scene}.mp3`;
 export const STORY_DISCLOSURE = manifest.narration;
 export const CAMPAIGN_HREF = manifest.source;
+/** Real-world context shown after each arrival; sourced and kept apart from the fiction. */
+export const HELP = manifest.help;
+export type ClinicFact = ClinicStory['fact'];

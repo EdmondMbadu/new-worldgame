@@ -1010,42 +1010,6 @@ kbd {
   font-size: 10px;
   min-width: 27px;
 }
-.restoration {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.cinema-top {
-  height: 8vh;
-  background: #071c1be8;
-}
-.cinema-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  text-align: center;
-  background: linear-gradient(transparent, #0a2421ef 35%);
-  padding: 45px 20px 22px;
-}
-.cinema-bottom .eyebrow {
-  color: var(--gold);
-  font-size: 9px;
-}
-.cinema-bottom h2 {
-  font:
-    400 33px Georgia,
-    serif;
-  margin: 12px 0;
-}
-.cinema-bottom p {
-  font-size: 12px;
-  color: #d1dcc8;
-}
-.cinema-bottom button {
-  pointer-events: auto;
-  padding: 14px 20px;
-}
 .result-overlay {
   background: #08251e66;
   backdrop-filter: blur(3px);
@@ -1513,12 +1477,6 @@ kbd {
   .setting-row select {
     font-size: 11px;
   }
-  .cinema-bottom h2 {
-    font-size: 26px;
-  }
-  .cinema-bottom p {
-    font-size: 11px;
-  }
   .recover-button {
     right: 15px;
     bottom: 250px;
@@ -1668,16 +1626,6 @@ kbd {
   .finale-lights {
     margin: 7px;
     font-size: 16px;
-  }
-  .cinema-bottom {
-    padding: 20px 20px 10px;
-  }
-  .cinema-bottom h2 {
-    font-size: 26px;
-    margin: 8px;
-  }
-  .cinema-bottom p {
-    margin: 5px;
   }
   .pause-card {
     padding: 20px 30px;
@@ -1900,3 +1848,39 @@ kbd {
 /* Short traffic intent stays legible without covering the driving view. */
 .speedometer .traffic-status { color: #f5dba1; max-width: 190px; font-size: 9px; letter-spacing: .07em; line-height: 1.45; margin-top: 7px; }
 @media (max-width: 600px) { .speedometer .traffic-status { max-width: 125px; font-size: 8px; } }
+
+/* Arrival cinematic: letterbox, one caption at a time, skip always available. */
+.arrival { position: absolute; inset: 0; z-index: 8; pointer-events: none; color: var(--cream); }
+.arrival-bar { position: absolute; left: 0; right: 0; }
+.arrival-bar--top { top: 0; height: clamp(46px, 8.5vh, 80px); display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(16px, 3vw, 40px); background: #040d0d; animation: arrival-bar-top 1.1s cubic-bezier(.2, .7, .2, 1) both; }
+.arrival-bar--bottom { bottom: 0; min-height: clamp(128px, 23vh, 220px); display: flex; flex-direction: column; justify-content: flex-end; padding: 44px clamp(18px, 6vw, 96px) clamp(20px, 3.6vh, 34px); background: linear-gradient(#040d0d00, #040d0dd9 34%, #040d0d); animation: arrival-bar-bottom 1.1s cubic-bezier(.2, .7, .2, 1) both; }
+.arrival-chapter { font-size: 10px; letter-spacing: .32em; text-transform: uppercase; color: #cdd5c7a8; }
+.arrival-skip { pointer-events: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 16px; border: 1px solid #efe6cc40; border-radius: 999px; background: #ffffff08; color: #f2eddb; font-size: 12px; letter-spacing: .08em; }
+.arrival-skip span { font-size: 17px; line-height: 1; }
+.arrival-skip:hover, .arrival-skip:focus-visible { border-color: var(--gold); color: var(--gold); }
+.arrival-caption { max-width: 780px; animation: arrival-caption 1s ease both; }
+.arrival-eyebrow { display: block; margin-bottom: 10px; color: var(--gold); font-size: 10px; letter-spacing: .26em; text-transform: uppercase; }
+.arrival-caption h2 { margin: 0 0 8px; font: 400 clamp(26px, 3.1vw, 44px)/1.1 Georgia, serif; letter-spacing: -.01em; color: #f7f2e3; text-wrap: balance; }
+.arrival-caption p { margin: 0; max-width: 640px; font-size: clamp(13px, 1.1vw, 16px); line-height: 1.55; color: #d2dbcc; }
+.arrival-note { display: block; margin-top: 10px; font-size: 11px; font-style: italic; color: #aebcaf; }
+.arrival-fact-body { display: flex; align-items: center; gap: clamp(16px, 2.8vw, 38px); }
+.arrival-figure { flex: 0 0 auto; font: 400 clamp(44px, 5.8vw, 84px)/.95 Georgia, serif; letter-spacing: -.02em; color: #f3cf86; white-space: nowrap; }
+.arrival-figure + div { padding-left: clamp(16px, 2.6vw, 34px); border-left: 1px solid #e8c27659; }
+.arrival-fact h2 { font-size: clamp(22px, 2.5vw, 36px); }
+.arrival-source { display: block; margin-top: 12px; font-size: 10px; letter-spacing: .03em; color: #9fb1a5; }
+.arrival-progress { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #ffffff12; }
+.arrival-progress i { display: block; height: 100%; background: var(--gold); transform-origin: left; transition: transform .2s linear; }
+.arrival--still .arrival-bar, .arrival--still .arrival-caption { animation: none; }
+@keyframes arrival-bar-top { from { transform: translateY(-100%); } to { transform: none; } }
+@keyframes arrival-bar-bottom { from { opacity: 0; } to { opacity: 1; } }
+@keyframes arrival-caption { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (max-width: 650px) {
+  .arrival-bar--bottom { min-height: 30vh; padding: 36px 20px 22px; }
+  .arrival-fact-body { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .arrival-figure + div { padding-left: 0; border-left: 0; }
+  .arrival-figure { font-size: 46px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arrival-bar, .arrival-caption { animation: none; }
+  .arrival-progress i { transition: none; }
+}

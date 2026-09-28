@@ -110,7 +110,9 @@ function mergeParts(scene: T.Object3D): Merged | null {
   };
 }
 let staffMaterial: T.MeshStandardMaterial | null = null;
-export function createStaff(color: string, skin: string, scale = 1) {
+/** Optional per-part colours, keyed by the source material name (e.g. trousers, shoes, hair). */
+export type StaffParts = Partial<Record<'LightBlue' | 'LightBrown' | 'Red_Dark' | 'White' | 'Hair' | 'Eyebrows', string>>;
+export function createStaff(color: string, skin: string, scale = 1, parts: StaffParts = {}) {
   if (!source) return null;
   if (merged === undefined) merged = mergeParts(source.scene);
   const group = new T.Group(),
@@ -123,9 +125,18 @@ export function createStaff(color: string, skin: string, scale = 1) {
   group.scale.setScalar(scale);
   group.add(model);
   const mats: T.Material[] = [];
+  // Shirt in the given colour; trousers a deep, related neutral; worn dark shoes.
+  const defaults: Record<string, T.Color> = {
+    LightBrown: new T.Color(color),
+    LightBlue: new T.Color(color).lerp(new T.Color('#1f2a2a'), 0.72),
+    Red_Dark: new T.Color('#2c2723'),
+    White: new T.Color('#8d877c'),
+  };
   const recolored = (name: string, original: T.Color) => {
     const c = original.clone();
-    if (/LightBrown|Red_Dark|LightBlue/.test(name)) c.set(color);
+    if (name in defaults) c.copy(defaults[name]);
+    const own = parts[name as keyof StaffParts];
+    if (own) c.set(own);
     if (/Skin/.test(name)) c.set(skin).multiplyScalar(name === 'Skin_Darker' ? 0.8 : 1);
     return c;
   };
@@ -172,7 +183,9 @@ export function createStaff(color: string, skin: string, scale = 1) {
     mesh.frustumCulled = false;
     const recolor = (m: T.Material) => {
       const mat = (m as T.MeshStandardMaterial).clone();
-      if (/LightBrown|Red_Dark|LightBlue/.test(mat.name)) mat.color.set(color);
+      if (mat.name in defaults) mat.color.copy(defaults[mat.name]);
+      const own = parts[mat.name as keyof StaffParts];
+      if (own) mat.color.set(own);
       if (/Skin/.test(mat.name))
         mat.color
           .set(skin)
@@ -191,12 +204,52 @@ export function createStaff(color: string, skin: string, scale = 1) {
     source.animations.map((clip) => [clip.name, mixer.clipAction(clip)]),
   );
   let current = '';
-  const leftHand = model.getObjectByName('Wrist.L'),
-    rightHand = model.getObjectByName('Wrist.R');
-  const leftArm = model.getObjectByName('UpperArm.L'),
-    rightArm = model.getObjectByName('UpperArm.R');
-  const leftFore = model.getObjectByName('LowerArm.L'),
-    rightFore = model.getObjectByName('LowerArm.R');
+  // three.js strips the dots from glTF node names (UpperArm.L → UpperArmL).
+  const bone = (name: string) => model.getObjectByName(name) ?? model.getObjectByName(name.replace('.', ''));
+  const leftHand = bone('Wrist.L'),
+    rightHand = bone('Wrist.R');
+  const leftArm = bone('UpperArm.L'),
+    rightArm = bone('UpperArm.R');
+  const leftFore = bone('LowerArm.L'),
+    rightFore = bone('LowerArm.R');
+  // The legs end in IK foot controllers, so posed legs carry their feet explicitly.
+  const legs = (['L', 'R'] as const).map((side) => ({
+    upper: bone(`UpperLeg.${side}`),
+    lower: bone(`LowerLeg.${side}`),
+    foot: bone(`Foot.${side}`),
+    side: side === 'L' ? 1 : -1,
+  }));
+  const head = bone('Head'), torso = bone('Torso');
+  model.updateMatrixWorld(true);
+  const toLocal = (b: T.Object3D | undefined, world: T.Vector3) =>
+    b ? b.worldToLocal(world.clone()).normalize() : new T.Vector3(0, 1, 0);
+  const legRest = legs.map(({ upper, lower, foot }) => {
+    if (!upper || !lower || !foot) return null;
+    const knee = lower.getWorldPosition(new T.Vector3()), ankle = foot.getWorldPosition(new T.Vector3());
+    return {
+      thigh: toLocal(upper, knee),
+      calf: toLocal(lower, ankle),
+      thighLength: upper.getWorldPosition(new T.Vector3()).distanceTo(knee),
+      calfLength: knee.distanceTo(ankle),
+    };
+  });
+  // The bind pose faces +Z; remember each bone's own forward for gaze and lean.
+  const forwardOf = (b: T.Object3D | undefined) =>
+    b ? new T.Vector3(0, 0, 1).applyQuaternion(b.getWorldQuaternion(new T.Quaternion()).invert()) : new T.Vector3(0, 0, 1);
+  const headForward = forwardOf(head), torsoForward = forwardOf(torso);
+  const headUp = head ? new T.Vector3(0, 1, 0).applyQuaternion(head.getWorldQuaternion(new T.Quaternion()).invert()) : new T.Vector3(0, 1, 0);
+  const baseY = model.position.y;
+  const aim = (b: T.Object3D, local: T.Vector3, world: T.Vector3, weight = 1) => {
+    b.updateWorldMatrix(true, false);
+    const wq = b.getWorldQuaternion(new T.Quaternion());
+    const now = local.clone().applyQuaternion(wq).normalize();
+    const delta = new T.Quaternion().setFromUnitVectors(now, world.clone().normalize());
+    if (weight < 1) delta.slerp(new T.Quaternion(), 1 - weight);
+    const parent = b.parent!.getWorldQuaternion(new T.Quaternion()).invert();
+    b.quaternion.copy(parent.multiply(delta.multiply(wq)));
+    b.updateMatrixWorld(true);
+  };
+  const scratch = new T.Vector3(), scratch2 = new T.Vector3();
   return {
     group,
     model,
@@ -275,6 +328,65 @@ export function createStaff(color: string, skin: string, scale = 1) {
           wrist = hand.getWorldPosition(new T.Vector3());
         rotate(lower, wrist.sub(joint), target.clone().sub(joint));
       }
+    },
+    /**
+     * Seated pose over the current clip: thighs forward, calves down, feet planted.
+     * Call after animate(). The seat is `calf length` above the group's floor.
+     */
+    sit(amount = 1, spread = 0.1) {
+      group.updateMatrixWorld(true);
+      const forward = scratch.set(0, 0, 1).transformDirection(group.matrixWorld);
+      const lateral = scratch2.set(1, 0, 0).transformDirection(group.matrixWorld);
+      const down = new T.Vector3(0, -1, 0).transformDirection(group.matrixWorld);
+      model.position.y = baseY;
+      model.updateMatrixWorld(true);
+      legs.forEach(({ upper, lower, foot, side }, i) => {
+        const rest = legRest[i];
+        if (!upper || !lower || !foot || !rest) return;
+        // Hips drop by one thigh as the thigh swings level.
+        if (i === 0) {
+          model.position.y = baseY - (rest.thighLength * amount) / Math.max(0.001, group.scale.y * model.scale.y) * model.scale.y;
+          model.updateMatrixWorld(true);
+        }
+        const thighDir = down.clone().lerp(forward.clone().addScaledVector(lateral, side * spread).addScaledVector(down, 0.08), amount);
+        aim(upper, rest.thigh, thighDir);
+        aim(lower, rest.calf, down.clone().addScaledVector(forward, 0.12 * amount));
+        const knee = lower.getWorldPosition(new T.Vector3());
+        const ankle = knee.addScaledVector(rest.calf.clone().applyQuaternion(lower.getWorldQuaternion(new T.Quaternion())).normalize(), rest.calfLength);
+        foot.position.copy(foot.parent!.worldToLocal(ankle));
+        foot.updateMatrixWorld(true);
+      });
+    },
+    /** Knee height of the seated pose, in world units, for placing hands and props. */
+    kneeWorld(side: 0 | 1) {
+      return legs[side].lower?.getWorldPosition(new T.Vector3()) ?? group.getWorldPosition(new T.Vector3());
+    },
+    /** Turn the head (and a little of the torso) towards a world point. */
+    look(target: T.Vector3, weight = 0.7) {
+      if (!head) return;
+      const from = head.getWorldPosition(new T.Vector3());
+      const dir = target.clone().sub(from).normalize();
+      if (torso) aim(torso, torsoForward, dir.clone().setY(0), weight * 0.25);
+      aim(head, headForward, dir, weight);
+    },
+    /** World position, facing and up of the head, for props such as an eye dressing. */
+    headFrame(position: T.Vector3, forward: T.Vector3, up: T.Vector3) {
+      if (!head) return false;
+      head.updateWorldMatrix(true, false);
+      const q = head.getWorldQuaternion(new T.Quaternion());
+      head.getWorldPosition(position);
+      forward.copy(headForward).applyQuaternion(q).normalize();
+      up.copy(headUp).applyQuaternion(q).normalize();
+      return true;
+    },
+    /** Lean the upper body forward (radians), e.g. over a bed. */
+    lean(angle: number) {
+      if (!torso) return;
+      group.updateMatrixWorld(true);
+      const forward = new T.Vector3(0, 0, 1).transformDirection(group.matrixWorld);
+      const up = new T.Vector3(0, 1, 0).transformDirection(group.matrixWorld);
+      const tilted = forward.clone().multiplyScalar(Math.cos(angle)).addScaledVector(up, -Math.sin(angle));
+      aim(torso, torsoForward, tilted, 1);
     },
     dispose() {
       mixer.stopAllAction();

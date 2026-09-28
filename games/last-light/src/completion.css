@@ -35,6 +35,13 @@
 .completion-intro h1:focus { outline: none; }
 .completion-intro > p:not(.eyebrow) { margin: 12px 0; font-size: clamp(14px, 1.35vw, 19px); }
 .completion-fiction { color: #d0d8cf; font-size: 11px; }
+.completion-fact { margin-top: clamp(14px, 2.4vh, 24px); padding-left: 14px; border-left: 2px solid #edce82; max-width: 460px; }
+.completion-fact .eyebrow { margin: 0 0 4px; font-size: 9px; }
+.completion-fact p { margin: 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; font: 400 clamp(15px, 1.3vw, 18px)/1.35 Georgia, serif; color: #f1ecdd; }
+.completion-fact strong { font: 400 clamp(24px, 2.3vw, 32px)/1 Georgia, serif; color: #f3cf86; }
+.completion-fact .completion-fact-links { margin-top: 6px; gap: 18px; font: 12px/1.5 inherit; font-family: inherit; }
+.completion-fact-links a { color: #e9e4d2; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: #c5cebd80; font-size: 12px; }
+.completion-fact-links a:hover { color: #ffe0a0; }
 .completion-bottom { margin-top: auto; padding-top: 24px; flex-shrink: 0; }
 .completion-audio { position: relative; display: flex; align-items: center; gap: 13px; width: fit-content; max-width: 100%; margin: 0 0 10px 22px; padding: 9px 15px 9px 10px; border: 1px solid #a9bead70; border-radius: 10px; background: #09231fef; }
 .completion-audio-toggle { flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; border: 1px solid #c1cab7; background: transparent; font-size: 16px !important; }
@@ -142,6 +149,9 @@
   .completion-intro h1 { font-size: 28px; max-width: 360px; }
   .completion-intro > p:not(.eyebrow) { margin: 9px 0; font-size: 13px; }
   .completion-fiction { font-size: 10px; }
+  .completion-fact { margin-top: 10px; padding-left: 10px; }
+  .completion-fact p { font-size: 13px; gap: 8px; }
+  .completion-fact strong { font-size: 20px; }
   .completion-bottom { padding-top: max(150px, 23dvh); }
   .completion-audio { width: 100%; gap: 9px; padding: 8px; }
   .completion-audio-copy { font-size: 11px; }

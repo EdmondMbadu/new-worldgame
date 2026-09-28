@@ -6,6 +6,7 @@ import { clamp, rainAt } from './missions';
 import { JourneyMusic } from './journey-music';
 import { SceneNarrator, type NarrationState } from './narration';
 import { CLINICS, type ClinicStory, type StoryScene } from './clinic-stories';
+import { ARRIVAL } from './arrival';
 
 export class Soundtrack {
   context: AudioContext | null = null;
@@ -462,12 +463,13 @@ export class Soundtrack {
       this.impact(0.28, 1400);
       this.tone(640, 0.05, 0.012);
     }
+    // Power cues follow the arrival: battery connected, first light, the compound.
     const power = restoring
-      ? e.restoreTime > 12
+      ? e.restoreTime >= ARRIVAL.compound
         ? 3
-        : e.restoreTime > 10
+        : e.restoreTime >= ARRIVAL.lightsOn
           ? 2
-          : e.restoreTime > 8
+          : e.restoreTime >= ARRIVAL.connected
             ? 1
             : 0
       : 0;

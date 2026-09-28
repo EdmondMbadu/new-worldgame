@@ -160,6 +160,9 @@
 .briefing-route text { fill: #bfccc0; font: 7px 'DM Sans', sans-serif; letter-spacing: 1px; }
 .opening-visual-caption { font-size: 8px; color: #aebeb4; margin: 6px 0 2px; }
 .clinic-story--urgent .story-scene-caption { display: none; }
+/* While the camera is on the clinic, the card keeps to its caption so the scene has room. */
+.clinic-story--urgent:is([data-opening-beat="0"], [data-opening-beat="1"]) .opening-visual .briefing-route { display: none; }
+.clinic-story--urgent:is([data-opening-beat="0"], [data-opening-beat="1"]) .opening-visual-caption { margin-top: 12px; }
 .clinic-story--urgent .story-project .story-facts { margin-block: 15px; }
 .story-preview-paused *, .story-preview-paused .story-art { animation-play-state: paused !important; }
 .story-preview-paused .opening-shot-copy { animation: none; }

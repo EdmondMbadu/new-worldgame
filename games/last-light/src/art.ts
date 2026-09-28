@@ -753,7 +753,10 @@ export function createClinic(name: string, large = false) {
     trim = material('#437368'),
     dark = material('#132b2c'),
     concrete = material('#b6af97'),
-    warm = material('#e3c788');
+    warm = material('#1d2a26', 0.35);
+  // The battery's charge display wakes with the connection.
+  warm.emissive.set('#9be8b4');
+  warm.emissiveIntensity = 0;
   const w = large ? 18 : 13;
   box(staticPart, concrete, 0, 0.18, 0, w + 2, 0.36, 8.5, 0.07);
   box(staticPart, plaster, 0, 2.3, -4.4, w, 4.2, 0.22);
@@ -895,8 +898,7 @@ export function createClinic(name: string, large = false) {
     for (let j = 0; j < 3; j++)
       box(interior, frameMat, x - 0.72, 1.58, -2.1 + j * 0.2, 0.03, 0.08, 0.04);
   }
-  box(interior, frameMat, 0, 1.02, -2, 1.8, 0.08, 0.7);
-  box(interior, equipment, 0, 1.27, -2, 0.44, 0.42, 0.35, 0.035);
+  // The centre room is the care room (clinic-care.ts), furnished separately.
   batch(interior);
   const fan = new T.Group();
   root.add(fan);
@@ -940,16 +942,22 @@ export function createClinic(name: string, large = false) {
     roofPanels.add(g);
     g.position.set(x, 5.46, z);
     g.rotation.x = 0.27;
+    g.userData.rest = g.position.clone();
     box(g, frame, 0, 0, 0, 1.85, 0.08, 1.4);
     box(g, panel, 0, 0.05, 0, 1.76, 0.01, 1.31);
+    // Each panel stays its own node, so the arrival can install them one by one.
+    batch(g);
   }
-  batch(roofPanels);
   const battery = new T.Group();
   root.add(battery);
   box(battery, dark, w * 0.48, 1.05, 1.95, 0.85, 1.55, 0.65, 0.045);
   box(battery, warm, w * 0.48, 1.31, 2.29, 0.42, 0.32, 0.02);
   box(battery, trim, w * 0.48, 0.6, 2.3, 0.65, 0.06, 0.02);
   batch(battery);
+  // Inverter status lamp: red on reserve, amber while connecting, green on power.
+  const status = new T.MeshStandardMaterial({ color: '#2a1411', emissive: '#ff4d32', emissiveIntensity: 1.4, roughness: 0.3 });
+  materials.add(status);
+  sphere(battery, status, w * 0.48 + 0.26, 1.62, 2.29, 0.03);
   const fixture = material('#fff1ba', 0.25);
   fixture.emissive.set('#ffda85');
   const bulbs: T.Mesh[] = [];
@@ -981,6 +989,9 @@ export function createClinic(name: string, large = false) {
     panes,
     roofPanels,
     battery,
+    status,
+    display: warm,
+    width: w,
     lights,
     fixture,
     glowMat,

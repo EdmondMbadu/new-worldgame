@@ -3,6 +3,7 @@ import { beginRun, finishRun, useCommunity, syncProgress, publishPending } from 
 import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
 import { routePoint } from "./routes";
 import {
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -35,6 +36,8 @@ import { beamMode, chapterLook } from "./night";
 import { CLINICS } from "./clinic-stories";
 import { ClinicStoryView } from "./ClinicStory";
 import { OPENING_DURATION } from "./OpeningBriefing";
+import { ArrivalOverlay } from "./ArrivalOverlay";
+import { RESTORE_DURATION } from "./vehicle";
 import { DriveCoach } from "./DriveCoach";
 import { keyLabel } from "./DrivingGuide";
 
@@ -568,7 +571,7 @@ export default function App() {
             instance.time = saved.result.remaining;
             instance.integrity = saved.result.integrity;
             instance.result = saved.result;
-            instance.restoreTime = 18;
+            instance.restoreTime = RESTORE_DURATION;
             instance.phase = 'results';
           } else { instance.phase = 'failed'; instance.failure = saved.failure || 'Try this delivery again.';
             instance.safeZ = Number.isFinite(saved.safeZ) ? Math.max(8,Math.min(instance.mission.length,saved.safeZ!)) : 8; instance.safeAlt = saved.safeAlt === true; failedCommitted = true; }
@@ -739,6 +742,10 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [inGame, run]);
   useEffect(() => () => sound.current?.dispose(), []);
+  const skipArrival = useCallback(() => {
+    engine.current?.skip();
+    setTick((t) => t + 1);
+  }, []);
   const start = (id = selected) => {
     restore.current = null;
     setHandoffError('');
@@ -1210,37 +1217,7 @@ export default function App() {
                 </>
               )}
               {e.phase === "restoring" && (
-                <div className="restoration">
-                  <div className="cinema-top" />
-                  <div className="cinema-bottom">
-                    <span className="eyebrow">
-                      {e.restoreTime < 8
-                        ? "DELIVERY RECEIVED"
-                        : e.restoreTime < 12
-                          ? "POWER IS RETURNING"
-                          : "A BRIGHTER TOMORROW"}
-                    </span>
-                    <h2>
-                      {e.restoreTime < 8
-                        ? "You brought the light."
-                        : e.restoreTime < 12
-                          ? "One room. Then another."
-                          : "The team can keep caring."}
-                    </h2>
-                    <p>
-                      {e.restoreTime < 8
-                        ? "The charged battery gives power now. Solar panels keep hope growing."
-                        : e.restoreTime < 12
-                          ? "The clinic is coming back to life."
-                          : "The lights are back. The team can keep caring."}
-                    </p>
-                    {e.restoreTime >= 11 && (
-                      <button className="text-button" onClick={() => e.skip()}>
-                        Continue ↗
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <ArrivalOverlay time={e.restoreTime} clinic={clinic} still={!!save.settings.reducedMotion} onSkip={skipArrival} />
               )}
               {e.phase === "failed" && (
                 <div className="modal-backdrop">

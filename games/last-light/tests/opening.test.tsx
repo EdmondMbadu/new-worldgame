@@ -27,8 +27,9 @@ describe('delivery briefings', () => {
     expect(coach).toContain('Hold ↑ to drive');
     expect(coach).toContain(MISSIONS[chapter].place);
   });
-  it('gives the care scene six seconds and ends at the truck', () => {
-    expect([0, 2, 8, 12, 16, OPENING_DURATION].map(openingBeat)).toEqual([0, 1, 2, 3, 4, 4]);
+  it('gives the care room seven and a half seconds and ends at the truck', () => {
+    expect([0, 2.5, 10, 14, 18, OPENING_DURATION].map(openingBeat)).toEqual([0, 1, 2, 3, 4, 4]);
+    expect(OPENING_DURATION).toBe(22);
   });
   it('keeps the mission, fiction label and controls visible without voice or motion', () => {
     const settings = { ...defaultSettings(), sound: false, subtitles: false, reducedMotion: true };

@@ -13,13 +13,24 @@ import { loadStaff } from '../src/staff';
 import { loadClinic } from '../src/clinic-assets';
 import { Soundtrack } from '../src/audio';
 import { OPENING_DURATION } from '../src/OpeningBriefing';
+import { ArrivalOverlay } from '../src/ArrivalOverlay';
+import { ARRIVAL } from '../src/arrival';
+import { RESTORE_DURATION } from '../src/vehicle';
+
+type QAScene = StoryScene | 'arrival';
+// ?scene=opening|arrival|closing&id=0..4&t=seconds&paused=1&still=1 opens a shot directly.
+const query = new URLSearchParams(location.search);
+// &cam=ex,ey,ez,ax,ay,az frames a clinic-local viewpoint (development only).
+if (query.get('cam')) { const v = query.get('cam')!.split(',').map(Number); (window as any).__llCam = { eye: v.slice(0, 3), aim: v.slice(3, 6) }; }
 import '../src/style.css';
 
 function StoryQA() {
-  const [id, setId] = useState(0), [scene, setScene] = useState<StoryScene | null>(null), [ready, setReady] = useState(false), [, tick] = useState(0), [report, setReport] = useState('Not checked');
+  const [id, setId] = useState(Number(query.get('id') || 0)), [scene, setScene] = useState<QAScene | null>((query.get('scene') as QAScene) || null), [ready, setReady] = useState(false), [, tick] = useState(0), [report, setReport] = useState('Not checked');
   const canvas = useRef<HTMLCanvasElement>(null), sound = useRef<Soundtrack | null>(null);
   const settings = useRef(defaultSettings());
-  const previewTime = useRef(0), previewPaused = useRef(false);
+  const previewTime = useRef(Number(query.get('t') || 0)), previewPaused = useRef(query.get('paused') === '1');
+  if (query.get('still') === '1') settings.current.reducedMotion = true;
+  const engineRef = useRef<GameEngine | null>(null);
   const [touch, setTouch] = useState(false);
   useEffect(() => {
     if (!scene || !canvas.current) return;
@@ -29,7 +40,7 @@ function StoryQA() {
       await Promise.all([initPhysics(), loadSurfaces(), loadStaff(), loadClinic(id)]);
       if (cancelled) return;
       engine = new GameEngine(MISSIONS[id]);
-      if (scene === 'closing') {
+      if (scene !== 'opening') {
         const position = { x: 0, y: roadY(engine.mission, engine.mission.length) + 1, z: engine.mission.length - 2 };
         engine.body.setTranslation(position, true);
         engine.position = { ...position };
@@ -37,8 +48,9 @@ function StoryQA() {
         engine.progress = position.z;
         engine.roadPosition = { x: 0, z: position.z };
       }
-      engine.phase = scene === 'closing' ? 'results' : 'ready';
-      engine.restoreTime = 18;
+      engine.phase = scene === 'closing' ? 'results' : scene === 'arrival' ? 'restoring' : 'ready';
+      engine.restoreTime = scene === 'arrival' ? previewTime.current : RESTORE_DURATION;
+      engineRef.current = engine;
       world = new GameWorld(canvas.current!, engine, settings.current);
       await world.prepare();
       if (cancelled) return;
@@ -47,6 +59,11 @@ function StoryQA() {
       const frame = (now: number) => {
         if (cancelled || !world || !engine) return;
         const dt = Math.min(.06, (now - last) / 1000); last = now;
+        if (scene === 'arrival') {
+          if (!previewPaused.current && engine.phase === 'restoring') previewTime.current = Math.min(ARRIVAL.end, previewTime.current + dt);
+          engine.restoreTime = previewTime.current;
+          if (engine.restoreTime >= ARRIVAL.end) engine.phase = 'results';
+        }
         if (scene === 'opening' && !settings.current.reducedMotion) {
           if (!previewPaused.current && !document.hidden) previewTime.current = Math.min(OPENING_DURATION, previewTime.current + dt);
           world.openingTime = previewTime.current;
@@ -64,13 +81,13 @@ function StoryQA() {
     })();
     return () => { cancelled = true; cancelAnimationFrame(raf); world?.dispose(); engine?.dispose(); };
   }, [scene, id]);
-  const show = (next: StoryScene) => {
+  const show = (next: QAScene) => {
     previewTime.current = 0; previewPaused.current = false;
     sound.current?.dispose();
     sound.current = new Soundtrack(settings.current, CLINICS[id]);
-    sound.current.setStory(next);
+    sound.current.setStory(next === 'arrival' ? null : next);
     void sound.current.unlock();
-    if (next === 'closing') sound.current.arrival();
+    if (next !== 'opening') sound.current.arrival();
     setScene(next);
   };
   const home = () => { sound.current?.dispose(); sound.current = null; setScene(null); };
@@ -101,8 +118,8 @@ function StoryQA() {
         previewPaused.current = event.target.value !== 'auto';
         if (previewPaused.current) previewTime.current = Number(event.target.value);
         tick(n => n + 1);
-      }}><option value="auto">Play sequence</option><option value="0">The call</option><option value="5">The care</option><option value="10">The road</option><option value="14">The kit</option><option value="18">Your turn</option></select></label>
+      }}><option value="auto">Play sequence</option><option value="0">The call</option><option value="4">The door</option><option value="8">The care room</option><option value="11">The road</option><option value="15">The kit</option><option value="19">Your turn</option></select></label>
     </div>}
-    <canvas ref={canvas} className="game-canvas" /><ClinicStoryView clinic={CLINICS[id]} chapter={id} scene={scene} settings={settings.current} narration={sound.current?.narration || {scene:null,status:'idle',progress:0}} onVoice={() => {sound.current?.toggleNarration();void sound.current?.unlock();}} onHome={home} onSettings={home} onContinue={home} onReplay={home} touch={touch} onTouch={() => setTouch(v => !v)} ready={ready} loading="Preparing preview" previewTime={previewTime.current} previewPaused={previewPaused.current} onPreviewPause={() => {previewPaused.current = !previewPaused.current; tick(n => n + 1);}} completed={Array.from({length:id+1},(_,i)=>i)} result={scene==='closing' ? {mission:id,mode:'standard',score:1752,stars:3,integrity:100,remaining:74,lives:MISSIONS[id].lives,clean:9,encounters:10} : undefined} /></main> : <main style={{padding:30}}><h1>Story verification</h1><p>Development fixture · no saves written. Preview the real scene components and decode every local recording.</p><label>Clinic <select value={id} onChange={e=>setId(Number(e.target.value))}>{CLINICS.map((c,i)=><option key={c.id} value={i}>{c.name}</option>)}</select></label><p><label><input type="checkbox" checked={settings.current.reducedMotion} onChange={e => {settings.current.reducedMotion = e.target.checked; tick(n => n + 1);}} /> Reduced motion</label> <label><input type="checkbox" checked={!settings.current.sound} onChange={e => {settings.current.sound = !e.target.checked; tick(n => n + 1);}} /> Sound off</label> <label><input type="checkbox" checked={touch} onChange={e => setTouch(e.target.checked)} /> Touch controls</label></p><p><button onClick={()=>show('opening')}>Preview opening</button> <button onClick={()=>show('closing')}>Preview ending</button> <button onClick={()=>void validate()}>Validate all voice files</button></p><pre style={{whiteSpace:'pre-wrap'}}>{report}</pre></main>;
+    <canvas ref={canvas} className="game-canvas" />{scene === 'arrival' && ready ? (engineRef.current?.phase === 'restoring' ? <ArrivalOverlay time={previewTime.current} clinic={CLINICS[id]} still={settings.current.reducedMotion} onSkip={() => { previewTime.current = ARRIVAL.end; }} /> : null) : <ClinicStoryView clinic={CLINICS[id]} chapter={id} scene={scene === 'arrival' ? 'closing' : scene} settings={settings.current} narration={sound.current?.narration || {scene:null,status:'idle',progress:0}} onVoice={() => {sound.current?.toggleNarration();void sound.current?.unlock();}} onHome={home} onSettings={home} onContinue={home} onReplay={home} touch={touch} onTouch={() => setTouch(v => !v)} ready={ready} loading="Preparing preview" previewTime={previewTime.current} previewPaused={previewPaused.current} onPreviewPause={() => {previewPaused.current = !previewPaused.current; tick(n => n + 1);}} completed={Array.from({length:id+1},(_,i)=>i)} result={scene!=='opening' ? {mission:id,mode:'standard',score:1752,stars:3,integrity:100,remaining:74,lives:MISSIONS[id].lives,clean:9,encounters:10} : undefined} />}</main> : <main style={{padding:30}}><h1>Story verification</h1><p>Development fixture · no saves written. Preview the real scene components and decode every local recording.</p><label>Clinic <select value={id} onChange={e=>setId(Number(e.target.value))}>{CLINICS.map((c,i)=><option key={c.id} value={i}>{c.name}</option>)}</select></label><p><label><input type="checkbox" checked={settings.current.reducedMotion} onChange={e => {settings.current.reducedMotion = e.target.checked; tick(n => n + 1);}} /> Reduced motion</label> <label><input type="checkbox" checked={!settings.current.sound} onChange={e => {settings.current.sound = !e.target.checked; tick(n => n + 1);}} /> Sound off</label> <label><input type="checkbox" checked={touch} onChange={e => setTouch(e.target.checked)} /> Touch controls</label></p><p><button onClick={()=>show('opening')}>Preview opening</button> <button onClick={()=>show('arrival')}>Preview arrival</button> <button onClick={()=>show('closing')}>Preview ending</button> <button onClick={()=>void validate()}>Validate all voice files</button></p><pre style={{whiteSpace:'pre-wrap'}}>{report}</pre></main>;
 }
 createRoot(document.getElementById('root')!).render(<StoryQA />);

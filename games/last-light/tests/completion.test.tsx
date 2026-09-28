@@ -43,6 +43,13 @@ describe('compact delivery completion', () => {
     expect(html).not.toContain('Find a player');
     expect(html).not.toContain('Public player name');
   });
+  it.each([0, 1, 2, 3, 4])('keeps chapter %i’s real-world fact and a way to help beside the result', chapter => {
+    const html = render(props(chapter));
+    expect(html).toContain('WHY IT MATTERS');
+    expect(html).toContain(CLINICS[chapter].fact.title);
+    expect(html).toContain(CLINICS[chapter].fact.href.replace(/&/g, '&amp;'));
+    expect(html).toContain(chapter === 4 ? 'Here’s how you can help our real-world team' : 'How you can help');
+  });
   it('returns to the map after the final chapter without inventing a sixth destination', () => {
     const html = render(props(4));
     expect(html).toContain('ALL FIVE CLINICS COMPLETE');

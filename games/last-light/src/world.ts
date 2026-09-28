@@ -73,7 +73,12 @@ import { CameraRig } from './camera-rig';
 import { PostFX } from './post';
 import { detectTier, deviceHints, FrameGovernor, TIERS, type Tier } from './quality';
 import { sharpenSurfaces } from './surfaces';
-import { createClinicCare } from './clinic-care';
+import { CARE_ROOM, createClinicCare } from './clinic-care';
+import { ARRIVAL, arrivalShot, stillShot, type ArrivalShot } from './arrival';
+import { OPENING_BEATS, OPENING_DURATION } from './opening-story';
+
+/** Slow start, quick middle, long gentle landing: the opening crane's pacing. */
+const craneEase = (x: number) => 1 - Math.pow(1 - x * x * (3 - 2 * x), 3);
 
 /** Terrain palette, parsed once instead of once per vertex. */
 const PALETTE = {
@@ -101,12 +106,106 @@ export class GameWorld {
     this.openingTime = null;
     this.rig.finishIntro();
   }
+  /**
+   * Places the arrival camera for one shot of the cinematic. Marks are authored
+   * in clinic-local space so every compound frames the same way.
+   */
+  private arrivalCamera(shot: ArrivalShot, t: number, truck: T.Vector3, forward: T.Vector3, portrait: boolean, still: boolean) {
+    const A = ARRIVAL, root = this.clinic.root, W = this.clinic.width;
+    const scale = W / 13;
+    const local = root.worldToLocal(this.localEye.copy(truck));
+    const px = local.x, pz = local.z;
+    const toWorld = (x: number, y: number, z: number, out: T.Vector3) => root.localToWorld(out.set(x, y, z));
+    const k = (a: number, b: number) => (still ? 1 : smooth(a, b, t));
+    if (shot === 'arrive') {
+      // A crane from the chase view to beside the truck, the team walking out.
+      toWorld(px - 4.8, 2.55, pz + 7.6 - k(0, A.unload) * 1.4, this.eye);
+      const chase = this.localAim2.copy(truck).addScaledVector(forward, -8).add(new T.Vector3(0, 4, 0));
+      if (!still) this.eye.lerp(chase, 1 - smooth(0, 2.6, t));
+      toWorld(px * 0.5 + 0.4, 1.9, pz * 0.45 + 3.5, this.aim);
+      if (!still) this.aim.lerp(this.localAim.copy(truck).addScaledVector(forward, 10).setY(truck.y + 0.7), 1 - smooth(0, 2.6, t));
+    } else if (shot === 'unload') {
+      // Follow the kit from the tailgate to the power cabinet.
+      // From beside the power cabinet, watching the kit come across the courtyard.
+      const kit = t < A.lift ? this.tailLocal : this.kitLocal;
+      const d = k(A.unload, A.setDown);
+      const cx = W * 0.48;
+      toWorld(cx + 3.4 - d * 1.0, 2.35 - d * 0.35, 11 - d * 2.2, this.eye);
+      toWorld(kit.x, 1.1, kit.z, this.aim);
+    } else if (shot === 'connect') {
+      const cx = W * 0.48;
+      const d = k(A.connect, A.panels);
+      toWorld(cx + 2.1 - d * 0.45, 1.9 - d * 0.12, 4.5 - d * 0.55, this.eye);
+      toWorld(cx - 0.05, 1.38, 2.2, this.aim);
+    } else if (shot === 'panels') {
+      const d = k(A.panels, A.firstLight);
+      toWorld(-8.6 * scale + d * 1.4, 8.4 - d * 0.4, 13.2 - d * 1.0, this.eye);
+      toWorld(0.4, 4.2, -1.0, this.aim);
+    } else if (shot === 'inside') {
+      const d = k(A.firstLight, A.pullBack);
+      toWorld(-1.45 + d * 0.22, 2.42 - d * 0.1, 0.75 - d * 0.5, this.eye);
+      // Eyes go to the ceiling as the tube light flickers on.
+      const up = still ? 0 : Math.max(0, 1 - Math.abs(t - (A.lightsOn + 0.9)) / 1.6);
+      toWorld(0.6, 1.15 + up * 1.1, -3.1 + up * 0.8, this.aim);
+    } else {
+      // Out through the door, across the porch, then a long, low arc that reveals the lit compound.
+      const final = portrait ? new T.Vector3(9.6 * scale, 4.4, 30.5) : new T.Vector3(11 * scale, 3.2, 22.5);
+      const pts = this.pullCurve.points;
+      const set = [
+        [-1.23, 2.32, 0.25], [-0.12, 2.08, 1.5], [0.3, 2.12, 4.3], [2.4 * scale, 2.3, 9.6], [7.2 * scale, 2.8, 17.5], [final.x, final.y, final.z],
+      ];
+      pts.length = set.length;
+      set.forEach(([x, y, z], i) => (pts[i] = pts[i] ?? new T.Vector3()).set(x, y, z));
+      this.pullCurve.updateArcLengths();
+      const x = still ? 1 : smooth(A.pullBack, A.end - 0.4, t);
+      const u = 1 - Math.pow(1 - x, 2.2);
+      const eye = this.pullCurve.getPointAt(u, this.localAim2);
+      root.localToWorld(this.eye.copy(eye));
+      const aim = this.localAim.set(0.6, 1.15, -3.1)
+        .lerp(this.localAim2.set(0, 2.1, 1.2), smooth(0.02, 0.12, u))
+        .lerp(this.localAim2.set(-1.4 * scale, portrait ? 2.9 : 2.7, -0.4), smooth(0.12, 0.6, u));
+      root.localToWorld(this.aim.copy(aim));
+    }
+  }
   renderer: T.WebGLRenderer;
   scene = new T.Scene();
   camera = new T.PerspectiveCamera(56, 1, 0.15, 3200);
   private storyCameraOffset = 0;
   private storyCameraOffsetY = 0;
   private openingShot: 'care' | 'road' | null = null;
+  private arrivalShotName: ArrivalShot | null = null;
+  private careSky: boolean | null = null;
+  private careLight = 0;
+  private exposureAdapt = 1;
+  private bloomAdapt = 1;
+  private scratchForward = new T.Vector3();
+  private truckLocal = new T.Vector3();
+  private tailLocal = new T.Vector3();
+  private cabinetLocal = new T.Vector3();
+  private kitCurve = new T.CatmullRomCurve3([new T.Vector3(), new T.Vector3(), new T.Vector3(), new T.Vector3()], false, 'centripetal');
+  private kitLocal = new T.Vector3();
+  private kitTangent = new T.Vector3();
+  private kitWorld = new T.Vector3();
+  private kitTangentWorld = new T.Vector3();
+  private kitPerp = new T.Vector3();
+  private gripWorld = new T.Vector3();
+  private gripLocal = new T.Vector3();
+  private lookTarget = new T.Vector3();
+  private localEye = new T.Vector3();
+  private localAim = new T.Vector3();
+  private localAim2 = new T.Vector3();
+  /** Opening: courtyard → porch → through the door → the bedside. Clinic-local. */
+  private careCurve = new T.CatmullRomCurve3([
+    new T.Vector3(-8.6, 5.3, 21),
+    new T.Vector3(-5.2, 3.4, 13),
+    new T.Vector3(-2.3, 2.5, 7.4),
+    new T.Vector3(-0.3, 2.1, 3.1),
+    new T.Vector3(0.0, 2.03, 1.45),
+    new T.Vector3(-0.05, 2.06, 0.6),
+    new T.Vector3(0.25, 2.12, 0.15),
+  ], false, 'centripetal');
+  /** Arrival: bedside → door → courtyard → the whole compound. Clinic-local; set per chapter. */
+  private pullCurve = new T.CatmullRomCurve3([new T.Vector3()], false, 'centripetal');
   private care: ReturnType<typeof createClinicCare>;
   truck: ReturnType<typeof createTruck>;
   clinic: ReturnType<typeof createClinic>;
@@ -289,8 +388,10 @@ export class GameWorld {
     this.clinic.root.rotation.y = Math.PI;
     const architecture = clinicArchitecture(m.id);
     this.clinic.root.add(architecture.root);
-    this.care = createClinicCare(m.id);
-    this.care.root.position.set(0, .36, 4.8);
+    this.care = createClinicCare(m.id, this.clinic.width);
+    this.care.lights.forEach((light) => this.clinic.root.add(light));
+    // The centre-room clinic light doubles as the care room's ceiling light.
+    this.clinic.interiorLights[2].position.set(CARE_ROOM.ceiling.x, CARE_ROOM.ceiling.y - 0.6, CARE_ROOM.ceiling.z + 0.8);
     this.clinic.root.add(this.care.root);
     this.clinicWingGlow = architecture.glow;
     this.scene.add(this.clinic.root);
@@ -1264,7 +1365,7 @@ export class GameWorld {
     const e = this.engine,
       m = e.mission;
     const preview = this.openingTime !== null && !this.settings.reducedMotion;
-    const careShot = preview && this.openingTime! < 8;
+    const careShot = preview && this.openingTime! < OPENING_BEATS.road;
     const viewProgress = careShot ? m.length : e.progress;
     this.clock += dt;
     const alpha = e.phase === 'driving' ? e.interpolation : 1;
@@ -1295,8 +1396,20 @@ export class GameWorld {
     atmosphereUniforms.uTime.value = this.clock;
     this.living.update(e, this.clock);
     this.trafficArt.update(e, alpha, this.settings.reducedMotion);
-    this.care.root.visible = careShot || e.progress > m.length - 100;
-    if (this.care.root.visible) this.care.update(this.openingTime ?? this.clock, this.settings.reducedMotion);
+    const arriving = e.phase === 'restoring' || e.phase === 'results';
+    const arrivalTime = arriving ? (e.phase === 'results' ? ARRIVAL.end : e.restoreTime) : 0;
+    this.care.root.visible = careShot || arriving || e.progress > m.length - 100;
+    if (!this.care.root.visible) this.careLight = 0;
+    if (this.care.root.visible) {
+      const opening = this.openingTime ?? 0;
+      this.careLight = this.care.update(careShot ? opening : this.clock, !!this.settings.reducedMotion, {
+        // The reserve lamp dims through the opening; the battery then takes over.
+        reserve: careShot ? 1 - 0.4 * smooth(OPENING_BEATS.care, OPENING_BEATS.road, opening) : 0.7,
+        power: arrivalTime >= ARRIVAL.lightsOn ? 1 : 0,
+        since: arrivalTime - ARRIVAL.lightsOn,
+        devices: smooth(ARRIVAL.devices, ARRIVAL.devices + 0.8, arrivalTime),
+      });
+    }
     for (const chunk of this.chunks)
       chunk.mesh.visible =
         chunk.end > viewProgress - chunk.behind && chunk.start < viewProgress + chunk.ahead;
@@ -1308,7 +1421,12 @@ export class GameWorld {
       }
     }
     // Light: golden hour sliding into dusk as the clinic gets closer.
-    const sky = this.applySky(e.progress);
+    // The care room is seen at dusk, like the arrival it foreshadows.
+    const sky = this.applySky(careShot ? m.length * 0.9 : e.progress);
+    if (this.careSky !== careShot) {
+      if (this.careSky !== null) this.updateEnvironment(true);
+      this.careSky = careShot;
+    }
     const brightness = this.settings.brightness ?? 1;
     this.renderer.toneMappingExposure = sky.exposure * brightness;
     const enhanced = this.settings.enhancedVisibility ? 1.6 : 1;
@@ -1338,7 +1456,9 @@ export class GameWorld {
       const high = beamMode(m, Math.abs(e.speed)) === 'HIGH BEAMS';
       light.angle = high ? 0.35 : 0.46;
       light.distance = night.beam;
-      light.intensity = (high ? 180 : 145) * lampScale;
+      // Once the truck is parked for the handover, only parking lamps stay on.
+      const parked = e.phase === 'restoring' || e.phase === 'results' ? 0.18 : 1;
+      light.intensity = (high ? 180 : 145) * lampScale * parked;
       light.target.position.set(
         (i === 0 ? -0.72 : 0.72) + e.steering * 8,
         -0.5,
@@ -1383,157 +1503,163 @@ export class GameWorld {
     this.truck.cargo.position.y =
       e.roadPulse * Math.sin(this.clock * 25) * 0.008;
     const restoring = e.phase === 'restoring' || e.phase === 'results';
-    const t = restoring ? e.restoreTime : 0;
-    this.truck.tailgate.rotation.x = (-smooth(0.3, 2.5, t) * Math.PI) / 2;
-    this.truck.cargo.visible = t < 3;
-    const transfer = smooth(3, 8, t),
-      ground = roadY(m, m.length);
-    const kitX = T.MathUtils.lerp(p.x, -6, transfer),
-      kitZ = T.MathUtils.lerp(p.z - 1.57, m.length + 16, transfer);
-    this.transferKit.visible = t >= 3 && t < 8.5;
-    this.transferKit.position.set(kitX, heightAt(m, kitX, kitZ), kitZ);
-    this.clinic.battery.visible = t >= 8;
-    // The installed array belongs to the later completed-clinic view, after the battery handover.
-    this.clinic.roofPanels.visible = e.phase === 'results';
+    const A = ARRIVAL;
+    const t = restoring ? (e.phase === 'results' ? A.end : e.restoreTime) : 0;
+    const still = !!this.settings.reducedMotion;
+    const W = this.clinic.width;
+    const fwd = this.scratchForward.set(Math.sin(e.heading), 0, Math.cos(e.heading));
+    this.truck.tailgate.rotation.x = (-smooth(A.tailgateOpen, A.tailgateOpen + 1.4, t) * Math.PI) / 2;
+    this.truck.cargo.visible = t < A.lift;
+    // The kit leaves the tailgate, clears the side of the truck and reaches the power cabinet.
+    const truckLocal = this.clinic.root.worldToLocal(this.truckLocal.copy(p));
+    const tailLocal = this.clinic.root.worldToLocal(this.tailLocal.copy(p).addScaledVector(fwd, -2.05));
+    const cabinetLocal = this.cabinetLocal.set(W * 0.48, 0, 3.0);
+    this.kitCurve.points[0].copy(tailLocal).setY(0);
+    this.kitCurve.points[1].set(truckLocal.x + 2.3, 0, tailLocal.z - 0.6);
+    this.kitCurve.points[2].set((truckLocal.x + 2.3 + cabinetLocal.x) / 2 + 0.6, 0, (tailLocal.z + cabinetLocal.z) / 2 - 0.4);
+    this.kitCurve.points[3].copy(cabinetLocal);
+    const carry = smooth(A.lift, A.setDown - 0.25, t);
+    const kitLocal = this.kitCurve.getPoint(carry, this.kitLocal);
+    const kitTangent = this.kitCurve.getTangent(Math.min(0.999, Math.max(0.001, carry)), this.kitTangent);
+    const kitWorld = this.clinic.root.localToWorld(this.kitWorld.copy(kitLocal));
+    const tangentWorld = this.kitTangentWorld.copy(kitTangent).transformDirection(this.clinic.root.matrixWorld).setY(0).normalize();
+    const kitYaw = Math.atan2(tangentWorld.x, tangentWorld.z);
+    const perp = this.kitPerp.set(tangentWorld.z, 0, -tangentWorld.x);
+    this.transferKit.visible = t >= A.lift && t < A.setDown + 0.1;
+    this.transferKit.position.set(kitWorld.x, heightAt(m, kitWorld.x, kitWorld.z), kitWorld.z);
+    this.transferKit.rotation.y = kitYaw;
+    this.clinic.battery.visible = t >= A.setDown;
+    // Inverter lamp: red on reserve, amber while connecting, green once the battery carries the load.
+    const status = this.clinic.status;
+    if (t < A.connect + 0.9) status.emissive.set('#ff4d32');
+    else if (t < A.connected) status.emissive.set('#ffb23a');
+    else status.emissive.set('#58f29a');
+    this.clinic.display.emissiveIntensity = smooth(A.connected - 0.2, A.connected + 0.6, t) * 0.55;
+    status.emissiveIntensity = t < A.connected && t >= A.connect + 0.9 ? 0.8 + Math.max(0, Math.sin(t * 16)) * 1.2 : t >= A.connected ? 1.4 + Math.max(0, 1 - (t - A.connected) * 2) * 1.6 : 0.9;
+    // The roof array goes up in a time-lapse, one panel after another.
+    this.clinic.roofPanels.visible = t >= A.panels;
+    this.clinic.roofPanels.children.forEach((panel, i) => {
+      const start = A.panels + i * A.panelStep;
+      const k = still ? (t >= start ? 1 : 0) : smooth(start, start + 0.55, t);
+      const rest = panel.userData.rest as T.Vector3;
+      panel.visible = t >= start;
+      panel.position.set(rest.x, rest.y + (1 - k) * 1.7, rest.z - (1 - k) * 0.6);
+    });
+    // Inside first, then the rest of the compound.
+    const mains = smooth(A.lightsOn, A.lightsOn + 1.1, t);
+    const devices = smooth(A.devices, A.devices + 0.8, t);
+    const compound = (i: number) => smooth(A.compound + i * 0.45, A.compound + 0.9 + i * 0.45, t);
     this.clinic.panes.forEach((pane, i) => {
-      const a = smooth(8.3 + i * 0.65, 9.3 + i * 0.65, t),
+      const a = compound(i),
         mat = pane.material as T.MeshStandardMaterial;
       mat.color.set(a > 0 ? '#899c82' : '#102223');
-      mat.emissiveIntensity = a * 0.025;
+      // Before the power returns, only the doorway glows, from the reserve lamp inside.
+      mat.emissiveIntensity = i === 1 && a === 0 && t < A.lightsOn ? 0.09 : a * 0.025;
       mat.opacity = 0.13;
     });
     this.clinic.interiorLights.forEach(
-      (light, i) =>
-        (light.intensity =
-          smooth(8.2 + i * 0.7, 9 + i * 0.7, t) * (i === 2 ? 16 : 24)),
+      (light, i) => (light.intensity = i === 2 ? this.careLight * 6 : compound(i) * 24),
     );
-    const power = smooth(8.3, 10.5, t);
     this.clinicWingGlow.forEach((mat, i) => {
-      mat.emissiveIntensity = smooth(10.5 + i * 0.35, 12 + i * 0.35, t) * 0.7;
+      mat.emissiveIntensity = smooth(A.compound + 1.2 + i * 0.35, A.compound + 2.4 + i * 0.35, t) * 0.7;
     });
     this.clinic.interiorMats.forEach((mat, i) => {
       mat.color
         .copy(this.clinic.interiorColors[i])
-        .multiplyScalar(0.13 + power * 0.87);
+        .multiplyScalar(0.13 + mains * 0.87);
       mat.emissive
         .copy(this.clinic.interiorColors[i])
-        .multiplyScalar(power * 0.08);
+        .multiplyScalar(mains * 0.08);
     });
-    this.clinic.screen.emissiveIntensity = power * 0.8;
+    this.clinic.screen.emissiveIntensity = devices * 0.8;
     this.clinic.fan.rotation.y =
-      t > 10 ? (t - 10) * Math.min(12, (t - 10) * 3) : 0;
-    // Let the initial power-on glow settle so the team and facade remain readable.
-    const settledLight = T.MathUtils.lerp(1, 0.42, smooth(13, 18, t));
-    this.clinic.lights[0].intensity = smooth(10, 12, t) * 80 * settledLight;
-    this.clinic.lights[1].intensity = smooth(10.8, 12.6, t) * 55 * settledLight;
-    this.clinic.fixture.emissiveIntensity = smooth(10, 12, t) * 3 * settledLight;
-    this.clinic.glowMat.opacity = smooth(10, 12.5, t) * 0.1;
+      t > A.lightsOn ? (t - A.lightsOn) * Math.min(12, (t - A.lightsOn) * 3) : 0;
+    // Let the power-on glow settle so the team and facade remain readable.
+    const settledLight = T.MathUtils.lerp(1, 0.7, smooth(A.end - 4, A.end, t));
+    // One porch bulb stays on the reserve until the solar power arrives.
+    const porch = 0.07 + 0.93 * smooth(A.compound + 0.6, A.compound + 1.8, t);
+    this.clinic.lights[0].intensity = porch * 40 * settledLight;
+    this.clinic.lights[1].intensity = smooth(A.compound + 1.2, A.compound + 2.4, t) * 26 * settledLight;
+    this.clinic.fixture.emissiveIntensity = porch * 1.6 * settledLight;
+    this.clinic.glowMat.opacity = (porch - 0.07) * 0.045;
+    const lookAtTruck = this.lookTarget;
     for (let i = 0; i < this.people.length; i++) {
       const person = this.people[i],
         receiver = i < 2;
       const baseX = (i % 2 ? 1 : -1) * (3.2 + Math.floor(i / 2) * 1.25),
         baseZ = m.length + 10 + (i % 3);
-      let walking = 0;
-      if (receiver && restoring && t < 8.5) {
-        const reach = smooth(0, 3, t),
-          carry = t >= 3;
-        person.group.position.x = carry
-          ? kitX + (i ? 1.05 : -1.05)
-          : T.MathUtils.lerp(baseX, p.x + (i ? 1.05 : -1.05), reach);
-        person.group.position.z = carry
-          ? kitZ
-          : T.MathUtils.lerp(m.length + 3, p.z - 1.57, reach);
-        person.group.rotation.y = carry
-          ? i
-            ? -Math.PI / 2
-            : Math.PI / 2
-          : Math.atan2(
-              p.x - person.group.position.x,
-              p.z - 1.57 - person.group.position.z,
-            );
-        walking = t < 7.7 ? 0.28 : 0;
-        for (let a = 0; a < 2; a++) {
-          person.limbs[a].rotation.x = carry
-            ? -0.85
-            : Math.sin(t * 7 + a * Math.PI) * 0.22;
-          person.limbs[a].rotation.z = 0;
-          person.forearms[a].rotation.x = carry ? -0.95 : -0.2;
+      const side = i ? 1 : -1;
+      let walking = 0, mode: 'idle' | 'walk' | 'wave' | 'connect' | 'carry' = 'idle';
+      let yaw = 0;
+      const pos = person.group.position;
+      if (receiver && restoring) {
+        if (t < A.lift) {
+          // Out to the tailgate, then wait while it opens.
+          const grip = this.gripWorld.copy(this.clinic.root.localToWorld(this.gripLocal.copy(tailLocal))).addScaledVector(perp, side * 1.05);
+          const reach = smooth(0.5, A.unload, t);
+          pos.set(T.MathUtils.lerp(baseX, grip.x, reach), 0, T.MathUtils.lerp(m.length + 3, grip.z, reach));
+          yaw = reach < 0.98 ? Math.atan2(grip.x - baseX, grip.z - (m.length + 3)) : kitYaw;
+          if (t > 0.5 && t < A.unload - 0.2) { walking = 0.28; mode = 'walk'; }
+        } else if (t < A.setDown) {
+          pos.set(kitWorld.x, 0, kitWorld.z).addScaledVector(perp, side * 1.05);
+          yaw = kitYaw;
+          walking = carry > 0.02 && carry < 0.98 ? 0.28 : 0;
+          mode = 'carry';
+        } else {
+          // One connects the battery; the other steps back to watch.
+          const spot = this.gripLocal.set(i ? W * 0.48 + 1.6 : W * 0.48 - 0.02, 0, i ? 4.6 : 2.8);
+          this.clinic.root.localToWorld(spot);
+          pos.set(spot.x, 0, spot.z);
+          yaw = i ? -0.35 : 0;
+          if (!i && t < A.connected + 0.5) mode = 'connect';
         }
       } else {
-        person.group.position.x =
-          receiver && t >= 8.5 ? -6 + (i ? 1.1 : -1.1) : baseX;
-        person.group.position.z = receiver && t >= 8.5 ? m.length + 15 : baseZ;
+        pos.set(baseX, 0, baseZ);
         if (receiver && !restoring)
-          person.group.position.z = T.MathUtils.lerp(
-            baseZ,
-            m.length + 3,
-            smooth(m.length - 50, m.length - 8, e.progress),
-          );
-        person.group.rotation.y = restoring
-          ? Math.PI
-          : Math.atan2(
-              p.x - person.group.position.x,
-              p.z - person.group.position.z,
-            );
-        const wave = t > 11 && (i === 3 || i === 4);
-        for (let a = 0; a < 2; a++) {
-          person.limbs[a].rotation.x = 0;
-          person.limbs[a].rotation.z =
-            a === 0 && wave
-              ? 1.7 + Math.sin(this.clock * 4) * 0.2
-              : a
-                ? -0.09
-                : 0.09;
-          person.forearms[a].rotation.x = wave ? -0.6 : -0.15;
-        }
-        if (i === 0 && t > 8 && t < 10.5) {
-          person.group.rotation.y = Math.PI;
-          person.limbs[0].rotation.x = -1.1;
-          person.forearms[0].rotation.x = -0.7;
-        }
-        if (
-          !restoring &&
-          receiver &&
-          e.progress > m.length - 50 &&
-          e.progress < m.length - 8
-        )
+          pos.z = T.MathUtils.lerp(baseZ, m.length + 3, smooth(m.length - 50, m.length - 8, e.progress));
+        // Towards the truck as it arrives; towards the clinic once the lights return.
+        yaw = restoring && t >= A.lightsOn
+          ? Math.atan2(-pos.x, m.length + 19 - pos.z)
+          : Math.atan2(p.x - pos.x, p.z - pos.z);
+        if (!restoring && receiver && e.progress > m.length - 50 && e.progress < m.length - 8) {
           walking = 0.15;
+          mode = 'walk';
+        }
+        // A welcome as the truck stops, and again as the lights come on.
+        if (restoring && (i === 3 || i === 4 || i === 6) && ((t > 0.4 + i * 0.2 && t < 3.4) || t > A.compound + 1 + i * 0.3)) mode = 'wave';
       }
+      person.group.rotation.set(0, yaw, 0);
       const gait = Math.sin(this.clock * 7 + i);
+      for (let a = 0; a < 2; a++) {
+        person.limbs[a].rotation.x = mode === 'carry' ? -0.85 : Math.sin(this.clock * 7 + a * Math.PI) * walking;
+        person.limbs[a].rotation.z = mode === 'wave' && a === 0 ? 1.7 + Math.sin(this.clock * 4) * 0.2 : a ? -0.09 : 0.09;
+        person.forearms[a].rotation.x = mode === 'carry' ? -0.95 : -0.15;
+      }
       person.limbs[2].rotation.x = gait * walking;
       person.limbs[3].rotation.x = -gait * walking;
       person.calves[0].rotation.x = Math.max(0, -gait) * walking * 1.6;
       person.calves[1].rotation.x = Math.max(0, gait) * walking * 1.6;
       person.head.rotation.y = Math.sin(this.clock * 0.6 + i) * 0.07;
-      person.group.position.y =
-        heightAt(m, person.group.position.x, person.group.position.z) +
-        Math.abs(gait) * walking * 0.025;
+      pos.y = heightAt(m, pos.x, pos.z) + Math.abs(gait) * walking * 0.025;
       const actor = this.staff[i];
       person.group.visible = !actor && p.z > m.length - 180;
       if (actor) {
-        actor.group.position.copy(person.group.position);
+        actor.group.position.copy(pos);
         actor.group.rotation.copy(person.group.rotation);
         actor.group.visible = p.z > m.length - 180;
-        const mode =
-          receiver && restoring && t >= 3 && t < 8.5
-            ? 'carry'
-            : walking > 0
-              ? 'walk'
-              : i === 0 && t > 8 && t < 10.5
-                ? 'connect'
-                : restoring && t > 11 && (i === 3 || i === 4)
-                  ? 'wave'
-                  : 'idle';
         actor.animate(mode, dt);
         if (mode === 'carry') {
           actor.group.updateMatrixWorld(true);
-          const gripX = kitX + (i ? 0.79 : -0.79),
-            gripY = this.transferKit.position.y + 1.18;
+          const gripY = this.transferKit.position.y + 1.18;
+          const edge = this.gripWorld.copy(kitWorld).addScaledVector(perp, side * 0.79).setY(gripY);
           actor.hold(
-            new T.Vector3(gripX, gripY, kitZ + (i ? -0.26 : 0.26)),
-            new T.Vector3(gripX, gripY, kitZ + (i ? 0.26 : -0.26)),
+            edge.clone().addScaledVector(tangentWorld, side * 0.26),
+            edge.clone().addScaledVector(tangentWorld, -side * 0.26),
           );
-        }
+        } else if (restoring && t > A.lightsOn && t < A.end) {
+          // Everyone turns to the windows as the clinic lights up.
+          actor.look(this.clinic.root.localToWorld(lookAtTruck.set(0, 2.4, 1.4)), 0.6 * smooth(A.lightsOn, A.lightsOn + 1, t));
+        } else if (restoring && t < A.lift) actor.look(lookAtTruck.set(p.x, p.y + 1.2, p.z), 0.5);
       }
     }
     const heading = e.heading;
@@ -1550,11 +1676,12 @@ export class GameWorld {
     const portrait = this.camera.aspect < 1;
     // Center the completed clinic above the compact bottom action panel.
     // The handover remains in the same scene and the player's truck stays visible.
-    const closingFrame = restoring ? this.settings.reducedMotion ? 1 : smooth(14, 18, t) : 0;
+    const closingFrame = restoring ? this.settings.reducedMotion ? (t >= ARRIVAL.pullBack ? 1 : 0) : smooth(ARRIVAL.end - 5, ARRIVAL.end, t) : 0;
     const offset = preview ? (portrait ? 0 : -0.22) : 0;
     // On short phones the scene sits below the title, before the scrollable dock.
     const viewportHeight = portrait && restoring ? Math.max(1, this.renderer.domElement.clientHeight) : 1;
-    const portraitOffset = clamp(.5 - (185 + Math.max(150, viewportHeight * .23) / 2) / viewportHeight, .04, .17);
+    // The intro text now carries the real-world fact, so the clinic sits a little lower.
+    const portraitOffset = clamp(.5 - (265 + Math.max(150, viewportHeight * .23) / 2) / viewportHeight, -.06, .17);
     const offsetY = preview ? (portrait ? .26 : .17) : closingFrame * (portrait ? portraitOffset : .10);
     if (Math.abs(offset - this.storyCameraOffset) > .0005 || Math.abs(offsetY - this.storyCameraOffsetY) > .0005) {
       this.storyCameraOffset = offset;
@@ -1569,34 +1696,30 @@ export class GameWorld {
       const roadShot = p.clone().addScaledVector(forward, -22).addScaledVector(side, 14).add(new T.Vector3(0, 21, 0));
       const kitShot = p.clone().addScaledVector(forward, -5.4).addScaledVector(side, 4.5).add(new T.Vector3(0, 3.7, 0));
       const driveShot = p.clone().addScaledVector(forward, portrait ? -9.6 : -8.1).add(new T.Vector3(0, portrait ? 4.3 : 2.8, 0));
-      const cargo = smooth(12, 14, seconds), departure = smooth(16, 20, seconds);
+      const cargo = smooth(OPENING_BEATS.kit, OPENING_BEATS.kit + 2, seconds), departure = smooth(OPENING_BEATS.turn, OPENING_DURATION, seconds);
       this.eye.copy(roadShot).lerp(kitShot, cargo).lerp(driveShot, departure);
       this.eye.y = Math.max(this.eye.y, worldHeight(m, this.eye.x, this.eye.z) + 1.6);
       this.aim.copy(p).addScaledVector(forward, T.MathUtils.lerp(35, -1, cargo)).add(new T.Vector3(0, 1, 0));
       this.aim.lerp(p.clone().addScaledVector(forward, 10).add(new T.Vector3(0, .7, 0)), departure);
       if (careShot) {
-        const y = roadY(m, m.length), move = smooth(0, 8, seconds);
-        // Low porch roofs in these compounds need a camera below the awning.
-        const careHeight = m.id === 1 || m.id === 4 ? 2.6 : 3.8;
-        this.eye.set(T.MathUtils.lerp(-4.8, -3.4, move), y + careHeight, m.length + 6);
-        this.aim.set(.1, y + 1.4, m.length + 14.2);
+        // From the courtyard, through the door, into the care room.
+        // A dusk crane down to the porch, through the door, then a slow landing at the bedside.
+        const u = craneEase(smooth(OPENING_BEATS.care, OPENING_BEATS.road - 0.2, seconds));
+        const local = this.careCurve.getPointAt(u, this.localEye);
+        const aim = this.localAim.set(0, portrait ? 1.7 : 2.5, -0.6)
+          .lerp(this.localAim2.copy(CARE_ROOM.door), smooth(0.55, 0.9, u))
+          .lerp(this.localAim2.set(0.45, 1.28, -3.0), smooth(0.93, 0.995, u));
+        this.clinic.root.localToWorld(this.eye.copy(local));
+        this.clinic.root.localToWorld(this.aim.copy(aim));
       }
       // Separate locations use a clean cut, never a flight through the landscape.
-      this.rig.place(this.eye, this.aim, dt, this.camera, shot !== this.openingShot);
+      this.rig.place(this.eye, this.aim, dt, this.camera, careShot || shot !== this.openingShot);
       this.openingShot = shot;
     } else if (restoring) {
-      const a = this.settings.reducedMotion ? 1 : smooth(0, 5, t);
-      const targetEye = new T.Vector3(
-        portrait ? (m.id === 4 ? -25 : -20) : -21,
-        roadY(m, m.length) + (portrait ? 13 : 11),
-        m.length - (portrait ? (m.id === 4 ? 28 : 20) : 12),
-      );
-      targetEye.lerp(new T.Vector3(portrait ? -26 : -21, roadY(m, m.length) + (portrait ? 14 : 9), m.length - (portrait ? 28 : 5)), closingFrame);
-      this.eye
-        .set(p.x - forward.x * 8, p.y + 4, p.z - forward.z * 8)
-        .lerp(targetEye, a);
-      this.aim.set(portrait ? 0 : -2 * closingFrame, roadY(m, m.length) + 2.5, m.length + 17);
-      this.rig.place(this.eye, this.aim, dt, this.camera);
+      const shot = still ? stillShot(t) : arrivalShot(t);
+      this.arrivalCamera(shot, t, p, forward, portrait, still);
+      this.arrivalShotName = shot;
+      this.rig.place(this.eye, this.aim, dt, this.camera, true);
     } else {
       const lead = 10 + speed * 11;
       const turn = routePoint(
@@ -1626,6 +1749,13 @@ export class GameWorld {
         this.camera,
       );
     }
+    if (import.meta.env.DEV && (window as any).__llCam) {
+      // Development-only framing aid: clinic-local eye/aim from the QA fixture.
+      const { eye, aim } = (window as any).__llCam as { eye: number[]; aim: number[] };
+      this.clinic.root.localToWorld(this.eye.set(eye[0], eye[1], eye[2]));
+      this.clinic.root.localToWorld(this.aim.set(aim[0], aim[1], aim[2]));
+      this.rig.place(this.eye, this.aim, dt, this.camera, true);
+    }
     this.sky.position.copy(this.camera.position);
     // The sun's shadow volume follows the truck; low sun, long shadows.
     const lightCentre = careShot ? new T.Vector3(0, roadY(m, m.length), m.length + 14) : p;
@@ -1640,7 +1770,17 @@ export class GameWorld {
     }
     this.rain.geometry.attributes.position.needsUpdate = true;
     const falling = rainAt(m, e.progress);
-    this.rain.visible = falling > 0.01;
+    // No rain streaks inside the care room.
+    const inside = this.clinic.root.worldToLocal(this.gripLocal.copy(this.camera.position));
+    const indoors = Math.abs(inside.x) < this.clinic.width / 2 && inside.z < 1.55 && inside.z > -4.5 && inside.y < 4.5;
+    this.rain.visible = falling > 0.01 && !indoors;
+    // A cinematographer's exposure: interiors are metered for the lamps, the lit
+    // compound at night is held a little under so warm windows don't blow out.
+    const exposureGoal = indoors ? (this.careLight > 0.3 ? 0.6 : 1.05) : restoring && t >= ARRIVAL.compound ? 0.86 : 1;
+    const adapt = dt > 0 ? 1 - Math.exp(-dt * 2.4) : 1;
+    this.exposureAdapt += (exposureGoal - this.exposureAdapt) * adapt;
+    this.bloomAdapt += ((indoors && this.careLight > 0.3 ? 0.4 : 1) - this.bloomAdapt) * adapt;
+    this.renderer.toneMappingExposure *= this.exposureAdapt;
     (this.rain.material as T.LineBasicMaterial).opacity =
       m.rainStart === undefined
         ? falling * (0.12 + 0.18 * smooth(0, m.length * 0.55, e.progress))
@@ -1714,6 +1854,7 @@ export class GameWorld {
       darkness: sky.darkness,
       shaftStrength: this.low ? 0 : 0.6 * (1 - chapterLook(m).storm * 0.2),
       impact: this.settings.reducedMotion ? 0 : e.impactPulse,
+      bloomScale: this.bloomAdapt,
     });
   }
   recordFrame(dt: number, physicsMs: number, renderMs: number) {

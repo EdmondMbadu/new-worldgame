@@ -1,6 +1,9 @@
 /** Fictional stakes for each playable delivery, separate from documented project facts. */
-export const OPENING_DURATION = 20;
-export const openingBeat = (seconds: number) => seconds < 2 ? 0 : seconds < 8 ? 1 : seconds < 12 ? 2 : seconds < 16 ? 3 : 4;
+export const OPENING_DURATION = 22;
+/** Beat start times: the call, the care room, the road, the kit, your turn. */
+export const OPENING_BEATS = { care: 2.5, road: 10, kit: 14, turn: 18 } as const;
+export const openingBeat = (seconds: number) =>
+  seconds < OPENING_BEATS.care ? 0 : seconds < OPENING_BEATS.road ? 1 : seconds < OPENING_BEATS.kit ? 2 : seconds < OPENING_BEATS.turn ? 3 : 4;
 export const OPENING_STORIES = [
   {
     lead: 'The clinic is on its', emphasis: 'last reserve.',

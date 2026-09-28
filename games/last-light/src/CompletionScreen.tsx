@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ClinicStoryProps } from './ClinicStory';
-import { CLINICS, STORY_DISCLOSURE, CAMPAIGN_HREF } from './clinic-stories';
+import { CLINICS, STORY_DISCLOSURE, CAMPAIGN_HREF, HELP } from './clinic-stories';
 import { MISSIONS } from './missions';
 import { CompletionAccount, InviteFriends, LeaderboardDialog, RealProjectCard } from './CommunityPanel';
 import { GameDialog } from './GameDialog';
@@ -47,6 +47,14 @@ export function CompletionScreen(p: ClinicStoryProps) {
         <h1 id="clinic-story-heading" ref={heading} tabIndex={-1}>{clinic.shortName}</h1>
         <p>{practice ? 'The kit is safely with the team. Ready for a full delivery?' : 'The kit is safely with the team.'}</p>
         <span className="completion-fiction">In-game clinic · {clinic.stage === 'online' ? 'Inspired by a completed project' : 'Real project preparing for solar'}</span>
+        <aside className="completion-fact" aria-label="Real-world fact">
+          <span className="eyebrow">WHY IT MATTERS</span>
+          <p>{clinic.fact.figure && <strong>{clinic.fact.figure}</strong>}<span>{clinic.fact.title}</span></p>
+          <p className="completion-fact-links">
+            <a href={clinic.fact.href} target="_blank" rel="noopener noreferrer" title={clinic.fact.source}>Source <span aria-hidden="true">↗</span></a>
+            <a href={HELP.href} target="_blank" rel="noopener noreferrer">{p.chapter === CLINICS.length - 1 ? HELP.title : 'How you can help'} <span aria-hidden="true">↗</span></a>
+          </p>
+        </aside>
       </div>
 
       <div className="completion-bottom">

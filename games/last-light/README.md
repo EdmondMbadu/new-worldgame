@@ -2,13 +2,13 @@
 
 ## Chapter openings and driving guidance
 
-All five chapters begin with a clearly labeled dramatized call and a route-specific delivery objective. A skippable 20-second sequence moves from the existing clinician illustration to an animated clinic care bay, then the chapter’s actual road, truck cargo and departure camera. The care bay includes a resting patient, two people at the waiting bench, a clinician checking the bedside and a staff member carrying supplies; eye-clinic chapters include an eye dressing. These are illustrative people and fictional circumstances, separate from the documented project status. Existing voice recordings and their matching transcripts are preserved.
+All five chapters begin with a clearly labeled dramatized call and a route-specific delivery objective. A skippable 22-second sequence moves from the existing clinician illustration to the clinic at dusk, cranes down from a wide dusk view of the compound (the doorway faintly lit by the reserve lamp), pushes through the front door and lands slowly at the bedside: a patient propped up on pillows, a clinician at the bedside with a chart, a companion in a chair and the warm, unsteady reserve lamp (eye-clinic chapters add an eye dressing). It then cuts to the chapter’s actual road, truck cargo and departure camera. People are the rigged staff model with trousers, shoes and poses (seated, propped up, leaning, looking) rather than the older primitive figures. These are illustrative people and fictional circumstances, separate from the documented project status. Existing voice recordings and their matching transcripts are preserved.
 
 The route diagram samples the selected mission, including Fresh tracks and bypasses. Start delivery is available as soon as the scene loads, independent of narration or animation. Pause animation freezes the sequence; story audio has its own pause/replay control. Reduced motion keeps the clinician illustration still. Phone layouts show the scene above the story and put Start delivery and controls before the narration transcript. Real project statistics remain under About the real project.
 
 Arrow keys are the primary instructions: hold ↑ to drive, ← / → to steer, and ↓ to slow/stop (continue holding after stopping to reverse). Remapped letters, touch and controllers remain available. The reserve starts only on acceleration. Every chapter supplies short movement prompts and a braking reminder for its first obstacle. Handover uses the visible Deliver kit button with the current shortcut.
 
-The development-only `qa/clinic-story.html` fixture previews every chapter, has a shot selector for visual checks, and supports muted, touch and reduced-motion modes without writing player saves. Graphics adjustments are queued before rendering and scale only the offscreen buffers, leaving the displayed canvas intact; actual canvas resizes redraw even while paused, and duplicate size notifications are ignored. The chase camera checks ground clearance after interpolation to prevent it entering rising banks. In the development-only `?qa=1` game, Stress graphics QA simulates slow frames to exercise adaptive resolution and tier changes without changing saved settings.
+The development-only `qa/clinic-story.html` fixture previews every chapter's opening, arrival and ending, has a shot selector for visual checks, accepts `?scene=opening|arrival|closing&id=0-4&t=seconds&paused=1` for repeatable frames, and supports muted, touch and reduced-motion modes without writing player saves. Graphics adjustments are queued before rendering and scale only the offscreen buffers, leaving the displayed canvas intact; actual canvas resizes redraw even while paused, and duplicate size notifications are ignored. The chase camera checks ground clearance after interpolation to prevent it entering rising banks. In the development-only `?qa=1` game, Stress graphics QA simulates slow frames to exercise adaptive resolution and tier changes without changing saved settings.
 
 A standalone 3D driving game for the Global Solutions Lab games collection. Play as Amani, carrying solar panels and a charged battery to five clinics before their emergency reserve expires. Reach the courtyard, stop safely, hand over the kit, and watch the clinic become bright and active.
 
@@ -74,7 +74,22 @@ Foreground frame delays no longer open an unexpected pause screen. Physics catch
 
 Pause or failure screens offer checkpoint practice. Practice uses a refreshed reserve and kit, and is explicitly excluded from records and unlocks. Scored recovery retains its time penalty. Revision 6 scores stay separate from previous road revisions (including revision 5) while preserving campaign completion.
 
-Each clinic has its own compound, including recessed windows, wings, shelters, drainage and electrical equipment. The clock stops at accepted handover. During the 18-second restoration, the tailgate opens, rigged staff carry the kit with hand targeting, a staff member connects the battery, and room, corridor and porch lighting returns in sequence. Equipment and community activity resume. Continue becomes available after power returns; the installed roof array appears in the later completed-clinic view. A charged battery supplies immediate power at night.
+Each clinic has its own compound, including recessed windows, wings, shelters, drainage and electrical equipment. The clock stops at accepted handover. The arrival is a 32-second letterboxed cinematic (`src/arrival.ts` holds the shared timeline; Skip, Enter or Escape jump to the end from the first frame):
+
+1. **Arrival** — the team walks out to the truck.
+2. **The handover** — the tailgate opens and two staff carry the kit around the truck to the power cabinet, hands on the frame.
+3. **Connected** — the battery is set down and connected; the inverter lamp goes from red to amber to green and the charge display wakes.
+4. **The panels** — a labelled time-lapse of the roof array going up panel by panel (a real installation takes a trained team several days).
+5. **First light** — inside the same care room from the opening: the ceiling tube flickers on, the monitor and vaccine fridge wake, and everyone looks up.
+6. **A brighter night, then why it matters** — the camera backs out through the door and across the porch, then a long low arc reveals the whole lit compound against the dusk sky; once outside, the chapter’s real-world fact appears with its source.
+
+Lighting is metered like a film: interiors lower exposure and bloom once the ceiling light is on, the lit compound is held slightly under at night, the parked truck drops to parking lamps and the porch lights are soft so the warm windows read without blowing out.
+
+Reduced motion replaces the camera moves with three still frames. A charged battery supplies immediate power at night; the installed roof array stays in the completed-clinic view.
+
+### Real-world facts
+
+Each chapter ends with one sourced fact (WHO, World Bank, IRENA & SEforALL, *Energizing Health*, 2023), in `content/drc-clinic-stories.json` beside the clinic it belongs to: 25,000+ facilities without power, only about half with reliable power, nearly a billion people affected, what electricity powers beyond lights, and solar with batteries not waiting for the grid. The fact also appears on the completion screen with its source and a link to help the real team; the final chapter spells out the call to help. Facts are kept visually separate from the fictional story.
 
 | Chapter | Landscape | Signature moment | Also on the road |
 | --- | --- | --- | --- |

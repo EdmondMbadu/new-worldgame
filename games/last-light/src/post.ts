@@ -113,6 +113,8 @@ export type PostFrame = {
   darkness: number;
   shaftStrength: number;
   impact: number;
+  /** Cinematic interiors: 1 = normal, lower = softer bloom around practical lights. */
+  bloomScale?: number;
 };
 
 export class PostFX {
@@ -171,8 +173,9 @@ export class PostFX {
     g.uVignette.value = 0.32 + f.darkness * 0.18;
     g.uAberration.value = f.impact * 0.006;
     if (this.bloom) {
-      this.bloom.strength = 0.26 + f.darkness * 0.5;
-      this.bloom.threshold = 1.15 - f.darkness * 0.55;
+      const scale = f.bloomScale ?? 1;
+      this.bloom.strength = (0.26 + f.darkness * 0.5) * scale;
+      this.bloom.threshold = 1.15 - f.darkness * 0.55 + (1 - scale) * 0.5;
     }
     if (this.shafts) {
       const u = this.shafts.material.uniforms;

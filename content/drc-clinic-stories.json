@@ -18,7 +18,8 @@
       "projectNote": "Solar power is already installed at Ndingi. This chapter re-creates a delivery inspired by that completed project.",
       "opening": "Ndingi calling. Our backup power is running low, and care is still under way. Bring the charged battery to the courtyard. Follow the marked road and keep the kit safe. We're ready for you.",
       "closing": "The kit has reached our team. Thank you for bringing it safely. In the real Ndingi project, solar power supports five care areas, from maternity to the operating room. Your journey ends here. Our work carries on.",
-      "routeNote": "Keep right and give other vehicles room. At the fork, the longer left road is firmer. Brake before the ruts."
+      "routeNote": "Keep right and give other vehicles room. At the fork, the longer left road is firmer. Brake before the ruts.",
+      "fact": {"figure": "25,000+", "title": "Thousands of clinics have no power.", "body": "An estimated 25,000 or more health facilities in sub-Saharan Africa have no electricity at all—making even basic lighting a challenge.", "source": "WHO, World Bank, IRENA & SEforALL · Energizing Health (2023)", "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"}
     },
     {
       "id": "nganga-tsanga",
@@ -34,7 +35,8 @@
       "projectNote": "The clinic has been visited and documented. Final solar system sizing and the installation schedule are still to be confirmed.",
       "opening": "Welcome to Nganga Tsanga. Our eye clinic is preparing for its next solar chapter. In this story, you are bringing the kit to our receiving team. The rain will ask you to slow down. Leave room for other vehicles, choose the firmer road, and keep the panels secure. We will be ready when you arrive.",
       "closing": "You made it through the rain, and the kit is safely with the team. Thank you for your careful delivery. A journey like this is one part of a much longer effort. Take a breath. The next clinic is waiting.",
-      "routeNote": "Rain makes the short route muddy. Brake early, steer gently and take the longer left ridge for firmer ground."
+      "routeNote": "Rain makes the short route muddy. Brake early, steer gently and take the longer left ridge for firmer ground.",
+      "fact": {"figure": "About half", "title": "Having electricity doesn’t mean you can count on it.", "body": "Only about half of health facilities in sub-Saharan Africa have reliable electricity. Outages can interrupt care when patients need it most.", "source": "WHO, World Bank, IRENA & SEforALL · Energizing Health (2023)", "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"}
     },
     {
       "id": "nsioni",
@@ -50,7 +52,8 @@
       "projectNote": "The clinic has been visited and photographed. Final solar system sizing, installation scheduling and exact location are awaiting confirmation.",
       "opening": "Welcome to Nsioni. Our eye clinic has been documented for a future solar project. Tonight, in this story, your task is to bring the kit to our team. Watch the river crossing. Wait until the way is clear, or take the longer ridge road. A careful arrival is what matters.",
       "closing": "The crossing is behind you. The kit has reached our receiving team. Thank you for taking care of it, and of everyone sharing the road. This journey is complete. We will carry the work forward.",
-      "routeNote": "The damaged bridge has a narrow marked lane. Stay centred and below 20 km/h, or take the left ridge bypass. Wait for crossing traffic."
+      "routeNote": "The damaged bridge has a narrow marked lane. Stay centred and below 20 km/h, or take the left ridge bypass. Wait for crossing traffic.",
+      "fact": {"figure": "~1 billion", "title": "Nearly a billion people are affected worldwide.", "body": "Across low- and lower-middle-income countries, almost one billion people depend on health facilities with unreliable electricity—or none at all.", "source": "WHO, World Bank, IRENA & SEforALL · Energizing Health (2023)", "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"}
     },
     {
       "id": "kiobo-kwimba",
@@ -66,7 +69,8 @@
       "projectNote": "The exterior and treatment rooms have been documented. Final solar system sizing and installation scheduling are the next steps.",
       "opening": "Welcome to Kiobo Kwimba. Our clinic is preparing for its next solar chapter. In this story, you carry the battery and panels through the night. Keep a steady pace, follow the reflectors, and use the firm route when you need it. We will meet you in the courtyard.",
       "closing": "Your headlights brought the team to the courtyard. Now the kit is here, safe and ready for the handover. Thank you for making the journey with such care. Rest a moment before the final road ahead.",
-      "routeNote": "Fog and darkness shorten your view. Follow the reflectors, slow before blind bends and leave space beside the cliff edge."
+      "routeNote": "Fog and darkness shorten your view. Follow the reflectors, slow before blind bends and leave space beside the cliff edge.",
+      "fact": {"figure": null, "title": "Electricity powers much more than lights.", "body": "Reliable power helps health workers deliver babies safely, keep vaccines refrigerated, run medical equipment, and respond to emergencies.", "source": "WHO, World Bank, IRENA & SEforALL · Energizing Health (2023)", "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"}
     },
     {
       "id": "mont-sinai",
@@ -82,7 +86,9 @@
       "projectNote": "The hospital has been visited and photographed. The rooms and equipment to power must be confirmed before final sizing and installation.",
       "opening": "Welcome to Mont Sinai, in Boma. This is your final delivery in the story. The hospital team is waiting to receive the kit. Read the road, give yourself room, and protect the battery and panels all the way into the courtyard. One more careful journey. We will take it from there.",
       "closing": "The kit has reached the team. Thank you for every careful choice along the way. You brought the battery and panels safely to the courtyard. The clinic teams carry the work forward. For now, take a breath, and enjoy the light.",
-      "routeNote": "Read the flood markers and brake before rough ground. Take the firmer bypass when the low road looks difficult. Protect the kit to the last bend."
+      "routeNote": "Read the flood markers and brake before rough ground. Take the firmer bypass when the low road looks difficult. Protect the kit to the last bend.",
+      "fact": {"figure": null, "title": "A clinic doesn’t have to wait for the power grid.", "body": "Solar panels paired with battery storage can power remote clinics—and keep essential services running after sunset.", "source": "WHO, World Bank, IRENA & SEforALL · Energizing Health (2023)", "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"}
     }
-  ]
+  ],
+  "help": {"title": "Here’s how you can help our real-world team", "href": "/campaigns/power-drc-clinics#donate"}
 }

@@ -13,7 +13,8 @@ import { creekAt, onPlank, roadSections, sectionEnvelope } from './road-sections
 
 /** Revision 6: every chapter has its own road, places and signature moments. */
 export const ROAD_REVISION = 6;
-export const RESTORE_DURATION = 18;
+/** Length of the arrival cinematic (see arrival.ts). */
+export const RESTORE_DURATION = 32;
 export const TUNING = {
   speed: 22.2, // 80 km/h on firm, visible road; curves still require braking.
   mudSpeed: 10.5,
