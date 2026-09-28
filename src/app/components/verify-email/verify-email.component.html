@@ -1,3 +1,4 @@
+<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>Your Last Light journey is saved.</strong><span>Finish signing in to return to your chapter.</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">Back to your saved game →</a></aside>
 <app-navbar></app-navbar>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">

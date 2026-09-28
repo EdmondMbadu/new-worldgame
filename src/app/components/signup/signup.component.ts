@@ -1,3 +1,4 @@
+import { clearAuthReturn, captureAuthReturn, gameAuthReturn } from 'src/app/services/auth-return';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
@@ -9,6 +10,8 @@ import { AuthService } from 'src/app/services/auth.service';
     standalone: false
 })
 export class SignupComponent implements OnInit {
+  cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
+  gameReturnUrl = gameAuthReturn();
   email: string = '';
   password: string = '';
   firstName: string = '';
@@ -28,7 +31,10 @@ export class SignupComponent implements OnInit {
   formLoadTime: number = 0; // Track when form loaded
 
   ngOnInit(): void {
+    const destination = captureAuthReturn();
+    if (destination) this.auth.setRedirectUrl(destination);
     window.scroll(0, 0);
+    if (this.gameReturnUrl) this.goal = 'Play Last Light, save my progress, and join the player leaderboard.';
     this.formLoadTime = Date.now(); // Record form load time
   }
   constructor(private auth: AuthService, private router: Router) {}
@@ -149,17 +155,13 @@ export class SignupComponent implements OnInit {
       if (outcome.status === 'recovered-verified') {
         await this.router.navigate(['/login'], {
           queryParams: {
+            redirectTo: captureAuthReturn(),
             accountRecovered: outcome.profileRepaired ? 'repaired' : 'verified',
           },
         });
       } else {
         await this.router.navigate(['/verify-email'], {
-          queryParams:
-            outcome.status === 'recovered-unverified'
-              ? {
-                  recovered: outcome.profileRepaired ? 'repaired' : 'existing',
-                }
-              : undefined,
+          queryParams: { redirectTo: captureAuthReturn(), ...(outcome.status === 'recovered-unverified' ? { recovered: outcome.profileRepaired ? 'repaired' : 'existing' } : {}) },
         });
       }
     } catch (error: any) {

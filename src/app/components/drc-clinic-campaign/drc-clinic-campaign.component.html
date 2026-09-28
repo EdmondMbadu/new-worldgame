@@ -11,6 +11,7 @@
     <nav [attr.aria-label]="tr('Project sections', 'Sections du projet')">
       <a href="#video" (click)="scrollToSection('video', $event)">{{ tr('Watch', 'Voir') }}</a>
       <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">{{ tr('Work completed', 'Travaux réalisés') }}</a>
+      <a href="#team" (click)="scrollToSection('team', $event)">{{ tr('Meet the team', 'L’équipe') }}</a>
       <a href="#geography" (click)="scrollToSection('geography', $event)">{{ tr('DRC map', 'Carte RDC') }}</a>
       <a href="#clinics" (click)="scrollToSection('clinics', $event)">{{ tr('10 clinics ready', '10 centres prêts') }}</a>
       <a href="#ledger" (click)="scrollToSection('ledger', $event)">{{ tr('Budget', 'Budget') }}</a>
@@ -187,6 +188,20 @@
         <i aria-hidden="true">↗</i>
       </a>
     </div>
+  </section>
+
+  <section id="team" class="chapter team-section" aria-labelledby="team-title">
+    <div class="team-heading">
+      <div><p class="eyebrow">{{ tr('THE PEOPLE BEHIND THE POWER', 'LES PERSONNES DERRIÈRE LE PROJET') }}</p>
+      <h2 id="team-title">{{ tr('Real people. Lasting light.', 'Des personnes engagées. Une lumière durable.') }}</h2></div>
+      <p>{{ tr('Meet the DRC Health Clinic Electrification Team, working to bring solar power to health clinics in the Democratic Republic of the Congo.', 'Découvrez l’équipe d’électrification des centres de santé en RDC, mobilisée pour apporter l’énergie solaire aux établissements de santé de la République démocratique du Congo.') }}</p>
+    </div>
+    <div class="team-gallery">
+      <figure class="team-portrait"><img src="assets/campaigns/drc-clinics/team/team-portrait.jpg" width="1280" height="960" loading="lazy" decoding="async" [alt]="tr('Members of the DRC Health Clinic Electrification Team together', 'Des membres de l’équipe d’électrification des centres de santé en RDC réunis')"><figcaption>{{ tr('The people behind the project', 'Les personnes derrière le projet') }}</figcaption></figure>
+      <figure class="team-working"><img src="assets/campaigns/drc-clinics/team/team-at-work.jpg" width="1280" height="960" loading="lazy" decoding="async" [alt]="tr('Team members working together around a table with laptops', 'Des membres de l’équipe travaillent ensemble autour d’une table avec des ordinateurs')"><figcaption>{{ tr('Working together, from planning to delivery', 'Ensemble, de la préparation à la réalisation') }}</figcaption></figure>
+    </div>
+    <div class="team-credits"><p class="eyebrow">{{ tr('PROJECT TEAM', 'ÉQUIPE DU PROJET') }}</p><p>Nicholson Thamba Vuadi <span>·</span> Yves Thamba <span>·</span> Augustin Phambu <span>·</span> Blessing Nguama <span>·</span> Peter Kamango <span>·</span> Clayton Nzau <span>·</span> Isaac Tembo <span>·</span> Mysterdie Nzinga <span>·</span> Francis Thamba</p></div>
+    <div class="team-actions"><p>{{ tr('Last Light draws inspiration from this real work. Your game score records a fictional delivery; contributions support the real campaign.', 'Last Light s’inspire de ce travail réel. Votre score représente une livraison fictive ; les contributions soutiennent la véritable campagne.') }}</p><div><a [href]="solutionUrl" class="team-link">{{ tr('Read the full project', 'Découvrir le projet complet') }} ↗</a><a href="#donate" (click)="scrollToSection('donate', $event)" class="team-link team-link-primary">{{ tr('Contribute to the real project', 'Contribuer au projet réel') }} →</a></div></div>
   </section>
 
   <section id="geography" class="chapter geography-section">

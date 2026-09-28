@@ -16,6 +16,7 @@
   //      "collectionGroup": "widgets",
   //      "fieldPath": "baz",
   //      "indexes": [
+    {"collectionGroup":"players","queryScope":"COLLECTION","fields":[{"fieldPath":"searchName","order":"ASCENDING"},{"fieldPath":"rankKey","order":"ASCENDING"}]},
   //        { "order": "ASCENDING", "queryScope": "COLLECTION" }
   //      ]
   //    },
@@ -90,5 +91,8 @@
       ]
     }
   ],
-  "fieldOverrides": []
+  "fieldOverrides": [
+    {"collectionGroup":"lastLightRuns","fieldPath":"expiresAt","ttl":true,"indexes":[]},
+    {"collectionGroup":"lastLightLimits","fieldPath":"expiresAt","ttl":true,"indexes":[]}
+  ]
 }

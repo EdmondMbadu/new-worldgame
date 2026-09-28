@@ -1,3 +1,4 @@
+import { clearAuthReturn, gameAuthReturn } from 'src/app/services/auth-return';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
@@ -9,6 +10,9 @@ import { AuthService } from 'src/app/services/auth.service';
     standalone: false
 })
 export class ForgotPasswordComponent {
+  cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
+  gameReturnUrl = gameAuthReturn();
+  resetNotice = '';
   myForm: FormGroup;
   loading: boolean = false;
   constructor(public auth: AuthService, private fb: FormBuilder) {
@@ -16,9 +20,12 @@ export class ForgotPasswordComponent {
       email: ['', [Validators.required, Validators.email]],
     });
   }
-  restorePassword() {
-    console.log('display email to restore', this.myForm.value.email);
-    this.auth.forgotPassword(this.myForm.value.email);
+  async restorePassword() {
+    if (this.myForm.invalid || this.loading) { this.myForm.markAllAsTouched(); return; }
+    this.loading = true;
+    try { await this.auth.forgotPassword(this.myForm.value.email); this.resetNotice = 'Reset instructions have been requested. Check your inbox, then return to log in.'; }
+    catch { this.resetNotice = 'Unable to send reset instructions. Please try again.'; }
+    finally { this.loading = false; }
   }
   get email() {
     return this.myForm.get('email');

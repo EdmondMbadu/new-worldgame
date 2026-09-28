@@ -1,3 +1,6 @@
+import { CompletionCommunity, Leaderboard, RealProjectCard } from './CommunityPanel';
+import { beginRun, finishRun, useCommunity, syncProgress, publishPending } from './community';
+import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
 import { routePoint } from "./routes";
 import {
   useEffect,
@@ -374,10 +377,23 @@ function SettingsPanel({
 }
 
 export default function App() {
-  const [save, setSave] = useState(readSave),
-    [selected, setSelected] = useState(0),
-    [variant, setVariant] = useState(0),
-    [inGame, setInGame] = useState(false),
+  const [checkpoint] = useState(() => readCheckpoint());
+  const [challenge] = useState(() => invitation());
+  const restore = useRef(checkpoint);
+  const community = useCommunity();
+  const [handoffError, setHandoffError] = useState(() => new URLSearchParams(location.search).has('resume') && !checkpoint ? 'This return point is not available in this browser. Open the original game tab, or choose a chapter here. Signed-in progress will load when connected.' : '');
+  const connectedOwner = useRef<string | null | undefined>(undefined);
+  const claimedCheckpoint = useRef(false);
+  const synced = useRef('');
+  const [save, setSave] = useState(() => {
+    const initial = readSave();
+    if (checkpoint) initial.settings = { ...checkpoint.save.settings };
+    initial.settings.mode = checkpoint?.mode || challenge?.mode || initial.settings.mode;
+    return initial;
+  }),
+    [selected, setSelected] = useState(checkpoint?.mission ?? challenge?.mission ?? 0),
+    [variant, setVariant] = useState(checkpoint?.variant ?? challenge?.variant ?? 0),
+    [inGame, setInGame] = useState(!!checkpoint),
     [opening, setOpening] = useState(false),
     [previewPaused, setPreviewPaused] = useState(false),
     [run, setRun] = useState(0),
@@ -421,6 +437,45 @@ export default function App() {
     }
     setStorageOk(writeSave(save));
   }, [save]);
+  useEffect(() => {
+    if (community.status === 'loading' || community.status === 'unavailable') return;
+    const uid = community.player?.uid || null;
+    if (connectedOwner.current !== uid) {
+      connectedOwner.current = uid;
+      synced.current = '';
+      setSave(previous => ({...readSave(uid || undefined), settings:previous.settings}));
+    }
+    if (checkpoint && !claimedCheckpoint.current) {
+      if (checkpoint.owner && checkpoint.owner !== uid) {
+        if (uid) { restore.current = null; setInGame(false); setHandoffError('This saved chapter belongs to another account. Its scores have not been copied.'); }
+      } else if (uid) {
+        const claimedBy = load<string | null>('last-light.guest-claimed', null);
+        const claimedResults = claimGuestRuns(uid);
+        setSave(previous => mergeProgress(previous, claimedResults));
+        if (checkpoint.owner === uid || !claimedBy || claimedBy === uid) {
+          persist('last-light.guest-claimed', uid);
+          setSave(previous => mergeProgress(previous, Object.values(checkpoint.save.story.best)));
+        }
+        claimedCheckpoint.current = true;
+        void publishPending();
+      } else {
+        setSave(previous => mergeProgress(previous, Object.values(checkpoint.save.story.best)));
+      }
+    }
+    if (community.player) setSave(previous => mergeProgress(previous,Object.values(community.player!.best)));
+  }, [community.status, community.player?.uid, community.player?.best, checkpoint]);
+  useEffect(() => {
+    if (!community.player || save.owner !== community.player.uid) return;
+    const signature = JSON.stringify(save.story.best);
+    if (signature === synced.current) return;
+    const timer = setTimeout(() => { synced.current = signature; void syncProgress(Object.values(save.story.best)).catch(() => { synced.current = ''; }); }, 800);
+    return () => clearTimeout(timer);
+  }, [save.story.best, save.owner, community.player?.uid]);
+  useEffect(() => {
+    const retry = () => { void publishPending(); synced.current = ''; setSave(s => ({...s,story:{...s.story,best:{...s.story.best}}})); };
+    window.addEventListener('online',retry);
+    return () => window.removeEventListener('online',retry);
+  }, []);
   // While the menu is open, fetch what the first drive needs, so pressing
   // Begin on a slow connection does not start from zero. Data saver skips it.
   useEffect(() => {
@@ -456,7 +511,7 @@ export default function App() {
       raf = 0,
       last = 0,
       hudTime = 0,
-      committed = false;
+      committed = false, failedCommitted = false;
     setReady(false);
     setError("");
     setLoading("Preparing the road");
@@ -490,6 +545,26 @@ export default function App() {
           missionVariant(MISSIONS[selected], variant),
           settingsRef.current.mode,
         );
+        if (restore.current) {
+          const saved = restore.current;
+          if (!sound.current) sound.current = new Soundtrack(settingsRef.current,CLINICS[selected]);
+          if (saved.result) {
+            const point = routePoint(instance.mission,instance.mission.length);
+            instance.body.setTranslation({...point,y:point.y+1.05},true);
+            instance.position = {...point,y:point.y+1.05};
+            instance.previousPosition = {...point,y:point.y+1.05};
+            instance.roadPosition = {x:0,z:instance.mission.length};
+            instance.progress = instance.mission.length;
+            instance.distance = 0;
+            instance.time = saved.result.remaining;
+            instance.integrity = saved.result.integrity;
+            instance.result = saved.result;
+            instance.restoreTime = 18;
+            instance.phase = 'results';
+          } else { instance.phase = 'failed'; instance.failure = saved.failure || 'Try this delivery again.';
+            instance.safeZ = Number.isFinite(saved.safeZ) ? Math.max(8,Math.min(instance.mission.length,saved.safeZ!)) : 8; instance.safeAlt = saved.safeAlt === true; failedCommitted = true; }
+          committed = true;
+        }
         engine.current = instance;
         setLoading("Bringing the valley to life");
         await new Promise<void>((resolve) =>
@@ -542,7 +617,19 @@ export default function App() {
           const physicsMs = performance.now() - stepStart;
           if (instance.result && !committed) {
             committed = true;
-            setSave((s) => recordResult(s, instance.result!));
+            const owner = finishRun(instance.result!);
+            const next = recordResult(owner === (saveRef.current.owner || null) ? saveRef.current : readSave(owner || undefined),instance.result!);
+            writeSave(next);
+            setSave(s => owner === (s.owner || null) ? recordResult(s,instance.result!) : s);
+            if (!instance.result!.practice) {
+              const href = checkpointHref({mission:selected,variant,mode:instance.mode,result:instance.result!,owner:owner || null,save:next});
+              if(href) history.replaceState(null,'',href + (qa ? '&qa=1' : ''));
+            }
+          }
+          if (instance.phase === 'failed' && !failedCommitted) {
+            failedCommitted = true;
+            const href = checkpointHref({mission:selected,variant,mode:instance.mode,failure:instance.failure,safeZ:instance.safeZ,safeAlt:instance.safeAlt,owner:saveRef.current.owner||null,save:saveRef.current});
+            if(href) history.replaceState(null,'',href + (qa ? '&qa=1' : ''));
           }
           const preview = openingRef.current && !settingsRef.current.reducedMotion;
           const visible = document.visibilityState !== 'hidden' && document.hasFocus();
@@ -644,6 +731,10 @@ export default function App() {
   }, [inGame, run]);
   useEffect(() => () => sound.current?.dispose(), []);
   const start = (id = selected) => {
+    restore.current = null;
+    setHandoffError('');
+    history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
+    beginRun(id,settingsRef.current.mode,variant);
     if (sound.current) sound.current.beginChapter(CLINICS[id]);
     else sound.current = new Soundtrack(settingsRef.current, CLINICS[id]);
     openingRef.current = true;
@@ -664,6 +755,8 @@ export default function App() {
     setAutopilot(false);
   };
   const home = () => {
+    restore.current = null;
+    history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
     sound.current?.dispose();
     sound.current = null;
     openingRef.current = false;
@@ -678,6 +771,22 @@ export default function App() {
     controls.current?.clear();
     sound.current?.silence();
     setShowSettings(true);
+  };
+  const authHandoff = (page:'login'|'signup'|'verify-email') => {
+    const instance = engine.current;
+    if (!instance?.result && instance?.phase !== 'failed') return;
+    const href = checkpointHref({mission:selected,variant,mode:instance.mode,
+      result:instance?.result || undefined, failure:instance?.phase === 'failed' ? instance.failure : undefined,
+      safeZ:instance?.safeZ,safeAlt:instance?.safeAlt,owner:saveRef.current.owner || null,save:saveRef.current});
+    if (!href || !writeSave(saveRef.current)) {
+      setHandoffError('Your browser cannot save a return point. Keep this game open and continue as a guest; enable browser storage before signing in.');
+      return;
+    }
+    sound.current?.silence();
+    try { sessionStorage.setItem('redirectTo',href); } catch { /* The URL carries the same destination. */ }
+    const target = `/${page}?redirectTo=${encodeURIComponent(href)}`;
+    if (window.top && window.top !== window) window.top.location.assign(target);
+    else window.location.assign(target);
   };
   const returnHref = "/games";
   const result = e?.result;
@@ -805,7 +914,7 @@ export default function App() {
             </div>
             <div className="chapters">
               {MISSIONS.map((m, i) => {
-                const open = unlocked(save, i),
+                const open = unlocked(save, i) || challenge?.mission === i || checkpoint?.mission === i,
                   best = save.story.best[bestKey(i, save.settings.mode, variant)];
                 return (
                   <button
@@ -834,6 +943,9 @@ export default function App() {
               })}
             </div>
           </section>
+          {handoffError && <p className="challenge-welcome" role="status">{handoffError}</p>}
+          {challenge && <aside className="challenge-welcome"><strong>You’re invited to chapter {challenge.mission+1}: {CLINICS[challenge.mission].shortName}.</strong><p>Try the same {challenge.mode} delivery on the {challenge.variant ? 'alternate' : 'original'} route. This invitation opens this chapter; earlier chapters still count only when you complete them.</p></aside>}
+          <section className="home-community" aria-label="The players and the real project"><Leaderboard mission={selected} mode={save.settings.mode} variant={variant}/><RealProjectCard/></section>
           <footer className="home-footer">
             <a href="/games/lost-in-orbit/" target="_top">
               ← Adventure 01 · Lost in Orbit
@@ -870,6 +982,8 @@ export default function App() {
               }}
               onTouch={() => setTouch(!touch)} touch={touch} ready={ready} loading={loading}
               completed={save.story.completed} result={opening ? undefined : result || undefined}
+              continueLabel={!opening && !result?.practice && !community.player ? selected < 4 ? 'Continue as guest · next clinic' : 'Continue as guest · chapter map' : undefined}
+              community={!opening && result ? <><CompletionCommunity result={result} onAuth={authHandoff}/>{handoffError && <p role="alert">{handoffError}</p>}</> : undefined}
             />
           )}
           {!ready && !error && !opening && (
@@ -1162,6 +1276,8 @@ export default function App() {
                     >
                       Practice from checkpoint · no score saved
                     </button>
+                    {!community.player && <button className="text-button" onClick={() => authHandoff('login')}>Save your journey · log in</button>}
+                    {handoffError && <p role="alert">{handoffError}</p>}
                     <button className="text-button" onClick={home}>
                       Chapter map
                     </button>

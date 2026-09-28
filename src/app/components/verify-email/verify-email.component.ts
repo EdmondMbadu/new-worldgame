@@ -1,3 +1,4 @@
+import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn } from 'src/app/services/auth-return';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
@@ -9,6 +10,8 @@ import { AuthService } from 'src/app/services/auth.service';
     standalone: false
 })
 export class VerifyEmailComponent implements OnInit {
+  cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
+  gameReturnUrl = gameAuthReturn();
   redirectTarget = '/home';
   checking = false;
   errorMessage = '';
@@ -22,10 +25,7 @@ export class VerifyEmailComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     window.scroll(0, 0);
-    const qp = this.route.snapshot.queryParamMap.get('redirectTo');
-    if (qp && qp.startsWith('/')) {
-      this.redirectTarget = qp;
-    }
+    this.redirectTarget = captureAuthReturn() || '/home';
     const recoveryState = this.route.snapshot.queryParamMap.get('recovered');
     if (recoveryState === 'repaired') {
       this.recoveryNotice =
@@ -50,7 +50,7 @@ export class VerifyEmailComponent implements OnInit {
       const isVerified = await this.auth.syncEmailVerified();
       if (isVerified) {
         // Email is verified, redirect to target
-        this.router.navigateByUrl(this.redirectTarget);
+        navigateAuthReturn(this.router, this.redirectTarget);
       }
     } catch (error) {
       console.error('Error checking verification:', error);
@@ -69,7 +69,7 @@ export class VerifyEmailComponent implements OnInit {
     try {
       const isVerified = await this.auth.syncEmailVerified();
       if (isVerified) {
-        this.router.navigateByUrl(this.redirectTarget);
+        navigateAuthReturn(this.router, this.redirectTarget);
       } else {
         this.errorMessage =
           'Your email has not been verified yet. Please check your inbox and click the verification link.';

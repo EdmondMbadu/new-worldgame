@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn } from 'src/app/services/auth-return';
+import { Subscription } from 'rxjs';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import {
   FormGroup,
@@ -16,7 +18,11 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
     styleUrls: ['./login.component.css'],
     standalone: false
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
+  cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
+  gameReturnUrl = gameAuthReturn();
+  private authSubscription?: Subscription;
+  ngOnDestroy() { this.authSubscription?.unsubscribe(); }
   myForm: FormGroup;
   loading: boolean = false;
   accountNotice: string = '';
@@ -33,27 +39,14 @@ export class LoginComponent implements OnInit {
         'Your account is already created and verified, and its profile is ready. Sign in to continue.';
     }
 
-    // If someone lands on /login?redirectTo=... (from a public page or bookmark),
-    // capture it for AuthService and for refresh resilience.
-    const qp = this.route.snapshot.queryParamMap.get('redirectTo');
-    if (qp) {
-      this.auth.setRedirectUrl(qp);
-      sessionStorage.setItem('redirectTo', qp);
-    } else {
-      // If the guard already set session storage and user refreshed on /login
-      const ss = sessionStorage.getItem('redirectTo');
-      if (ss) this.auth.setRedirectUrl(ss);
-    }
-
-    // Check if user is already logged in and redirect if needed
-    this.afAuth.authState.subscribe(user => {
-      if (user && (qp || sessionStorage.getItem('redirectTo'))) {
-        // User is already logged in and has a redirect URL, so redirect them
-        const redirectUrl = qp || sessionStorage.getItem('redirectTo');
-        if (redirectUrl) {
-          sessionStorage.removeItem('redirectTo'); // Clean up
-          this.router.navigateByUrl(redirectUrl);
-        }
+    const destination = captureAuthReturn();
+    if (destination) this.auth.setRedirectUrl(destination);
+    // Do not race interactive sign-in or bypass email verification.
+    this.authSubscription = this.afAuth.authState.subscribe(user => {
+      if (user && destination && !this.loading) {
+        const verified = user.emailVerified || user.providerData.some(p => !!p?.providerId && p.providerId !== 'password');
+        if (verified) navigateAuthReturn(this.router, destination);
+        else this.router.navigate(['/verify-email'], {queryParams:{redirectTo:destination}});
       }
     });
   }

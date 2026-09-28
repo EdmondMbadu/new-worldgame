@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { CAMPAIGN_HREF, CLINICS, STORY_DISCLOSURE, type ClinicStory, type StoryScene } from './clinic-stories';
 import type { NarrationState } from './narration';
 import type { Settings } from './save';
@@ -10,6 +10,8 @@ import { OPENING_STORIES } from './opening-story';
 import './clinic-story.css';
 
 type Props = {
+  community?: ReactNode;
+  continueLabel?: string;
   clinic: ClinicStory;
   chapter: number;
   scene: StoryScene;
@@ -93,8 +95,9 @@ export function ClinicStoryView(p: Props) {
           </>}
 
           <button className="primary story-primary" onClick={p.onContinue} disabled={opening && !p.ready}>
-            <span>{opening ? p.ready ? 'Start delivery' : `${p.loading || 'Preparing the road'}…` : result?.practice ? 'Start a full delivery' : p.chapter < 4 ? 'Next clinic' : 'Return to chapter map'}</span><span aria-hidden="true">→</span>
+            <span>{p.continueLabel || (opening ? p.ready ? 'Start delivery' : `${p.loading || 'Preparing the road'}…` : result?.practice ? 'Start a full delivery' : p.chapter < 4 ? 'Next clinic' : 'Return to chapter map')}</span><span aria-hidden="true">→</span>
           </button>
+          {!opening && p.community}
           {opening && <p className="story-clock-note">The clock starts when you {p.touch ? 'hold Drive' : 'begin to drive'}. Take a moment to get ready.</p>}
           {opening ? <>
             <DrivingGuide settings={settings} touch={p.touch} />

@@ -1,0 +1,329 @@
+.community-account,
+.community-board,
+.invite-friends,
+.real-project {
+  color: #e9eee9;
+  background: rgba(13, 28, 29, 0.94);
+  border: 1px solid #a9bead35;
+  border-radius: 15px;
+  padding: 22px;
+  margin: 18px 0;
+}
+.completion-community {
+  margin: 22px 0;
+}
+.completion-community h3,
+.community-board h3,
+.real-project h3 {
+  font-size: 1.35rem;
+  line-height: 1.2;
+  margin: 9px 0;
+  font-family: inherit;
+}
+.community-account p,
+.invite-friends p,
+.real-project p {
+  color: #b9c7c0;
+  line-height: 1.55;
+  font-size: 14px;
+}
+.community-account small,
+.community-board > small,
+.invite-friends > small,
+.real-project small {
+  display: block;
+  color: #a6b7ae;
+  line-height: 1.5;
+  margin-top: 12px;
+  font-size: 12px;
+}
+.community-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 15px 0;
+}
+.community-account button,
+.community-actions button,
+.community-actions a,
+.community-board button,
+.leaderboard-dialog button {
+  background: #f0cc86;
+  color: #172724;
+  border: 1px solid #c7b687;
+  padding: 11px 15px;
+  border-radius: 7px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  min-height: 44px;
+}
+.community-actions a,
+.community-board button {
+  background: transparent;
+  color: #f0cc86;
+  border-color: #a9bead50;
+}
+.community-account form {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.community-account label,
+.share-link-label {
+  display: grid;
+  gap: 7px;
+  color: #c2cfc5;
+  font-size: 12px;
+}
+.community-account input,
+.share-link-label input {
+  background: #081917;
+  color: #eef4ed;
+  border: 1px solid #a0b5a666;
+  border-radius: 6px;
+  padding: 12px;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+.share-link-label {
+  margin: 14px 0;
+}
+.community-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+.community-title .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.leaderboard-rows {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+}
+.leaderboard-rows li {
+  display: grid;
+  grid-template-columns: 38px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 62px;
+  border-top: 1px solid #b6c5b420;
+  padding: 9px 4px;
+}
+.leaderboard-rows strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.leaderboard-rows li > span > small,
+.leaderboard-rows b > small {
+  display: block;
+  color: #9eb3a5;
+  font-size: 10px;
+  font-weight: 400;
+  margin-top: 3px;
+}
+.leaderboard-rows b {
+  text-align: right;
+  color: #f1d196;
+  font-variant-numeric: tabular-nums;
+  font-size: 17px;
+}
+.board-rank {
+  color: #beceb8;
+  font-size: 17px;
+}
+.leaderboard-rows .is-you {
+  background: #efd0970e;
+  border-radius: 5px;
+}
+.board-own {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #f0cc8650;
+  padding: 12px;
+  border-radius: 7px;
+  font-size: 13px;
+}
+.board-own span {
+  margin-left: auto;
+}
+.board-empty {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #b5c4b9;
+  padding: 10px 0;
+}
+.real-project {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 20px;
+}
+.real-project img {
+  width: 100%;
+  height: auto;
+  border-radius: 9px;
+  filter: saturate(0.93);
+}
+.real-project h3 {
+  font-size: 1.15rem;
+}
+.real-project .community-actions a {
+  font-size: 12px;
+  padding: 8px 10px;
+}
+.home-community {
+  position: relative;
+  z-index: 2;
+  margin: 25px 5vw;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.home-community .real-project {
+  grid-template-columns: 1fr;
+}
+.home-community .real-project img {
+  max-height: 220px;
+  object-fit: cover;
+  object-position: center 35%;
+}
+.challenge-welcome {
+  position: relative;
+  z-index: 3;
+  margin: 20px 5vw;
+  padding: 20px;
+  background: #193530;
+  border: 1px solid #ecd19855;
+  border-radius: 12px;
+  color: #eee5d1;
+}
+.leaderboard-dialog {
+  padding: 0;
+  border: 1px solid #677d66;
+  border-radius: 20px;
+  width: min(740px, calc(100vw - 28px));
+  max-height: 90dvh;
+  color: #eef1e9;
+  background: linear-gradient(145deg, #203a33, #102320 55%);
+  box-shadow: 0 30px 100px #000a;
+}
+.leaderboard-dialog::backdrop {
+  background: #03100cba;
+  backdrop-filter: blur(8px);
+}
+.board-dialog-content {
+  padding: 32px;
+}
+.board-dialog-content header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+.board-dialog-content h2 {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(26px, 5vw, 40px);
+  margin: 12px 0 20px;
+}
+.board-dialog-content p,
+.board-dialog-content > small {
+  color: #afc2b4;
+  font: 14px/1.6 system-ui;
+}
+.leaderboard-dialog .board-close {
+  background: #ffffff0a;
+  color: #f0dbb3;
+  border-color: #ffffff30;
+  font-size: 25px;
+  padding: 5px 14px;
+}
+.board-filters {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 10px;
+  margin: 20px 0;
+}
+.board-filters label,
+.board-search {
+  display: grid;
+  gap: 7px;
+  font: 12px/1.5 system-ui;
+  color: #cfdbd1;
+}
+.board-filters select,
+.board-search input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #809e8270;
+  background: #10261e;
+  color: #edf2e8;
+  padding: 12px 9px;
+  border-radius: 7px;
+  font: 14px system-ui;
+}
+.board-body {
+  min-height: 150px;
+}
+.board-count {
+  font-size: 12px !important;
+}
+.board-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  font: 12px system-ui;
+}
+.leaderboard-dialog button:disabled,
+.community-account button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.community-account :focus-visible,
+.community-board :focus-visible,
+.real-project :focus-visible,
+.leaderboard-dialog :focus-visible,
+.invite-friends :focus-visible {
+  outline: 3px solid #f3d28f;
+  outline-offset: 4px;
+}
+@media (max-width: 760px) {
+  .home-community {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 15px 20px;
+  }
+  .real-project {
+    grid-template-columns: 1fr;
+  }
+  .real-project img {
+    max-height: 210px;
+    object-fit: cover;
+  }
+  .board-dialog-content {
+    padding: 20px;
+  }
+  .board-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+  .board-filters label:first-child {
+    grid-column: 1/-1;
+  }
+  .community-account,
+  .community-board,
+  .invite-friends,
+  .real-project {
+    padding: 18px;
+  }
+}

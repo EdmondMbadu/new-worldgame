@@ -50,6 +50,7 @@ interface ClinicProfile {
     './drc-clinic-campaign.power.css',
     './drc-clinic-campaign.donation.css',
     './drc-clinic-campaign.clinics.css',
+    './drc-clinic-campaign.team.css',
   ],
   standalone: false,
 })
@@ -522,6 +523,9 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       void this.renderDrcMap();
+      if (['#team', '#donate'].includes(location.hash)) {
+        requestAnimationFrame(() => document.getElementById(location.hash.slice(1))?.scrollIntoView());
+      }
     }
   }
 

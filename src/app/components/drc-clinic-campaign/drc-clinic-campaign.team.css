@@ -1,0 +1,106 @@
+.team-section {
+  scroll-margin-top: 90px;
+}
+.team-heading {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 3rem;
+  align-items: end;
+  margin-bottom: 2rem;
+}
+.team-heading h2 {
+  max-width: 650px;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+}
+.team-heading > p,
+.team-actions > p {
+  color: #b1b9be;
+  line-height: 1.75;
+  max-width: 540px;
+}
+.team-gallery {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+.team-gallery figure {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #171d20;
+  border: 1px solid #ffffff18;
+}
+.team-gallery img {
+  width: 100%;
+  height: auto;
+  display: block;
+  filter: brightness(1.015) contrast(1.015) saturate(0.93);
+}
+.team-working {
+  margin-top: 3rem !important;
+}
+.team-gallery figcaption {
+  padding: 1rem 1.25rem;
+  color: #cad2d5;
+  font-size: 0.85rem;
+}
+.team-credits {
+  padding: 2rem 0;
+  border-bottom: 1px solid #ffffff20;
+}
+.team-credits > p:last-child {
+  max-width: 1020px;
+  font-size: 1.05rem;
+  line-height: 2;
+  color: #edf1ed;
+}
+.team-credits span {
+  color: #c4a365;
+  padding: 0 0.4rem;
+}
+.team-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+.team-actions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+.team-link {
+  padding: 0.85rem 1.1rem;
+  border: 1px solid #ffffff35;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: #eef2ee;
+}
+.team-link-primary {
+  background: #e9bb72;
+  color: #132323;
+  border-color: #e9bb72;
+}
+.team-link:focus-visible {
+  outline: 3px solid #e9bb72;
+  outline-offset: 4px;
+}
+@media (max-width: 760px) {
+  .team-heading,
+  .team-gallery {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .team-working {
+    margin-top: 0 !important;
+  }
+  .team-actions {
+    flex-direction: column;
+    align-items: start;
+  }
+}

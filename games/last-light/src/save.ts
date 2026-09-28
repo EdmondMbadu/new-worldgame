@@ -28,6 +28,7 @@ export type Settings = {
   keys: Record<string, string>;
 };
 export type Save = {
+  owner?: string;
   version: 1;
   completed: number[];
   best: Record<string, Result>;
@@ -168,16 +169,16 @@ export function parseSave(raw: string | null): Save {
     return base;
   }
 }
-export function readSave(): Save {
+export function readSave(owner?: string): Save {
   try {
-    return parseSave(localStorage.getItem('last-light.v1'));
+    return { ...parseSave(localStorage.getItem(owner ? `last-light.account.${owner}` : 'last-light.v1')), ...(owner ? {owner} : {}) };
   } catch {
-    return freshSave();
+    return { ...freshSave(), ...(owner ? {owner} : {}) };
   }
 }
 export function writeSave(save: Save) {
   try {
-    localStorage.setItem('last-light.v1', JSON.stringify(save));
+    localStorage.setItem(save.owner ? `last-light.account.${save.owner}` : 'last-light.v1', JSON.stringify(save));
     return true;
   } catch {
     return false;

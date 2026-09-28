@@ -20,7 +20,7 @@ export default defineConfig({
   },
   // Served as source in development, so the wasm alias above applies to it.
   optimizeDeps: { exclude: ['@dimforge/rapier3d'] },
-  server: { port: 5175, strictPort: true },
+  server: { port: 5175, strictPort: true, proxy: { '/assets/campaigns/': 'http://localhost:4200' } },
   build: {
     target: 'es2022',
     sourcemap: false,

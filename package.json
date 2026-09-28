@@ -22,7 +22,8 @@
     "start:last-light": "npm --prefix games/last-light run dev",
     "build:games": "npm run build:game && npm --prefix games/last-light run build",
     "test:last-light": "npm --prefix games/last-light test",
-    "test:games": "npm run test:game && npm run test:last-light"
+    "test:games": "npm run test:game && npm run test:last-light",
+    "test:last-light-community": "node scripts/test-last-light-community.mjs"
   },
   "private": true,
   "dependencies": {

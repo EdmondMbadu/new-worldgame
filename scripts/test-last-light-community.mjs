@@ -1,0 +1,18 @@
+import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, symlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const run=(command,args,options={})=>{const result=spawnSync(command,args,{cwd:root,stdio:'inherit',...options});if(result.error)throw result.error;if(result.status!==0)process.exit(result.status||1);};
+run('npm',['run','build','--prefix','functions']);
+const dir=mkdtempSync(path.join(tmpdir(),'last-light-emulator-'));
+mkdirSync(path.join(dir,'functions'));
+writeFileSync(path.join(dir,'functions/package.json'),JSON.stringify({main:'index.js',engines:{node:'22'}}));
+writeFileSync(path.join(dir,'functions/index.js'),`const admin=require('firebase-admin');admin.initializeApp();Object.assign(exports,require(${JSON.stringify(path.join(root,'functions/lib/last-light.js'))}));`);
+symlinkSync(path.join(root,'functions/node_modules'),path.join(dir,'functions/node_modules'),'dir');
+copyFileSync(path.join(root,'firestore.rules'),path.join(dir,'firestore.rules'));
+copyFileSync(path.join(root,'firestore.indexes.json'),path.join(dir,'firestore.indexes.json'));
+writeFileSync(path.join(dir,'firebase.json'),JSON.stringify({functions:{source:'functions'},firestore:{rules:'firestore.rules',indexes:'firestore.indexes.json'},emulators:{auth:{port:9106},functions:{port:5006},firestore:{port:8186},hub:{port:4406},logging:{port:4506},ui:{enabled:false},singleProjectMode:true}}));
+const quote=s=>`'${s.replaceAll("'", "'\\''")}'`;
+run('firebase',['emulators:exec','--config',path.join(dir,'firebase.json'),'--project','demo-last-light','--only','auth,firestore,functions',`${quote(process.execPath)} --test ${quote(path.join(root,'functions/test/last-light.integration.test.js'))}`],{env:{...process.env,LAST_LIGHT_EMULATOR_TEST:'1'}});

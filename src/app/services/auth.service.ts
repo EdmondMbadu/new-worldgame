@@ -1,3 +1,4 @@
+import { captureAuthReturn, gameAuthReturn, navigateAuthReturn, safeAuthReturn } from './auth-return';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
@@ -360,7 +361,8 @@ export class AuthService {
       const sendVerification = this.fns.httpsCallable(
         'sendBrandedVerificationEmail'
       );
-      await firstValueFrom(sendVerification({}));
+      const returnTo = gameAuthReturn();
+      await firstValueFrom(sendVerification(returnTo ? {returnTo, origin: window.location.origin} : {}));
     } catch (error) {
       if ((error as any)?.code === 'functions/resource-exhausted') {
         throw error;
@@ -372,7 +374,9 @@ export class AuthService {
         error
       );
       await user.sendEmailVerification({
-        url: 'https://newworld-game.org/verify-email?verified=1',
+        url: gameAuthReturn() && ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'].includes(window.location.origin)
+          ? `${window.location.origin}/verify-email?verified=1&redirectTo=${encodeURIComponent(gameAuthReturn()!)}`
+          : 'https://newworld-game.org/verify-email?verified=1',
       });
     }
   }
@@ -824,22 +828,8 @@ export class AuthService {
     }
   }
 
-  forgotPassword(email: string) {
-    this.fireauth
-      .sendPasswordResetEmail(email)
-      .then(
-        () => {
-          this.router.navigate(['verify-email']);
-        },
-        (err) => {
-          alert('Something went wrong');
-        }
-      )
-      .catch((error) => {
-        alert('Something went wrong');
-        this.router.navigate(['/']);
-        // ...
-      });
+  forgotPassword(email: string): Promise<void> {
+    return this.fireauth.sendPasswordResetEmail(email);
   }
   private col = this.afs.collection<DemoBooking>('demoBookings');
   /** Write one booking and return the document reference */
@@ -1059,7 +1049,8 @@ export class AuthService {
     if (!user) return false;
     await user.reload();
     if (!user.emailVerified) return false;
-    await this.markUserVerified(user.uid);
+    await user.getIdToken(true);
+    try { await this.markUserVerified(user.uid); } catch (error) { console.warn('Verified account profile sync will retry later.', error); }
     return true;
   }
 
@@ -1143,9 +1134,9 @@ export class AuthService {
         console.warn('Unable to sync verified profile flag:', user.uid, error);
       }
       const dest = this.popRedirect();
-      this.router.navigateByUrl(dest);
+      navigateAuthReturn(this.router, dest);
     } else {
-      this.router.navigate(['/verify-email']);
+      this.router.navigate(['/verify-email'], {queryParams: {redirectTo: captureAuthReturn()}});
     }
   }
 
@@ -1452,7 +1443,8 @@ export class AuthService {
     }
 
     // sanitize + clear
-    if (!target || !target.startsWith('/')) {
+    target = safeAuthReturn(target) || '';
+    if (!target) {
       // Check if user is school admin and redirect accordingly
       if (this.currentUser?.role === 'schoolAdmin') {
         target = '/school-admin';

@@ -1,3 +1,4 @@
+<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>Your Last Light journey is saved.</strong><span>Finish signing in to return to your chapter.</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">Back to your saved game →</a></aside>
 <div class="dark:bg-slate-900 min-h-screen">
     <app-navbar [currentPageJoinNow]="true" ></app-navbar>
 
@@ -7,6 +8,7 @@
 
     <div class="bg-white p-10 shadow-lg dark:bg-slate-800">
         <h1 class="flex flex-col mx-auto text-xl text-center mb-6 dark:text-white">Sign Up</h1>
+        <p *ngIf="gameReturnUrl" class="text-center text-sm mb-6 dark:text-white">Already have an account? <a routerLink="/login" [queryParams]="{ redirectTo: gameReturnUrl }" class="underline">Log in and keep your chapter</a>.</p>
         <div class="flex flex-col mx-auto justify-center my-4 items-center">
             <div class=" w-20 h-20 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700">
                

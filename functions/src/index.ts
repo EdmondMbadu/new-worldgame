@@ -1206,10 +1206,15 @@ export const sendBrandedVerificationEmail = functions.https.onCall(
       );
     }
 
+    const request = _data as {returnTo?: unknown; origin?: unknown} | null;
+    const gameReturn = typeof request?.returnTo === 'string' && /^\/games\/last-light\/\?resume=[a-f0-9-]{36}$/.test(request.returnTo) ? request.returnTo : null;
+    const allowedOrigins = ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'];
+    const returnOrigin = typeof request?.origin === 'string' && allowedOrigins.includes(request.origin) ? request.origin : APP_BASE_URL;
+    const verificationContinue = gameReturn ? `${returnOrigin}/verify-email?verified=1&redirectTo=${encodeURIComponent(gameReturn)}` : `${APP_BASE_URL}/verify-email?verified=1`;
     const verificationLink = await admin.auth().generateEmailVerificationLink(
       authUser.email,
       {
-        url: `${APP_BASE_URL}/verify-email?verified=1`,
+        url: verificationContinue,
         handleCodeInApp: false,
       }
     );
@@ -13195,3 +13200,6 @@ Design direction:
       });
     }
   });
+
+// Last Light: private progress and server-owned public scoreboards.
+export { beginLastLightRun, getLastLightAccount, saveLastLightName, syncLastLightProgress, submitLastLightRun, getLastLightLeaderboard } from './last-light';
