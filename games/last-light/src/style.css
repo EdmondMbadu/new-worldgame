@@ -1884,3 +1884,6 @@ kbd {
   .arrival-bar, .arrival-caption { animation: none; }
   .arrival-progress i { transition: none; }
 }
+.setting-leaderboard { border-top: 1px solid #eff1d815; padding: 12px 0 4px; font-size: 12px; }
+.setting-leaderboard .setting-label { display: block; margin-bottom: 2px; }
+.setting-leaderboard .board-player { margin: 0; padding: 0; border: 0; font-size: 12px; }

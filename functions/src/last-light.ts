@@ -16,6 +16,8 @@ import {
   publicName,
   eligibleOwner,
   elapsedDrive,
+  guestKey,
+  boardsFor,
   Drive,
 } from './last-light-core';
 const db = () => admin.firestore();
@@ -62,6 +64,47 @@ function collectionBoard(b: string) {
 }
 const rankKey = (score: number, id: string) =>
   `${String(10000 - score).padStart(5, '0')}:${id}`;
+/** Guests are keyed by a private device key; only its hash is stored. */
+const guestId = (key: string) => `guest_${hash(`guest:${key}`).slice(0, 40)}`;
+const publicIdOf = (playerId: string) => hash(playerId).slice(0, 24);
+/** Writes (or rewrites) every leaderboard row for a player's published drives. */
+function writeRows(
+  tx: admin.firestore.Transaction,
+  publicId: string,
+  name: string,
+  published: Record<string, Drive>,
+) {
+  const row = {
+    id: publicId,
+    name,
+    searchName: name.toLocaleLowerCase('en'),
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  const boards = boardsFor(published);
+  for (const { board, drive } of boards.chapters)
+    tx.set(collectionBoard(board).doc(publicId), {
+      ...row,
+      score: drive.score,
+      chapters: 1,
+      rankKey: rankKey(drive.score, publicId),
+    });
+  for (const { board, score, chapters } of boards.overall)
+    tx.set(collectionBoard(board).doc(publicId), {
+      ...row,
+      score,
+      chapters,
+      rankKey: rankKey(score, publicId),
+    });
+}
+function deleteRows(
+  tx: admin.firestore.Transaction,
+  publicId: string,
+  published: Record<string, Drive>,
+) {
+  const boards = boardsFor(published);
+  for (const { board } of [...boards.chapters, ...boards.overall])
+    tx.delete(collectionBoard(board).doc(publicId));
+}
 async function limit(
   c: functions.https.CallableContext,
   kind: string,
@@ -214,6 +257,8 @@ export const submitLastLightRun = functions.https.onCall(async (raw, c) => {
       { merge: true },
     );
     tx.update(ref, { claimedBy: uid, result: r });
+    // Players who hid themselves keep their records privately.
+    if (p?.hidden) return { published: false };
     const row = {
       id: publicId,
       name: p!.name,
@@ -265,6 +310,11 @@ export const getLastLightLeaderboard = functions.https.onCall(
       col.count().get(),
       c.auth ? col.doc(hash(c.auth.uid).slice(0, 24)).get() : null,
     ]);
+    // A device player sees their own row without signing in.
+    let deviceOwn: admin.firestore.DocumentSnapshot | null = null;
+    if (!own?.exists && typeof raw?.deviceKey === 'string' && /^[a-f0-9]{64}$/.test(raw.deviceKey))
+      deviceOwn = await col.doc(publicIdOf(guestId(raw.deviceKey))).get();
+    const mine = own?.exists ? own : deviceOwn?.exists ? deviceOwn : null;
     async function entry(
       d: admin.firestore.DocumentSnapshot,
       knownRank?: number,
@@ -300,10 +350,131 @@ export const getLastLightLeaderboard = functions.https.onCall(
     return {
       entries,
       total: count.data().count,
-      own: own?.exists
-        ? entries.find((r) => r.id === own.id) || (await entry(own))
+      own: mine
+        ? entries.find((r) => r.id === mine.id) || (await entry(mine))
         : null,
       nextCursor: rows.size > size ? rows.docs[size - 1].id : null,
     };
   },
 );
+
+/**
+ * Automatic publishing for everyone: no sign-in or form. The device's private
+ * key identifies the player; the run ticket and timing checks are the same as
+ * for accounts, so only real full deliveries reach the boards.
+ */
+export const publishLastLightDrive = functions.https.onCall(async (raw, c) => {
+  const key = checked(() => guestKey(raw?.deviceKey)),
+    name = checked(() => publicName(raw?.name)),
+    r = checked(() => validateDrive(raw?.result));
+  if (
+    !/^[a-f0-9-]{36}$/.test(raw?.id || '') ||
+    !/^[a-f0-9]{48}$/.test(raw?.secret || '')
+  )
+    fail('invalid-argument', 'This drive has no online record.');
+  await limit(c, 'guest-submit', 60);
+  const playerId = guestId(key),
+    publicId = publicIdOf(playerId);
+  const ref = db().collection('lastLightRuns').doc(raw.id),
+    player = db().collection('lastLightPlayers').doc(playerId);
+  return db().runTransaction(async (tx) => {
+    const [runSnap, pSnap] = await Promise.all([tx.get(ref), tx.get(player)]),
+      run = runSnap.data(),
+      p = pSnap.data();
+    if (
+      !run ||
+      !timingSafeEqual(
+        Buffer.from(run.secretHash, 'hex'),
+        Buffer.from(hash(raw.secret), 'hex'),
+      )
+    )
+      fail('permission-denied', 'This drive cannot be claimed.');
+    // A drive started while signed in can only be published from that session.
+    if (run!.owner && run!.owner !== c.auth?.uid)
+      fail('permission-denied', 'This drive belongs to another player.');
+    if (run!.claimedBy) {
+      if (
+        run!.claimedBy === playerId &&
+        JSON.stringify(validateDrive(run!.result)) === JSON.stringify(r)
+      )
+        return { published: !p?.hidden, publicId, name: p?.name || name };
+      fail('already-exists', 'This drive has already been recorded.');
+    }
+    if (
+      driveKey(run as Drive) !== driveKey(r) ||
+      Date.now() - run!.issuedAt > 30 * 86400000 ||
+      Date.now() - run!.issuedAt <
+        Math.max(20000, (elapsedDrive(r) - 10) * 1000)
+    )
+      fail(
+        'invalid-argument',
+        'This drive could not be verified. Your local progress is still saved.',
+      );
+    const best = mergeBest(p?.best || {}, [r]),
+      published = mergeBest(p?.published || {}, [r]);
+    tx.set(
+      player,
+      {
+        guest: true,
+        name,
+        best,
+        published,
+        hidden: !!p?.hidden,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true },
+    );
+    tx.update(ref, { claimedBy: playerId, result: r });
+    if (!p?.hidden) writeRows(tx, publicId, name, published);
+    return { published: !p?.hidden, publicId, name };
+  });
+});
+/** Opt out (or back in), and rename a device player; boards update at once. */
+export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
+  if (typeof raw?.hidden !== 'boolean')
+    fail('invalid-argument', 'Choose whether to appear on the leaderboard.');
+  const key = raw?.deviceKey ? checked(() => guestKey(raw.deviceKey)) : null,
+    uid = c.auth?.uid ? user(c, raw) : null;
+  const rename =
+    raw?.name === undefined ? null : checked(() => publicName(raw.name));
+  if (!key && !uid) fail('invalid-argument', 'This device has no player key yet.');
+  await limit(c, 'visibility', 30);
+  const refs = [
+    ...(key ? [{ ref: db().collection('lastLightPlayers').doc(guestId(key)), id: guestId(key), guest: true }] : []),
+    ...(uid ? [{ ref: db().collection('lastLightPlayers').doc(uid), id: uid, guest: false }] : []),
+  ];
+  return db().runTransaction(async (tx) => {
+    const snaps = await Promise.all(refs.map((r) => tx.get(r.ref)));
+    let name = rename || '';
+    snaps.forEach((snap, i) => {
+      const { ref, id, guest } = refs[i],
+        p = snap.data(),
+        publicId = guest ? publicIdOf(id) : hash(id).slice(0, 24);
+      // Account names stay stable; device players may rename freely.
+      const nextName = guest && rename ? rename : p?.name;
+      if (!p && !guest) return;
+      if (!p) {
+        tx.set(ref, {
+          guest: true,
+          name: rename || null,
+          hidden: raw.hidden,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        return;
+      }
+      if (guest && nextName) name = nextName;
+      tx.set(
+        ref,
+        {
+          hidden: raw.hidden,
+          ...(guest && rename ? { name: rename } : {}),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true },
+      );
+      if (raw.hidden) deleteRows(tx, publicId, p.published || {});
+      else if (nextName) writeRows(tx, publicId, nextName, p.published || {});
+    });
+    return { hidden: raw.hidden, name };
+  });
+});

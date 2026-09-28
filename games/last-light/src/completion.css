@@ -201,3 +201,5 @@
   .completion-team-title span { display: none; }
   .completion-caption { width: 100%; font-size: 12px; padding: 10px 12px; }
 }
+.completion-rank { font-size: 12px; color: #edce82; letter-spacing: .04em; white-space: nowrap; }
+.completion-rank--pending { color: #bccabb; }

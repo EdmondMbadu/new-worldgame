@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ClinicStoryProps } from './ClinicStory';
 import { CLINICS, STORY_DISCLOSURE, CAMPAIGN_HREF, HELP } from './clinic-stories';
 import { MISSIONS } from './missions';
-import { CompletionAccount, InviteFriends, LeaderboardDialog, RealProjectCard } from './CommunityPanel';
+import { CompletionAccount, InviteFriends, LeaderboardDialog, RealProjectCard, YourRank } from './CommunityPanel';
 import { GameDialog } from './GameDialog';
 import './completion.css';
 
@@ -76,6 +76,7 @@ export function CompletionScreen(p: ClinicStoryProps) {
           <div className="completion-drive">
             <div className="completion-score-line">
               {result && <span className="completion-points"><span className="completion-star" aria-label={`${result.stars} of 3 stars`}>★</span> <strong>{result.score.toLocaleString()}</strong> <span>pts</span></span>}
+              {result && <YourRank mission={p.chapter} mode={result.mode || settings.mode} variant={result.variant || 0} practice={practice} />}
               <button className="completion-link" onClick={event => openPanel('drive', event.currentTarget)}>Drive details <span aria-hidden="true">↗</span></button>
             </div>
             {practice && <small className="completion-practice">Practice · no record saved</small>}

@@ -1,4 +1,4 @@
-import { Leaderboard, RealProjectCard } from './CommunityPanel';
+import { Leaderboard, PlayerControls, RealProjectCard } from './CommunityPanel';
 import { beginRun, finishRun, useCommunity, syncProgress, publishPending } from './community';
 import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
 import { routePoint } from "./routes";
@@ -323,6 +323,10 @@ function SettingsPanel({
             />
           </label>
         ))}
+        <div className="setting-leaderboard">
+          <span className="setting-label">Public leaderboard</span>
+          <PlayerControls />
+        </div>
         <label className="setting-row">
           Night brightness
           <input

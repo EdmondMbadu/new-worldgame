@@ -19,7 +19,8 @@
     "moderation:prepare-legacy": "node scripts/prepare-solution-moderation.js",
     "moderation:prepare-legacy:apply": "node scripts/prepare-solution-moderation.js --apply",
     "test:weekly-brief": "npm run build && node --test test/weekly-brief*.test.js",
-    "test:bulk-email-links": "npm run build && node --test test/bulk-email-links.test.js"
+    "test:bulk-email-links": "npm run build && node --test test/bulk-email-links.test.js",
+    "test:last-light": "npm run build && node --test test/last-light.unit.test.js"
   },
   "engines": {
     "node": "20"

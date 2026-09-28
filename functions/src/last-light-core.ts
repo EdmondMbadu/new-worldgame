@@ -132,3 +132,25 @@ export function eligibleOwner(
 export function elapsedDrive(r: Drive): number {
   return seconds[r.mission] * (r.mode === 'relaxed' ? 1.35 : 1) - r.remaining;
 }
+/** A browser's private player key: 32 random bytes as hex, generated on the device. */
+export function guestKey(raw: unknown): string {
+  if (typeof raw !== 'string' || !/^[a-f0-9]{64}$/.test(raw))
+    throw new Error('This device has no player key yet.');
+  return raw;
+}
+/** Every leaderboard a player's published drives appear on: each chapter, and overall. */
+export function boardsFor(published: Record<string, Drive>) {
+  const chapters: { board: string; drive: Drive }[] = [];
+  const overall = new Map<string, Drive>();
+  for (const d of Object.values(published)) {
+    chapters.push({ board: boardKey(d, d.mission), drive: d });
+    overall.set(boardKey(d, 'all'), d);
+  }
+  return {
+    chapters,
+    overall: [...overall].map(([board, drive]) => ({
+      board,
+      ...totalBest(published, drive),
+    })),
+  };
+}

@@ -327,3 +327,17 @@
     padding: 18px;
   }
 }
+
+/* Automatic leaderboard: your name, rename and opt-out, kept quiet. */
+.board-player { margin: 12px 0 6px; padding: 12px 0 0; border-top: 1px solid #b6c5b426; font-size: 13px; color: #cdd8cb; }
+.board-player p { margin: 0; line-height: 1.6; }
+.board-player strong { color: #f4efdf; font-weight: 500; }
+.board-player form { display: flex; flex-wrap: wrap; align-items: end; gap: 10px; }
+.board-player label { display: grid; gap: 5px; font-size: 11px; color: #aebfb1; flex: 1 1 180px; }
+.board-player input { min-height: 40px; padding: 8px 10px; border-radius: 5px; border: 1px solid #b6c8b855; background: #0a211d; color: #f4efdf; font: inherit; font-size: 14px; }
+.board-player form > button:not(.board-link) { min-height: 40px; padding: 8px 14px; border-radius: 5px; background: #edcb83; color: #122921; font-weight: 600; }
+.board-link { background: none; border: 0; padding: 4px 0; min-height: 32px; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #c5cebd80; cursor: pointer; }
+.board-link:hover { color: #ffe0a0; }
+.board-player [role="status"] { margin-top: 6px; color: #f0c98a; font-size: 12px; }
+.leaderboard-dialog .board-player .board-link, .board-player .board-link { background: none; border: 0; padding: 4px 0; min-height: 32px; color: #e9e4d2; font-weight: 400; box-shadow: none; }
+.leaderboard-dialog .board-player .board-link:hover { color: #ffe0a0; background: none; }

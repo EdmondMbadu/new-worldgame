@@ -17,6 +17,8 @@ import {
   totalBest,
   eligibleOwner,
   publicName,
+  guestKey,
+  boardsFor,
 } from '../../../functions/src/last-light-core';
 import type { Drive } from '../../../functions/src/last-light-core';
 import { MISSIONS } from '../src/missions';
@@ -217,4 +219,14 @@ describe('shared-device guest claims', () => {
     const href=checkpointHref({mission:4,mode:'standard',variant:0,result:drive,owner:null,save:freshSave()});
     expect(readCheckpoint(href!.slice(href!.indexOf('?')))).toBeNull();
   });
+  it('accepts only a full private device key and lists every board a player appears on', () => {
+    expect(() => guestKey('abc')).toThrow();
+    expect(() => guestKey('g'.repeat(64))).toThrow();
+    expect(guestKey('a'.repeat(64))).toBe('a'.repeat(64));
+    const best = mergeBest({}, [drive, { ...drive, mission: 1, lives: 5 }]);
+    const boards = boardsFor(best);
+    expect(boards.chapters.map((b) => b.board).sort()).toEqual(['r6-v0-standard-0', 'r6-v0-standard-1']);
+    expect(boards.overall).toEqual([{ board: 'r6-v0-standard-all', score: 3600, chapters: 2 }]);
+  });
 });
+

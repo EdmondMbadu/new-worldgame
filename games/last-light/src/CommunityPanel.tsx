@@ -5,8 +5,11 @@ import { CLINICS } from "./clinic-stories";
 import { ROAD_REVISION } from "./vehicle";
 import {
   api,
+  identity,
   joinLeaderboard,
   refreshAccount,
+  renamePlayer,
+  setLeaderboardVisibility,
   useCommunity,
   errorMessage,
 } from "./community";
@@ -89,12 +92,35 @@ export function RealProjectCard({
     </aside>
   );
 }
-function Rows({ data, overall = false }: { data: Board; overall?: boolean }) {
+type Local = { name: string; score: number; chapters: number; saved?: boolean } | null;
+/** Your best local result for a board, shown until (or if) the server confirms it. */
+export function localBest(bracket: Bracket): Local {
+  const me = identity();
+  if (me.hidden) return null;
+  const best = new Map<number, number>();
+  let saved = true;
+  for (const p of pendingRuns()) {
+    const r = p.result;
+    if (!r || p.rejected || r.practice || r.revision !== ROAD_REVISION || r.mode !== bracket.mode || (r.variant || 0) !== bracket.variant) continue;
+    if (bracket.mission !== "all" && r.mission !== bracket.mission) continue;
+    if (r.score >= (best.get(r.mission) || 0)) saved = saved && !!p.published;
+    best.set(r.mission, Math.max(best.get(r.mission) || 0, r.score));
+  }
+  if (!best.size) return null;
+  return { name: me.name, score: [...best.values()].reduce((a, b) => a + b, 0), chapters: best.size, saved };
+}
+function Rows({ data, overall = false, local = null }: { data: Board; overall?: boolean; local?: Local }) {
+  // Until the server has your row, show where your local best would place you.
+  const pending = !data.own && local ? local : null;
+  const at = pending ? data.entries.filter((e) => e.score >= pending.score).length : -1;
+  const rows: (Entry & { pending?: boolean; saved?: boolean })[] = [...data.entries];
+  if (pending && (at < data.entries.length || !data.nextCursor))
+    rows.splice(at, 0, { id: "local", name: pending.name, score: pending.score, chapters: pending.chapters, rank: (data.entries[at - 1]?.rank ?? 0) + 1, pending: true, saved: pending.saved });
   return (
     <>
       <ol className="leaderboard-rows" aria-label="Player rankings">
-        {data.entries.map((row) => (
-          <li key={row.id} className={row.id === data.own?.id ? "is-you" : ""}>
+        {rows.map((row) => (
+          <li key={row.id} className={row.id === data.own?.id || row.pending ? "is-you" : ""}>
             <span className="board-rank" aria-label={`Rank ${row.rank}`}>
               {row.rank <= 3
                 ? ["🥇", "🥈", "🥉"][row.rank - 1]
@@ -103,8 +129,9 @@ function Rows({ data, overall = false }: { data: Board; overall?: boolean }) {
             <span>
               <strong>
                 {row.name}
-                {row.id === data.own?.id && <small> YOU</small>}
+                {(row.id === data.own?.id || row.pending) && <small> YOU</small>}
               </strong>
+              {row.pending && <small>{row.saved ? "Saved · refreshing rankings" : "Saving to the leaderboard…"}</small>}
               {overall && <small>{row.chapters}/5 chapters</small>}
             </span>
             <b>
@@ -120,11 +147,11 @@ function Rows({ data, overall = false }: { data: Board; overall?: boolean }) {
           <span>{data.own.score.toLocaleString()} points</span>
         </div>
       )}
-      {!data.entries.length && (
+      {!rows.length && (
         <p className="board-empty">
           {data.total
             ? "No players match this search."
-            : "The road is open. Complete a delivery and publish your score to be among the first."}
+            : "The road is open. Complete a delivery and you’ll appear here automatically."}
         </p>
       )}
     </>
@@ -158,6 +185,7 @@ function useBoard(
             await a.ready;
             return a.call<Board>("getLastLightLeaderboard", {
               ...bracket,
+              deviceKey: identity().key,
               revision: ROAD_REVISION,
               limit,
               search,
@@ -214,6 +242,7 @@ export function LeaderboardDialog({
     search,
     pages[pages.length - 1],
   );
+  const local = search ? null : localBest(bracket);
   useEffect(() => {
     const node = dialog.current;
     node?.showModal();
@@ -312,6 +341,7 @@ export function LeaderboardDialog({
               {error} <button onClick={retry}>Retry rankings</button>
             </p>
           )}
+          {error && local && <Rows data={{ entries: [], own: null, total: 0, nextCursor: null }} local={local} overall={bracket.mission === "all"} />}
           {data && (
             <>
               <p className="board-count">
@@ -319,7 +349,7 @@ export function LeaderboardDialog({
                 {data.total === 1 ? "player" : "players"} · Road edition{" "}
                 {ROAD_REVISION}
               </p>
-              <Rows data={data} overall={bracket.mission === "all"} />
+              <Rows data={data} local={local} overall={bracket.mission === "all"} />
             </>
           )}
         </div>
@@ -338,9 +368,10 @@ export function LeaderboardDialog({
             Next →
           </button>
         </footer>
-        {onPublish && <button className="board-publish" onClick={onPublish}>Save your score / join the leaderboard</button>}
+        <PlayerControls />
+        {onPublish && <button className="board-publish" onClick={onPublish}>Keep your scores across devices</button>}
         <small>
-          Only signed-in players who publish a valid full delivery appear here.
+          Every full delivery is ranked automatically under your player name.
           Practice drives and contributions do not affect rankings.
         </small>
       </div>
@@ -359,6 +390,7 @@ export function Leaderboard({
 }) {
   const bracket = { mission, mode, variant },
     { data, error, loading, retry } = useBoard(bracket, 5);
+  const local = localBest(bracket);
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
   return (
@@ -381,7 +413,7 @@ export function Leaderboard({
           {error} <button onClick={retry}>Retry</button>
         </p>
       )}
-      {data && <Rows data={data} />}
+      {data && <Rows data={data} local={local} />}
       <small>
         Top five · best full deliveries · road edition {ROAD_REVISION}
       </small>
@@ -498,10 +530,10 @@ export function CompletionAccount({
       {!player ? (
         <>
           <span className="eyebrow">KEEP YOUR JOURNEY</span>
-          <h3>Your delivery deserves a place.</h3>
+          <h3>{identity().hidden ? "Your delivery is saved on this device." : `You’re on the leaderboard as ${identity().name}.`}</h3>
           <p>
-            Create an account or log in to save across devices and join
-            the leaderboard. You’ll return to this completed chapter.
+            Create an account or log in to keep your scores across devices.
+            You’ll return to this completed chapter.
           </p>
           <div className="community-actions">
             <button
@@ -521,10 +553,10 @@ export function CompletionAccount({
         </>
       ) : !player.verified ? (
         <>
-          <h3>One step before the leaderboard.</h3>
+          <h3>{identity().hidden ? "Your chapter is saved." : `You’re on the leaderboard as ${identity().name}.`}</h3>
           <p>
-            Verify your email to publish your score. Your chapter stays
-            saved here.
+            Verify your email to rank under your account instead. Your
+            chapter stays saved here.
           </p>
           <button onClick={() => onAuth("verify-email")}>
             Verify email
@@ -592,4 +624,58 @@ export function CompletionAccount({
       )}
     </section>
   );
+}
+
+/** Your public name, with rename and a one-tap opt-out. Nothing is required. */
+export function PlayerControls() {
+  const community = useCommunity();
+  const me = identity();
+  const account = community.player?.name && community.player.verified ? community.player.name : null;
+  const [editing, setEditing] = useState(false),
+    [name, setName] = useState(me.name),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  const run = (task: Promise<unknown>) => {
+    setBusy(true);
+    setError("");
+    void task
+      .then(() => setEditing(false))
+      .catch((e) => setError(e instanceof Error && /^Use /.test(e.message) ? e.message : errorMessage(e)))
+      .finally(() => setBusy(false));
+  };
+  return (
+    <div className="board-player">
+      {me.hidden ? (
+        <p>
+          You’re hidden from the leaderboard. Your scores stay saved.{" "}
+          <button className="board-link" disabled={busy} onClick={() => run(setLeaderboardVisibility(false))}>Show me again</button>
+        </p>
+      ) : editing && !account ? (
+        <form onSubmit={(e) => { e.preventDefault(); run(renamePlayer(name)); }}>
+          <label>
+            Your public name
+            <input value={name} maxLength={28} minLength={2} required autoComplete="nickname" onChange={(e) => setName(e.target.value)} />
+          </label>
+          <button disabled={busy || !name.trim()}>{busy ? "Saving…" : "Save name"}</button>
+          <button type="button" className="board-link" onClick={() => { setEditing(false); setName(me.name); }}>Cancel</button>
+        </form>
+      ) : (
+        <p>
+          You appear as <strong>{account || me.name}</strong>.{" "}
+          {!account && <button className="board-link" onClick={() => setEditing(true)}>Rename</button>}
+          {!account && " · "}
+          <button className="board-link" disabled={busy} onClick={() => run(setLeaderboardVisibility(true))}>Hide me from the leaderboard</button>
+        </p>
+      )}
+      {error && <p role="status">{error}</p>}
+    </div>
+  );
+}
+/** A compact “#3 of 12” for the completion screen. */
+export function YourRank({ mission, mode, variant, practice = false }: { mission: number; mode: string; variant: number; practice?: boolean }) {
+  const bracket = { mission, mode, variant };
+  const { data } = useBoard(bracket, 5);
+  if (practice || identity().hidden) return null;
+  if (data?.own) return <span className="completion-rank">#{data.own.rank} of {data.total.toLocaleString()}</span>;
+  return localBest(bracket) ? <span className="completion-rank completion-rank--pending">Saving to the leaderboard…</span> : null;
 }

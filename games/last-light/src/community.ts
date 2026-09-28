@@ -8,6 +8,39 @@ import {
   type Ticket,
 } from './journey';
 import { ROAD_REVISION } from './vehicle';
+import { load, persist } from './journey';
+
+/**
+ * Every player is on the leaderboard automatically under a friendly generated
+ * name, unless they hide themselves. The private key never leaves this device
+ * except to the game's own server, which stores only its hash.
+ */
+export type Identity = { key: string; name: string; hidden: boolean; chosen?: boolean };
+const IDENTITY_KEY = 'last-light.player.v1';
+const ADJECTIVES = ['Steady', 'Bright', 'Careful', 'Swift', 'Quiet', 'Brave', 'Patient', 'Golden', 'Kind', 'Evening', 'Gentle', 'Keen'];
+const NOUNS = ['Baobab', 'Kingfisher', 'Lantern', 'Acacia', 'Heron', 'Sunbird', 'Firefly', 'Palm', 'River', 'Ridge', 'Weaver', 'Hornbill'];
+const pick = <T,>(list: T[], n: number) => list[n % list.length];
+export function autoName(random = crypto.getRandomValues(new Uint32Array(3))) {
+  return `${pick(ADJECTIVES, random[0])} ${pick(NOUNS, random[1])} ${10 + (random[2] % 90)}`;
+}
+let identityCache: Identity | null = null;
+export function identity(): Identity {
+  if (identityCache) return identityCache;
+  const saved = load<Identity | null>(IDENTITY_KEY, null);
+  if (saved && /^[a-f0-9]{64}$/.test(saved.key) && typeof saved.name === 'string' && saved.name) {
+    identityCache = { key: saved.key, name: saved.name, hidden: saved.hidden === true, chosen: saved.chosen === true };
+    return identityCache;
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(32));
+  identityCache = { key: [...bytes].map((b) => b.toString(16).padStart(2, '0')).join(''), name: autoName(), hidden: false, chosen: false };
+  persist(IDENTITY_KEY, identityCache);
+  return identityCache;
+}
+function saveIdentity(next: Identity) {
+  identityCache = next;
+  persist(IDENTITY_KEY, next);
+  update({});
+}
 export type Player = {
   uid: string;
   verified: boolean;
@@ -40,6 +73,7 @@ export function initializeCommunity() {
         const request = ++generation;
         if (!user) {
           update({ status: 'guest', player: null, message: '' });
+          void publishPending();
           return;
         }
         const player: Player = {
@@ -63,7 +97,7 @@ export function initializeCommunity() {
           );
           if (request !== generation) return;
           update({ player: { ...player, ...record }, message: '' });
-          if (record.name) void publishPending();
+          void publishPending();
         } catch {
           if (request === generation)
             update({
@@ -114,7 +148,7 @@ export function beginRun(mission: number, mode: string, variant: number) {
       });
       run.owner = run.ticket.owner ?? null;
       updatePending(run);
-      if (run.result && state.player?.name) void publishPending();
+      if (run.result) void publishPending();
     })
     .catch(() => {
       run.offline = true;
@@ -125,29 +159,38 @@ export function finishRun(result: Result) {
   if (result.practice || !activeRun) return undefined;
   activeRun.result = result;
   updatePending(activeRun);
-  if (state.player?.name) void publishPending();
+  void publishPending();
   return activeRun.owner;
 }
 let publishing = false;
+/** Accounts with a public name publish as themselves; everyone else as this device's player. */
+const accountReady = (p: Player | null): p is Player => !!p?.name && p.verified;
 export async function publishPending() {
   const player = state.player;
-  if (publishing || !player?.name || !player.verified) return;
+  const me = identity();
+  if (publishing || me.hidden) return;
   publishing = true;
   try {
     const a = await api();
+    await a.ready;
+    const account = accountReady(player) ? player : null;
+    const uid = a.auth.currentUser?.uid || null;
     const runs = pendingRuns().filter(
-      (p) => p.owner === player.uid && p.result && !p.published && !p.rejected,
+      (p) =>
+        p.result &&
+        p.ticket &&
+        !p.published &&
+        !p.rejected &&
+        (account ? p.owner === account.uid : p.owner === null || p.owner === uid),
     );
     let saved = 0;
     for (const p of runs) {
-      if (state.player?.uid !== player.uid) break;
-      if (!p.ticket) continue;
+      if (state.player?.uid !== player?.uid) break;
       try {
-        await a.call('submitLastLightRun', {
-          ...p.ticket,
-          result: p.result,
-          accountUid: player.uid,
-        });
+        if (account)
+          await a.call('submitLastLightRun', { ...p.ticket, result: p.result, accountUid: account.uid });
+        else
+          await a.call('publishLastLightDrive', { ...p.ticket, result: p.result, deviceKey: me.key, name: me.name });
         updatePending({ ...p, published: true });
         saved++;
       } catch (e) {
@@ -160,7 +203,7 @@ export async function publishPending() {
           ].includes(code || '')
         ) {
           updatePending({ ...p, rejected: true });
-          if (state.player?.uid === player.uid)
+          if (state.player?.uid === player?.uid)
             update({
               message:
                 'An older drive could not be verified for rankings. Your chapter progress is kept; new full deliveries can still qualify.',
@@ -170,15 +213,36 @@ export async function publishPending() {
         throw e;
       }
     }
-    if (saved && state.player?.uid === player.uid) {
-      update({ message: 'Your score is on the leaderboard.' });
+    if (saved && state.player?.uid === player?.uid) {
+      update({ message: `Your score is on the leaderboard as ${account?.name || me.name}.` });
       window.dispatchEvent(new Event('last-light:board'));
     }
   } catch (e) {
-    if (state.player?.uid === player.uid) update({ message: errorMessage(e) });
+    if (state.player?.uid === player?.uid) update({ message: errorMessage(e) });
   } finally {
     publishing = false;
   }
+}
+/** Opt out of (or back into) the public leaderboard. Scores are kept either way. */
+export async function setLeaderboardVisibility(hidden: boolean) {
+  const me = identity();
+  saveIdentity({ ...me, hidden });
+  const a = await api();
+  await a.ready;
+  await a.call('setLastLightVisibility', { hidden, deviceKey: me.key, accountUid: a.auth.currentUser?.uid || undefined });
+  window.dispatchEvent(new Event('last-light:board'));
+  if (!hidden) await publishPending();
+}
+/** Choose a different public name for this device's player. */
+export async function renamePlayer(raw: string) {
+  const name = raw.normalize('NFKC').trim().replace(/\s+/g, ' ');
+  if (!/^[\p{L}\p{N} ._'-]{2,28}$/u.test(name)) throw new Error('Use 2–28 letters, numbers, spaces, dots, hyphens or underscores.');
+  const me = identity();
+  saveIdentity({ ...me, name, chosen: true });
+  const a = await api();
+  await a.ready;
+  await a.call('setLastLightVisibility', { hidden: me.hidden, deviceKey: me.key, name });
+  window.dispatchEvent(new Event('last-light:board'));
 }
 export async function joinLeaderboard(name: string) {
   const p = state.player;
@@ -214,7 +278,7 @@ export async function syncProgress(results: Result[]) {
 }
 export function errorMessage(e: unknown) {
   const message = e instanceof Error ? e.message : '';
-  return /^(Use |Choose |Verify |This drive|Your existing|Too many)/.test(
+  return /^(Use |Choose |Verify |This drive|This device|Your existing|Too many)/.test(
     message,
   )
     ? message
