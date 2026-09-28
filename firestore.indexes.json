@@ -1,28 +1,13 @@
 {
-  // Example:
-  //
-  // "indexes": [
-  //   {
-  //     "collectionGroup": "widgets",
-  //     "queryScope": "COLLECTION",
-  //     "fields": [
-  //       { "fieldPath": "foo", "arrayConfig": "CONTAINS" },
-  //       { "fieldPath": "bar", "mode": "DESCENDING" }
-  //     ]
-  //   },
-  //
-  //  "fieldOverrides": [
-  //    {
-  //      "collectionGroup": "widgets",
-  //      "fieldPath": "baz",
-  //      "indexes": [
-    {"collectionGroup":"players","queryScope":"COLLECTION","fields":[{"fieldPath":"searchName","order":"ASCENDING"},{"fieldPath":"rankKey","order":"ASCENDING"}]},
-  //        { "order": "ASCENDING", "queryScope": "COLLECTION" }
-  //      ]
-  //    },
-  //   ]
-  // ]
   "indexes": [
+    {
+      "collectionGroup": "players",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "searchName", "order": "ASCENDING" },
+        { "fieldPath": "rankKey", "order": "ASCENDING" }
+      ]
+    },
     {
       "collectionGroup": "solutions",
       "queryScope": "COLLECTION",
