@@ -39,6 +39,7 @@ The combined production build creates Angular and both game documents in `dist/`
 
 - W / up: accelerate. S / down / space: brake; holding brake at a standstill reverses.
 - A / D or left / right: steer. E: deliver in the marked courtyard or recover when stuck. Escape: pause.
+- Stuck on a cliff or against traffic? Pause and choose **Recover truck · −8 seconds** to return to the last clear, firm checkpoint and continue the same delivery. This is always available while a drive is paused, even if automatic stuck detection has not triggered. The driving recovery prompt also detects blocked reverse attempts and stays available after releasing the pedals.
 - Touch controls can be enabled in the driving HUD and appear automatically on touch-oriented devices. Hold DRIVE and a steering button together.
 - Standard gamepads use the left stick, triggers, A / cross for the contextual action and the menu button to pause.
 - Settings include remappable letter/number keys, volume, radio voice/subtitles, night brightness, enhanced night visibility, reduced lightning/camera motion, one-press delivery, graphics quality and Relaxed difficulty. Difficulty and graphics changes apply to the next drive.
@@ -111,6 +112,10 @@ Revision 7 makes the game load quickly on slow and metered connections and run s
 - `src/quality.ts`, `network.ts`, `vendor/`, `scripts/offline-cache.ts`: graphics tiers and the frame governor, connection-aware downloads, the streamed Rapier loader and the offline cache. Reproducible asset preparation scripts live in `scripts/`; provenance is in `ASSETS.md`.
 
 Game libraries are independent of the Angular application and Lost in Orbit. Heavy rendering and physics modules load when a drive starts. Texture fallbacks keep a missing material download from preventing play. Rendering supports tiered quality with automatic resolution and tier adjustment, reduced camera motion and a restart path for WebGL context loss. Timers pause on lost focus or page visibility, and long frame gaps do not consume the mission clock.
+
+## Completion screen
+
+The completed clinic stays visible above a compact action panel with the real team photo, drive summary, sharing, leaderboard and next clinic. Full statistics and account controls open in Drive details; the leaderboard also links to those account controls. Sharing works for guests, and practice shares omit a recorded score. Narration uses the existing audio controls and transcript preference; the full transcript remains available when audio is muted or unavailable. Small screens can scroll the panel, and dialogs support Escape and return focus to their trigger. The final chapter returns to the map; practice starts a full delivery of the same chapter.
 
 ## Verification
 

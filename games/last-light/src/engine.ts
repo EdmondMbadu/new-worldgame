@@ -406,6 +406,7 @@ export class GameEngine {
     this.previousSprings.fill(TUNING.suspension);
   }
   recover() {
+    if (this.phase === 'paused' && this.previous === 'driving') this.resume();
     if (this.phase !== 'driving') return;
     this.time = Math.max(0, this.time - 8);
     this.recoveries++;
@@ -552,10 +553,6 @@ export class GameEngine {
     this.elapsed += dt;
     this.throttle = input.throttle;
     this.braking = input.brake;
-    this.stalledFor =
-      input.throttle > 0.25 && Math.abs(this.speed) < 0.6
-        ? this.stalledFor + dt
-        : 0;
     this.roadPulse *= Math.exp(-dt * 8);
     this.shiftPulse = Math.max(0, this.shiftPulse - dt * 3);
     this.gearCooldown -= dt;
@@ -679,6 +676,11 @@ export class GameEngine {
             TUNING.force *
             clamp((maxSpeed - this.speed) / 4.5, 0, 1) *
             (1 - this.shiftPulse * 0.14);
+    // Either driving direction can be blocked. Once offered, keep recovery
+    // available when the player releases the pedals to reach the button/key.
+    if (Math.abs(this.speed) >= 0.6) this.stalledFor = 0;
+    else if (Math.abs(force) > 0) this.stalledFor += dt;
+    else if (this.stalledFor <= 2.5) this.stalledFor = 0;
     for (let i = 0; i < 4; i++) {
       this.vehicle.setWheelSteering(i, i < 2 ? this.steering : 0);
       this.vehicle.setWheelEngineForce(i, force);

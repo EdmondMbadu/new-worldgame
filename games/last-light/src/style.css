@@ -897,6 +897,10 @@ kbd {
   box-shadow: 0 25px 100px #051d2866;
   border-radius: 4px;
 }
+.pause-card {
+  max-height: 100%;
+  overflow-y: auto;
+}
 .pause-card > .eyebrow {
   color: var(--gold);
   font-size: 9px;

@@ -1422,9 +1422,11 @@ export class GameWorld {
     this.clinic.screen.emissiveIntensity = power * 0.8;
     this.clinic.fan.rotation.y =
       t > 10 ? (t - 10) * Math.min(12, (t - 10) * 3) : 0;
-    this.clinic.lights[0].intensity = smooth(10, 12, t) * 80;
-    this.clinic.lights[1].intensity = smooth(10.8, 12.6, t) * 55;
-    this.clinic.fixture.emissiveIntensity = smooth(10, 12, t) * 3;
+    // Let the initial power-on glow settle so the team and facade remain readable.
+    const settledLight = T.MathUtils.lerp(1, 0.42, smooth(13, 18, t));
+    this.clinic.lights[0].intensity = smooth(10, 12, t) * 80 * settledLight;
+    this.clinic.lights[1].intensity = smooth(10.8, 12.6, t) * 55 * settledLight;
+    this.clinic.fixture.emissiveIntensity = smooth(10, 12, t) * 3 * settledLight;
     this.clinic.glowMat.opacity = smooth(10, 12.5, t) * 0.1;
     for (let i = 0; i < this.people.length; i++) {
       const person = this.people[i],
@@ -1546,11 +1548,14 @@ export class GameWorld {
       this.camera.updateProjectionMatrix();
     }
     const portrait = this.camera.aspect < 1;
-    // Ease the final composition into the free side of the closing story panel.
+    // Center the completed clinic above the compact bottom action panel.
     // The handover remains in the same scene and the player's truck stays visible.
     const closingFrame = restoring ? this.settings.reducedMotion ? 1 : smooth(14, 18, t) : 0;
-    const offset = preview ? (portrait ? 0 : -0.22) : closingFrame * (portrait ? 0 : -0.22);
-    const offsetY = preview ? (portrait ? .26 : .17) : closingFrame * (portrait ? .31 : 0);
+    const offset = preview ? (portrait ? 0 : -0.22) : 0;
+    // On short phones the scene sits below the title, before the scrollable dock.
+    const viewportHeight = portrait && restoring ? Math.max(1, this.renderer.domElement.clientHeight) : 1;
+    const portraitOffset = clamp(.5 - (185 + Math.max(150, viewportHeight * .23) / 2) / viewportHeight, .04, .17);
+    const offsetY = preview ? (portrait ? .26 : .17) : closingFrame * (portrait ? portraitOffset : .10);
     if (Math.abs(offset - this.storyCameraOffset) > .0005 || Math.abs(offsetY - this.storyCameraOffsetY) > .0005) {
       this.storyCameraOffset = offset;
       this.storyCameraOffsetY = offsetY;
@@ -1586,11 +1591,11 @@ export class GameWorld {
         roadY(m, m.length) + (portrait ? 13 : 11),
         m.length - (portrait ? (m.id === 4 ? 28 : 20) : 12),
       );
-      targetEye.lerp(new T.Vector3(portrait ? -20 : -15, roadY(m, m.length) + (portrait ? 10 : 7), m.length + (portrait ? -10 : 2)), closingFrame);
+      targetEye.lerp(new T.Vector3(portrait ? -26 : -21, roadY(m, m.length) + (portrait ? 14 : 9), m.length - (portrait ? 28 : 5)), closingFrame);
       this.eye
         .set(p.x - forward.x * 8, p.y + 4, p.z - forward.z * 8)
         .lerp(targetEye, a);
-      this.aim.set(0, roadY(m, m.length) + 2.5, m.length + 17);
+      this.aim.set(portrait ? 0 : -2 * closingFrame, roadY(m, m.length) + 2.5, m.length + 17);
       this.rig.place(this.eye, this.aim, dt, this.camera);
     } else {
       const lead = 10 + speed * 11;

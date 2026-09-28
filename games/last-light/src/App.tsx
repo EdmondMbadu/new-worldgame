@@ -1,4 +1,4 @@
-import { CompletionCommunity, Leaderboard, RealProjectCard } from './CommunityPanel';
+import { Leaderboard, RealProjectCard } from './CommunityPanel';
 import { beginRun, finishRun, useCommunity, syncProgress, publishPending } from './community';
 import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
 import { routePoint } from "./routes";
@@ -363,7 +363,9 @@ function SettingsPanel({
         <p className="setting-note">
           Arrow keys: hold ↑ to drive, ← → to steer, ↓ to slow or stop. Keep holding ↓ after stopping to reverse. The letter keys above also work. Controller: steer with the left stick, triggers
           to drive/brake, A / × to deliver. Recover a stuck truck with the
-          contextual action or the on-screen button.
+          contextual action or the on-screen button. You can always pause
+          (Escape / controller Menu) and choose Recover truck during a drive.
+          Recovery returns you to the last safe checkpoint and uses 8 seconds.
         </p>
         <button
           className="secondary"
@@ -503,6 +505,13 @@ export default function App() {
       controls.current?.clear();
       sound.current?.silence();
     }
+    setTick((t) => t + 1);
+  };
+  const recover = () => {
+    engine.current?.recover();
+    controls.current?.clear();
+    void sound.current?.unlock();
+    canvas.current?.focus({ preventScroll: true });
     setTick((t) => t + 1);
   };
   useEffect(() => {
@@ -982,8 +991,7 @@ export default function App() {
               }}
               onTouch={() => setTouch(!touch)} touch={touch} ready={ready} loading={loading}
               completed={save.story.completed} result={opening ? undefined : result || undefined}
-              continueLabel={!opening && !result?.practice && !community.player ? selected < 4 ? 'Continue as guest · next clinic' : 'Continue as guest · chapter map' : undefined}
-              community={!opening && result ? <><CompletionCommunity result={result} onAuth={authHandoff}/>{handoffError && <p role="alert">{handoffError}</p>}</> : undefined}
+              onAuth={authHandoff} handoffError={handoffError}
             />
           )}
           {!ready && !error && !opening && (
@@ -1190,10 +1198,8 @@ export default function App() {
                   {e.needsRecovery && (
                     <button
                       className="recover-button"
-                      onClick={() => {
-                        e.recover();
-                        controls.current?.clear();
-                      }}
+                      onClick={recover}
+                      title="Return to the last safe checkpoint. Uses 8 seconds of clinic reserve."
                     >
                       Recover truck · −8 seconds
                     </button>
@@ -1293,6 +1299,14 @@ export default function App() {
                     <button className="primary" onClick={pause} autoFocus>
                       Continue the journey ↗
                     </button>
+                    {e.previous === "driving" && (
+                      <>
+                        <button className="secondary" onClick={recover}>
+                          Recover truck · −8 seconds
+                        </button>
+                        <p>Stuck? Return to the last safe checkpoint and continue this delivery.</p>
+                      </>
+                    )}
                     <button className="secondary" onClick={settings}>
                       Settings & controls
                     </button>

@@ -28,9 +28,21 @@ type Board = {
 type Bracket = { mission: number | "all"; mode: string; variant: number };
 export function RealProjectCard({
   beforeLeave,
+  compact = false,
 }: {
   beforeLeave?: () => boolean;
+  compact?: boolean;
 }) {
+  if (compact) return <aside className="completion-team" aria-label="The real project">
+    <a className="completion-team-photo" href="/campaigns/power-drc-clinics#team" target="_blank" rel="noopener noreferrer" aria-label="Meet the clinic electrification team (opens in a new tab)">
+      <img src="/assets/campaigns/drc-clinics/team/team-portrait.jpg" alt="Members of the real DRC Health Clinic Electrification Team" width="1280" height="960" />
+    </a>
+    <div className="completion-team-copy">
+      <span className="eyebrow">THE REAL PROJECT</span>
+      <a className="completion-team-title" href="/campaigns/power-drc-clinics#team" target="_blank" rel="noopener noreferrer">Meet the team <span aria-hidden="true">↗</span></a>
+      <a className="completion-link" href="/campaigns/power-drc-clinics#donate" target="_blank" rel="noopener noreferrer">Support the project <span aria-hidden="true">↗</span></a>
+    </div>
+  </aside>;
   return (
     <aside className="real-project">
       <img
@@ -183,12 +195,14 @@ function useBoard(
   ]);
   return { data, error, loading, retry: () => setRevision((x) => x + 1) };
 }
-function LeaderboardDialog({
+export function LeaderboardDialog({
   initial,
   onClose,
+  onPublish,
 }: {
   initial: Bracket;
   onClose: () => void;
+  onPublish?: () => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [bracket, setBracket] = useState(initial),
@@ -214,7 +228,7 @@ function LeaderboardDialog({
       ref={dialog}
       className="leaderboard-dialog"
       aria-labelledby="board-title"
-      onCancel={onClose}
+      onCancel={event => { event.preventDefault(); onClose(); }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -223,7 +237,7 @@ function LeaderboardDialog({
         <header>
           <div>
             <span className="eyebrow">LAST LIGHT · THE PLAYERS</span>
-            <h2 id="board-title">Every journey counts.</h2>
+            <h2 id="board-title">Leading the way</h2>
           </div>
           <button
             className="board-close"
@@ -324,6 +338,7 @@ function LeaderboardDialog({
             Next →
           </button>
         </footer>
+        {onPublish && <button className="board-publish" onClick={onPublish}>Save your score / join the leaderboard</button>}
         <small>
           Only signed-in players who publish a valid full delivery appear here.
           Practice drives and contributions do not affect rankings.
@@ -387,11 +402,13 @@ export function InviteFriends({
   mode,
   variant,
   score,
+  compact = false,
 }: {
   mission: number;
   mode: string;
   variant: number;
   score?: number;
+  compact?: boolean;
 }) {
   const [notice, setNotice] = useState("");
   const url = challengeUrl(mission, mode, variant),
@@ -406,8 +423,7 @@ export function InviteFriends({
   };
   return (
     <div className="invite-friends">
-      <span className="eyebrow">A FRIENDLY CHALLENGE</span>
-      <h3>Who would you bring along?</h3>
+      {!compact && <><span className="eyebrow">A FRIENDLY CHALLENGE</span><h3>Who would you bring along?</h3></>}
       <p>
         Invite 5–10 friends to try this delivery. They can join the leaderboard
         after signing in and completing a full drive.
@@ -456,7 +472,7 @@ export function InviteFriends({
     </div>
   );
 }
-export function CompletionCommunity({
+export function CompletionAccount({
   result,
   onAuth,
 }: {
@@ -478,122 +494,102 @@ export function CompletionCommunity({
   const offline = !runRecord?.ticket;
   const connectionIssue = /unavailable|Unable|Too many/i.test(error || message);
   return (
-    <div className="completion-community">
-      {!result.practice && (
+    <section className="community-account">
+      {!player ? (
         <>
-          <section className="community-account">
-            {!player ? (
-              <>
-                <span className="eyebrow">KEEP YOUR JOURNEY</span>
-                <h3>Your delivery deserves a place.</h3>
-                <p>
-                  Create an account or log in to save across devices and join
-                  the leaderboard. You’ll return to this completed chapter.
-                </p>
-                <div className="community-actions">
-                  <button
-                    disabled={status === "loading"}
-                    onClick={() => onAuth("signup")}
-                  >
-                    Create an account
-                  </button>
-                  <button
-                    disabled={status === "loading"}
-                    onClick={() => onAuth("login")}
-                  >
-                    Log in
-                  </button>
-                </div>
-                <small>Continuing as a guest is always available.</small>
-              </>
-            ) : !player.verified ? (
-              <>
-                <h3>One step before the leaderboard.</h3>
-                <p>
-                  Verify your email to publish your score. Your chapter stays
-                  saved here.
-                </p>
-                <button onClick={() => onAuth("verify-email")}>
-                  Verify email
-                </button>
-              </>
-            ) : !player.name ? (
-              <>
-                <h3>Choose your name on the road.</h3>
-                <p>
-                  Your player name and scores will be public. Your email stays
-                  private.
-                </p>
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setBusy(true);
-                    setError("");
-                    void joinLeaderboard(name)
-                      .catch((e) => setError(errorMessage(e)))
-                      .finally(() => setBusy(false));
-                  }}
-                >
-                  <label>
-                    Public player name
-                    <input
-                      required
-                      minLength={2}
-                      maxLength={28}
-                      autoComplete="nickname"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Your player name"
-                    />
-                  </label>
-                  <button disabled={busy || !name.trim()}>
-                    {busy ? "Saving…" : "Join the leaderboard"}
-                  </button>
-                </form>
-              </>
-            ) : (
-              <>
-                <h3>Welcome back, {player.name}.</h3>
-                <p>
-                  {runRecord?.published
-                    ? "Your best eligible delivery is on the leaderboard."
-                    : "Your best full online deliveries count toward your ranking."}
-                </p>
-              </>
-            )}
-            {(error || message) && (
-              <p role="status">
-                {error || message}
-                {player && connectionIssue && (
-                  <button onClick={() => void refreshAccount()}>
-                    Retry online saving
-                  </button>
-                )}
-              </p>
-            )}
-            {offline && (
-              <small>
-                This drive began without an online record. Your chapter progress
-                is kept; complete a new online delivery to publish a score.
-              </small>
-            )}
-          </section>
-          {player && (
-            <InviteFriends
-              mission={result.mission}
-              mode={result.mode}
-              variant={result.variant || 0}
-              score={result.score}
-            />
-          )}
-          <Leaderboard
-            mission={result.mission}
-            mode={result.mode}
-            variant={result.variant || 0}
-          />
+          <span className="eyebrow">KEEP YOUR JOURNEY</span>
+          <h3>Your delivery deserves a place.</h3>
+          <p>
+            Create an account or log in to save across devices and join
+            the leaderboard. You’ll return to this completed chapter.
+          </p>
+          <div className="community-actions">
+            <button
+              disabled={status === "loading"}
+              onClick={() => onAuth("signup")}
+            >
+              Create an account
+            </button>
+            <button
+              disabled={status === "loading"}
+              onClick={() => onAuth("login")}
+            >
+              Log in
+            </button>
+          </div>
+          <small>Continuing as a guest is always available.</small>
+        </>
+      ) : !player.verified ? (
+        <>
+          <h3>One step before the leaderboard.</h3>
+          <p>
+            Verify your email to publish your score. Your chapter stays
+            saved here.
+          </p>
+          <button onClick={() => onAuth("verify-email")}>
+            Verify email
+          </button>
+        </>
+      ) : !player.name ? (
+        <>
+          <h3>Choose your name on the road.</h3>
+          <p>
+            Your player name and scores will be public. Your email stays
+            private.
+          </p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setBusy(true);
+              setError("");
+              void joinLeaderboard(name)
+                .catch((e) => setError(errorMessage(e)))
+                .finally(() => setBusy(false));
+            }}
+          >
+            <label>
+              Public player name
+              <input
+                required
+                minLength={2}
+                maxLength={28}
+                autoComplete="nickname"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your player name"
+              />
+            </label>
+            <button disabled={busy || !name.trim()}>
+              {busy ? "Saving…" : "Join the leaderboard"}
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          <h3>Welcome back, {player.name}.</h3>
+          <p>
+            {runRecord?.published
+              ? "Your best eligible delivery is on the leaderboard."
+              : "Your best full online deliveries count toward your ranking."}
+          </p>
         </>
       )}
-      <RealProjectCard />
-    </div>
+      {(error || message) && (
+        <p role="status">
+          {error || message}
+          {player && connectionIssue && (
+            <button onClick={() => void refreshAccount()}>
+              Retry online saving
+            </button>
+          )}
+        </p>
+      )}
+      {offline && (
+        <small>
+          This drive began without an online record. Your chapter progress
+          is kept; complete a new online delivery to publish a score.
+        </small>
+      )}
+    </section>
   );
 }

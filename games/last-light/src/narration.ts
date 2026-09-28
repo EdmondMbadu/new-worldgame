@@ -1,7 +1,7 @@
 import { storyClip, type ClinicStory, type StoryScene } from './clinic-stories';
 
 export type NarrationStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'ended' | 'blocked' | 'error';
-export type NarrationState = { status: NarrationStatus; progress: number; scene: StoryScene | null };
+export type NarrationState = { status: NarrationStatus; progress: number; scene: StoryScene | null; currentTime?: number; duration?: number };
 type Clip = {
   audio: HTMLAudioElement;
   source: MediaElementAudioSourceNode;
@@ -137,7 +137,7 @@ export class SceneNarrator {
       ? Math.min(1, audio.currentTime / audio.duration) : 0;
     const status = clip.failed ? 'error' : clip.blocked ? 'blocked' : audio.ended ? 'ended'
       : !this.wanted || !this.enabled ? 'paused' : this.playing ? 'playing' : 'loading';
-    return { scene: this.scene, status, progress };
+    return { scene: this.scene, status, progress, currentTime: audio.currentTime, duration: Number.isFinite(audio.duration) ? audio.duration : 0 };
   }
 
   dispose() {
