@@ -1,6 +1,7 @@
-import { Leaderboard, PlayerControls, RealProjectCard } from './CommunityPanel';
-import { beginRun, finishRun, useCommunity, syncProgress, publishPending } from './community';
+import { Leaderboard, LeaderboardDialog, PlayerControls, RealProjectCard } from './CommunityPanel';
+import { beginRun, beginPractice, finishRun, useCommunity, syncProgress, publishPending, saveDriveCheckpoint, continueJourney, currentJourneyId, abandonDrive } from './community';
 import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
+import { readActive, type ActiveJourney } from './records';
 import { routePoint } from "./routes";
 import {
   useCallback,
@@ -385,10 +386,23 @@ function SettingsPanel({
   );
 }
 
+function RestartJourneyDialog({ onKeep, onRestart }: { onKeep: () => void; onRestart: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => { const previous = document.activeElement as HTMLElement | null; dialog.current?.showModal(); return () => previous?.focus?.(); }, []);
+  return <dialog ref={dialog} className="restart-dialog" role="alertdialog" aria-labelledby="restart-title" aria-describedby="restart-description" onCancel={e => { e.preventDefault(); onKeep(); }}>
+    <h2 id="restart-title">Start a new drive?</h2><p id="restart-description">This replaces your unfinished journey. Your past drives, best scores and unlocked clinics stay saved.</p>
+    <button className="primary" autoFocus onClick={onKeep}>Keep my journey</button><button className="secondary" onClick={onRestart}>Start again</button>
+  </dialog>;
+}
+
 export default function App() {
   const [checkpoint] = useState(() => readCheckpoint());
   const [challenge] = useState(() => invitation());
   const restore = useRef(checkpoint);
+  const restoreDrive = useRef<ActiveJourney | null>(null);
+  const [continuing, setContinuing] = useState(false);
+  const [restartChoice, setRestartChoice] = useState<{ id: number; journeyId?: string } | null>(null);
+  const [sharedBoard, setSharedBoard] = useState(() => new URLSearchParams(location.search).get('leaderboard') === '1');
   const community = useCommunity();
   const [handoffError, setHandoffError] = useState(() => new URLSearchParams(location.search).has('resume') && !checkpoint ? 'This return point is not available in this browser. Open the original game tab, or choose a chapter here. Signed-in progress will load when connected.' : '');
   const connectedOwner = useRef<string | null | undefined>(undefined);
@@ -402,7 +416,7 @@ export default function App() {
   }),
     [selected, setSelected] = useState(checkpoint?.mission ?? challenge?.mission ?? 0),
     [variant, setVariant] = useState(checkpoint?.variant ?? challenge?.variant ?? 0),
-    [inGame, setInGame] = useState(!!checkpoint),
+    [inGame, setInGame] = useState(!!checkpoint && !checkpoint.owner),
     [opening, setOpening] = useState(false),
     [previewPaused, setPreviewPaused] = useState(false),
     [run, setRun] = useState(0),
@@ -432,6 +446,9 @@ export default function App() {
   settingsOpenRef.current = showSettings;
   previewPausedRef.current = previewPaused;
   const e = engine.current;
+  const savedJourney = readActive(community.player?.uid || null);
+  const canContinue = savedJourney && ['driving','between'].includes(savedJourney.status);
+  useEffect(() => { const changed = () => setTick(t => t+1); window.addEventListener('last-light:records', changed); return () => window.removeEventListener('last-light:records', changed); }, []);
   const qa =
     import.meta.env.DEV &&
     new URLSearchParams(location.search).get("qa") === "1";
@@ -450,6 +467,7 @@ export default function App() {
     if (community.status === 'loading' || community.status === 'unavailable') return;
     const uid = community.player?.uid || null;
     if (connectedOwner.current !== uid) {
+      if (connectedOwner.current !== undefined && connectedOwner.current !== uid && engine.current) { engine.current.pause(); setInGame(false); restoreDrive.current = null; }
       connectedOwner.current = uid;
       synced.current = '';
       setSave(previous => ({...readSave(uid || undefined), settings:previous.settings}));
@@ -458,6 +476,7 @@ export default function App() {
       if (checkpoint.owner && checkpoint.owner !== uid) {
         if (uid) { restore.current = null; setInGame(false); setHandoffError('This saved chapter belongs to another account. Its scores have not been copied.'); }
       } else if (uid) {
+        if (checkpoint.owner === uid) setInGame(true);
         const claimedBy = load<string | null>('last-light.guest-claimed', null);
         const claimedResults = claimGuestRuns(uid);
         setSave(previous => mergeProgress(previous, claimedResults));
@@ -500,6 +519,14 @@ export default function App() {
     }, 1500);
     return () => clearTimeout(timer);
   }, [inGame]);
+  const checkpointOf = (instance: GameEngine | null) => {
+    try { return instance?.checkpoint() || null; }
+    catch {
+      setStorageOk(false);
+      setHandoffError('This checkpoint could not be saved. Keep this tab open; completed deliveries are still recorded.');
+      return null;
+    }
+  };
   const pause = () => {
     const x = engine.current;
     if (!x) return;
@@ -511,6 +538,7 @@ export default function App() {
       x.pause();
       controls.current?.clear();
       sound.current?.silence();
+      const snapshot = checkpointOf(x); if (snapshot) setStorageOk(saveDriveCheckpoint(snapshot, true));
     }
     setTick((t) => t + 1);
   };
@@ -527,7 +555,7 @@ export default function App() {
       raf = 0,
       last = 0,
       hudTime = 0,
-      committed = false, failedCommitted = false;
+      committed = false, failedCommitted = false, checkpointAt = 0;
     setReady(false);
     setError("");
     setLoading("Preparing the road");
@@ -561,7 +589,11 @@ export default function App() {
           missionVariant(MISSIONS[selected], variant),
           settingsRef.current.mode,
         );
-        if (restore.current) {
+        if (restoreDrive.current?.snapshot) {
+          instance.restoreDrive(restoreDrive.current.snapshot);
+          if (!sound.current) sound.current = new Soundtrack(settingsRef.current, CLINICS[selected]);
+          restoreDrive.current = null;
+        } else if (restore.current) {
           const saved = restore.current;
           if (!sound.current) sound.current = new Soundtrack(settingsRef.current,CLINICS[selected]);
           if (saved.result) {
@@ -599,6 +631,7 @@ export default function App() {
         world.current = view;
         setLoading("Lighting the road");
         await view.prepare();
+        if (instance.phase === 'paused') view.render(0, 0);
         if (cancelled) return;
         const input = new Controls(settingsRef.current, (force = false) => {
           if (settingsOpenRef.current || openingRef.current || ['restoring', 'results', 'failed'].includes(instance.phase)) {
@@ -631,6 +664,11 @@ export default function App() {
           const stepStart = performance.now();
           if (!openingRef.current) instance.advance(dt, state, settingsRef.current.singlePress);
           const physicsMs = performance.now() - stepStart;
+          if (!openingRef.current && now - checkpointAt > 5000) {
+            checkpointAt = now;
+            const snapshot = checkpointOf(instance);
+            if (snapshot) setStorageOk(saveDriveCheckpoint(snapshot));
+          }
           if (instance.result && !committed) {
             committed = true;
             const owner = finishRun(instance.result!);
@@ -644,6 +682,7 @@ export default function App() {
           }
           if (instance.phase === 'failed' && !failedCommitted) {
             failedCommitted = true;
+            abandonDrive();
             const href = checkpointHref({mission:selected,variant,mode:instance.mode,failure:instance.failure,safeZ:instance.safeZ,safeAlt:instance.safeAlt,owner:saveRef.current.owner||null,save:saveRef.current});
             if(href) history.replaceState(null,'',href + (qa ? '&qa=1' : ''));
           }
@@ -679,6 +718,7 @@ export default function App() {
     void load();
     const interrupt = (event?: Event) => {
       if (!openingRef.current) engine.current?.pause(event?.type || "visibility");
+      const snapshot = checkpointOf(engine.current); if (snapshot) setStorageOk(saveDriveCheckpoint(snapshot, true));
       controls.current?.clear();
       sound.current?.silence();
       setTick((t) => t + 1);
@@ -750,11 +790,16 @@ export default function App() {
     engine.current?.skip();
     setTick((t) => t + 1);
   }, []);
-  const start = (id = selected) => {
+  const start = (id = selected, journeyId?: string, confirmed = false) => {
+    const unfinished = readActive(community.player?.uid || null);
+    if (!confirmed && !journeyId && unfinished && ['driving','between'].includes(unfinished.status)) {
+      engine.current?.pause(); setRestartChoice({ id }); return;
+    }
+    restoreDrive.current = null;
     restore.current = null;
     setHandoffError('');
     history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
-    beginRun(id,settingsRef.current.mode,variant);
+    beginRun(id,settingsRef.current.mode,variant,journeyId);
     if (sound.current) sound.current.beginChapter(CLINICS[id]);
     else sound.current = new Soundtrack(settingsRef.current, CLINICS[id]);
     openingRef.current = true;
@@ -774,7 +819,33 @@ export default function App() {
     pilotRef.current = false;
     setAutopilot(false);
   };
+  const resumeSaved = async () => {
+    setContinuing(true); setHandoffError('');
+    try {
+      const saved = await continueJourney();
+      settingsRef.current = { ...settingsRef.current, mode: saved.mode };
+      setSave(s => ({ ...s, settings: settingsRef.current }));
+      setSelected(saved.mission); setVariant(saved.variant);
+      if (saved.status === 'between') {
+        // State setters settle before starting the next road, which may use a
+        // different variant from the chapter-map selection.
+        nextLeg.current = saved;
+      } else {
+        restore.current = null; restoreDrive.current = saved;
+        openingRef.current = false; setOpening(false); setReady(false); setInGame(true); setShowSettings(false); setRun(r => r+1);
+        history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
+      }
+    } catch (err) { setHandoffError(err instanceof Error ? err.message : 'Unable to restore this journey. Your scores are safe.'); }
+    finally { setContinuing(false); }
+  };
+  const nextLeg = useRef<ActiveJourney | null>(null);
+  useEffect(() => {
+    if (nextLeg.current && selected === nextLeg.current.mission && variant === nextLeg.current.variant) {
+      const next = nextLeg.current; nextLeg.current = null; start(next.mission, next.journeyId, true);
+    }
+  }, [selected, variant, continuing]);
   const home = () => {
+    const snapshot = checkpointOf(engine.current); if (snapshot) setStorageOk(saveDriveCheckpoint(snapshot, true));
     restore.current = null;
     history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
     sound.current?.dispose();
@@ -877,13 +948,13 @@ export default function App() {
               <br />
               Reach the clinic. Bring the light.
             </p>
-            <button className="primary start-button" onClick={() => start()}>
-              <span>
-                {save.story.completed.includes(selected)
-                  ? "Drive again"
-                  : "Begin the journey"}
-              </span>
-              <span>↗</span>
+            {canContinue && <div className="journey-continue">
+              <button className="primary start-button" disabled={continuing || community.status === 'loading'} onClick={() => void resumeSaved()}><span>{continuing ? 'Restoring journey…' : 'Continue journey'}</span><span>↗</span></button>
+              <p>Clinic {savedJourney.mission + 1} · {CLINICS[savedJourney.mission]?.shortName}<br/>{savedJourney.snapshot ? `${time(savedJourney.snapshot.remaining)} reserve · ${Math.round(savedJourney.snapshot.integrity)}% kit · safe checkpoint` : 'Your next delivery is ready.'}</p>
+              <small>{savedJourney.dirty ? 'Latest save on this device' : community.player ? 'Saved to your account' : 'Saved on this device'} · {new Date(savedJourney.savedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</small>
+            </div>}
+            <button className={canContinue ? 'secondary start-button' : 'primary start-button'} disabled={community.status === 'loading'} onClick={() => start(canContinue ? 0 : selected)}>
+              <span>{canContinue ? 'Start new journey' : save.story.completed.includes(selected) ? 'Drive again' : 'Begin the journey'}</span><span>↗</span>
             </button>
             <div
               className="road-edition"
@@ -992,7 +1063,7 @@ export default function App() {
               previewPaused={previewPaused || showSettings} onPreviewPause={() => setPreviewPaused(v => !v)}
               settings={save.settings} narration={sound.current?.narration || { status: 'idle', progress: 0, scene: null }}
               onVoice={storyVoice} onSettings={settings} onHome={home}
-              onContinue={opening ? beginDrive : () => result?.practice ? start(selected) : selected < 4 ? start(selected + 1) : home()}
+              onContinue={opening ? beginDrive : () => result?.practice ? start(selected) : selected < 4 ? start(selected + 1, currentJourneyId() || readActive(community.player?.uid || null)?.journeyId) : home()}
               onReplay={() => {
                 if (!e) return;
                 sound.current?.setStory(null);
@@ -1257,11 +1328,12 @@ export default function App() {
                     <button
                       className="secondary"
                       onClick={() => {
+                        beginPractice();
                         e.practiceFromCheckpoint();
                         controls.current?.clear();
                       }}
                     >
-                      Practice from checkpoint · no score saved
+                      Practice from checkpoint · unranked
                     </button>
                     {!community.player && <button className="text-button" onClick={() => authHandoff('login')}>Save your journey · log in</button>}
                     {handoffError && <p role="alert">{handoffError}</p>}
@@ -1276,7 +1348,7 @@ export default function App() {
                   <section className="pause-card">
                     <span className="eyebrow">THE ROAD WILL WAIT</span>
                     <h2>Take a breath.</h2>
-                    <p>Your delivery and the clinic clock are paused.</p>
+                    <p>Your delivery and the clinic clock are paused.</p><p className="checkpoint-status" role="status">{community.checkpointMessage || "Your next checkpoint will save automatically."}</p>
                     <button className="primary" onClick={pause} autoFocus>
                       Continue the journey ↗
                     </button>
@@ -1294,17 +1366,18 @@ export default function App() {
                     <button
                       className="text-button"
                       onClick={() => {
+                        beginPractice();
                         e.practiceFromCheckpoint();
                         controls.current?.clear();
                       }}
                     >
-                      Practice from checkpoint · no score saved
+                      Practice from checkpoint · unranked
                     </button>
                     <button className="text-button" onClick={() => start()}>
                       Restart this delivery
                     </button>
                     <button className="text-button" onClick={home}>
-                      Chapter map
+                      Save & return to chapter map
                     </button>
                   </section>
                 </div>
@@ -1400,6 +1473,8 @@ export default function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+      {restartChoice && <RestartJourneyDialog onKeep={() => setRestartChoice(null)} onRestart={() => { const choice = restartChoice; setRestartChoice(null); start(choice.id, choice.journeyId, true); }} />}
+      {sharedBoard && <LeaderboardDialog initial={{ mission: /^[0-4]$/.test(new URLSearchParams(location.search).get('chapter') || '') ? Number(new URLSearchParams(location.search).get('chapter')) : 'all', mode: ['standard','relaxed'].includes(new URLSearchParams(location.search).get('mode') || '') ? new URLSearchParams(location.search).get('mode')! : save.settings.mode, variant: new URLSearchParams(location.search).get('variant') === '1' ? 1 : 0 }} onClose={() => setSharedBoard(false)} />}
     </main>
   );
 }

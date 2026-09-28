@@ -18,6 +18,8 @@ import {
 } from '@angular/fire/compat/storage';
 import { Observable, async, finalize, of, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { AngularFireFunctions } from '@angular/fire/compat/functions';
+import { take, timeout } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -28,6 +30,27 @@ import { TranslateService } from '@ngx-translate/core';
 })
 export class ProfileComponent implements OnInit {
   user: User = {};
+  lastLight: { name: string; hidden: boolean; best: Record<string, { mission: number; mode: string; variant: number; revision: number; score: number }> } | null = null;
+  lastLightRoad = 'standard:0';
+  lastLightUnavailable = false;
+  get lastLightSummary() {
+    const [mode, variant] = this.lastLightRoad.split(':');
+    const best = new Map<number, number>();
+    for (const r of Object.values(this.lastLight?.best || {})) {
+      if (r.revision !== 6 || r.mode !== mode || r.variant !== Number(variant)) continue;
+      best.set(r.mission, Math.max(best.get(r.mission) || 0, r.score));
+    }
+    return { score: [...best.values()].reduce((sum, score) => sum + score, 0), clinics: best.size };
+  }
+  loadLastLight() {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid) return;
+    this.lastLightUnavailable = false;
+    this.functions.httpsCallable('getLastLightAccount')({ accountUid: uid }).pipe(take(1), timeout(14000)).subscribe({
+      next: record => { if (this.auth.currentUser?.uid === uid) this.lastLight = record; },
+      error: () => { if (this.auth.currentUser?.uid === uid) this.lastLightUnavailable = true; },
+    });
+  }
   profilePicturePath?: string = '';
   solutions: Solution[] = [];
   completedSolutions: Solution[] = [];
@@ -48,6 +71,7 @@ export class ProfileComponent implements OnInit {
   isHovering?: boolean;
   constructor(
     private router: Router,
+    private functions: AngularFireFunctions,
     public auth: AuthService,
     private time: TimeService,
     private solution: SolutionService,
@@ -81,6 +105,7 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     window.scroll(0, 0);
     this.user = this.auth.currentUser;
+    this.loadLastLight();
 
     this.solution.getAuthenticatedUserAllSolutions().subscribe((data: any) => {
       this.solutions = data;

@@ -78,10 +78,7 @@ test(
     await assert.rejects(() => call("getLastLightAccount"), {
       code: "UNAUTHENTICATED",
     });
-    await assert.rejects(
-      () => call("saveLastLightName", { name: "New Player" }, unverified),
-      { code: "FAILED_PRECONDITION" },
-    );
+    await call("saveLastLightName", { name: "New Player" }, unverified);
     await call("saveLastLightName", { name: `Alice ${prefix}` }, alice);
     await call("saveLastLightName", { name: `Bob ${prefix}` }, bob);
     await assert.rejects(
@@ -112,14 +109,8 @@ test(
         ),
       { code: "INVALID_ARGUMENT" },
     );
-    assert.deepEqual(
-      await call("submitLastLightRun", { ...guest, result: drive }, alice),
-      { published: true },
-    );
-    assert.deepEqual(
-      await call("submitLastLightRun", { ...guest, result: drive }, alice),
-      { published: true },
-    );
+    assert.equal((await call("submitLastLightRun", { ...guest, result: drive }, alice)).published, true);
+    assert.equal((await call("submitLastLightRun", { ...guest, result: drive }, alice)).published, true);
     await assert.rejects(
       () => call("submitLastLightRun", { ...guest, result: drive }, bob),
       { code: "PERMISSION_DENIED" },
@@ -247,7 +238,7 @@ test(
     const d1 = { ...d0, mission: 1, lives: 5, remaining: 127.5 };
     const name = `Steady Heron ${prefix}`;
     await assert.rejects(
-      () => call("publishLastLightDrive", { ...(await maturedTicket(undefined, v1)), result: d0, deviceKey: "nope", name }),
+      async () => call("publishLastLightDrive", { ...(await maturedTicket(undefined, v1)), result: d0, deviceKey: "nope", name }),
       { code: "INVALID_ARGUMENT" },
     );
     const t0 = await maturedTicket(undefined, v1);
@@ -327,3 +318,42 @@ test(
     }
   },
 );
+
+test('account history, default alias, opt-out and concurrent checkpoint ownership', {skip:!enabled},async()=>{
+  const owner=await player('continuation'),other=await player('unrelated');
+  const profile=await call('getLastLightAccount',{},owner);
+  assert.ok(profile.name);assert.equal(profile.hidden,false);
+  const journeyId=randomUUID();
+  const ticket=await maturedTicket(owner,{...base,journeyId});
+  const snapshot={version:1,...base,stage:'driving',safeZ:120,safeAlt:false,remaining:190,integrity:84,elapsed:45,furthest:128,impacts:1,recoveries:0,cleanEncounters:1,radioIndex:1,damageCooldown:0,practice:false,events:[],cars:[],knocked:[]};
+  await call('saveLastLightJourney',{...ticket,version:0,snapshot},owner);
+  const race=await Promise.allSettled([call('resumeLastLightJourney',{version:1},owner),call('resumeLastLightJourney',{version:1},owner)]);
+  assert.equal(race.filter(r=>r.status==='fulfilled').length,1,'only one device acquires continuation');
+  const resumed=race.find(r=>r.status==='fulfilled').value;
+  await assert.rejects(()=>call('saveLastLightJourney',{...ticket,version:2,snapshot},owner),{code:'PERMISSION_DENIED'});
+  await assert.rejects(()=>call('saveLastLightJourney',{...resumed.ticket,version:2,snapshot},other),{code:'PERMISSION_DENIED'});
+  await call('setLastLightVisibility',{hidden:true},owner);
+  const result={...drive,integrity:80,stars:2,score:1720};
+  const replies=await Promise.all([call('submitLastLightRun',{...resumed.ticket,result},owner),call('submitLastLightRun',{...resumed.ticket,result},owner)]);
+  assert.ok(replies.every(r=>r.saved&&!r.published));
+  let history=await call('getLastLightDrives',{},owner);
+  assert.equal(history.drives.length,1);
+  const lower={...drive,integrity:70,stars:2,score:1680};
+  await call('submitLastLightRun',{...(await maturedTicket(owner)),result:lower},owner);
+  history=await call('getLastLightDrives',{},owner);assert.equal(history.drives.length,2);
+  const latest=await call('getLastLightAccount',{},owner);
+  assert.equal(latest.best['0:standard:r6:v0'].score,1720);assert.equal(latest.hidden,true);
+  assert.equal(latest.active.status,'between');assert.equal(latest.active.version,3);
+  assert.equal((await call('getLastLightLeaderboard',base,owner)).own,null);
+  await call('setLastLightVisibility',{hidden:false},owner);
+  const visible=await call('getLastLightLeaderboard',base,owner);assert.equal(visible.own.score,1720);
+  const shared=await call('getLastLightLeaderboard',{...base,focus:visible.own.id});assert.equal(shared.featured.name,profile.name);
+  await call('setLastLightVisibility',{hidden:true},owner);
+  assert.equal((await call('getLastLightLeaderboard',{...base,focus:visible.own.id})).featured,null);
+  await assert.rejects(()=>call('getLastLightDrives',{accountUid:owner.uid},other),{code:'PERMISSION_DENIED'});
+  const paths=[`lastLightPlayers/${owner.uid}/drives/${resumed.ticket.id}`,`lastLightPlayers/${owner.uid}/state/current`,`lastLightPlayers/${owner.uid}/journeys/${journeyId}`];
+  for(const path of paths){
+    const url=`http://127.0.0.1:8186/v1/projects/demo-last-light/databases/(default)/documents/${path}`;
+    assert.equal((await fetch(url,{headers:{Authorization:`Bearer ${owner.token}`}})).status,403,'private nested records stay callable-only');
+  }
+});

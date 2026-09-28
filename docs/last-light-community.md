@@ -1,5 +1,7 @@
 # Last Light community and real-project connection
 
+The account-first leaderboard and mid-drive continuation behavior is specified in [last-light-leaderboard-and-resume.md](last-light-leaderboard-and-resume.md). It supersedes the earlier nickname-gated publication and end-of-chapter-only resume flow described below.
+
 The game remains playable without an account or a working backend. Accounts are encouraged on each completed chapter; the next-chapter button explicitly allows guests to continue. Failed deliveries keep Retry first and offer a smaller login action. Practice never publishes scores.
 
 ## What ships

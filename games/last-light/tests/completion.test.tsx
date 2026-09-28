@@ -7,7 +7,7 @@ import { MISSIONS } from '../src/missions';
 import { defaultSettings } from '../src/save';
 import type { CommunityState } from '../src/community';
 
-const community = vi.hoisted(() => ({ value: { status: 'guest', player: null, message: '' } as CommunityState }));
+const community = vi.hoisted(() => ({ value: { status: 'guest', player: null, message: '', checkpointMessage: '', synced: false } as CommunityState }));
 vi.mock('../src/community', async importOriginal => ({
   ...await importOriginal<typeof import('../src/community')>(),
   useCommunity: () => community.value,
@@ -93,32 +93,31 @@ describe('compact delivery completion', () => {
 });
 
 describe('account controls inside drive details', () => {
-  beforeEach(() => { community.value = { status: 'guest', player: null, message: '' }; });
+  beforeEach(() => { community.value = { status: 'guest', player: null, message: '', checkpointMessage: '', synced: false }; });
   const account = () => renderToStaticMarkup(<CompletionAccount result={props().result!} onAuth={() => {}} />);
   it('keeps guest continuation and account handoff available without duplicate panels', () => {
     const html = account();
     expect(html).toContain('Create an account');
     expect(html).toContain('Log in');
-    expect(html).toContain('Continuing as a guest');
+    expect(html).toContain('saved on this device');
     expect(html).not.toContain('THE REAL PROJECT');
     expect(html).not.toContain('Challenge link');
   });
-  it('retains verification and public-name eligibility states', () => {
-    community.value = { status: 'signed-in', player: { uid: 'test', verified: false, name: '', publicId: '', best: {} }, message: '' };
+  it('retains verification without requiring a public-name form', () => {
+    community.value = { status: 'signed-in', player: { uid: 'test', verified: false, name: '', publicId: '', best: {}, hidden: false, rankingEnabled: false, bestJourneys: {}, active: null }, message: '', checkpointMessage: '', synced: false };
     expect(account()).toContain('Verify email');
     expect(account()).not.toContain('Public player name');
     community.value.player!.verified = true;
-    expect(account()).toContain('Public player name');
-    expect(account()).toContain('Your email stays');
+    expect(account()).not.toContain('Public player name');
     community.value.player!.name = 'Driver';
-    expect(account()).toContain('Welcome back, Driver');
+    expect(account()).toContain('Your delivery, Driver');
     expect(account()).not.toContain('Public player name');
   });
   it('keeps offline results honest and makes online saving retryable', () => {
-    community.value = { status: 'signed-in', player: { uid: 'test', verified: true, name: 'Driver', publicId: 'test', best: {} }, message: 'Online records are unavailable. Your progress stays on this device.' };
+    community.value = { status: 'signed-in', player: { uid: 'test', verified: true, name: 'Driver', publicId: 'test', best: {}, hidden: false, rankingEnabled: false, bestJourneys: {}, active: null }, message: 'Online records are unavailable. Your progress stays on this device.', checkpointMessage: '', synced: false };
     const html = account();
     expect(html).toContain('Retry online saving');
-    expect(html).toContain('This drive began without an online record');
+    expect(html).toContain('saved on this device');
     expect(html).not.toContain('Your best eligible delivery is on the leaderboard');
   });
 });

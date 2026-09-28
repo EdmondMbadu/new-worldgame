@@ -1,0 +1,10 @@
+
+.last-light-profile { margin-top: 1.5rem; padding: 1.5rem; border: 1px solid #315a47; border-radius: 1rem; background: #102b24; color: #eceddf; display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap; }
+.last-light-profile h2 { font: 1.65rem Georgia, serif; margin: .25rem 0; }
+.last-light-profile p, .last-light-profile label { font-size: .75rem; color: #bfceba; }
+.last-light-profile-eyebrow { font-size: .6rem; letter-spacing: .15em; color: #e6ca84; }
+.last-light-profile select { display: block; border: 1px solid #6c806a; background: #102b24; color: #eceddf; border-radius: .35rem; padding: .5rem; margin-top: .35rem; }
+.last-light-profile-score strong { display: block; font-size: 1.1rem; font-weight: 500; }
+.last-light-profile-score span { font-size: .7rem; color: #bfceba; }
+.last-light-profile a, .last-light-profile button { color: #efd18b; font-size: .8rem; padding: .65rem 0; }
+.last-light-profile a:focus-visible, .last-light-profile button:focus-visible { outline: 2px solid #efd18b; outline-offset: 4px; }

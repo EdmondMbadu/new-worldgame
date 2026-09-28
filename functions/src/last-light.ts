@@ -1,5 +1,7 @@
 import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { validateSnapshot, type DriveSnapshot } from './last-light-snapshot';
 import {
   createHash,
   randomBytes,
@@ -12,7 +14,6 @@ import {
   mergeBest,
   boardKey,
   driveKey,
-  totalBest,
   publicName,
   eligibleOwner,
   elapsedDrive,
@@ -39,16 +40,38 @@ const user = (c: functions.https.CallableContext, raw?: any) => {
     );
   return uid;
 };
-const verified = (c: functions.https.CallableContext, raw?: any) => {
-  const uid = user(c, raw),
-    provider = c.auth!.token.firebase?.sign_in_provider;
+const isVerified = (c: functions.https.CallableContext) =>
+  !!c.auth &&
+  (!!c.auth.token.email_verified ||
+    !['password', 'anonymous', 'custom', undefined].includes(
+      c.auth.token.firebase?.sign_in_provider,
+    ));
+const uuid = (v: unknown): v is string =>
+  typeof v === 'string' &&
+  /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(v);
+const playerRef = (uid: string) => db().collection('lastLightPlayers').doc(uid);
+function generatedName(uid: string) {
+  const h = hash(uid);
+  return `${['Steady', 'Bright', 'Careful', 'Kind'][parseInt(h.slice(0, 2), 16) % 4]} ${['Heron', 'Lantern', 'Baobab', 'Sunbird'][parseInt(h.slice(2, 4), 16) % 4]} ${10 + (parseInt(h.slice(4, 8), 16) % 90)}`;
+}
+function checkTicket(raw: any, run: any, uid: string | null) {
   if (
-    !c.auth!.token.email_verified &&
-    (!provider || ['password', 'anonymous', 'custom'].includes(provider))
+    !run ||
+    !/^[a-f0-9]{48}$/.test(raw?.secret || '') ||
+    !timingSafeEqual(
+      Buffer.from(run.secretHash, 'hex'),
+      Buffer.from(hash(raw.secret), 'hex'),
+    )
   )
-    fail('failed-precondition', 'Verify your email before publishing a score.');
-  return uid;
-};
+    fail(
+      'permission-denied',
+      'This drive was continued elsewhere or cannot be claimed.',
+    );
+  if (run.owner && run.owner !== uid)
+    fail('permission-denied', 'This drive belongs to another player.');
+}
+const sortKey = (at: number, id: string) =>
+  `${String(9999999999999 - at).padStart(13, '0')}:${id}`;
 function checked<T>(fn: () => T): T {
   try {
     return fn();
@@ -78,7 +101,7 @@ function writeRows(
     id: publicId,
     name,
     searchName: name.toLocaleLowerCase('en'),
-    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
   };
   const boards = boardsFor(published);
   for (const { board, drive } of boards.chapters)
@@ -124,59 +147,73 @@ async function limit(
       );
     tx.set(ref, {
       count: count + 1,
-      expiresAt: admin.firestore.Timestamp.fromMillis((hour + 2) * 3600000),
+      expiresAt: Timestamp.fromMillis((hour + 2) * 3600000),
     });
   });
 }
 export const beginLastLightRun = functions.https.onCall(async (raw, c) => {
-  if (raw?.accountUid) user(c,raw);
+  if (raw?.accountUid) user(c, raw);
   const b = checked(() => bracket(raw));
   await limit(c, 'runs', 120);
-  const id = randomUUID(),
+  const journeyId = uuid(raw?.journeyId) ? raw.journeyId : randomUUID();
+  const id = uuid(raw?.clientRunId) ? raw.clientRunId : randomUUID(),
     secret = randomBytes(24).toString('hex');
-  await db()
-    .collection('lastLightRuns')
-    .doc(id)
-    .set({
+  const ref = db().collection('lastLightRuns').doc(id);
+  await db().runTransaction(async (tx) => {
+    if ((await tx.get(ref)).exists)
+      fail('already-exists', 'This drive already has a record.');
+    tx.set(ref, {
       ...b,
+      journeyId,
       secretHash: hash(secret),
       owner: c.auth?.uid || null,
       claimedBy: null,
       issuedAt: Date.now(),
-      expiresAt: admin.firestore.Timestamp.fromMillis(
-        Date.now() + 30 * 86400000,
-      ),
+      expiresAt: Timestamp.fromMillis(Date.now() + 30 * 86400000),
     });
-  return { id, secret, owner: c.auth?.uid || null };
+  });
+  return { id, secret, owner: c.auth?.uid || null, journeyId };
 });
 export const getLastLightAccount = functions.https.onCall(async (raw, c) => {
   const uid = user(c, raw);
-  await limit(c, 'account', 120);
-  const p = (await db().collection('lastLightPlayers').doc(uid).get()).data();
-  return {
-    name: p?.name || '',
-    best: p?.best || {},
-    publicId: hash(uid).slice(0, 24),
-  };
+  await limit(c, 'account', 240);
+  return db().runTransaction(async (tx) => {
+    const ref = playerRef(uid),
+      p = (await tx.get(ref)).data() || {};
+    const active =
+      (await tx.get(ref.collection('state').doc('current'))).data() || null;
+    const name = p.name || generatedName(uid),
+      rankingEnabled = isVerified(c);
+    tx.set(ref, { name, hidden: !!p.hidden, rankingEnabled }, { merge: true });
+    // Verification can arrive after a privately saved completion. Rebuild from
+    // validated tickets only, never from imported/offline personal bests.
+    if (rankingEnabled && !p.hidden)
+      writeRows(tx, publicIdOf(uid), name, p.published || {});
+    return {
+      name,
+      best: p.best || {},
+      publicId: publicIdOf(uid),
+      hidden: !!p.hidden,
+      bestJourneys: p.bestJourneys || {},
+      active,
+      rankingEnabled,
+    };
+  });
 });
 export const saveLastLightName = functions.https.onCall(async (raw, c) => {
-  const uid = verified(c, raw),
+  const uid = user(c, raw),
     name = checked(() => publicName(raw?.name));
   await limit(c, 'profile', 20);
-  const ref = db().collection('lastLightPlayers').doc(uid);
   await db().runTransaction(async (tx) => {
-    const p = (await tx.get(ref)).data();
-    // The first public name is stable so all chapter boards stay consistent.
-    if (p?.name && p.name !== name)
-      fail(
-        'failed-precondition',
-        'Your existing player name is already linked to your scores.',
-      );
+    const ref = playerRef(uid),
+      p = (await tx.get(ref)).data();
     tx.set(
       ref,
-      { name, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
+      { name, updatedAt: FieldValue.serverTimestamp() },
       { merge: true },
     );
+    if (!p?.hidden && isVerified(c))
+      writeRows(tx, publicIdOf(uid), name, p?.published || {});
   });
   return { name };
 });
@@ -194,89 +231,147 @@ export const syncLastLightProgress = functions.https.onCall(async (raw, c) => {
     const best = mergeBest(p?.best || {}, results);
     tx.set(
       ref,
-      { best, updatedAt: admin.firestore.FieldValue.serverTimestamp() },
+      { best, updatedAt: FieldValue.serverTimestamp() },
       { merge: true },
     );
     return { best };
   });
 });
 export const submitLastLightRun = functions.https.onCall(async (raw, c) => {
-  const uid = verified(c, raw),
+  const uid = user(c, raw),
     r = checked(() => validateDrive(raw?.result));
-  if (
-    !/^[a-f0-9-]{36}$/.test(raw?.id || '') ||
-    !/^[a-f0-9]{48}$/.test(raw?.secret || '')
-  )
+  if (!uuid(raw?.id))
     fail('invalid-argument', 'This drive has no online record.');
-  await limit(c, 'submit', 120);
+  await limit(c, 'submit', 240);
   const ref = db().collection('lastLightRuns').doc(raw.id),
-    player = db().collection('lastLightPlayers').doc(uid);
+    player = playerRef(uid);
   return db().runTransaction(async (tx) => {
-    const [runSnap, pSnap] = await Promise.all([tx.get(ref), tx.get(player)]),
-      run = runSnap.data(),
-      p = pSnap.data();
-    if (
-      !run ||
-      !timingSafeEqual(
-        Buffer.from(run.secretHash, 'hex'),
-        Buffer.from(hash(raw.secret), 'hex'),
-      )
-    )
-      fail('permission-denied', 'This drive cannot be claimed.');
+    const [runSnap, pSnap, activeSnap] = await Promise.all([
+      tx.get(ref),
+      tx.get(player),
+      tx.get(player.collection('state').doc('current')),
+    ]);
+    const run = runSnap.data(),
+      p = pSnap.data() || {};
+    checkTicket(raw, run, uid);
     if (!eligibleOwner(run!.owner, run!.claimedBy, uid))
       fail('permission-denied', 'This drive belongs to another player.');
-    if (run!.claimedBy) {
-      if (JSON.stringify(validateDrive(run!.result)) !== JSON.stringify(r))
-        fail('already-exists', 'This drive has already been recorded.');
-      return { published: true };
-    }
-    if (!p?.name)
-      fail('failed-precondition', 'Choose your public player name first.');
+    if (
+      run!.claimedBy &&
+      JSON.stringify(validateDrive(run!.result)) !== JSON.stringify(r)
+    )
+      fail('already-exists', 'This drive has already been recorded.');
+    const snap = run!.snapshot as DriveSnapshot | undefined;
     if (
       driveKey(run as Drive) !== driveKey(r) ||
       Date.now() - run!.issuedAt > 30 * 86400000 ||
       Date.now() - run!.issuedAt <
-        Math.max(20000, (elapsedDrive(r) - 10) * 1000)
+        Math.max(20000, (elapsedDrive(r) - 10) * 1000) ||
+      (snap &&
+        (snap.practice ||
+          r.remaining > snap.remaining + 0.001 ||
+          r.integrity > snap.integrity + 0.001))
     )
       fail(
         'invalid-argument',
         'This drive could not be verified. Your local progress is still saved.',
       );
-    const best = mergeBest(p?.best || {}, [r]);
-    const published = mergeBest(p?.published || {}, [r]);
-    const publicId = hash(uid).slice(0, 24),
-      chapter = published[driveKey(r)],
-      total = totalBest(published, r);
+    const historyRef = player.collection('drives').doc(raw.id),
+      existing = (await tx.get(historyRef)).data();
+    const journeyRef = player
+      .collection('journeys')
+      .doc(run!.journeyId || raw.id);
+    const journey = (await tx.get(journeyRef)).data() || {
+      id: journeyRef.id,
+      mode: r.mode,
+      variant: r.variant,
+      revision: r.revision,
+      drives: {},
+    };
+    const best = mergeBest(p.best || {}, [r]),
+      published = mergeBest(p.published || {}, [r]);
+    const name = p.name || generatedName(uid),
+      eligible = isVerified(c),
+      completedAt = existing?.completedAt || Date.now();
+    // A journey has exactly one accepted attempt for each of its five legs.
+    if (
+      !journey.drives[r.mission] &&
+      r.mission > 0 &&
+      !journey.drives[r.mission - 1]
+    )
+      journey.partial = true;
+    if (
+      !journey.drives[r.mission] &&
+      journey.mode === r.mode &&
+      journey.variant === r.variant &&
+      journey.revision === r.revision
+    )
+      journey.drives[r.mission] = { id: raw.id, score: r.score };
+    const full =
+      !journey.partial && [0, 1, 2, 3, 4].every((i) => journey.drives[i]);
+    const bestJourneys = { ...(p.bestJourneys || {}) },
+      key = boardKey(r, 'all');
+    if (full) {
+      journey.score = Object.values(journey.drives).reduce(
+        (sum: number, d: any) => sum + d.score,
+        0,
+      );
+      journey.completedAt = journey.completedAt || completedAt;
+      if (!bestJourneys[key] || bestJourneys[key].score < journey.score)
+        bestJourneys[key] = {
+          id: journey.id,
+          score: journey.score,
+          completedAt: journey.completedAt,
+        };
+    }
+    tx.set(journeyRef, journey);
+    tx.set(historyRef, {
+      id: raw.id,
+      result: r,
+      completedAt,
+      sortKey: sortKey(completedAt, raw.id),
+      eligible: true,
+      journeyId: journey.id,
+    });
     tx.set(
       player,
       {
+        name,
         best,
         published,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        bestJourneys,
+        rankingEnabled: eligible,
+        updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
     );
-    tx.update(ref, { claimedBy: uid, result: r });
-    // Players who hid themselves keep their records privately.
-    if (p?.hidden) return { published: false };
-    const row = {
-      id: publicId,
-      name: p!.name,
-      searchName: p!.name.toLocaleLowerCase('en'),
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    tx.update(ref, { owner: uid, claimedBy: uid, result: r });
+    // Keep the next leg resumable even when the player closes the arrival screen.
+    if (
+      activeSnap.data()?.runId === raw.id &&
+      activeSnap.data()?.status === 'driving'
+    ) {
+      const current = activeSnap.data()!;
+      tx.set(player.collection('state').doc('current'), {
+        version: current.version + 1,
+        runId: raw.id,
+        journeyId: journey.id,
+        status: r.mission === 4 ? 'finished' : 'between',
+        mission: r.mission + 1,
+        mode: r.mode,
+        variant: r.variant,
+        revision: r.revision,
+        savedAt: Date.now(),
+      });
+    }
+    if (!p.hidden && eligible) writeRows(tx, publicIdOf(uid), name, published);
+    return {
+      saved: true,
+      eligible,
+      published: !p.hidden && eligible,
+      best,
+      bestJourneys,
     };
-    tx.set(collectionBoard(boardKey(r, r.mission)).doc(publicId), {
-      ...row,
-      score: chapter.score,
-      chapters: 1,
-      rankKey: rankKey(chapter.score, publicId),
-    });
-    tx.set(collectionBoard(boardKey(r, 'all')).doc(publicId), {
-      ...row,
-      ...total,
-      rankKey: rankKey(total.score, publicId),
-    });
-    return { published: true };
   });
 });
 export const getLastLightLeaderboard = functions.https.onCall(
@@ -312,7 +407,12 @@ export const getLastLightLeaderboard = functions.https.onCall(
     ]);
     // A device player sees their own row without signing in.
     let deviceOwn: admin.firestore.DocumentSnapshot | null = null;
-    if (!own?.exists && typeof raw?.deviceKey === 'string' && /^[a-f0-9]{64}$/.test(raw.deviceKey))
+    if (
+      !c.auth &&
+      !own?.exists &&
+      typeof raw?.deviceKey === 'string' &&
+      /^[a-f0-9]{64}$/.test(raw.deviceKey)
+    )
       deviceOwn = await col.doc(publicIdOf(guestId(raw.deviceKey))).get();
     const mine = own?.exists ? own : deviceOwn?.exists ? deviceOwn : null;
     async function entry(
@@ -347,8 +447,13 @@ export const getLastLightLeaderboard = functions.https.onCall(
         entry(d, firstRank === undefined ? undefined : firstRank + i),
       ),
     );
+    const featured =
+      typeof raw?.focus === 'string' && /^[a-f0-9]{24}$/.test(raw.focus)
+        ? await col.doc(raw.focus).get()
+        : null;
     return {
       entries,
+      featured: featured?.exists ? await entry(featured) : null,
       total: count.data().count,
       own: mine
         ? entries.find((r) => r.id === mine.id) || (await entry(mine))
@@ -364,6 +469,11 @@ export const getLastLightLeaderboard = functions.https.onCall(
  * for accounts, so only real full deliveries reach the boards.
  */
 export const publishLastLightDrive = functions.https.onCall(async (raw, c) => {
+  if (c.auth)
+    fail(
+      'failed-precondition',
+      'Save this drive under your signed-in account.',
+    );
   const key = checked(() => guestKey(raw?.deviceKey)),
     name = checked(() => publicName(raw?.name)),
     r = checked(() => validateDrive(raw?.result));
@@ -381,6 +491,11 @@ export const publishLastLightDrive = functions.https.onCall(async (raw, c) => {
     const [runSnap, pSnap] = await Promise.all([tx.get(ref), tx.get(player)]),
       run = runSnap.data(),
       p = pSnap.data();
+    if (p?.migratedTo)
+      fail(
+        'permission-denied',
+        'This device record already belongs to an account.',
+      );
     if (
       !run ||
       !timingSafeEqual(
@@ -410,23 +525,33 @@ export const publishLastLightDrive = functions.https.onCall(async (raw, c) => {
         'invalid-argument',
         'This drive could not be verified. Your local progress is still saved.',
       );
+    const stableName = p?.name || name;
     const best = mergeBest(p?.best || {}, [r]),
       published = mergeBest(p?.published || {}, [r]);
     tx.set(
       player,
       {
         guest: true,
-        name,
+        name: stableName,
         best,
         published,
         hidden: !!p?.hidden,
-        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
     );
     tx.update(ref, { claimedBy: playerId, result: r });
-    if (!p?.hidden) writeRows(tx, publicId, name, published);
-    return { published: !p?.hidden, publicId, name };
+    const completedAt = Date.now();
+    tx.set(player.collection('drives').doc(raw.id), {
+      id: raw.id,
+      result: r,
+      completedAt,
+      sortKey: sortKey(completedAt, raw.id),
+      eligible: true,
+      journeyId: run!.journeyId || raw.id,
+    });
+    if (!p?.hidden) writeRows(tx, publicId, stableName, published);
+    return { published: !p?.hidden, publicId, name: stableName };
   });
 });
 /** Opt out (or back in), and rename a device player; boards update at once. */
@@ -437,11 +562,28 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
     uid = c.auth?.uid ? user(c, raw) : null;
   const rename =
     raw?.name === undefined ? null : checked(() => publicName(raw.name));
-  if (!key && !uid) fail('invalid-argument', 'This device has no player key yet.');
+  if (!key && !uid)
+    fail('invalid-argument', 'This device has no player key yet.');
   await limit(c, 'visibility', 30);
   const refs = [
-    ...(key ? [{ ref: db().collection('lastLightPlayers').doc(guestId(key)), id: guestId(key), guest: true }] : []),
-    ...(uid ? [{ ref: db().collection('lastLightPlayers').doc(uid), id: uid, guest: false }] : []),
+    ...(!uid && key
+      ? [
+          {
+            ref: db().collection('lastLightPlayers').doc(guestId(key)),
+            id: guestId(key),
+            guest: true,
+          },
+        ]
+      : []),
+    ...(uid
+      ? [
+          {
+            ref: db().collection('lastLightPlayers').doc(uid),
+            id: uid,
+            guest: false,
+          },
+        ]
+      : []),
   ];
   return db().runTransaction(async (tx) => {
     const snaps = await Promise.all(refs.map((r) => tx.get(r.ref)));
@@ -452,13 +594,25 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
         publicId = guest ? publicIdOf(id) : hash(id).slice(0, 24);
       // Account names stay stable; device players may rename freely.
       const nextName = guest && rename ? rename : p?.name;
-      if (!p && !guest) return;
+      if (!p && !guest) {
+        tx.set(ref, {
+          name: generatedName(id),
+          hidden: raw.hidden,
+          rankingEnabled: isVerified(c),
+        });
+        return;
+      }
+      if (p?.migratedTo && guest)
+        fail(
+          'permission-denied',
+          'This device record already belongs to an account.',
+        );
       if (!p) {
         tx.set(ref, {
           guest: true,
           name: rename || null,
           hidden: raw.hidden,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         });
         return;
       }
@@ -468,13 +622,283 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
         {
           hidden: raw.hidden,
           ...(guest && rename ? { name: rename } : {}),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: FieldValue.serverTimestamp(),
         },
         { merge: true },
       );
       if (raw.hidden) deleteRows(tx, publicId, p.published || {});
-      else if (nextName) writeRows(tx, publicId, nextName, p.published || {});
+      else if (nextName && (guest || isVerified(c)))
+        writeRows(tx, publicId, nextName, p.published || {});
     });
     return { hidden: raw.hidden, name };
   });
 });
+
+/** Private, paginated history; never served by a public profile link. */
+export const getLastLightDrives = functions.https.onCall(async (raw, c) => {
+  const uid = user(c, raw);
+  await limit(c, 'history', 240);
+  const col = playerRef(uid).collection('drives');
+  let query: admin.firestore.Query = col.orderBy('sortKey');
+  if (raw?.cursor) {
+    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(raw.cursor))
+      fail('invalid-argument', 'Invalid history page.');
+    const cursor = await col.doc(raw.cursor).get();
+    if (cursor.exists) query = query.startAfter(cursor);
+  }
+  const page = await query.limit(21).get();
+  return {
+    drives: page.docs.slice(0, 20).map((d) => d.data()),
+    nextCursor: page.size > 20 ? page.docs[19].id : null,
+  };
+});
+/** Import private local history without ever turning it into ranked scores. */
+export const saveLastLightHistory = functions.https.onCall(async (raw, c) => {
+  const uid = user(c, raw);
+  if (!Array.isArray(raw?.drives) || raw.drives.length > 20)
+    fail('invalid-argument', 'Too many drives.');
+  const records = raw.drives.map((d: any) => {
+    const r = d?.result;
+    if (
+      !/^[a-zA-Z0-9_-]{1,100}$/.test(d?.id || '') ||
+      !r ||
+      !Number.isInteger(r.mission) ||
+      r.mission < 0 ||
+      r.mission > 4 ||
+      !['standard', 'relaxed'].includes(r.mode) ||
+      ![0, 1].includes(r.variant) ||
+      !Number.isInteger(r.revision) ||
+      r.revision < 1 ||
+      r.revision > 6 ||
+      !Number.isFinite(r.score) ||
+      r.score < 0 ||
+      r.score > 2000 ||
+      !Number.isFinite(r.integrity) ||
+      r.integrity < 0 ||
+      r.integrity > 100 ||
+      !Number.isFinite(r.remaining) ||
+      r.remaining < 0 ||
+      r.remaining > 500 ||
+      !Number.isFinite(d.completedAt) ||
+      d.completedAt > Date.now() + 60000 ||
+      d.completedAt < 0
+    )
+      fail('invalid-argument', 'Invalid private drive.');
+    // Allow old road editions in history; keep only documented result fields.
+    const result = Object.fromEntries(
+      [
+        'mission',
+        'mode',
+        'variant',
+        'revision',
+        'score',
+        'stars',
+        'integrity',
+        'remaining',
+        'lives',
+        'clean',
+        'encounters',
+        'practice',
+      ]
+        .filter(
+          (k) =>
+            r[k] !== undefined &&
+            (typeof r[k] === 'number' ||
+              typeof r[k] === 'boolean' ||
+              k === 'mode'),
+        )
+        .map((k) => [k, r[k]]),
+    );
+    return {
+      id: d.id,
+      result,
+      completedAt: d.completedAt,
+      sortKey: sortKey(d.completedAt, d.id),
+      eligible: false,
+      imported: d.imported === true || d.id.startsWith('legacy-'),
+      journeyId: uuid(d.journeyId) ? d.journeyId : null,
+    };
+  });
+  await limit(c, 'history-save', 240);
+  await db().runTransaction(async (tx) => {
+    const refs = records.map((d: any) =>
+      playerRef(uid).collection('drives').doc(d.id),
+    );
+    const existing = await Promise.all(
+      refs.map((r: admin.firestore.DocumentReference) => tx.get(r)),
+    );
+    records.forEach((d: any, i: number) => {
+      if (!existing[i].exists) tx.set(refs[i], d);
+    });
+  });
+  return { saved: records.map((d: any) => d.id) };
+});
+
+/** Migrate only runs provably owned by this private device key and this account. */
+export const claimLastLightGuest = functions.https.onCall(async (raw, c) => {
+  const uid = user(c, raw),
+    key = checked(() => guestKey(raw?.deviceKey)),
+    id = guestId(key);
+  await limit(c, 'claim', 60);
+  return db().runTransaction(async (tx) => {
+    const guestRef = playerRef(id),
+      account = playerRef(uid);
+    const [guestSnap, accountSnap, runs] = await Promise.all([
+      tx.get(guestRef),
+      tx.get(account),
+      tx.get(
+        db()
+          .collection('lastLightRuns')
+          .where('claimedBy', '==', id)
+          .limit(201),
+      ),
+    ]);
+    const guest = guestSnap.data(),
+      p = accountSnap.data() || {};
+    if (guest?.migratedTo && guest.migratedTo !== uid)
+      return { claimed: 0, more: false };
+    const owned = runs.docs
+      .slice(0, 200)
+      .filter((d) => !d.data().owner || d.data().owner === uid);
+    const results = owned.map((d) => validateDrive(d.data().result));
+    const hidden =
+      !!p.hidden ||
+      (!guest?.migratedTo && !!guest?.hidden) ||
+      raw?.hidden === true;
+    const name = p.name || generatedName(uid),
+      published = mergeBest(p.published || {}, results);
+    const histories = await Promise.all(
+      owned.map((d) => tx.get(guestRef.collection('drives').doc(d.id))),
+    );
+    owned.forEach((d, i) => {
+      const result = results[i],
+        at = histories[i].data()?.completedAt || d.data().issuedAt;
+      tx.update(db().collection('lastLightRuns').doc(d.id), {
+        owner: uid,
+        claimedBy: uid,
+      });
+      tx.set(account.collection('drives').doc(d.id), {
+        id: d.id,
+        result,
+        completedAt: at,
+        sortKey: sortKey(at, d.id),
+        eligible: true,
+        journeyId: d.data().journeyId || d.id,
+      });
+    });
+    tx.set(
+      account,
+      {
+        name,
+        hidden,
+        published,
+        best: mergeBest(p.best || {}, results),
+        rankingEnabled: isVerified(c),
+      },
+      { merge: true },
+    );
+    if (guest) {
+      deleteRows(tx, publicIdOf(id), guest.published || {});
+      tx.set(guestRef, { migratedTo: uid, hidden: true }, { merge: true });
+    }
+    if (!hidden && isVerified(c))
+      writeRows(tx, publicIdOf(uid), name, published);
+    else deleteRows(tx, publicIdOf(uid), published);
+    return { claimed: owned.length, more: runs.size > 200 && owned.length > 0 };
+  });
+});
+
+/** Compare-and-swap prevents an older tab/device from replacing a newer checkpoint. */
+export const saveLastLightJourney = functions.https.onCall(async (raw, c) => {
+  const uid = user(c, raw);
+  if (!uuid(raw?.id) || !Number.isInteger(raw?.version) || raw.version < 0)
+    fail('invalid-argument', 'Invalid checkpoint.');
+  await limit(c, 'checkpoint', 600);
+  return db().runTransaction(async (tx) => {
+    const ref = playerRef(uid).collection('state').doc('current'),
+      runRef = db().collection('lastLightRuns').doc(raw.id);
+    const [head, runSnap] = await Promise.all([tx.get(ref), tx.get(runRef)]),
+      run = runSnap.data();
+    checkTicket(raw, run, uid);
+    if (run!.claimedBy || Date.now() - run!.issuedAt > 30 * 86400000)
+      fail('failed-precondition', 'This drive has ended.');
+    if ((head.data()?.version || 0) !== raw.version)
+      fail(
+        'aborted',
+        'A newer journey is saved. Continue it from the chapter map.',
+      );
+    const snapshot = checked(() =>
+      validateSnapshot(raw?.snapshot, run!.snapshot),
+    );
+    if (driveKey(snapshot) !== driveKey(run as Drive))
+      fail('invalid-argument', 'This checkpoint belongs to another road.');
+    const version = raw.version + 1,
+      savedAt = Date.now();
+    tx.set(ref, {
+      version,
+      runId: raw.id,
+      journeyId: run!.journeyId || raw.id,
+      snapshot,
+      status: 'driving',
+      mission: snapshot.mission,
+      mode: snapshot.mode,
+      variant: snapshot.variant,
+      revision: snapshot.revision,
+      savedAt,
+    });
+    tx.update(runRef, { owner: uid, snapshot });
+    return { version, savedAt };
+  });
+});
+export const resumeLastLightJourney = functions.https.onCall(async (raw, c) => {
+  const uid = user(c, raw);
+  await limit(c, 'resume', 120);
+  return db().runTransaction(async (tx) => {
+    const ref = playerRef(uid).collection('state').doc('current'),
+      head = (await tx.get(ref)).data();
+    if (!head || head!.status !== 'driving' || head!.version !== raw?.version)
+      fail('aborted', 'A newer journey is saved. Reload to continue it.');
+    const runRef = db().collection('lastLightRuns').doc(head!.runId),
+      run = (await tx.get(runRef)).data();
+    if (
+      !run ||
+      run.owner !== uid ||
+      run.claimedBy ||
+      Date.now() - run.issuedAt > 30 * 86400000
+    )
+      fail('failed-precondition', 'This saved drive has ended or expired.');
+    checked(() => validateSnapshot(head!.snapshot));
+    const secret = randomBytes(24).toString('hex'),
+      version = head!.version + 1;
+    tx.update(runRef, { secretHash: hash(secret) });
+    tx.update(ref, { version });
+    return {
+      ...head,
+      version,
+      ticket: {
+        id: head!.runId,
+        secret,
+        owner: uid,
+        journeyId: head!.journeyId,
+      },
+    };
+  });
+});
+export const discardLastLightJourney = functions.https.onCall(
+  async (raw, c) => {
+    const uid = user(c, raw);
+    await limit(c, 'discard', 60);
+    return db().runTransaction(async (tx) => {
+      const ref = playerRef(uid).collection('state').doc('current'),
+        head = (await tx.get(ref)).data();
+      if ((head?.version || 0) !== raw?.version)
+        fail(
+          'aborted',
+          'A newer journey is saved. Reload before starting again.',
+        );
+      const version = (head?.version || 0) + 1;
+      tx.set(ref, { version, status: 'abandoned', savedAt: Date.now() });
+      return { version };
+    });
+  },
+);

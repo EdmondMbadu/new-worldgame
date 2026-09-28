@@ -5,10 +5,11 @@ const calls = vi.hoisted(() => [] as { name: string; data: any }[]);
 vi.mock('../src/community-api', () => ({
   ready: Promise.resolve(),
   auth: { currentUser: null },
-  watchAuth: () => () => {},
+  watchAuth: (fn: any) => { fn(null); return () => {}; },
   call: async (name: string, data: any) => {
     calls.push({ name, data });
-    if (name === 'beginLastLightRun') return { id: '00000000-0000-4000-8000-000000000000', secret: 'a'.repeat(48), owner: null };
+    if (name === 'beginLastLightRun') return { id: data.clientRunId, secret: 'a'.repeat(48), owner: null };
+    if (name === 'publishLastLightDrive') return { published: false };
     return { published: true };
   },
 }));
@@ -41,6 +42,7 @@ describe('automatic leaderboard', () => {
   });
   it('publishes a finished delivery with no sign-in and nothing to type', async () => {
     const c = await import('../src/community');
+    c.initializeCommunity(); await tick();
     c.beginRun(0, 'standard', 0);
     await tick(); await tick();
     c.finishRun(result);
@@ -52,21 +54,24 @@ describe('automatic leaderboard', () => {
     expect(publish!.data.result.score).toBe(1684);
     expect(calls.some((x) => x.name === 'submitLastLightRun')).toBe(false);
   });
-  it('shows you on the board straight away, before the server confirms', async () => {
+  it('keeps local personal bests available without assigning an unconfirmed rank', async () => {
     const c = await import('../src/community');
     const { localBest } = await import('../src/CommunityPanel');
     const { updatePending } = await import('../src/journey');
     updatePending({ id: 'r1', owner: null, result });
     updatePending({ id: 'r2', owner: null, result: { ...result, mission: 1, lives: 5, score: 1500 } });
-    expect(localBest({ mission: 0, mode: 'standard', variant: 0 })).toMatchObject({ name: c.identity().name, score: 1684, chapters: 1, saved: false });
+    const { hydrateLocalHistory } = await import('../src/records'); hydrateLocalHistory(null);
+    expect(localBest({ mission: 0, mode: 'standard', variant: 0 })).toMatchObject({ name: c.identity().name, score: 1684, chapters: 1 });
+    expect(localBest({ mission: 0, mode: 'standard', variant: 0 })).not.toHaveProperty('rank');
     expect(localBest({ mission: 'all', mode: 'standard', variant: 0 })).toMatchObject({ name: c.identity().name, score: 3184, chapters: 2 });
     expect(localBest({ mission: 0, mode: 'relaxed', variant: 0 })).toBeNull();
     updatePending({ id: 'p', owner: null, result: { ...result, mission: 2, practice: true } });
     expect(localBest({ mission: 2, mode: 'standard', variant: 0 })).toBeNull();
   });
-  it('respects opting out: no publishing, no provisional row, and the server is told', async () => {
+  it('retains private records while opting out and tells the server before submitting', async () => {
     const c = await import('../src/community');
     const { localBest, PlayerControls } = await import('../src/CommunityPanel');
+    c.initializeCommunity(); await tick();
     await c.setLeaderboardVisibility(true);
     const hide = calls.find((x) => x.name === 'setLastLightVisibility');
     expect(hide!.data).toMatchObject({ hidden: true, deviceKey: c.identity().key });
@@ -74,9 +79,10 @@ describe('automatic leaderboard', () => {
     updatePending({ id: 'r1', owner: null, result, ticket: { id: '00000000-0000-4000-8000-000000000001', secret: 'b'.repeat(48) } });
     calls.length = 0;
     await c.publishPending();
-    expect(calls.length).toBe(0);
-    expect(localBest({ mission: 0, mode: 'standard', variant: 0 })).toBeNull();
-    expect(renderToStaticMarkup(<PlayerControls />)).toContain('Show me again');
+    expect(calls[0].name).toBe('setLastLightVisibility');
+    const { hydrateLocalHistory } = await import('../src/records'); hydrateLocalHistory(null);
+    expect(localBest({ mission: 0, mode: 'standard', variant: 0 })?.score).toBe(1684);
+    expect(renderToStaticMarkup(<PlayerControls />)).toContain('Hidden. Your private scores stay saved.');
   });
   it('lets you rename, and rejects names that could hold an email', async () => {
     const c = await import('../src/community');
@@ -86,7 +92,7 @@ describe('automatic leaderboard', () => {
     await expect(c.renamePlayer('me@example.com')).rejects.toThrow(/Use 2–28/);
     const { PlayerControls } = await import('../src/CommunityPanel');
     const html = renderToStaticMarkup(<PlayerControls />);
-    expect(html).toContain('You appear as <strong>Mama Kinshasa</strong>');
-    expect(html).toContain('Hide me from the leaderboard');
+    expect(html).toContain('Edit public name');
+    expect(html).toContain('Show me on the leaderboard');
   });
 });

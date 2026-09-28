@@ -243,6 +243,20 @@
       </div>
     </section>
 
+    <section class="last-light-profile" aria-labelledby="last-light-profile-title">
+      <div><span class="last-light-profile-eyebrow">YOUR GAMES</span><h2 id="last-light-profile-title">Last Light</h2>
+        <p *ngIf="lastLight">{{ lastLight.name }} · {{ lastLight.hidden ? 'Leaderboard hidden' : 'Eligible scores shown on the leaderboard' }}</p>
+        <p *ngIf="lastLightUnavailable">Game records are temporarily unavailable. Your saved scores are kept.</p>
+      </div>
+      <ng-container *ngIf="lastLight">
+        <label>Road <select [(ngModel)]="lastLightRoad"><option value="standard:0">Standard · Original</option><option value="standard:1">Standard · Alternate</option><option value="relaxed:0">Relaxed · Original</option><option value="relaxed:1">Relaxed · Alternate</option></select></label>
+        <div class="last-light-profile-score"><strong>{{ lastLightSummary.score | number }} pts</strong><span>Personal-best total · {{ lastLightSummary.clinics }}/5 clinics</span></div>
+      </ng-container>
+      <button *ngIf="lastLightUnavailable" type="button" (click)="loadLastLight()">Retry</button>
+      <a href="/games/last-light/?leaderboard=1">Scores &amp; drive history ↗</a>
+      <a href="/games/last-light/">Continue journey →</a>
+    </section>
+
     <!-- ACTIVITY HEATMAP -->
     <section class="relative z-0 mt-6">
       <app-activity-heatmap [uid]="user.uid"></app-activity-heatmap>

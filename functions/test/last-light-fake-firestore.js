@@ -24,7 +24,7 @@ class Query {
   _docs() {
     const prefix = this.path + '/';
     let docs = [...store].filter(([p]) => p.startsWith(prefix) && !p.slice(prefix.length).includes('/')).map(([p, d]) => new Snap(p.split('/').pop(), d));
-    for (const [f, op, v] of this.spec.where) docs = docs.filter((d) => (op === '<' ? d._d[f] < v : true));
+    for (const [f, op, v] of this.spec.where) docs = docs.filter((d) => (op === '<' ? d._d[f] < v : op === '==' ? d._d[f] === v : true));
     const cmp = (a, b) => { for (const f of this.spec.order) { if (a._d[f] < b._d[f]) return -1; if (a._d[f] > b._d[f]) return 1; } return 0; };
     docs.sort(cmp);
     const first = this.spec.order[0];
@@ -41,7 +41,7 @@ const db = {
   async runTransaction(fn) {
     const writes = [];
     const tx = {
-      get: (ref) => ref.get(),
+      get: (ref) => { if (writes.length) throw new Error('Read after write in transaction'); return ref.get(); },
       set: (ref, data, opts) => { writes.push(() => write(ref.path, data, opts)); return tx; },
       update: (ref, data) => { writes.push(() => write(ref.path, data, { merge: true })); return tx; },
       delete: (ref) => { writes.push(() => store.delete(ref.path)); return tx; },

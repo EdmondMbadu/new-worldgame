@@ -9,6 +9,7 @@ import {
 } from './routes';
 import { crossingBrake, updateTraffic } from './traffic';
 import { TrafficFlow } from './traffic-flow';
+import { validateSnapshot, type DriveSnapshot } from '../../../functions/src/last-light-snapshot';
 import {
   engineRpm,
   impactDamage,
@@ -404,6 +405,61 @@ export class GameEngine {
     this.previousPosition = { ...this.position };
     this.previousRotation = { ...this.rotation };
     this.previousSprings.fill(TUNING.suspension);
+  }
+  /** Resources/events are current; only the truck is moved to safe, stationary ground. */
+  checkpoint(): DriveSnapshot | null {
+    const stage = this.phase === 'paused' ? this.previous : this.phase;
+    if (!['ready', 'driving'].includes(stage) || this.time <= 0 || this.integrity <= 0) return null;
+    const primitives = (value: object) => Object.fromEntries(Object.entries(value).filter(([,v]) => ['number', 'string', 'boolean'].includes(typeof v)));
+    return validateSnapshot({
+      version: 1, revision: ROAD_REVISION, mission: this.mission.id, mode: this.mode, variant: this.mission.variant || 0,
+      stage, safeZ: this.safeZ, safeAlt: this.safeAlt, remaining: this.time, integrity: this.integrity, elapsed: this.elapsed,
+      furthest: this.furthest, impacts: this.impacts, recoveries: this.recoveries, cleanEncounters: this.cleanEncounters,
+      radioIndex: this.radioIndex, damageCooldown: Math.max(0, this.damageCooldown), practice: this.practice,
+      events: this.encounters.map(primitives), cars: this.traffic.cars.map(primitives), knocked: this.knocked.map(k => k.index),
+    });
+  }
+  restoreDrive(raw: DriveSnapshot) {
+    const s = validateSnapshot(raw);
+    if (s.mission !== this.mission.id || s.mode !== this.mode || s.variant !== (this.mission.variant || 0) ||
+      s.events.length !== this.encounters.length || s.cars.length !== this.traffic.cars.length)
+      throw new Error('This saved drive belongs to another road.');
+    // Do not assign arbitrary wire keys to game objects. Static geometry stays
+    // deterministic; mutable state must match the original roster and types.
+    const eventFields = ['warned','entered','resolved','clean','impactAtEntry','recoveryAtEntry','elapsed','state','actorZ','passedSafely','blockedFor','actorOffset','actorSpeed','phaseTime','yieldAmount','brakeLights','indicator','waterLevel','stopTime'];
+    const carFields = ['distance','station','speed','acceleration','wheelSpin','braking','hold','contactHeld','observed','clean','credited','followTime','laps','state'];
+    const copy = (target: any, source: Record<string, unknown>, fields: string[]) => {
+      if (target.id !== source.id || fields.some(k => typeof source[k] !== typeof target[k])) throw new Error('This saved traffic state is incompatible.');
+      for (const k of fields) target[k] = source[k];
+    };
+    this.encounters.forEach((e, i) => {
+      if (!['waiting','approaching','crossing','clearing','clear'].includes(String(s.events[i].state))) throw new Error('Invalid encounter state.');
+      copy(e, s.events[i], eventFields);
+      const body = this.eventBodies.get(e.id);
+      if (body) {
+        const pose = encounterPose(this.mission, e), position = { x: pose.x, y: pose.y + actorLift(e), z: pose.z };
+        body.setTranslation(position, false); body.setRotation(pose.rotation, false);
+        body.setNextKinematicTranslation(position); body.setNextKinematicRotation(pose.rotation);
+      }
+    });
+    this.traffic.cars.forEach((car, i) => {
+      if (!['cruising','following','yielding','impact'].includes(String(s.cars[i].state)) || Number(s.cars[i].distance) < 0 || Number(s.cars[i].distance) > car.path.total)
+        throw new Error('Invalid saved traffic position.');
+      copy(car, s.cars[i], carFields);
+      const sample = car.path.sample(car.distance);
+      car.pose = sample.pose; car.previous = { ...sample.pose }; car.station = sample.station;
+      const body = this.trafficBodies[car.id], rotation = this.trafficRotation(car.pose);
+      body.setTranslation(car.pose, false); body.setRotation(rotation, false);
+      body.setNextKinematicTranslation(car.pose); body.setNextKinematicRotation(rotation);
+    });
+    this.time = s.remaining; this.integrity = s.integrity; this.elapsed = s.elapsed; this.traffic.elapsed = s.elapsed;
+    this.safeZ = s.safeZ; this.safeAlt = s.safeAlt; this.furthest = s.furthest;
+    this.impacts = s.impacts; this.recoveries = s.recoveries; this.cleanEncounters = s.cleanEncounters;
+    this.radioIndex = s.radioIndex; this.damageCooldown = s.damageCooldown; this.practice = s.practice;
+    this.knocked = s.knocked.map(index => ({ index, vx: 0, vz: 0, at: s.elapsed - 10 }));
+    this.restoreCheckpoint();
+    this.previous = s.stage; this.phase = 'paused'; this.accumulator = 0; this.delivery = 0;
+    this.say('JOURNEY RESTORED', 'Back on safe ground. Your reserve and kit condition are unchanged. Continue when you’re ready.');
   }
   recover() {
     if (this.phase === 'paused' && this.previous === 'driving') this.resume();
@@ -838,7 +894,7 @@ export class GameEngine {
         (event) => Math.abs(this.progress - event.z) < event.length / 2 + 22,
       )
     ) {
-      this.safeZ = Math.floor(Math.max(8, this.progress - 4) / 5) * 5;
+      this.safeZ = Math.max(8, Math.floor((this.progress - 4) / 5) * 5);
       this.safeAlt = this.isAlt;
     }
     const offset = routeX(m, this.progress, true) - roadX(m, this.progress);

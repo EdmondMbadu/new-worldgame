@@ -1,7 +1,7 @@
 import type { Result } from './engine';
 import { parseSave, freshSave, recordResult, type Save } from './save';
 import { ROAD_REVISION } from './vehicle';
-export type Ticket = { id: string; secret: string; owner?: string | null };
+export type Ticket = { id: string; secret: string; owner?: string | null; journeyId?: string };
 export type Pending = {
   id: string;
   owner: string | null;
@@ -10,6 +10,10 @@ export type Pending = {
   published?: boolean;
   rejected?: boolean;
   offline?: boolean;
+  saved?: boolean;
+  eligible?: boolean;
+  completedAt?: number;
+  journeyId?: string;
 };
 export type Checkpoint = {
   version: 1;
@@ -134,20 +138,20 @@ export function pendingRuns(): Pending[] {
             (p.owner === null || typeof p.owner === 'string') &&
             (!p.result || validResult(p.result)),
         )
-        .slice(-40)
     : [];
 }
 export function updatePending(p: Pending) {
   const runs = pendingRuns(),
     previous = runs.find((x) => x.id === p.id);
   const next = {
+    ...previous,
     ...p,
     owner: previous?.owner || p.owner,
-    published: previous?.published || p.published || false,
+    published: p.published ?? previous?.published ?? false,
   };
   return persist(
     pendingKey,
-    [...runs.filter((x) => x.id !== p.id), next].slice(-40),
+    [...runs.filter((x) => x.id !== p.id), next],
   );
 }
 export function claimGuestRuns(uid: string): Result[] {

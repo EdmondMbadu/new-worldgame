@@ -8,7 +8,7 @@ const run=(command,args,options={})=>{const result=spawnSync(command,args,{cwd:r
 run('npm',['run','build','--prefix','functions']);
 const dir=mkdtempSync(path.join(tmpdir(),'last-light-emulator-'));
 mkdirSync(path.join(dir,'functions'));
-writeFileSync(path.join(dir,'functions/package.json'),JSON.stringify({main:'index.js',engines:{node:'22'}}));
+writeFileSync(path.join(dir,'functions/package.json'),JSON.stringify({main:'index.js',engines:{node:'22'},dependencies:{'firebase-admin':'^13.0.0','firebase-functions':'^6.0.0'}}));
 writeFileSync(path.join(dir,'functions/index.js'),`const admin=require('firebase-admin');admin.initializeApp();Object.assign(exports,require(${JSON.stringify(path.join(root,'functions/lib/last-light.js'))}));`);
 symlinkSync(path.join(root,'functions/node_modules'),path.join(dir,'functions/node_modules'),'dir');
 copyFileSync(path.join(root,'firestore.rules'),path.join(dir,'firestore.rules'));

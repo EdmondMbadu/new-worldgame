@@ -4,31 +4,47 @@ import type { Result } from "./engine";
 import { CLINICS } from "./clinic-stories";
 import { ROAD_REVISION } from "./vehicle";
 import {
-  api,
+  online,
+  currentPlayer,
+  leaderboardHidden,
+  pendingVisibility,
   identity,
-  joinLeaderboard,
   refreshAccount,
   renamePlayer,
   setLeaderboardVisibility,
   useCommunity,
   errorMessage,
+  deadline,
 } from "./community";
-import { challengeUrl, pendingRuns } from "./journey";
+import { challengeUrl, pendingRuns, load, persist } from "./journey";
+import {
+  bestJourney,
+  driveHistory,
+  personalBest,
+  rememberDrive,
+  type DriveRecord,
+} from "./records";
 import "./community.css";
-type Entry = {
+import "./leaderboard.css";
+export type Entry = {
   id: string;
   name: string;
   score: number;
   rank: number;
   chapters: number;
 };
-type Board = {
+export type Board = {
   entries: Entry[];
   own: Entry | null;
   total: number;
   nextCursor: string | null;
+  featured?: Entry | null;
 };
-type Bracket = { mission: number | "all"; mode: string; variant: number };
+export type Bracket = {
+  mission: number | "all";
+  mode: string;
+  variant: number;
+};
 export function RealProjectCard({
   beforeLeave,
   compact = false,
@@ -36,16 +52,44 @@ export function RealProjectCard({
   beforeLeave?: () => boolean;
   compact?: boolean;
 }) {
-  if (compact) return <aside className="completion-team" aria-label="The real project">
-    <a className="completion-team-photo" href="/campaigns/power-drc-clinics#team" target="_blank" rel="noopener noreferrer" aria-label="Meet the clinic electrification team (opens in a new tab)">
-      <img src="/assets/campaigns/drc-clinics/team/team-portrait.jpg" alt="Members of the real DRC Health Clinic Electrification Team" width="1280" height="960" />
-    </a>
-    <div className="completion-team-copy">
-      <span className="eyebrow">THE REAL PROJECT</span>
-      <a className="completion-team-title" href="/campaigns/power-drc-clinics#team" target="_blank" rel="noopener noreferrer">Meet the team <span aria-hidden="true">↗</span></a>
-      <a className="completion-link" href="/campaigns/power-drc-clinics#donate" target="_blank" rel="noopener noreferrer">Support the project <span aria-hidden="true">↗</span></a>
-    </div>
-  </aside>;
+  if (compact)
+    return (
+      <aside className="completion-team" aria-label="The real project">
+        <a
+          className="completion-team-photo"
+          href="/campaigns/power-drc-clinics#team"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Meet the clinic electrification team (opens in a new tab)"
+        >
+          <img
+            src="/assets/campaigns/drc-clinics/team/team-portrait.jpg"
+            alt="Members of the real DRC Health Clinic Electrification Team"
+            width="1280"
+            height="960"
+          />
+        </a>
+        <div className="completion-team-copy">
+          <span className="eyebrow">THE REAL PROJECT</span>
+          <a
+            className="completion-team-title"
+            href="/campaigns/power-drc-clinics#team"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Meet the team <span aria-hidden="true">↗</span>
+          </a>
+          <a
+            className="completion-link"
+            href="/campaigns/power-drc-clinics#donate"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Support the project <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </aside>
+    );
   return (
     <aside className="real-project">
       <img
@@ -92,84 +136,75 @@ export function RealProjectCard({
     </aside>
   );
 }
-type Local = { name: string; score: number; chapters: number; saved?: boolean } | null;
-/** Your best local result for a board, shown until (or if) the server confirms it. */
+type Local = {
+  name: string;
+  score: number;
+  chapters: number;
+  saved?: boolean;
+} | null;
 export function localBest(bracket: Bracket): Local {
-  const me = identity();
-  if (me.hidden) return null;
-  const best = new Map<number, number>();
-  let saved = true;
-  for (const p of pendingRuns()) {
-    const r = p.result;
-    if (!r || p.rejected || r.practice || r.revision !== ROAD_REVISION || r.mode !== bracket.mode || (r.variant || 0) !== bracket.variant) continue;
-    if (bracket.mission !== "all" && r.mission !== bracket.mission) continue;
-    if (r.score >= (best.get(r.mission) || 0)) saved = saved && !!p.published;
-    best.set(r.mission, Math.max(best.get(r.mission) || 0, r.score));
-  }
-  if (!best.size) return null;
-  return { name: me.name, score: [...best.values()].reduce((a, b) => a + b, 0), chapters: best.size, saved };
+  const player = currentPlayer(),
+    best = personalBest(
+      player?.uid || null,
+      bracket.mode,
+      bracket.variant,
+      ROAD_REVISION,
+      bracket.mission,
+      player?.best,
+    );
+  return best.chapters
+    ? { name: player?.name || identity().name, ...best }
+    : null;
 }
-function Rows({ data, overall = false, local = null }: { data: Board; overall?: boolean; local?: Local }) {
-  // Until the server has your row, show where your local best would place you.
-  const pending = !data.own && local ? local : null;
-  const at = pending ? data.entries.filter((e) => e.score >= pending.score).length : -1;
-  const rows: (Entry & { pending?: boolean; saved?: boolean })[] = [...data.entries];
-  if (pending && (at < data.entries.length || !data.nextCursor))
-    rows.splice(at, 0, { id: "local", name: pending.name, score: pending.score, chapters: pending.chapters, rank: (data.entries[at - 1]?.rank ?? 0) + 1, pending: true, saved: pending.saved });
-  return (
-    <>
-      <ol className="leaderboard-rows" aria-label="Player rankings">
-        {rows.map((row) => (
-          <li key={row.id} className={row.id === data.own?.id || row.pending ? "is-you" : ""}>
-            <span className="board-rank" aria-label={`Rank ${row.rank}`}>
-              {row.rank <= 3
-                ? ["🥇", "🥈", "🥉"][row.rank - 1]
-                : `#${row.rank}`}
-            </span>
-            <span>
-              <strong>
-                {row.name}
-                {(row.id === data.own?.id || row.pending) && <small> YOU</small>}
-              </strong>
-              {row.pending && <small>{row.saved ? "Saved · refreshing rankings" : "Saving to the leaderboard…"}</small>}
-              {overall && <small>{row.chapters}/5 chapters</small>}
-            </span>
-            <b>
-              {row.score.toLocaleString()}
-              <small>points</small>
-            </b>
-          </li>
-        ))}
-      </ol>
-      {data.own && !data.entries.some((e) => e.id === data.own!.id) && (
-        <div className="board-own">
-          Your rank <strong>#{data.own.rank}</strong>
-          <span>{data.own.score.toLocaleString()} points</span>
-        </div>
-      )}
-      {!rows.length && (
-        <p className="board-empty">
-          {data.total
-            ? "No players match this search."
-            : "The road is open. Complete a delivery and you’ll appear here automatically."}
-        </p>
-      )}
-    </>
-  );
+function useRecords() {
+  const [revision, setRevision] = useState(0);
+  useEffect(() => {
+    const fn = () => setRevision((n) => n + 1);
+    window.addEventListener("last-light:records", fn);
+    return () => window.removeEventListener("last-light:records", fn);
+  }, []);
+  return revision;
 }
-function useBoard(
+export function useBoard(
   bracket: Bracket,
   limit: 5 | 20,
   search = "",
   cursor: string | null = null,
 ) {
-  const community = useCommunity();
-  const [data, setData] = useState<Board | null>(null),
+  const community = useCommunity(),
+    owner = community.player?.uid || "guest";
+  const focus =
+    typeof location === "undefined"
+      ? null
+      : new URLSearchParams(location.search).get("player");
+  const ownKey = `last-light.own-cache.${JSON.stringify([owner, bracket.mission, bracket.mode, bracket.variant, community.player?.hidden ?? identity().hidden])}`;
+  const key = JSON.stringify([
+    owner,
+    bracket.mission,
+    bracket.mode,
+    bracket.variant,
+    limit,
+    search,
+    cursor,
+    focus,
+    community.player?.hidden ?? identity().hidden,
+  ]);
+  const [answer, setAnswer] = useState<{
+      key: string;
+      data: Board;
+      at: number;
+    } | null>(null),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
     [revision, setRevision] = useState(0);
+  const cached = load<{ key: string; data: Board; at: number } | null>(
+    `last-light.board-cache.${owner}`,
+    null,
+  );
+  const current =
+    answer?.key === key ? answer : cached?.key === key ? cached : null;
   useEffect(() => {
-    const refresh = () => setRevision((x) => x + 1);
+    const refresh = () => setRevision((n) => n + 1);
     window.addEventListener("last-light:board", refresh);
     return () => window.removeEventListener("last-light:board", refresh);
   }, []);
@@ -177,28 +212,29 @@ function useBoard(
     let active = true;
     setLoading(true);
     setError("");
-    setData(null);
     const timer = setTimeout(
       () => {
-        void api()
-          .then(async (a) => {
-            await a.ready;
-            return a.call<Board>("getLastLightLeaderboard", {
-              ...bracket,
-              deviceKey: identity().key,
-              revision: ROAD_REVISION,
-              limit,
-              search,
-              cursor,
-            });
-          })
-          .then((value) => {
-            if (active) setData(value);
+        void online<Board>("getLastLightLeaderboard", {
+          ...bracket,
+          revision: ROAD_REVISION,
+          deviceKey: identity().key,
+          limit,
+          search,
+          cursor,
+          focus,
+        })
+          .then((data) => {
+            if (active) {
+              const value = { key, data, at: Date.now() };
+              persist(ownKey, { ...data, entries: [] });
+              setAnswer(value);
+              persist(`last-light.board-cache.${owner}`, value);
+            }
           })
           .catch(() => {
             if (active)
               setError(
-                "Rankings are unavailable right now. Your next delivery is ready.",
+                "Live rankings are unavailable. Your personal records are kept.",
               );
           })
           .finally(() => {
@@ -211,17 +247,316 @@ function useBoard(
       active = false;
       clearTimeout(timer);
     };
-  }, [
-    bracket.mission,
-    bracket.mode,
-    bracket.variant,
-    limit,
-    search,
-    cursor,
-    revision,
-    community.player?.uid,
-  ]);
-  return { data, error, loading, retry: () => setRevision((x) => x + 1) };
+  }, [key, revision]);
+  return {
+    data: current?.data || null,
+    yourData: current?.data || load<Board | null>(ownKey, null),
+    updatedAt: current?.at,
+    error,
+    loading,
+    retry: () => setRevision((n) => n + 1),
+  };
+}
+function PlayerRow({
+  row,
+  you = false,
+  overall = false,
+}: {
+  row: Entry;
+  you?: boolean;
+  overall?: boolean;
+}) {
+  return (
+    <tr className={you ? "is-you" : ""}>
+      <td className="board-rank">{row.rank}</td>
+      <td>
+        <div className="lb-person">
+          <span className="lb-avatar" aria-hidden="true">
+            {row.name[0]}
+          </span>
+          <span>
+            {row.name}
+            {you && <small className="lb-you-tag">YOU</small>}
+            <small className="lb-mobile-clinics">
+              {overall ? `${row.chapters} / 5 clinics` : "Full delivery"}
+            </small>
+          </span>
+        </div>
+      </td>
+      {overall && <td className="lb-clinics">{row.chapters} / 5</td>}
+      <td className="lb-points">
+        {row.score.toLocaleString()} <small>pts</small>
+      </td>
+    </tr>
+  );
+}
+function Rows({
+  data,
+  overall = false,
+}: {
+  data: Board;
+  overall?: boolean;
+  local?: Local;
+}) {
+  return (
+    <>
+      <table className="lb-table">
+        <caption className="sr-only">Confirmed player rankings</caption>
+        <thead>
+          <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Player</th>
+            {overall && (
+              <th scope="col" className="lb-clinics">
+                Clinics
+              </th>
+            )}
+            <th scope="col">{overall ? "Best total" : "Best score"}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.entries.map((row) => (
+            <PlayerRow
+              key={row.id}
+              row={row}
+              overall={overall}
+              you={row.id === data.own?.id}
+            />
+          ))}
+        </tbody>
+      </table>
+      {!data.entries.length && (
+        <p className="board-empty">
+          {data.total
+            ? "No players match this search."
+            : "No ranked deliveries here yet. Your first full delivery can open the road."}
+        </p>
+      )}
+    </>
+  );
+}
+function YourRecord({
+  bracket,
+  data,
+  loading,
+}: {
+  bracket: Bracket;
+  data: Board | null;
+  loading: boolean;
+}) {
+  const { player } = useCommunity();
+  useRecords();
+  const owner = player?.uid || null,
+    best = localBest(bracket),
+    own = data?.own;
+  const records = driveHistory(owner).filter(
+    (d) =>
+      d.result.mode === bracket.mode &&
+      (d.result.variant || 0) === bracket.variant &&
+      d.result.revision === ROAD_REVISION &&
+      (bracket.mission === "all" || d.result.mission === bracket.mission),
+  );
+  const latest = records[0],
+    pending = pendingRuns().some(
+      (p) =>
+        p.owner === owner &&
+        p.result &&
+        !p.result.practice &&
+        p.ticket &&
+        !p.saved &&
+        !p.rejected,
+    );
+  const label =
+    pendingVisibility() !== null
+      ? "Visibility change pending"
+      : leaderboardHidden()
+        ? "Private · only you can see this"
+        : player && !player.verified
+          ? "Verify email to rank"
+          : pending
+            ? "Waiting to sync"
+            : best
+              ? "Personal record · not ranked"
+              : "No delivery here yet";
+  return (
+    <div className="lb-own" aria-label="Your record">
+      <span className="lb-own-rank">{own ? own.rank : "—"}</span>
+      <span className="lb-avatar" aria-hidden="true">
+        {(player?.name || identity().name)[0]}
+      </span>
+      <div className="lb-own-copy">
+        <strong>
+          {player?.name || identity().name}{" "}
+          <small className="lb-you-tag">YOU</small>
+        </strong>
+        <small>
+          {own ? "Confirmed rank" : label}
+          {loading && own ? " · refreshing" : ""}
+          {latest
+            ? ` · Last delivery: ${latest.result.score.toLocaleString()} pts`
+            : ""}
+        </small>
+        {own && best && best.score > own.score && (
+          <small>
+            Personal best: {best.score.toLocaleString()} pts · includes unranked
+            history
+          </small>
+        )}
+      </div>
+      {bracket.mission === "all" && (
+        <span className="lb-clinics">
+          {own?.chapters ?? best?.chapters ?? 0} / 5
+        </span>
+      )}
+      <span className="lb-points">
+        {(own?.score ?? best?.score)?.toLocaleString() || "—"}{" "}
+        <small>pts</small>
+      </span>
+    </div>
+  );
+}
+function MyDrives({ bracket }: { bracket: Bracket }) {
+  const { player } = useCommunity();
+  useRecords();
+  const uid = player?.uid || null,
+    [page, setPage] = useState<{
+      owner: string | null;
+      cursor: string | null;
+      loaded: boolean;
+    }>({ owner: uid, cursor: null, loaded: false }),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  const [scope, setScope] = useState<"current" | "all">("current");
+  const fetchPage = async (cursor: string | null = null) => {
+    if (!uid) return;
+    setBusy(true);
+    setError("");
+    try {
+      const p = await online<{
+        drives: DriveRecord[];
+        nextCursor: string | null;
+      }>("getLastLightDrives", { accountUid: uid, cursor });
+      if (currentPlayer()?.uid !== uid) return;
+      p.drives.forEach((d) => rememberDrive({ ...d, owner: uid, saved: true }));
+      setPage({ owner: uid, cursor: p.nextCursor, loaded: true });
+    } catch {
+      setError("History could not refresh. Saved local drives are shown.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  useEffect(() => {
+    setPage({ owner: uid, cursor: null, loaded: false });
+    void fetchPage();
+  }, [uid]);
+  const records = driveHistory(uid).filter(
+    (d) =>
+      scope === "all" ||
+      (d.result.revision === ROAD_REVISION &&
+        d.result.mode === bracket.mode &&
+        (d.result.variant || 0) === bracket.variant),
+  );
+  const best = personalBest(
+      uid,
+      bracket.mode,
+      bracket.variant,
+      ROAD_REVISION,
+      "all",
+      player?.best,
+    ),
+    single = Math.max(
+      bestJourney(uid, bracket.mode, bracket.variant, ROAD_REVISION),
+      player?.bestJourneys?.[
+        `r${ROAD_REVISION}-v${bracket.variant}-${bracket.mode}-all`
+      ]?.score || 0,
+    );
+  return (
+    <section className="lb-history" aria-label="Your private drive history">
+      <div className="lb-history-summary">
+        <span>
+          Personal-best total <strong>{best.score.toLocaleString()} pts</strong>
+          <small>Best score at each clinic · {best.chapters}/5</small>
+        </span>
+        <span>
+          Best complete journey{" "}
+          <strong>
+            {single ? `${single.toLocaleString()} pts` : "Not completed yet"}
+          </strong>
+          <small>Five clinics in one playthrough</small>
+        </span>
+      </div>
+      <label className="lb-history-filter">
+        Show{" "}
+        <select
+          value={scope}
+          onChange={(e) => setScope(e.target.value as "current" | "all")}
+        >
+          <option value="current">Current road & difficulty</option>
+          <option value="all">All my drives · includes older editions</option>
+        </select>
+      </label>
+      <p className="lb-history-note">
+        Every delivery stays here. Replays improve your best only when you score
+        higher.
+      </p>
+      {busy && <p role="status">Refreshing your drives…</p>}
+      {error && (
+        <p role="status">
+          {error} <button onClick={() => void fetchPage()}>Retry</button>
+        </p>
+      )}
+      <ol className="lb-drive-list">
+        {records.map((d) => (
+          <li key={d.id}>
+            <span>
+              <strong>{CLINICS[d.result.mission].shortName}</strong>
+              <small>
+                {d.completedAt
+                  ? new Date(d.completedAt).toLocaleString([], {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })
+                  : "Earlier personal best"}{" "}
+                · {d.result.mode} ·{" "}
+                {d.result.variant ? "Alternate" : "Original"} · Edition{" "}
+                {d.result.revision || 1}
+              </small>
+              <small>
+                {d.result.practice
+                  ? "Practice · unranked"
+                  : d.eligible
+                    ? "Verified delivery"
+                    : "Personal history · unranked"}{" "}
+                ·{" "}
+                {d.saved
+                  ? "Saved to account"
+                  : uid
+                    ? "Waiting to sync"
+                    : "On this device"}
+              </small>
+            </span>
+            <b>
+              {d.result.score.toLocaleString()} <small>pts</small>
+            </b>
+          </li>
+        ))}
+      </ol>
+      {!records.length && (
+        <p className="board-empty">No completed drives in this view yet.</p>
+      )}
+      {uid && (!page.loaded || page.cursor) && (
+        <button
+          disabled={busy}
+          onClick={() =>
+            void fetchPage(page.owner === uid ? page.cursor : null)
+          }
+        >
+          {page.loaded ? "Load earlier drives" : "Refresh history"}
+        </button>
+      )}
+      <small>Private history is visible only to you.</small>
+    </section>
+  );
 }
 export function LeaderboardDialog({
   initial,
@@ -232,42 +567,77 @@ export function LeaderboardDialog({
   onClose: () => void;
   onPublish?: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [bracket, setBracket] = useState(initial),
+  const dialog = useRef<HTMLDialogElement>(null),
+    community = useCommunity();
+  useRecords();
+  const [tab, setTab] = useState<"all" | "clinic" | "history">(() =>
+      new URLSearchParams(location.search).get("leaderboard") === "1" &&
+      typeof initial.mission === "number"
+        ? "clinic"
+        : "all",
+    ),
+    [mode, setMode] = useState(initial.mode),
+    [variant, setVariant] = useState(initial.variant),
+    [mission, setMission] = useState(
+      typeof initial.mission === "number" ? initial.mission : 0,
+    ),
     [search, setSearch] = useState(""),
-    [pages, setPages] = useState<(string | null)[]>([null]);
-  const { data, error, loading, retry } = useBoard(
-    bracket,
-    20,
-    search,
-    pages[pages.length - 1],
-  );
-  const local = search ? null : localBest(bracket);
+    [pages, setPages] = useState<(string | null)[]>([null]),
+    [expanded, setExpanded] = useState(false),
+    [shareNotice, setShareNotice] = useState(""),
+    [shareUrl, setShareUrl] = useState("");
+  const bracket: Bracket = {
+      mission: tab === "clinic" ? mission : "all",
+      mode,
+      variant,
+    },
+    { data, yourData, error, loading, retry, updatedAt } = useBoard(
+      bracket,
+      expanded ? 20 : 5,
+      search,
+      pages.at(-1),
+    );
+  const name = community.player?.name || identity().name,
+    pending = driveHistory(community.player?.uid || null).some((d) => !d.saved),
+    reset = () => setPages([null]);
   useEffect(() => {
-    const node = dialog.current;
-    node?.showModal();
-    return () => node?.close();
+    const previous = document.activeElement as HTMLElement | null;
+    dialog.current?.showModal();
+    return () => {
+      previous?.focus?.();
+    };
   }, []);
-  const change = (value: Partial<Bracket>) => {
-    setBracket((b) => ({ ...b, ...value }));
-    setPages([null]);
+  const share = async () => {
+    const id = yourData?.own?.id;
+    if (!id) return;
+    const url = `${location.origin}/games/last-light/?${new URLSearchParams({ leaderboard: "1", player: id, chapter: String(bracket.mission), mode, variant: String(variant), revision: String(ROAD_REVISION) })}`;
+    setShareUrl(url);
+    setShareNotice("Copy this public link to share your score.");
+    try {
+      await deadline(navigator.clipboard.writeText(url), 2000);
+      setShareNotice("Your public score link is copied.");
+    } catch {
+      // The selectable link is already available if clipboard access is denied.
+    }
   };
   return createPortal(
     <dialog
       ref={dialog}
-      className="leaderboard-dialog"
-      aria-labelledby="board-title"
-      onCancel={event => { event.preventDefault(); onClose(); }}
+      className="leaderboard-dialog lb-dialog"
+      aria-labelledby="leaderboard-title"
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="board-dialog-content">
-        <header>
-          <div>
-            <span className="eyebrow">LAST LIGHT · THE PLAYERS</span>
-            <h2 id="board-title">Leading the way</h2>
-          </div>
+      <div className="lb-shell">
+        <header className="lb-heading">
+          <span className="eyebrow">LAST LIGHT · THE PLAYERS</span>
+          <h2 id="leaderboard-title">Leaderboard</h2>
+          <p>Every delivery counts. Your best stays with you.</p>
           <button
             className="board-close"
             onClick={onClose}
@@ -276,104 +646,234 @@ export function LeaderboardDialog({
             ×
           </button>
         </header>
-        <p>
-          One best score per player, per chapter. Overall adds your best scores
-          across five chapters. Ties use a stable player order.
-        </p>
-        <div className="board-filters">
-          <label>
-            Leaderboard
-            <select
-              value={bracket.mission}
-              onChange={(e) =>
-                change({
-                  mission:
-                    e.target.value === "all" ? "all" : Number(e.target.value),
-                })
-              }
+        <div className="lb-account-strip">
+          <span className="lb-avatar" aria-hidden="true">
+            {name[0]}
+          </span>
+          <div>
+            <strong>{name}</strong>
+            <small>
+              {community.player
+                ? "Signed in to your profile"
+                : "Playing on this device"}
+            </small>
+          </div>
+          <span className="lb-sync">
+            {community.player
+              ? community.synced && !pending
+                ? "✓ Records synced"
+                : "○ Sync pending"
+              : "Local records"}
+            <button
+              className="board-link"
+              onClick={() => void refreshAccount()}
             >
-              <option value="all">Overall · five chapters</option>
+              Refresh
+            </button>
+          </span>
+        </div>
+        <div className="lb-toolbar">
+          <div className="lb-tabs" role="group" aria-label="Leaderboard view">
+            {(
+              [
+                ["all", "Overall"],
+                ["clinic", "This clinic"],
+                ["history", "My drives"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                aria-pressed={tab === id}
+                onClick={() => {
+                  setTab(id);
+                  reset();
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <label className="sr-only" htmlFor="lb-road">
+            Difficulty and route
+          </label>
+          <select
+            id="lb-road"
+            value={`${mode}:${variant}`}
+            onChange={(e) => {
+              const [m, v] = e.target.value.split(":");
+              setMode(m);
+              setVariant(Number(v));
+              reset();
+            }}
+          >
+            {["standard", "relaxed"].flatMap((m) =>
+              [0, 1].map((v) => (
+                <option key={`${m}:${v}`} value={`${m}:${v}`}>
+                  {m === "standard" ? "Standard" : "Relaxed"} ·{" "}
+                  {v ? "Alternate" : "Original"} route
+                </option>
+              )),
+            )}
+          </select>
+          {tab !== "history" && (
+            <input
+              type="search"
+              aria-label="Find a player"
+              placeholder="Find player"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                reset();
+              }}
+            />
+          )}
+        </div>
+        {tab === "clinic" && (
+          <label className="lb-clinic-filter">
+            Clinic{" "}
+            <select
+              value={mission}
+              onChange={(e) => {
+                setMission(Number(e.target.value));
+                reset();
+              }}
+            >
               {CLINICS.map((c, i) => (
                 <option key={c.id} value={i}>
-                  Chapter {i + 1} · {c.shortName}
+                  {i + 1} · {c.shortName}
                 </option>
               ))}
             </select>
           </label>
-          <label>
-            Difficulty
-            <select
-              value={bracket.mode}
-              onChange={(e) => change({ mode: e.target.value })}
-            >
-              <option value="standard">Standard</option>
-              <option value="relaxed">Relaxed</option>
-            </select>
-          </label>
-          <label>
-            Route
-            <select
-              value={bracket.variant}
-              onChange={(e) => change({ variant: Number(e.target.value) })}
-            >
-              <option value={0}>Original</option>
-              <option value={1}>Alternate</option>
-            </select>
-          </label>
-        </div>
-        <label className="board-search">
-          Find a player
-          <input
-            type="search"
-            value={search}
-            maxLength={28}
-            placeholder="Start typing their player name"
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setPages([null]);
-            }}
-          />
-        </label>
-        <div className="board-body" aria-busy={loading}>
-          {loading && <p role="status">Loading players…</p>}
-          {error && (
-            <p role="status">
-              {error} <button onClick={retry}>Retry rankings</button>
-            </p>
-          )}
-          {error && local && <Rows data={{ entries: [], own: null, total: 0, nextCursor: null }} local={local} overall={bracket.mission === "all"} />}
-          {data && (
-            <>
-              <p className="board-count">
-                {data.total.toLocaleString()} ranked{" "}
-                {data.total === 1 ? "player" : "players"} · Road edition{" "}
-                {ROAD_REVISION}
-              </p>
-              <Rows data={data} local={local} overall={bracket.mission === "all"} />
-            </>
-          )}
-        </div>
-        <footer className="board-pagination">
+        )}
+        {tab === "history" ? (
+          <MyDrives bracket={bracket} />
+        ) : (
+          <>
+            <div className="lb-results" aria-busy={loading}>
+              {loading && (
+                <p className="lb-status" role="status">
+                  {data ? "Refreshing rankings…" : "Connecting to rankings…"}
+                </p>
+              )}
+              {error && (
+                <p className="lb-status" role="status">
+                  {error}{" "}
+                  <button className="board-link" onClick={retry}>
+                    Retry rankings
+                  </button>
+                  {data && updatedAt && (
+                    <small>
+                      Last updated{" "}
+                      {new Date(updatedAt).toLocaleTimeString([], {
+                        hour: "numeric",
+                        minute: "2-digit",
+                      })}
+                    </small>
+                  )}
+                </p>
+              )}
+              {data &&
+                (expanded ? (
+                  <div
+                    className="lb-ranked-list"
+                    role="region"
+                    aria-label="Ranked players"
+                    tabIndex={0}
+                    key={pages[pages.length - 1] || "first"}
+                  >
+                    <Rows data={data} overall={bracket.mission === "all"} />
+                  </div>
+                ) : (
+                  <Rows data={data} overall={bracket.mission === "all"} />
+                ))}
+              <YourRecord bracket={bracket} data={yourData} loading={loading} />
+              {data?.featured && data.featured.id !== data.own?.id && (
+                <div className="lb-shared">
+                  Shared score · {data.featured.name} · #{data.featured.rank} ·{" "}
+                  {data.featured.score.toLocaleString()} pts
+                </div>
+              )}
+            </div>
+            <footer className="lb-board-footer">
+              <small>
+                {bracket.mission === "all"
+                  ? "Overall adds your personal best at each clinic."
+                  : "One best full delivery per player at this clinic."}
+              </small>
+              {!expanded ? (
+                <button
+                  className="board-link"
+                  onClick={() => {
+                    setExpanded(true);
+                    reset();
+                  }}
+                >
+                  View all {data?.total.toLocaleString() || ""} players →
+                </button>
+              ) : (
+                <div className="lb-page-controls">
+                  <button
+                    disabled={pages.length === 1 || loading}
+                    onClick={() => setPages((p) => p.slice(0, -1))}
+                  >
+                    ← Previous
+                  </button>
+                  <span>Page {pages.length}</span>
+                  <button
+                    disabled={!data?.nextCursor || loading}
+                    onClick={() => setPages((p) => [...p, data!.nextCursor])}
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </footer>
+          </>
+        )}
+        <div className="lb-bottom">
+          <PlayerControls />
           <button
-            disabled={pages.length === 1 || loading}
-            onClick={() => setPages((p) => p.slice(0, -1))}
+            className="lb-share"
+            disabled={
+              !yourData?.own ||
+              leaderboardHidden() ||
+              pendingVisibility() === true
+            }
+            onClick={() => void share()}
           >
-            ← Previous
+            Share my score ↗
           </button>
-          <span>Page {pages.length}</span>
-          <button
-            disabled={!data?.nextCursor || loading}
-            onClick={() => setPages((p) => [...p, data!.nextCursor])}
-          >
-            Next →
+        </div>
+        {shareNotice && (
+          <div className="lb-share-notice">
+            <p role="status">{shareNotice}</p>
+            <label>
+              Public score link
+              <input
+                readOnly
+                value={shareUrl}
+                onFocus={(e) => e.currentTarget.select()}
+              />
+            </label>
+          </div>
+        )}
+        {onPublish && !community.player && (
+          <button className="board-link" onClick={onPublish}>
+            Keep these records across devices · sign in
           </button>
-        </footer>
-        <PlayerControls />
-        {onPublish && <button className="board-publish" onClick={onPublish}>Keep your scores across devices</button>}
-        <small>
-          Every full delivery is ranked automatically under your player name.
-          Practice drives and contributions do not affect rankings.
-        </small>
+        )}
+        <details className="lb-rules">
+          <summary>How scoring works</summary>
+          <p>
+            Each clinic keeps your highest verified score. Overall combines
+            those five personal bests; it is not a single playthrough. My drives
+            shows each attempt and your best complete journey. Difficulty, route
+            and road edition stay separate. Tied scores use a stable player
+            order. Practice and unverifiable deliveries remain private and
+            unranked. Edition {ROAD_REVISION}.
+          </p>
+        </details>
       </div>
     </dialog>,
     document.body,
@@ -390,30 +890,28 @@ export function Leaderboard({
 }) {
   const bracket = { mission, mode, variant },
     { data, error, loading, retry } = useBoard(bracket, 5);
-  const local = localBest(bracket);
-  const [open, setOpen] = useState(false);
-  const trigger = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false),
+    trigger = useRef<HTMLButtonElement>(null);
   return (
     <section className="community-board" aria-label="Chapter leaderboard">
       <div className="community-title">
         <div>
           <span className="eyebrow">
-            CHAPTER {mission + 1} · {mode.toUpperCase()} ·{" "}
-            {variant ? "ALTERNATE" : "ORIGINAL"}
+            CHAPTER {mission + 1} · {mode.toUpperCase()}
           </span>
           <h3>Leading the way</h3>
         </div>
         <button ref={trigger} onClick={() => setOpen(true)}>
-          All players ↗
+          Leaderboard ↗
         </button>
       </div>
-      {loading && <p role="status">Loading the top five…</p>}
+      {loading && <p role="status">Refreshing the top five…</p>}
       {error && (
         <p role="status">
           {error} <button onClick={retry}>Retry</button>
         </p>
       )}
-      {data && <Rows data={data} local={local} />}
+      {data && <Rows data={data} />}
       <small>
         Top five · best full deliveries · road edition {ROAD_REVISION}
       </small>
@@ -455,7 +953,12 @@ export function InviteFriends({
   };
   return (
     <div className="invite-friends">
-      {!compact && <><span className="eyebrow">A FRIENDLY CHALLENGE</span><h3>Who would you bring along?</h3></>}
+      {!compact && (
+        <>
+          <span className="eyebrow">A FRIENDLY CHALLENGE</span>
+          <h3>Who would you bring along?</h3>
+        </>
+      )}
       <p>
         Invite 5–10 friends to try this delivery. They can join the leaderboard
         after signing in and completing a full drive.
@@ -511,29 +1014,32 @@ export function CompletionAccount({
   result: Result;
   onAuth: (page: "login" | "signup" | "verify-email") => void;
 }) {
-  const { status, player, message } = useCommunity(),
-    [name, setName] = useState(""),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  const runRecord = pendingRuns().find(
-    (p) =>
-      p.result?.mission === result.mission &&
-      p.result?.mode === result.mode &&
-      (p.result?.variant || 0) === (result.variant || 0) &&
-      p.result?.score === result.score &&
-      p.result?.remaining === result.remaining,
+  const { status, player, message } = useCommunity();
+  useRecords();
+  const record = driveHistory(player?.uid || null).find(
+    (d) =>
+      d.result.mission === result.mission &&
+      d.result.score === result.score &&
+      d.result.remaining === result.remaining,
   );
-  const offline = !runRecord?.ticket;
-  const connectionIssue = /unavailable|Unable|Too many/i.test(error || message);
   return (
     <section className="community-account">
-      {!player ? (
+      <h3>
+        {player
+          ? `Your delivery, ${player.name || "saved"}.`
+          : "Keep your journey."}
+      </h3>
+      <p>
+        {record?.published && !leaderboardHidden()
+          ? "Your best eligible score is on the leaderboard."
+          : record?.saved && player
+            ? "This delivery is saved to your account."
+            : "This delivery is saved on this device."}
+      </p>
+      {!player && (
         <>
-          <span className="eyebrow">KEEP YOUR JOURNEY</span>
-          <h3>{identity().hidden ? "Your delivery is saved on this device." : `You’re on the leaderboard as ${identity().name}.`}</h3>
           <p>
-            Create an account or log in to keep your scores across devices.
-            You’ll return to this completed chapter.
+            Sign in to keep your scores and unfinished journey across devices.
           </p>
           <div className="community-actions">
             <button
@@ -549,90 +1055,31 @@ export function CompletionAccount({
               Log in
             </button>
           </div>
-          <small>Continuing as a guest is always available.</small>
-        </>
-      ) : !player.verified ? (
-        <>
-          <h3>{identity().hidden ? "Your chapter is saved." : `You’re on the leaderboard as ${identity().name}.`}</h3>
-          <p>
-            Verify your email to rank under your account instead. Your
-            chapter stays saved here.
-          </p>
-          <button onClick={() => onAuth("verify-email")}>
-            Verify email
-          </button>
-        </>
-      ) : !player.name ? (
-        <>
-          <h3>Choose your name on the road.</h3>
-          <p>
-            Your player name and scores will be public. Your email stays
-            private.
-          </p>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setBusy(true);
-              setError("");
-              void joinLeaderboard(name)
-                .catch((e) => setError(errorMessage(e)))
-                .finally(() => setBusy(false));
-            }}
-          >
-            <label>
-              Public player name
-              <input
-                required
-                minLength={2}
-                maxLength={28}
-                autoComplete="nickname"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your player name"
-              />
-            </label>
-            <button disabled={busy || !name.trim()}>
-              {busy ? "Saving…" : "Join the leaderboard"}
-            </button>
-          </form>
-        </>
-      ) : (
-        <>
-          <h3>Welcome back, {player.name}.</h3>
-          <p>
-            {runRecord?.published
-              ? "Your best eligible delivery is on the leaderboard."
-              : "Your best full online deliveries count toward your ranking."}
-          </p>
         </>
       )}
-      {(error || message) && (
-        <p role="status">
-          {error || message}
-          {player && connectionIssue && (
-            <button onClick={() => void refreshAccount()}>
-              Retry online saving
-            </button>
-          )}
-        </p>
+      {player && !player.verified && (
+        <>
+          <p>
+            Your scores are saved privately. Verify your email to appear in the
+            rankings.
+          </p>
+          <button onClick={() => onAuth("verify-email")}>Verify email</button>
+        </>
       )}
-      {offline && (
-        <small>
-          This drive began without an online record. Your chapter progress
-          is kept; complete a new online delivery to publish a score.
-        </small>
-      )}
+      {message && <p role="status">{message}</p>}
+      <button className="board-link" onClick={() => void refreshAccount()}>
+        Retry online saving
+      </button>
     </section>
   );
 }
-
-/** Your public name, with rename and a one-tap opt-out. Nothing is required. */
 export function PlayerControls() {
-  const community = useCommunity();
-  const me = identity();
-  const account = community.player?.name && community.player.verified ? community.player.name : null;
+  const community = useCommunity(),
+    actual = leaderboardHidden(),
+    pending = pendingVisibility();
+  const publicName = community.player?.name || identity().name;
   const [editing, setEditing] = useState(false),
-    [name, setName] = useState(me.name),
+    [name, setName] = useState(publicName),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const run = (task: Promise<unknown>) => {
@@ -640,42 +1087,101 @@ export function PlayerControls() {
     setError("");
     void task
       .then(() => setEditing(false))
-      .catch((e) => setError(e instanceof Error && /^Use /.test(e.message) ? e.message : errorMessage(e)))
+      .catch((e) => setError(errorMessage(e)))
       .finally(() => setBusy(false));
   };
   return (
-    <div className="board-player">
-      {me.hidden ? (
-        <p>
-          You’re hidden from the leaderboard. Your scores stay saved.{" "}
-          <button className="board-link" disabled={busy} onClick={() => run(setLeaderboardVisibility(false))}>Show me again</button>
-        </p>
-      ) : editing && !account ? (
-        <form onSubmit={(e) => { e.preventDefault(); run(renamePlayer(name)); }}>
+    <div className="board-player lb-privacy">
+      <div className="lb-visibility-row">
+        <button
+          role="switch"
+          aria-checked={!(pending ?? actual)}
+          aria-label="Show me on the leaderboard"
+          className="lb-switch"
+          disabled={busy || community.status === "loading"}
+          onClick={() => run(setLeaderboardVisibility(!(pending ?? actual)))}
+        >
+          <span />
+        </button>
+        <div>
+          <strong>Show me on the leaderboard</strong>
+          <small>
+            {pending !== null
+              ? "Visibility change pending · public visibility is not confirmed yet."
+              : actual
+                ? "Hidden. Your private scores stay saved."
+                : "Public player name and eligible scores only. Hide anytime."}
+          </small>
+        </div>
+      </div>
+      <button
+        className="board-link lb-rename"
+        onClick={() => {
+          setName(publicName);
+          setEditing(!editing);
+        }}
+      >
+        Edit public name
+      </button>
+      {editing && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            run(renamePlayer(name));
+          }}
+        >
           <label>
-            Your public name
-            <input value={name} maxLength={28} minLength={2} required autoComplete="nickname" onChange={(e) => setName(e.target.value)} />
+            Public player name
+            <input
+              required
+              minLength={2}
+              maxLength={28}
+              autoComplete="nickname"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </label>
-          <button disabled={busy || !name.trim()}>{busy ? "Saving…" : "Save name"}</button>
-          <button type="button" className="board-link" onClick={() => { setEditing(false); setName(me.name); }}>Cancel</button>
+          <button disabled={busy}>Save</button>
+          <button
+            type="button"
+            className="board-link"
+            onClick={() => setEditing(false)}
+          >
+            Cancel
+          </button>
         </form>
-      ) : (
-        <p>
-          You appear as <strong>{account || me.name}</strong>.{" "}
-          {!account && <button className="board-link" onClick={() => setEditing(true)}>Rename</button>}
-          {!account && " · "}
-          <button className="board-link" disabled={busy} onClick={() => run(setLeaderboardVisibility(true))}>Hide me from the leaderboard</button>
+      )}
+      {error && (
+        <p role="status">
+          {error}
+          {pending !== null && (
+            <button onClick={() => run(setLeaderboardVisibility(pending))}>
+              Retry visibility change
+            </button>
+          )}
         </p>
       )}
-      {error && <p role="status">{error}</p>}
     </div>
   );
 }
-/** A compact “#3 of 12” for the completion screen. */
-export function YourRank({ mission, mode, variant, practice = false }: { mission: number; mode: string; variant: number; practice?: boolean }) {
-  const bracket = { mission, mode, variant };
-  const { data } = useBoard(bracket, 5);
-  if (practice || identity().hidden) return null;
-  if (data?.own) return <span className="completion-rank">#{data.own.rank} of {data.total.toLocaleString()}</span>;
-  return localBest(bracket) ? <span className="completion-rank completion-rank--pending">Saving to the leaderboard…</span> : null;
+export function YourRank({
+  mission,
+  mode,
+  variant,
+  practice = false,
+}: {
+  mission: number;
+  mode: string;
+  variant: number;
+  practice?: boolean;
+}) {
+  const { data } = useBoard({ mission, mode, variant }, 5);
+  if (practice || leaderboardHidden()) return null;
+  if (data?.own)
+    return (
+      <span className="completion-rank">
+        #{data.own.rank} of {data.total.toLocaleString()}
+      </span>
+    );
+  return null;
 }
