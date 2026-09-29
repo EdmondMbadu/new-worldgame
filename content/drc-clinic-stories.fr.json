@@ -1,0 +1,133 @@
+{
+  "edition": "drc-clinics.v1",
+  "source": "/campaigns/power-drc-clinics#clinics",
+  "reviewedOn": "2026-09-18",
+  "narration": "Soignant fictif · Voix générée par IA",
+  "clinics": [
+    {
+      "id": "ndingi",
+      "name": "Centre de santé de Ndingi",
+      "shortName": "Ndingi",
+      "location": "Ndingi · Territoire de Tshela · Kongo Central",
+      "stage": "online",
+      "population": null,
+      "capacityKw": 2,
+      "careAreas": [
+        "Maternité",
+        "Laboratoire",
+        "Chambres d’hospitalisation",
+        "Consultation",
+        "Bloc opératoire"
+      ],
+      "headline": "Le centre utilise ses dernières réserves.",
+      "context": "Les soins continuent après le coucher du soleil. Vivez une livraison fictive inspirée du projet solaire réalisé à Ndingi.",
+      "projectNote": "L’énergie solaire est déjà installée à Ndingi. Ce chapitre reconstitue une livraison inspirée de ce projet achevé.",
+      "opening": "Ici Ndingi. Notre réserve d’énergie s’épuise, mais les soins continuent. Apportez la batterie chargée dans la cour. Suivez la route balisée et protégez le matériel. Nous vous attendons.",
+      "closing": "Le matériel est arrivé auprès de notre équipe. Merci de l’avoir apporté en toute sécurité. Dans le véritable projet de Ndingi, l’énergie solaire alimente cinq espaces de soins, de la maternité au bloc opératoire. Votre trajet s’achève ici. Notre travail continue.",
+      "routeNote": "Gardez la droite et laissez de la place aux autres véhicules. À la bifurcation, la route de gauche est plus longue mais plus ferme. Freinez avant les ornières.",
+      "fact": {
+        "figure": "25 000+",
+        "title": "Des milliers de centres de santé n’ont pas d’électricité.",
+        "body": "On estime qu’au moins 25 000 établissements de santé en Afrique subsaharienne n’ont aucune électricité, ce qui rend même l’éclairage de base difficile.",
+        "source": "OMS, Banque mondiale, IRENA et SEforALL · Energizing Health (2023)",
+        "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"
+      }
+    },
+    {
+      "id": "nganga-tsanga",
+      "name": "Centre de santé ophtalmologique CEAC / Nganga–Tsanga",
+      "shortName": "CEAC Nganga–Tsanga",
+      "location": "À 17 km de Tsanga Nord · RD Congo",
+      "stage": "ready",
+      "population": null,
+      "capacityKw": null,
+      "careAreas": [],
+      "headline": "Une raison de continuer.",
+      "context": "Un centre ophtalmologique prépare son prochain chapitre solaire. Transportez le matériel sous la pluie jusqu’à l’équipe.",
+      "projectNote": "Le centre a été visité et documenté. Le dimensionnement final du système solaire et le calendrier d’installation restent à confirmer.",
+      "opening": "Bienvenue à Nganga Tsanga. Notre centre ophtalmologique prépare son prochain chapitre solaire. Dans cette histoire, vous apportez le matériel à notre équipe. La pluie vous obligera à ralentir. Laissez de la place aux autres véhicules, choisissez la route la plus ferme et attachez bien les panneaux. Nous serons prêts à votre arrivée.",
+      "closing": "Vous avez traversé la pluie, et le matériel est arrivé en toute sécurité. Merci pour cette livraison attentive. Un tel trajet n’est qu’une étape dans un effort bien plus long. Soufflez un peu. Le prochain centre vous attend.",
+      "routeNote": "La pluie rend le raccourci boueux. Freinez tôt, braquez doucement et prenez la crête de gauche, plus longue mais plus ferme.",
+      "fact": {
+        "figure": "Environ la moitié",
+        "title": "Avoir l’électricité ne signifie pas pouvoir compter sur elle.",
+        "body": "Seule environ la moitié des établissements de santé en Afrique subsaharienne disposent d’une électricité fiable. Les coupures peuvent interrompre les soins au moment où les patients en ont le plus besoin.",
+        "source": "OMS, Banque mondiale, IRENA et SEforALL · Energizing Health (2023)",
+        "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"
+      }
+    },
+    {
+      "id": "nsioni",
+      "name": "Centre de santé ophtalmologique CEAC Nsioni",
+      "shortName": "CEAC Nsioni",
+      "location": "RD Congo · Localisation à confirmer",
+      "stage": "ready",
+      "population": null,
+      "capacityKw": null,
+      "careAreas": [],
+      "headline": "Les soins valent la traversée.",
+      "context": "Le centre ophtalmologique de Nsioni a été documenté pour un projet solaire. Dans cette histoire, votre livraison rapproche l’équipe de son objectif.",
+      "projectNote": "Le centre a été visité et photographié. Le dimensionnement solaire, le calendrier d’installation et la localisation exacte restent à confirmer.",
+      "opening": "Bienvenue à Nsioni. Notre centre ophtalmologique a été documenté pour un futur projet solaire. Ce soir, dans cette histoire, votre mission est d’apporter le matériel à notre équipe. Attention à la traversée de la rivière. Attendez que le passage soit libre, ou prenez la route de crête, plus longue. L’essentiel est d’arriver en toute sécurité.",
+      "closing": "La traversée est derrière vous. Le matériel est arrivé auprès de notre équipe. Merci d’en avoir pris soin, et d’avoir respecté les autres usagers de la route. Ce trajet est terminé. Nous poursuivrons le travail.",
+      "routeNote": "Le pont endommagé ne laisse qu’un passage étroit balisé. Restez au centre, sous les 20 km/h, ou prenez le contournement par la crête à gauche. Laissez passer les véhicules engagés.",
+      "fact": {
+        "figure": "Près d’un milliard",
+        "title": "Près d’un milliard de personnes sont concernées dans le monde.",
+        "body": "Dans les pays à revenu faible ou intermédiaire inférieur, près d’un milliard de personnes dépendent d’établissements de santé dont l’électricité est peu fiable, voire inexistante.",
+        "source": "OMS, Banque mondiale, IRENA et SEforALL · Energizing Health (2023)",
+        "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"
+      }
+    },
+    {
+      "id": "kiobo-kwimba",
+      "name": "Centre de santé de Kiobo–Kwimba",
+      "shortName": "CEAC Kiobo–Kwimba",
+      "location": "RD Congo · Localisation à confirmer",
+      "stage": "ready",
+      "population": null,
+      "capacityKw": null,
+      "careAreas": [],
+      "headline": "Apportez un peu de lumière.",
+      "context": "Un centre prépare son accès à une énergie solaire fiable. Suivez les réflecteurs dans la nuit et apportez le matériel à l’équipe.",
+      "projectNote": "L’extérieur et les salles de soins ont été documentés. Les prochaines étapes sont le dimensionnement du système solaire et la programmation de l’installation.",
+      "opening": "Bienvenue à Kiobo Kwimba. Notre centre prépare son prochain chapitre solaire. Dans cette histoire, vous transportez la batterie et les panneaux à travers la nuit. Gardez une allure régulière, suivez les réflecteurs et empruntez la route ferme si nécessaire. Nous vous retrouverons dans la cour.",
+      "closing": "Vos phares ont guidé l’équipe vers la cour. Le matériel est maintenant ici, intact et prêt à être remis. Merci d’avoir effectué ce trajet avec autant de soin. Reposez-vous un instant avant la dernière route.",
+      "routeNote": "Le brouillard et l’obscurité réduisent la visibilité. Suivez les réflecteurs, ralentissez avant les virages sans visibilité et restez à distance du bord de la falaise.",
+      "fact": {
+        "figure": null,
+        "title": "L’électricité sert à bien plus qu’à éclairer.",
+        "body": "Une alimentation fiable aide les soignants à accompagner les naissances, à conserver les vaccins au froid, à utiliser le matériel médical et à répondre aux urgences.",
+        "source": "OMS, Banque mondiale, IRENA et SEforALL · Energizing Health (2023)",
+        "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"
+      }
+    },
+    {
+      "id": "mont-sinai",
+      "name": "Hôpital Mont Sinaï",
+      "shortName": "Mont Sinaï",
+      "location": "Boma · RD Congo",
+      "stage": "ready",
+      "population": null,
+      "capacityKw": null,
+      "careAreas": [],
+      "headline": "Encore une lumière au bout du chemin.",
+      "context": "Le dernier trajet mène au Mont Sinaï, à Boma. Apportez le dernier chargement à l’équipe de l’hôpital.",
+      "projectNote": "L’hôpital a été visité et photographié. Les salles et les équipements à alimenter doivent être confirmés avant le dimensionnement final et l’installation.",
+      "opening": "Bienvenue au Mont Sinaï, à Boma. Voici votre dernière livraison dans cette histoire. L’équipe de l’hôpital attend le matériel. Anticipez la route, gardez vos distances et protégez la batterie et les panneaux jusqu’à la cour. Encore un trajet prudent. Nous prendrons le relais.",
+      "closing": "Le matériel est arrivé auprès de l’équipe. Merci pour chaque décision prudente prise en chemin. Vous avez amené la batterie et les panneaux jusqu’à la cour en toute sécurité. Les équipes soignantes poursuivent leur travail. Pour l’instant, soufflez un peu et profitez de la lumière.",
+      "routeNote": "Observez les repères de crue et freinez avant les passages accidentés. Prenez le contournement plus ferme lorsque la route basse semble difficile. Protégez le matériel jusqu’au dernier virage.",
+      "fact": {
+        "figure": null,
+        "title": "Un centre de santé n’a pas à attendre le réseau électrique.",
+        "body": "Des panneaux solaires associés à des batteries peuvent alimenter les centres isolés et maintenir les services essentiels après le coucher du soleil.",
+        "source": "OMS, Banque mondiale, IRENA et SEforALL · Energizing Health (2023)",
+        "href": "https://www.who.int/news/item/14-01-2023-close-to-one-billion-people-globally-are-served-by-health-care-facilities-with-no-electricity-access-or-with-unreliable-electricity"
+      }
+    }
+  ],
+  "help": {
+    "title": "Soutenez notre équipe sur le terrain",
+    "href": "/campaigns/power-drc-clinics#donate"
+  }
+}

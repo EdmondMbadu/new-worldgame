@@ -91,7 +91,8 @@ export class SceneNarrator {
   toggle() {
     if (this.disposed || !this.scene) return;
     const clip = this.clips.get(this.scene);
-    if (!clip || clip.failed) return;
+    if (!clip) return;
+    if (clip.failed) { clip.failed = false; this.wanted = false; clip.audio.load(); }
     if (this.wanted && !clip.audio.ended && !clip.blocked) {
       this.wanted = false;
       clip.gain.gain.value = 0;
@@ -107,7 +108,8 @@ export class SceneNarrator {
   resume() {
     if (this.disposed || !this.scene) return;
     const clip = this.clips.get(this.scene);
-    if (!clip || clip.failed) return;
+    if (!clip) return;
+    if (clip.failed) { clip.failed = false; this.wanted = false; clip.audio.load(); }
     if (clip.audio.ended) clip.audio.currentTime = 0;
     clip.blocked = false;
     this.wanted = true;

@@ -1,3 +1,4 @@
+import { lastLightReturn } from './last-light-return';
 /**
  * Import function triggers from their respective submodules:
  *
@@ -1206,11 +1207,12 @@ export const sendBrandedVerificationEmail = functions.https.onCall(
       );
     }
 
-    const request = _data as {returnTo?: unknown; origin?: unknown} | null;
-    const gameReturn = typeof request?.returnTo === 'string' && /^\/games\/last-light\/\?resume=[a-f0-9-]{36}$/.test(request.returnTo) ? request.returnTo : null;
+    const request = _data as {returnTo?: unknown; origin?: unknown; language?: unknown} | null;
+    const french = request?.language === 'fr';
+    const gameReturn = lastLightReturn(request?.returnTo);
     const allowedOrigins = ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'];
     const returnOrigin = typeof request?.origin === 'string' && allowedOrigins.includes(request.origin) ? request.origin : APP_BASE_URL;
-    const verificationContinue = gameReturn ? `${returnOrigin}/verify-email?verified=1&redirectTo=${encodeURIComponent(gameReturn)}` : `${APP_BASE_URL}/verify-email?verified=1`;
+    const verificationContinue = gameReturn ? `${returnOrigin}/verify-email?verified=1&lang=${french ? "fr" : "en"}&redirectTo=${encodeURIComponent(gameReturn)}` : `${APP_BASE_URL}/verify-email?verified=1`;
     const verificationLink = await admin.auth().generateEmailVerificationLink(
       authUser.email,
       {
@@ -1224,10 +1226,10 @@ export const sendBrandedVerificationEmail = functions.https.onCall(
     );
     const safeVerificationLink = escapeEmailHtml(verificationLink);
     const year = new Date().getFullYear();
-    const subject = 'Verify your email | Global Solutions Lab';
+    const subject = french ? 'Vérifiez votre adresse e-mail | Global Solutions Lab' : 'Verify your email | Global Solutions Lab';
     const preheader =
       'One quick step: verify your email to activate your Global Solutions Lab account.';
-    const html = `<!doctype html>
+    let html = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -1276,9 +1278,22 @@ export const sendBrandedVerificationEmail = functions.https.onCall(
     </table>
   </body>
 </html>`;
-    const text = `Hello ${String(
+    let text = `Hello ${String(
       profileSnapshot.get('firstName') || authUser.displayName || 'there'
     )},\n\nThank you for joining Global Solutions Lab. Verify your email address to activate your account:\n\n${verificationLink}\n\nIf you did not create this account, you can safely ignore this email.\n\nGlobal Solutions Lab\n${APP_BASE_URL}`;
+
+    if (french) {
+      html = html.replace('<html lang="en">', '<html lang="fr">')
+        .replace('One quick step: verify your email to activate your Global Solutions Lab account.', 'Une dernière étape : vérifiez votre adresse e-mail pour activer votre compte Global Solutions Lab.')
+        .replace('Welcome to a world of solutions', 'Bienvenue dans un monde de solutions')
+        .replace('Hello ', 'Bonjour ')
+        .replace('Thank you for joining Global Solutions Lab. Verify your email address to activate your account and begin collaborating on solutions for a better world.', 'Merci de rejoindre Global Solutions Lab. Vérifiez votre adresse e-mail pour activer votre compte et collaborer à des solutions pour un monde meilleur.')
+        .replace('Verify my email', 'Vérifier mon adresse e-mail')
+        .replace('For your security, this verification link can only be used once. If the button does not work, copy and paste this link into your browser:', 'Pour votre sécurité, ce lien ne peut être utilisé qu’une fois. Si le bouton ne fonctionne pas, copiez et collez ce lien dans votre navigateur :')
+        .replace('If you did not create this account, you can safely ignore this email.', 'Si vous n’avez pas créé ce compte, ignorez cet e-mail.')
+        .replace('Designing solutions for Spaceship Earth.', 'Concevoir des solutions pour notre planète.');
+      text = `Bonjour ${String(profileSnapshot.get('firstName') || authUser.displayName || '')},\n\nMerci de rejoindre Global Solutions Lab. Vérifiez votre adresse e-mail pour activer votre compte :\n\n${verificationLink}\n\nSi vous n’avez pas créé ce compte, ignorez cet e-mail.\n\nGlobal Solutions Lab\n${APP_BASE_URL}`;
+    }
 
     try {
       await sgMail.send({
@@ -13202,4 +13217,4 @@ Design direction:
   });
 
 // Last Light: private progress and server-owned public scoreboards.
-export { beginLastLightRun, getLastLightAccount, saveLastLightName, syncLastLightAccountName, syncLastLightProgress, submitLastLightRun, getLastLightLeaderboard, publishLastLightDrive, setLastLightVisibility, getLastLightDrives, saveLastLightHistory, claimLastLightGuest, saveLastLightJourney, resumeLastLightJourney, discardLastLightJourney } from './last-light';
+export { beginLastLightRun, getLastLightAccount, saveLastLightLanguage, saveLastLightName, syncLastLightAccountName, syncLastLightProgress, submitLastLightRun, getLastLightLeaderboard, publishLastLightDrive, setLastLightVisibility, getLastLightDrives, saveLastLightHistory, claimLastLightGuest, saveLastLightJourney, resumeLastLightJourney, discardLastLightJourney } from './last-light';

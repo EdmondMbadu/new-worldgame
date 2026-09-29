@@ -1,3 +1,4 @@
+import { t } from '../../../../content/last-light-locale';
 import { clearAuthReturn, captureAuthReturn, gameAuthReturn } from 'src/app/services/auth-return';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
@@ -10,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
     standalone: false
 })
 export class SignupComponent implements OnInit {
+  readonly tr = t;
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
   email: string = '';
@@ -34,7 +36,7 @@ export class SignupComponent implements OnInit {
     const destination = captureAuthReturn();
     if (destination) this.auth.setRedirectUrl(destination);
     window.scroll(0, 0);
-    if (this.gameReturnUrl) this.goal = 'Play Last Light, save my progress, and join the player leaderboard.';
+    if (this.gameReturnUrl) this.goal = t('Play Last Light, save my progress, and join the player leaderboard.');
     this.formLoadTime = Date.now(); // Record form load time
   }
   constructor(private auth: AuthService, private router: Router) {}
@@ -44,7 +46,7 @@ export class SignupComponent implements OnInit {
    * Detects gibberish patterns common in bot signups.
    */
   isValidName(name: string): boolean {
-    const trimmed = name.trim();
+    const trimmed = name.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
     // Must be at least 2 characters
     if (trimmed.length < 2) return false;
@@ -99,7 +101,7 @@ export class SignupComponent implements OnInit {
     // Bot detection: form filled too quickly
     if (this.isFormFilledTooQuickly()) {
       console.log('Bot detected: form filled too quickly');
-      alert('Please take your time filling out the form.');
+      alert(t('Please take your time filling out the form.'));
       return;
     }
 
@@ -110,33 +112,33 @@ export class SignupComponent implements OnInit {
       this.lastName === '' ||
       this.rePassword === ''
     ) {
-      alert('Fill all the fields');
+      alert(t('Fill all the fields'));
       return;
     }
 
     // Validate names aren't gibberish
     if (!this.isValidName(this.firstName)) {
-      alert('Please enter a valid first name.');
+      alert(t('Please enter a valid first name.'));
       return;
     }
     if (!this.isValidName(this.lastName)) {
-      alert('Please enter a valid last name.');
+      alert(t('Please enter a valid last name.'));
       return;
     }
 
     // Require goal/reason with minimum length
     if (this.goal.trim().length < 20) {
       alert(
-        'Please tell us why you want to join (at least 20 characters). This helps us understand our community better.'
+        t('Please tell us why you want to join (at least 20 characters). This helps us understand our community better.')
       );
       return;
     }
 
     if (!this.agree || !this.solverEvaluator) {
-      alert('You must check both checkbox conditions to proceed.');
+      alert(t('You must check both checkbox conditions to proceed.'));
       return;
     } else if (this.password !== this.rePassword) {
-      alert(' Both Passwords need to match');
+      alert(t(' Both Passwords need to match'));
       return;
     }
     this.submitting = true;

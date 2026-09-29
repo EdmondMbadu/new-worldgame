@@ -1,3 +1,4 @@
+import { t, getLocale } from './locale';
 import { useEffect, useRef, useState } from 'react';
 import type { GameEngine } from './engine';
 
@@ -19,14 +20,14 @@ export function DriveCoach({ engine: e, touch, controller }: { engine: GameEngin
   const ready = e.phase === 'ready';
   const brake = nearRough && !braked;
   if (!ready && !brake && (steered || e.progress > 180)) return null;
-  const drive = touch ? 'Drive' : controller ? 'the right trigger' : '↑';
+  const drive = t(touch ? 'Drive' : controller ? 'the right trigger' : '↑');
   const title = ready ? `Hold ${drive} to drive toward ${e.mission.place}.`
-    : brake ? `Hold ${touch ? 'Brake' : controller ? 'the left trigger' : '↓'} to slow before ${rough?.kind === 'tree' ? 'the fallen tree' : rough?.kind === 'planks' ? 'the loose planks' : rough?.kind === 'landslide' ? 'the landslide' : 'rough ground'}.`
+    : brake ? `Hold ${t(touch ? 'Brake' : controller ? 'the left trigger' : '↓')} to slow before ${t(rough?.kind === 'tree' ? 'the fallen tree' : rough?.kind === 'planks' ? 'the loose planks' : rough?.kind === 'landslide' ? 'the landslide' : 'rough ground')}.`
     : touch ? 'Keep holding Drive. Slide the pad to steer.'
     : controller ? 'Keep driving. Use the left stick to steer.' : 'Keep holding ↑. Use ← → to steer.';
   return <div className={`drive-coach ${ready ? 'drive-coach--ready' : ''}`}>
-    <span className="eyebrow">{ready ? 'YOUR DELIVERY STARTS HERE' : brake ? 'SLOW DOWN AHEAD' : 'FOLLOW THE ROAD'}</span>
-    <p role="status">{title}</p>
-    {ready ? <small>The reserve clock starts when you drive.</small> : <button className="text-button" onClick={() => setDismissed(true)} aria-label="Hide driving tips">Got it</button>}
+    <span className="eyebrow">{t(ready ? 'YOUR DELIVERY STARTS HERE' : brake ? 'SLOW DOWN AHEAD' : 'FOLLOW THE ROAD')}</span>
+    <p role="status">{t(title)}</p>
+    {ready ? <small>{t("The reserve clock starts when you drive.")}</small> : <button className="text-button" onClick={() => setDismissed(true)} aria-label={t("Hide driving tips")}>{t("Got it")}</button>}
   </div>;
 }

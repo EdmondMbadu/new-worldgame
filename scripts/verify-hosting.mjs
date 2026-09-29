@@ -78,8 +78,8 @@ for (const game of games) {
     const story = JSON.parse(readFileSync(new URL('../content/drc-clinic-stories.json', import.meta.url), 'utf8'));
     if (!existsSync(path.join(root, 'story/clinic-evening.webp')))
       fail('Last Light is missing its clinic story artwork.');
-    for (const clinic of story.clinics) for (const scene of ['opening', 'closing']) {
-      const clip = path.join(root, 'audio/story', `${clinic.id}-${scene}.mp3`);
+    for (const clinic of story.clinics) for (const language of ['', 'fr']) for (const scene of ['opening', 'closing']) {
+      const clip = path.join(root, 'audio/story', language, `${clinic.id}-${scene}.mp3`);
       if (!existsSync(clip) || statSync(clip).size < 1000)
         fail(`Last Light is missing the ${clinic.id} ${scene} narration.`);
     }

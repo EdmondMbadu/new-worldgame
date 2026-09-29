@@ -219,3 +219,27 @@ describe('account-first synchronization', () => {
     expect(c.currentPlayer()?.name).toBe('Alice Account');
   });
 });
+
+describe('language belongs to the current account',()=>{
+  it('keeps the latest rapid switch when an earlier request is still in flight',async()=>{
+    const c=await initialized();
+    let release!:()=>void;
+    mock.call.mockImplementation(async (name:string)=>{
+      if(name==='saveLastLightLanguage')await new Promise<void>(resolve=>{release=resolve;});
+      return {};
+    });
+    const first=c.saveLanguagePreference('fr');
+    await vi.waitFor(()=>expect(release).toBeTypeOf('function'));
+    const second=c.saveLanguagePreference('en');release();await first;
+    await vi.waitFor(()=>expect(mock.call.mock.calls.filter(([n])=>n==='saveLastLightLanguage').at(-1)?.[1].language).toBe('en'));
+    release();await second;expect(c.currentPlayer()?.language).toBe('en');
+    expect(localStorage.getItem('last-light.language-pending.alice')).toBe('null');
+  });
+  it('retains an offline language choice for retry',async()=>{
+    const c=await initialized();mock.call.mockRejectedValue(new Error('offline'));
+    await c.saveLanguagePreference('fr');
+    expect(localStorage.getItem('last-light.language-pending.alice')).toBe('"fr"');
+    mock.call.mockResolvedValue({language:'fr'});await c.saveLanguagePreference('fr');
+    expect(c.currentPlayer()?.language).toBe('fr');
+  });
+});

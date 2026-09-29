@@ -1,5 +1,6 @@
+import { t, getLocale, getLanguage, useLanguage, LanguageSwitch, campaignHref } from './locale';
 import { Leaderboard, LeaderboardDialog, PlayerControls, RealProjectCard } from './CommunityPanel';
-import { beginRun, beginPractice, finishRun, useCommunity, syncProgress, publishPending, saveDriveCheckpoint, continueJourney, currentJourneyId, abandonDrive } from './community';
+import { beginRun, beginPractice, finishRun, useCommunity, syncProgress, publishPending, saveDriveCheckpoint, continueJourney, currentJourneyId, abandonDrive, saveLanguagePreference } from './community';
 import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
 import { readActive, type ActiveJourney } from './records';
 import { routePoint } from "./routes";
@@ -73,7 +74,7 @@ function RouteMap({ engine: e }: { engine: GameEngine }) {
     <svg
       className="route-map"
       viewBox="0 0 105 130"
-      aria-label="Route to the clinic"
+      aria-label={t("Route to the clinic")}
     >
       <polyline points={main} className="route-line" />
       {alternatives.map((points, i) => (
@@ -135,9 +136,9 @@ function TouchControls({
           else controls.touch[key] = 0;
         }
       }}
-      aria-label={label}
+      aria-label={t(label)}
     >
-      {label}
+      {t(label)}
     </button>
   );
   return (
@@ -145,7 +146,7 @@ function TouchControls({
       <div
         className="steering-pad"
         role="slider"
-        aria-label="Steering"
+        aria-label={t("Steering")}
         aria-valuemin={-1}
         aria-valuemax={1}
         aria-valuenow={controls?.touch.steer || 0}
@@ -172,7 +173,7 @@ function TouchControls({
         }}
       >
         <span>←</span>
-        <span className="steering-label">STEER</span>
+        <span className="steering-label">{t("STEER")}</span>
         <span>→</span>
       </div>
       <div className="pedals">
@@ -222,7 +223,7 @@ function SettingsPanel({
         className="settings-panel"
         role="dialog"
         aria-modal="true"
-        aria-label="Journey settings"
+        aria-label={t("Journey settings")}
         onKeyDown={(event) => {
           event.stopPropagation();
           if (event.key === "Escape") {
@@ -249,21 +250,20 @@ function SettingsPanel({
       >
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">MAKE YOURSELF AT HOME</span>
-            <h2>Journey settings</h2>
+            <span className="eyebrow">{t("MAKE YOURSELF AT HOME")}</span>
+            <h2>{t("Journey settings")}</h2>
           </div>
           <button
             className="icon-button"
             onClick={onClose}
-            aria-label="Close settings"
+            aria-label={t("Close settings")}
             autoFocus
           >
             ×
           </button>
         </div>
-        <label className="setting-row">
-          Difficulty
-          <select
+        <LanguageSwitch onChange={language => void saveLanguagePreference(language)} />
+        <label className="setting-row">{t(" Difficulty ")}<select
             value={settings.mode}
             onChange={(e) =>
               onChange({
@@ -272,17 +272,12 @@ function SettingsPanel({
               })
             }
           >
-            <option value="standard">Standard</option>
-            <option value="relaxed">Relaxed · more time</option>
+            <option value="standard">{t("Standard")}</option>
+            <option value="relaxed">{t("Relaxed · more time")}</option>
           </select>
         </label>
-        <p className="setting-note">
-          Difficulty changes apply to your next drive. Relaxed adds 35% more
-          time and softens cargo damage.
-        </p>
-        <label className="setting-row">
-          Graphics
-          <select
+        <p className="setting-note">{t(" Difficulty changes apply to your next drive. Relaxed adds 35% more time and softens cargo damage. ")}</p>
+        <label className="setting-row">{t(" Graphics ")}<select
             value={settings.quality}
             onChange={(e) =>
               onChange({
@@ -291,16 +286,13 @@ function SettingsPanel({
               })
             }
           >
-            <option value="auto">Auto · adapts to this device</option>
-            <option value="high">High</option>
-            <option value="medium">Balanced</option>
-            <option value="low">Light · older phones and slow graphics</option>
+            <option value="auto">{t("Auto · adapts to this device")}</option>
+            <option value="high">{t("High")}</option>
+            <option value="medium">{t("Balanced")}</option>
+            <option value="low">{t("Light · older phones and slow graphics")}</option>
           </select>
         </label>
-        <p className="setting-note">
-          Graphics changes apply to the next drive. Auto starts from what this
-          device can do and lowers resolution, then detail, if the drive stutters.
-        </p>
+        <p className="setting-note">{t(" Graphics changes apply to the next drive. Auto starts from what this device can do and lowers resolution, then detail, if the drive stutters. ")}</p>
         {(
           [
             ["sound", "Sound & music"],
@@ -314,7 +306,7 @@ function SettingsPanel({
           ] as const
         ).map(([key, label]) => (
           <label className="setting-row" key={key}>
-            {label}
+            {t(label)}
             <input
               type="checkbox"
               checked={settings[key]}
@@ -325,14 +317,12 @@ function SettingsPanel({
           </label>
         ))}
         <div className="setting-leaderboard">
-          <span className="setting-label">Public leaderboard</span>
+          <span className="setting-label">{t("Public leaderboard")}</span>
           <PlayerControls />
         </div>
-        <label className="setting-row">
-          Night brightness
-          <input
+        <label className="setting-row">{t(" Night brightness ")}<input
             type="range"
-            aria-label="Night brightness"
+            aria-label={t("Night brightness")}
             min="0.8"
             max="1.4"
             step="0.05"
@@ -342,10 +332,8 @@ function SettingsPanel({
             }
           />
         </label>
-        <label className="setting-row">
-          Volume
-          <input
-            aria-label="Volume"
+        <label className="setting-row">{t(" Volume ")}<input
+            aria-label={t("Volume")}
             type="range"
             min="0"
             max="1"
@@ -359,28 +347,20 @@ function SettingsPanel({
         <div className="bindings">
           {Object.entries(settings.keys).map(([key, value]) => (
             <button key={key} onClick={() => setBinding(key)}>
-              {key}
+              {t(key)}
               <kbd>
-                {binding === key
+                {t(binding === key
                   ? "Press a key…"
-                  : value.replace("Key", "").replace("Digit", "")}
+                  : value.replace("Key", "").replace("Digit", ""))}
               </kbd>
             </button>
           ))}
         </div>
-        <p className="setting-note">
-          Arrow keys: hold ↑ to drive, ← → to steer, ↓ to slow or stop. Keep holding ↓ after stopping to reverse. The letter keys above also work. Controller: steer with the left stick, triggers
-          to drive/brake, A / × to deliver. Recover a stuck truck with the
-          contextual action or the on-screen button. You can always pause
-          (Escape / controller Menu) and choose Recover truck during a drive.
-          Recovery returns you to the last safe checkpoint and uses 8 seconds.
-        </p>
+        <p className="setting-note">{t(" Arrow keys: hold ↑ to drive, ← → to steer, ↓ to slow or stop. Keep holding ↓ after stopping to reverse. The letter keys above also work. Controller: steer with the left stick, triggers to drive/brake, A / × to deliver. Recover a stuck truck with the contextual action or the on-screen button. You can always pause (Escape / controller Menu) and choose Recover truck during a drive. Recovery returns you to the last safe checkpoint and uses 8 seconds. ")}</p>
         <button
           className="secondary"
           onClick={() => onChange(defaultSettings())}
-        >
-          Restore default settings
-        </button>
+        >{t(" Restore default settings ")}</button>
       </section>
     </div>
   );
@@ -390,12 +370,14 @@ function RestartJourneyDialog({ onKeep, onRestart }: { onKeep: () => void; onRes
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => { const previous = document.activeElement as HTMLElement | null; dialog.current?.showModal(); return () => previous?.focus?.(); }, []);
   return <dialog ref={dialog} className="restart-dialog" role="alertdialog" aria-labelledby="restart-title" aria-describedby="restart-description" onCancel={e => { e.preventDefault(); onKeep(); }}>
-    <h2 id="restart-title">Start a new drive?</h2><p id="restart-description">This replaces your unfinished journey. Your past drives, best scores and unlocked clinics stay saved.</p>
-    <button className="primary" autoFocus onClick={onKeep}>Keep my journey</button><button className="secondary" onClick={onRestart}>Start again</button>
+    <h2 id="restart-title">{t("Start a new drive?")}</h2><p id="restart-description">{t("This replaces your unfinished journey. Your past drives, best scores and unlocked clinics stay saved.")}</p>
+    <button className="primary" autoFocus onClick={onKeep}>{t("Keep my journey")}</button><button className="secondary" onClick={onRestart}>{t("Start again")}</button>
   </dialog>;
 }
 
 export default function App() {
+  const language = useLanguage();
+  useEffect(() => { document.documentElement.lang = language; sound.current?.changeLanguage(); }, [language]);
   const [checkpoint] = useState(() => readCheckpoint());
   const [challenge] = useState(() => invitation());
   const restore = useRef(checkpoint);
@@ -676,14 +658,14 @@ export default function App() {
             writeSave(next);
             setSave(s => owner === (s.owner || null) ? recordResult(s,instance.result!) : s);
             if (!instance.result!.practice) {
-              const href = checkpointHref({mission:selected,variant,mode:instance.mode,result:instance.result!,owner:owner || null,save:next});
+              const href = checkpointHref({mission:selected,variant,mode:instance?.mode || save.settings.mode,result:instance.result!,owner:owner || null,save:next});
               if(href) history.replaceState(null,'',href + (qa ? '&qa=1' : ''));
             }
           }
           if (instance.phase === 'failed' && !failedCommitted) {
             failedCommitted = true;
             abandonDrive();
-            const href = checkpointHref({mission:selected,variant,mode:instance.mode,failure:instance.failure,safeZ:instance.safeZ,safeAlt:instance.safeAlt,owner:saveRef.current.owner||null,save:saveRef.current});
+            const href = checkpointHref({mission:selected,variant,mode:instance?.mode || save.settings.mode,failure:instance.failure,safeZ:instance.safeZ,safeAlt:instance.safeAlt,owner:saveRef.current.owner||null,save:saveRef.current});
             if(href) history.replaceState(null,'',href + (qa ? '&qa=1' : ''));
           }
           const preview = openingRef.current && !settingsRef.current.reducedMotion;
@@ -865,8 +847,7 @@ export default function App() {
   };
   const authHandoff = (page:'login'|'signup'|'verify-email') => {
     const instance = engine.current;
-    if (!instance?.result && instance?.phase !== 'failed') return;
-    const href = checkpointHref({mission:selected,variant,mode:instance.mode,
+    const href = !inGame ? `/games/last-light/?${new URLSearchParams({ ...Object.fromEntries(new URLSearchParams(location.search)), lang: getLanguage() })}` : checkpointHref({mission:selected,variant,mode:instance?.mode || save.settings.mode,
       result:instance?.result || undefined, failure:instance?.phase === 'failed' ? instance.failure : undefined,
       safeZ:instance?.safeZ,safeAlt:instance?.safeAlt,owner:saveRef.current.owner || null,save:saveRef.current});
     if (!href || !writeSave(saveRef.current)) {
@@ -875,7 +856,7 @@ export default function App() {
     }
     sound.current?.silence();
     try { sessionStorage.setItem('redirectTo',href); } catch { /* The URL carries the same destination. */ }
-    const target = `/${page}?redirectTo=${encodeURIComponent(href)}`;
+    const target = `/${page}?lang=${getLanguage()}&redirectTo=${encodeURIComponent(href)}`;
     if (window.top && window.top !== window) window.top.location.assign(target);
     else window.location.assign(target);
   };
@@ -918,90 +899,78 @@ export default function App() {
           <div className="home-shade" />
           <header className="home-header">
             <a href={returnHref} target="_top" className="brand">
-              <span className="brand-mark">✳</span> GLOBAL SOLUTIONS LAB{" "}
-              <span className="muted">/ PLAY</span>
+              <span className="brand-mark">✳</span>{t(" GLOBAL SOLUTIONS LAB")}{t(" ")}
+              <span className="muted">{t("/ PLAY")}</span>
             </a>
             <div className="header-actions">
-              <span className="edition">THE SECOND ADVENTURE</span>
-              <button className="text-button" onClick={settings}>
-                Settings ↗
-              </button>
+              <LanguageSwitch onChange={language => void saveLanguagePreference(language)} />
+              <span className="edition">{t("THE SECOND ADVENTURE")}</span>
+              <button className="text-button" onClick={settings}>{t(" Settings ↗ ")}</button>
             </div>
           </header>
           <section className="hero">
             <div className="eyebrow">
-              <span className="live-dot" /> A JOURNEY WORTH MAKING
-            </div>
-            <h1>
-              LAST
-              <br />
+              <span className="live-dot" />{t(" A JOURNEY WORTH MAKING ")}</div>
+            <h1> LAST <br />
               <em>LIGHT</em>
               <span className="title-period">.</span>
             </h1>
-            <p className="hero-tagline">
-              The road is rough.
-              <br />
-              The reason is everything.
-            </p>
-            <p className="hero-description">
-              Five nights. One reason to keep going.
-              <br />
-              Reach the clinic. Bring the light.
-            </p>
+            <p className="hero-tagline">{t(" The road is rough. ")}<br />{t(" The reason is everything. ")}</p>
+            <p className="hero-description">{t(" Five nights. One reason to keep going. ")}<br />{t(" Reach the clinic. Bring the light. ")}</p>
             {canContinue && <div className="journey-continue">
-              <button className="primary start-button" disabled={continuing || community.status === 'loading'} onClick={() => void resumeSaved()}><span>{continuing ? 'Restoring journey…' : 'Continue journey'}</span><span>↗</span></button>
-              <p>Clinic {savedJourney.mission + 1} · {CLINICS[savedJourney.mission]?.shortName}<br/>{savedJourney.snapshot ? `${time(savedJourney.snapshot.remaining)} reserve · ${Math.round(savedJourney.snapshot.integrity)}% kit · safe checkpoint` : 'Your next delivery is ready.'}</p>
-              <small>{savedJourney.dirty ? 'Latest save on this device' : community.player ? 'Saved to your account' : 'Saved on this device'} · {new Date(savedJourney.savedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</small>
+              <button className="primary start-button" disabled={continuing || community.status === 'loading'} onClick={() => void resumeSaved()}><span>{t(continuing ? 'Restoring journey…' : 'Continue journey')}</span><span>↗</span></button>
+              <p>{t("Clinic ")}{savedJourney.mission + 1} · {t(CLINICS[savedJourney.mission]?.shortName)}<br/>{t(savedJourney.snapshot ? `${time(savedJourney.snapshot.remaining)} reserve · ${Math.round(savedJourney.snapshot.integrity)}% kit · safe checkpoint` : 'Your next delivery is ready.')}</p>
+              <small>{t(savedJourney.dirty ? 'Latest save on this device' : community.player ? 'Saved to your account' : 'Saved on this device')} · {t(new Date(savedJourney.savedAt).toLocaleString(getLocale(), { dateStyle: 'medium', timeStyle: 'short' }))}</small>
             </div>}
             <button className={canContinue ? 'secondary start-button' : 'primary start-button'} disabled={community.status === 'loading'} onClick={() => start(canContinue ? 0 : selected)}>
-              <span>{canContinue ? 'Start new journey' : save.story.completed.includes(selected) ? 'Drive again' : 'Begin the journey'}</span><span>↗</span>
+              <span>{t(canContinue ? 'Start new journey' : save.story.completed.includes(selected) ? 'Drive again' : community.player ? 'Begin the journey' : 'Play as guest')}</span><span>↗</span>
             </button>
+            {!community.player && <div className="entry-account-actions">
+              <button onClick={() => authHandoff('signup')}>{t('Create an account')}</button>
+              <span aria-hidden="true">·</span><button onClick={() => authHandoff('login')}>{t('Log in')}</button>
+              <p>{t('Guest progress stays on this device. An account keeps it across devices.')}</p>
+            </div>}
+            <a className="entry-contribute" href={campaignHref()} target="_blank" rel="noopener noreferrer">{t('Help power the real clinics.')} <strong>{t('Contribute $10')} ↗</strong></a>
             <div
               className="road-edition"
               role="group"
-              aria-label="Road conditions"
+              aria-label={t("Road conditions")}
             >
               <button
                 aria-pressed={variant === 0}
                 onClick={() => setVariant(0)}
-              >
-                Valley run
-              </button>
+              >{t(" Valley run ")}</button>
               <button
                 aria-pressed={variant === 1}
                 onClick={() => setVariant(1)}
-              >
-                Fresh tracks
-              </button>
+              >{t(" Fresh tracks ")}</button>
             </div>
             <div className="hero-meta">
-              <span>3D DRIVING ADVENTURE</span>
-              <i /> <span>5 CHAPTERS</span>
+              <span>{t("3D DRIVING ADVENTURE")}</span>
+              <i /> <span>{t("5 CHAPTERS")}</span>
               <i />
-              <span>KEYBOARD · TOUCH · CONTROLLER</span>
+              <span>{t("KEYBOARD · TOUCH · CONTROLLER")}</span>
             </div>
           </section>
           <aside className="mission-preview">
-            <span className="eyebrow">
-              YOUR NEXT DELIVERY / {String(selected + 1).padStart(2, "0")}
+            <span className="eyebrow">{t(" YOUR NEXT DELIVERY / ")}{t(String(selected + 1).padStart(2, "0"))}
             </span>
-            <h2>{mission.title}</h2>
-            <p>{mission.tagline}</p>
+            <h2>{t(mission.title)}</h2>
+            <p>{t(mission.tagline)}</p>
             <div className="preview-rule" />
-            <span>{mission.place}</span>
+            <span>{t(mission.place)}</span>
             <span className="preview-distance">
-              {(pathLength(mission) / 1000).toFixed(1)} km ·{" "}
-              {chapterLook(mission).name.toLowerCase()}
+              {t((pathLength(mission) / 1000).toLocaleString(getLocale(), { maximumFractionDigits: 1 }))}{t(" km ·")}{t(" ")}
+              {t(chapterLook(mission).name.toLowerCase())}
             </span>
-            <span className="preview-region">{mission.region}</span>
-            <span className="preview-signature">{mission.signature}</span>
+            <span className="preview-region">{t(mission.region)}</span>
+            <span className="preview-signature">{t(mission.signature)}</span>
           </aside>
-          <section className="campaign" aria-label="Choose a chapter">
+          <section className="campaign" aria-label={t("Choose a chapter")}>
             <div className="campaign-label">
-              <span className="eyebrow">A CHAIN OF LIGHT</span>
+              <span className="eyebrow">{t("A CHAIN OF LIGHT")}</span>
               <span>
-                {save.story.completed.length}/5 CHAPTERS COMPLETE
-              </span>
+                {save.story.completed.length}{t("/5 CHAPTERS COMPLETE ")}</span>
             </div>
             <div className="chapters">
               {MISSIONS.map((m, i) => {
@@ -1016,32 +985,30 @@ export default function App() {
                     aria-pressed={selected === i}
                   >
                     <span className="chapter-number">
-                      {String(i + 1).padStart(2, "0")}{" "}
+                      {t(String(i + 1).padStart(2, "0"))}{t(" ")}
                       <span>
-                        {save.story.completed.includes(i) ? "✦" : open ? "↗" : "○"}
+                        {t(save.story.completed.includes(i) ? "✦" : open ? "↗" : "○")}
                       </span>
                     </span>
-                    <strong>{m.title}</strong>
+                    <strong>{t(m.title)}</strong>
                     <span className="chapter-detail">
-                      {best
-                        ? `${"★".repeat(best.stars)} · ${best.score.toLocaleString()} pts`
+                      {t(best
+                        ? `${"★".repeat(best.stars)} · ${best.score.toLocaleString(getLocale())} pts`
                         : open
                           ? m.place
-                          : "Complete the previous chapter"}
+                          : "Complete the previous chapter")}
                     </span>
                   </button>
                 );
               })}
             </div>
           </section>
-          {handoffError && <p className="challenge-welcome" role="status">{handoffError}</p>}
-          {challenge && <aside className="challenge-welcome"><strong>You’re invited to chapter {challenge.mission+1}: {CLINICS[challenge.mission].shortName}.</strong><p>Try the same {challenge.mode} delivery on the {challenge.variant ? 'alternate' : 'original'} route. This invitation opens this chapter; earlier chapters still count only when you complete them.</p></aside>}
-          <section className="home-community" aria-label="The players and the real project"><Leaderboard mission={selected} mode={save.settings.mode} variant={variant}/><RealProjectCard/></section>
+          {t(handoffError && <p className="challenge-welcome" role="status">{t(handoffError)}</p>)}
+          {challenge && <aside className="challenge-welcome"><strong>{t("You’re invited to chapter ")}{challenge.mission+1}: {t(CLINICS[challenge.mission].shortName)}.</strong><p>{t("Try the same ")}{t(challenge.mode)}{t(" delivery on the ")}{t(challenge.variant ? 'alternate' : 'original')}{t(" route. This invitation opens this chapter; earlier chapters still count only when you complete them.")}</p></aside>}
+          <section className="home-community" aria-label={t("The players and the real project")}><Leaderboard mission={selected} mode={save.settings.mode} variant={variant}/><RealProjectCard/></section>
           <footer className="home-footer">
-            <a href="/games/lost-in-orbit/" target="_top">
-              ← Adventure 01 · Lost in Orbit
-            </a>
-            <span>EVERY MINUTE MATTERS. EVERY LIGHT MATTERS.</span>
+            <a href="/games/lost-in-orbit/" target="_top">{t(" ← Adventure 01 · Lost in Orbit ")}</a>
+            <span>{t("EVERY MINUTE MATTERS. EVERY LIGHT MATTERS.")}</span>
           </footer>
         </>
       )}
@@ -1052,7 +1019,7 @@ export default function App() {
             ref={canvas}
             className="game-canvas"
             tabIndex={-1}
-            aria-label={`Last Light: drive to ${mission.place}`}
+            aria-label={t(`Last Light: drive to ${mission.place}`)}
           />
           <div className="game-vignette" />
           {!error && (opening || (ready && e?.phase === 'results' && result)) && (
@@ -1078,30 +1045,25 @@ export default function App() {
           )}
           {!ready && !error && !opening && (
             <div className="loading-screen">
-              <span className="eyebrow">
-                LAST LIGHT / CHAPTER {String(selected + 1).padStart(2, "0")}
+              <span className="eyebrow">{t(" LAST LIGHT / CHAPTER ")}{t(String(selected + 1).padStart(2, "0"))}
               </span>
-              <h2>{mission.title}</h2>
+              <h2>{t(mission.title)}</h2>
               <div className="loading-line" />
-              <p>{loading}…</p>
-              <small>
-                Keep right, follow tail lights and pass when the road ahead is
-                clear. The clinic clock starts with your first driving input.
-              </small>
+              <p>{t(loading)}…</p>
+              <small>{t(" Keep right, follow tail lights and pass when the road ahead is clear. The clinic clock starts with your first driving input. ")}</small>
             </div>
           )}
           {ready && e && !opening && (
             <>
               {!['restoring', 'results'].includes(e.phase) && <header className="drive-header">
                 <div className="drive-identity">
-                  <span className="eyebrow">
-                    LAST LIGHT / {String(selected + 1).padStart(2, "0")}
+                  <span className="eyebrow">{t(" LAST LIGHT / ")}{t(String(selected + 1).padStart(2, "0"))}
                   </span>
-                  <strong>{clinic.shortName}</strong>
+                  <strong>{t(clinic.shortName)}</strong>
                 </div>
                 <div className={`reserve ${e.time < 40 ? "urgent" : ""}`}>
-                  <span>CLINIC RESERVE</span>
-                  <strong>{time(e.time)}</strong>
+                  <span>{t("CLINIC RESERVE")}</span>
+                  <strong>{t(time(e.time))}</strong>
                   <div className="reserve-track">
                     <i style={{ width: `${(e.time / e.initial) * 100}%` }} />
                   </div>
@@ -1117,15 +1079,15 @@ export default function App() {
                       }));
                     }}
                     aria-label={
-                      save.settings.sound ? "Mute sound" : "Enable sound"
+                      t(save.settings.sound ? "Mute sound" : "Enable sound")
                     }
                   >
-                    {save.settings.sound ? "♪" : "♩"}
+                    {t(save.settings.sound ? "♪" : "♩")}
                   </button>
                   <button
                     className="icon-button"
                     onClick={pause}
-                    aria-label="Pause game"
+                    aria-label={t("Pause game")}
                   >
                     Ⅱ
                   </button>
@@ -1138,15 +1100,15 @@ export default function App() {
                     <span className="destination-symbol">+</span>
                     <div>
                       <span className="eyebrow">
-                        {e.distance < 40 ? "YOU ARE HERE" : "FOLLOW THE ROAD"}
+                        {t(e.distance < 40 ? "YOU ARE HERE" : "FOLLOW THE ROAD")}
                       </span>
-                      <strong>{mission.place}</strong>
-                      <span>{Math.round(e.distance)} m to delivery</span>
+                      <strong>{t(mission.place)}</strong>
+                      <span>{Math.round(e.distance)}{t(" m to delivery")}</span>
                     </div>
                   </div>
                   <div className="telemetry">
                     <div className="cargo-state">
-                      <span>SOLAR KIT</span>
+                      <span>{t("SOLAR KIT")}</span>
                       <strong>
                         {Math.round(e.integrity)}
                         <small>%</small>
@@ -1161,20 +1123,19 @@ export default function App() {
                         />
                       </div>
                       <span>
-                        {e.integrity >= 70
+                        {t(e.integrity >= 70
                           ? "SECURE"
                           : e.integrity >= 35
                             ? "HANDLE WITH CARE"
-                            : "AT RISK"}
+                            : "AT RISK")}
                       </span>
                     </div>
                     <RouteMap engine={e} />
                   </div>
                   <div className="speedometer">
                     <strong>{Math.round(Math.abs(e.speed) * 3.6)}</strong>
-                    <span>
-                      KM/H{" "}
-                      <b className="gear">{e.speed < -0.5 ? "R" : e.gear}</b>
+                    <span>{t(" KM/H")}{t(" ")}
+                      <b className="gear">{t(e.speed < -0.5 ? "R" : e.gear)}</b>
                     </span>
                     <div className="rpm-track">
                       <i
@@ -1183,12 +1144,12 @@ export default function App() {
                         }}
                       />
                     </div>
-                    <small>{e.surface.toUpperCase()}</small>
-                    {e.trafficHint && (
-                      <small className="traffic-status">{e.trafficHint}</small>
-                    )}
+                    <small>{t(e.surface.toUpperCase())}</small>
+                    {t(e.trafficHint && (
+                      <small className="traffic-status">{t(e.trafficHint)}</small>
+                    ))}
                     <small className="beam-status">
-                      ◌ {beamMode(e.mission, Math.abs(e.speed), e.progress)}
+                      ◌ {t(beamMode(e.mission, Math.abs(e.speed), e.progress))}
                     </small>
                   </div>
                   {e.upcomingEncounter && (
@@ -1200,29 +1161,26 @@ export default function App() {
                       <span className="encounter-mark">!</span>
                       <div>
                         <strong>
-                          {e.upcomingEncounter.state === "clear"
+                          {t(e.upcomingEncounter.state === "clear"
                             ? "ROAD CLEAR"
-                            : e.upcomingEncounter.title}
+                            : e.upcomingEncounter.title)}
                         </strong>
-                        <span>{e.upcomingEncounter.state === 'clear' ? 'PASSAGE OPEN' : 'CAUTION AHEAD'}</span>
+                        <span>{t(e.upcomingEncounter.state === 'clear' ? 'PASSAGE OPEN' : 'CAUTION AHEAD')}</span>
                       </div>
                       <b>
                         {Math.max(
                           0,
                           Math.round(e.upcomingEncounter.z - e.progress),
-                        )}{" "}
-                        m
-                      </b>
+                        )}{t(" ")}{t(" m ")}</b>
                     </div>
                   )}
                   {e.elapsed < e.rewardUntil && (
-                    <div className="clean-cue">
-                      ✓ CLEAN DRIVING <span>{e.totalClean} handled</span>
+                    <div className="clean-cue">{t(" ✓ CLEAN DRIVING ")}<span>{e.totalClean}{t(" handled")}</span>
                     </div>
                   )}
                   {e.canDeliver && (
                     <div className="delivery-prompt">
-                      <span>YOU MADE IT TO THE CLINIC</span>
+                      <span>{t("YOU MADE IT TO THE CLINIC")}</span>
                       <button
                         className="primary"
                         onPointerDown={(event) => {
@@ -1257,8 +1215,8 @@ export default function App() {
                             controls.current.touch.action = false;
                         }}
                       >
-                        {save.settings.singlePress ? 'Deliver kit' : 'Hold to deliver kit'}
-                        {!touch && <small className="delivery-key">{controls.current?.device === 'controller' ? 'A / ×' : keyLabel(save.settings, 'action')}</small>}
+                        {t(save.settings.singlePress ? 'Deliver kit' : 'Hold to deliver kit')}
+                        {!touch && <small className="delivery-key">{t(controls.current?.device === 'controller' ? 'A / ×' : keyLabel(save.settings, 'action'))}</small>}
                       </button>
                       <div className="delivery-track">
                         <i
@@ -1268,23 +1226,17 @@ export default function App() {
                     </div>
                   )}
                   {e.distance < 30 && !e.canDeliver && (
-                    <div className="approach-prompt">
-                      Park inside the marked bay and brake to a stop.
-                    </div>
+                    <div className="approach-prompt">{t(" Park inside the marked bay and brake to a stop. ")}</div>
                   )}
                   {e.practice && (
-                    <div className="approach-prompt">
-                      Practice · records and unlocks stay unchanged
-                    </div>
+                    <div className="approach-prompt">{t(" Practice · records and unlocks stay unchanged ")}</div>
                   )}
                   {e.needsRecovery && (
                     <button
                       className="recover-button"
                       onClick={recover}
-                      title="Return to the last safe checkpoint. Uses 8 seconds of clinic reserve."
-                    >
-                      Recover truck · −8 seconds
-                    </button>
+                      title={t("Return to the last safe checkpoint. Uses 8 seconds of clinic reserve.")}
+                    >{t(" Recover truck · −8 seconds ")}</button>
                   )}
                   {touch && (
                     <TouchControls controls={controls.current} engine={e} />
@@ -1297,18 +1249,11 @@ export default function App() {
               {e.phase === "failed" && (
                 <div className="modal-backdrop">
                   <section className="pause-card">
-                    <span className="eyebrow">
-                      THERE IS ANOTHER WAY THROUGH
-                    </span>
-                    <h2>A fresh start.</h2>
-                    <p>{e.failure}</p>
-                    <p className="muted">
-                      Brake before rough ground. Take the firmer route. The team
-                      is ready when you are.
-                    </p>
-                    <button className="primary" onClick={() => start()}>
-                      Try the delivery again ↗
-                    </button>
+                    <span className="eyebrow">{t(" THERE IS ANOTHER WAY THROUGH ")}</span>
+                    <h2>{t("A fresh start.")}</h2>
+                    <p>{t(e.failure)}</p>
+                    <p className="muted">{t(" Brake before rough ground. Take the firmer route. The team is ready when you are. ")}</p>
+                    <button className="primary" onClick={() => start()}>{t(" Try the delivery again ↗ ")}</button>
                     <button
                       className="secondary"
                       onClick={() => {
@@ -1322,9 +1267,7 @@ export default function App() {
                         };
                         start();
                       }}
-                    >
-                      Try with more time
-                    </button>
+                    >{t(" Try with more time ")}</button>
                     <button
                       className="secondary"
                       onClick={() => {
@@ -1332,37 +1275,27 @@ export default function App() {
                         e.practiceFromCheckpoint();
                         controls.current?.clear();
                       }}
-                    >
-                      Practice from checkpoint · unranked
-                    </button>
-                    {!community.player && <button className="text-button" onClick={() => authHandoff('login')}>Save your journey · log in</button>}
-                    {handoffError && <p role="alert">{handoffError}</p>}
-                    <button className="text-button" onClick={home}>
-                      Chapter map
-                    </button>
+                    >{t(" Practice from checkpoint · unranked ")}</button>
+                    {!community.player && <button className="text-button" onClick={() => authHandoff('login')}>{t("Save your journey · log in")}</button>}
+                    {t(handoffError && <p role="alert">{t(handoffError)}</p>)}
+                    <button className="text-button" onClick={home}>{t(" Chapter map ")}</button>
                   </section>
                 </div>
               )}
               {e.phase === "paused" && !showSettings && !error && (
                 <div className="modal-backdrop">
                   <section className="pause-card">
-                    <span className="eyebrow">THE ROAD WILL WAIT</span>
-                    <h2>Take a breath.</h2>
-                    <p>Your delivery and the clinic clock are paused.</p><p className="checkpoint-status" role="status">{community.checkpointMessage || "Your next checkpoint will save automatically."}</p>
-                    <button className="primary" onClick={pause} autoFocus>
-                      Continue the journey ↗
-                    </button>
+                    <span className="eyebrow">{t("THE ROAD WILL WAIT")}</span>
+                    <h2>{t("Take a breath.")}</h2>
+                    <p>{t("Your delivery and the clinic clock are paused.")}</p><p className="checkpoint-status" role="status">{t(community.checkpointMessage || "Your next checkpoint will save automatically.")}</p>
+                    <button className="primary" onClick={pause} autoFocus>{t(" Continue the journey ↗ ")}</button>
                     {e.previous === "driving" && (
                       <>
-                        <button className="secondary" onClick={recover}>
-                          Recover truck · −8 seconds
-                        </button>
-                        <p>Stuck? Return to the last safe checkpoint and continue this delivery.</p>
+                        <button className="secondary" onClick={recover}>{t(" Recover truck · −8 seconds ")}</button>
+                        <p>{t("Stuck? Return to the last safe checkpoint and continue this delivery.")}</p>
                       </>
                     )}
-                    <button className="secondary" onClick={settings}>
-                      Settings & controls
-                    </button>
+                    <button className="secondary" onClick={settings}>{t(" Settings & controls ")}</button>
                     <button
                       className="text-button"
                       onClick={() => {
@@ -1370,15 +1303,9 @@ export default function App() {
                         e.practiceFromCheckpoint();
                         controls.current?.clear();
                       }}
-                    >
-                      Practice from checkpoint · unranked
-                    </button>
-                    <button className="text-button" onClick={() => start()}>
-                      Restart this delivery
-                    </button>
-                    <button className="text-button" onClick={home}>
-                      Save & return to chapter map
-                    </button>
+                    >{t(" Practice from checkpoint · unranked ")}</button>
+                    <button className="text-button" onClick={() => start()}>{t(" Restart this delivery ")}</button>
+                    <button className="text-button" onClick={home}>{t(" Save & return to chapter map ")}</button>
                   </section>
                 </div>
               )}
@@ -1391,8 +1318,7 @@ export default function App() {
                       if (e.phase === "paused") e.resume();
                     }}
                   >
-                    {autopilot ? "Stop" : "Run"} driving QA
-                  </button>
+                    {t(autopilot ? "Stop" : "Run")}{t(" driving QA ")}</button>
                   <button onClick={async () => {
                     // Development-only regression aid: request the same adaptive
                     // graphics changes as slow frames, even with manual quality.
@@ -1402,44 +1328,33 @@ export default function App() {
                     if (!view) return;
                     view.governor = new FrameGovernor(view.tier, true);
                     for (let i = 0; i < 300; i++) view.recordFrame(.04, 2, 35);
-                  }}>Stress graphics QA</button>
-                  <output>
-                    tier {world.current ? ["light", "balanced", "high"][world.current.tier] : "-"} ·
-                    res {world.current ? Math.round(world.current.governor.scale * 100) : 100}% ·{" "}
-                    phase {e.phase} · z {e.progress.toFixed(0)} ·{" "}
-                    {e.integrity.toFixed(0)}% · {tick} frames ·{" "}
-                    {world.current?.renderer.info.render.calls} calls ·{" "}
+                  }}>{t("Stress graphics QA")}</button>
+                  <output>{t(" tier ")}{t(world.current ? ["light", "balanced", "high"][world.current.tier] : "-")}{t(" · res ")}{world.current ? Math.round(world.current.governor.scale * 100) : 100}% ·{t(" ")}{t(" phase ")}{t(e.phase)}{t(" · z ")}{t(e.progress.toFixed(0))} ·{t(" ")}
+                    {t(e.integrity.toFixed(0))}% · {tick}{t(" frames ·")}{t(" ")}
+                    {world.current?.renderer.info.render.calls}{t(" calls ·")}{t(" ")}
                     {Math.round(
                       world.current?.renderer.info.render.triangles || 0,
-                    )}{" "}
-                    triangles · p95 {world.current?.performance.p95.toFixed(1)}{" "}
-                    ms · p99 {world.current?.frames.stats.p99.toFixed(1)} ms ·
-                    max {world.current?.frames.stats.max.toFixed(0)} ms ·
-                    &gt;100ms {world.current?.frames.stats.over100} · &gt;250ms{" "}
-                    {world.current?.frames.stats.over250}· CPU{" "}
-                    {world.current?.frames.stats.physicsMs.toFixed(1)}/
-                    {world.current?.frames.stats.renderMs.toFixed(1)} ms ·
-                    dropped {e.droppedTime.toFixed(2)}s · pause {e.pauseEvents}{" "}
-                    ({e.pauseReason}) · traffic {e.traffic.observed}/
-                    {e.traffic.cars.length} · clean {e.traffic.clean}· brake{" "}
-                    {e.brakeSource} {e.braking.toFixed(2)}
+                    )}{t(" ")}{t(" triangles · p95 ")}{t(world.current?.performance.p95.toFixed(1))}{t(" ")}{t(" ms · p99 ")}{t(world.current?.frames.stats.p99.toFixed(1))}{t(" ms · max ")}{t(world.current?.frames.stats.max.toFixed(0))}{t(" ms · &gt;100ms ")}{world.current?.frames.stats.over100}{t(" · &gt;250ms")}{t(" ")}
+                    {world.current?.frames.stats.over250}{t("· CPU")}{t(" ")}
+                    {t(world.current?.frames.stats.physicsMs.toFixed(1))}/
+                    {t(world.current?.frames.stats.renderMs.toFixed(1))}{t(" ms · dropped ")}{t(e.droppedTime.toFixed(2))}{t("s · pause ")}{e.pauseEvents}{t(" ")}
+                    ({t(e.pauseReason)}{t(") · traffic ")}{e.traffic.observed}/
+                    {e.traffic.cars.length}{t(" · clean ")}{e.traffic.clean}{t("· brake")}{t(" ")}
+                    {t(e.brakeSource)} {t(e.braking.toFixed(2))}
                   </output>
                   <output>
-                    {Math.round(world.current?.frames.stats.fps || 0)} avg fps
-                  </output>
+                    {Math.round(world.current?.frames.stats.fps || 0)}{t(" avg fps ")}</output>
                 </div>
               )}
             </>
           )}
-          {error && (
+          {t(error && (
             <div className="modal-backdrop">
               <section className="pause-card">
-                <span className="eyebrow">LET US GET YOU BACK ON THE ROAD</span>
-                <h2>The scene needs a restart.</h2>
-                <p>{error}</p>
-                <button className="primary" onClick={() => start()}>
-                  Restart drive ↗
-                </button>
+                <span className="eyebrow">{t("LET US GET YOU BACK ON THE ROAD")}</span>
+                <h2>{t("The scene needs a restart.")}</h2>
+                <p>{t(error)}</p>
+                <button className="primary" onClick={() => start()}>{t(" Restart drive ↗ ")}</button>
                 <button
                   className="secondary"
                   onClick={() => {
@@ -1450,21 +1365,15 @@ export default function App() {
                     setSave((s) => ({ ...s, settings: settingsRef.current }));
                     start();
                   }}
-                >
-                  Try low graphics
-                </button>
-                <button className="text-button" onClick={home}>
-                  Back to chapters
-                </button>
+                >{t(" Try low graphics ")}</button>
+                <button className="text-button" onClick={home}>{t(" Back to chapters ")}</button>
               </section>
             </div>
-          )}
+          ))}
         </>
       )}
       {!storageOk && (
-        <div className="storage-notice">
-          Progress is saved for this session. Browser storage is unavailable.
-        </div>
+        <div className="storage-notice">{t(" Progress is saved for this session. Browser storage is unavailable. ")}</div>
       )}
       {showSettings && (
         <SettingsPanel

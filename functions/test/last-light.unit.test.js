@@ -260,3 +260,17 @@ test('missing profile names use a generated fallback, never email; all account c
   await call('claimLastLightGuest', { deviceKey: key() }, 'claim-first');
   assert.equal(fake.store.get('lastLightPlayers/claim-first').name, 'Claim First');
 });
+
+test('language is private account data and cannot overwrite scores or another account', async () => {
+  const uid='french-driver', other='english-driver';
+  await assert.rejects(()=>call('saveLastLightLanguage',{language:'fr'}),{code:'unauthenticated'});
+  await assert.rejects(()=>call('saveLastLightLanguage',{language:'de'},uid),{code:'invalid-argument'});
+  await assert.rejects(()=>call('saveLastLightLanguage',{language:'fr',accountUid:other},uid),{code:'permission-denied'});
+  const before=await call('getLastLightAccount',{},uid);
+  await ll.saveLastLightLanguage.run({language:'fr',accountUid:uid},ctx(uid,false));
+  const after=await call('getLastLightAccount',{},uid);
+  assert.equal(after.language,'fr');assert.deepEqual(after.best,before.best);assert.equal(after.hidden,before.hidden);
+  assert.equal((await call('getLastLightAccount',{},other)).language,null);
+  await call('saveLastLightLanguage',{language:'en',accountUid:uid},uid);
+  assert.equal((await call('getLastLightAccount',{},uid)).language,'en');
+});

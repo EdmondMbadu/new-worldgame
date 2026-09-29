@@ -1,4 +1,4 @@
-<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>Your Last Light journey is saved.</strong><span>Finish signing in to return to your chapter.</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">Back to your saved game →</a></aside>
+<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>{{ tr("Your game is waiting.") }}</strong><span>{{ tr("Finish signing in to return to your chapter.") }}</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">{{ tr("Back to Last Light →") }}</a></aside>
 <div
   class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950"
 >
@@ -28,13 +28,11 @@
           <p
             class="text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400"
           >
-            Sign In
-          </p>
+            {{ tr(" Sign In ") }}</p>
           <h1
             class="mt-2 text-2xl font-extrabold leading-tight tracking-tight bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent"
           >
-            Welcome back
-          </h1>
+            {{ tr(" Welcome back ") }}</h1>
         </div>
 
         <div
@@ -43,8 +41,8 @@
           aria-live="polite"
           class="mx-8 mb-4 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm leading-6 text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-100"
         >
-          <p class="font-semibold">Your account is ready</p>
-          <p class="mt-1">{{ accountNotice }}</p>
+          <p class="font-semibold">{{ tr("Your account is ready") }}</p>
+          <p class="mt-1">{{ tr((accountNotice)) }}</p>
         </div>
 
         <!-- error -->
@@ -54,8 +52,7 @@
           aria-live="assertive"
           class="mx-8 mb-2 rounded-lg border border-red-300/60 bg-red-50 px-4 py-2 text-sm text-red-700 dark:border-red-800/60 dark:bg-red-900/30 dark:text-red-200"
         >
-          Sign in failed. Please try again and double-check your details.
-        </div>
+          {{ tr(" Sign in failed. Please try again and double-check your details. ") }}</div>
 
         <div class="px-8 pb-8 space-y-5">
           <!-- Email -->
@@ -63,7 +60,7 @@
             <label
               for="email"
               class="mb-2 block text-sm font-medium text-slate-800 dark:text-slate-200"
-              >Email</label
+              >{{ tr("Email") }}</label
             >
             <div class="relative">
               <svg
@@ -92,7 +89,7 @@
                 type="email"
                 id="email"
                 formControlName="email"
-                placeholder="you@example.com"
+                [attr.placeholder]="tr(&quot;you@example.com&quot;)"
                 class="w-full rounded-xl border border-slate-300/70 bg-white/70 pl-10 pr-3 py-2.5 text-slate-900 outline-none ring-0 transition focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 dark:border-slate-700 dark:bg-slate-800/80 dark:text-white"
                 required
                 autocomplete="email"
@@ -102,8 +99,7 @@
               *ngIf="email!.invalid && email!.touched"
               class="mt-1 text-sm text-red-500"
             >
-              Enter a valid email
-            </div>
+              {{ tr(" Enter a valid email ") }}</div>
           </div>
 
           <!-- Password -->
@@ -111,7 +107,7 @@
             <label
               for="password"
               class="mb-2 block text-sm font-medium text-slate-800 dark:text-slate-200"
-              >Password</label
+              >{{ tr("Password") }}</label
             >
             <div class="relative">
               <svg
@@ -149,8 +145,7 @@
               *ngIf="password!.invalid && password!.touched"
               class="mt-1 text-sm text-red-500"
             >
-              Enter a valid password
-            </div>
+              {{ tr(" Enter a valid password ") }}</div>
           </div>
 
           <!-- actions -->
@@ -161,8 +156,7 @@
               [queryParams]="gameReturnUrl ? { redirectTo: gameReturnUrl } : null"
               class="text-sm font-medium text-teal-600 hover:text-emerald-600 dark:text-teal-400"
             >
-              Forgot password?
-            </a>
+              {{ tr(" Forgot password? ") }}</a>
           </div>
 
           <!-- submit -->
@@ -171,8 +165,7 @@
             [disabled]="myForm.invalid || loading"
             class="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-300 hover:from-teal-700 hover:via-emerald-700 hover:to-cyan-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed dark:focus-visible:ring-offset-slate-900"
           >
-            Log in
-          </button>
+            {{ tr(" Log in ") }}</button>
 
           <!-- loading -->
           <div
@@ -196,7 +189,7 @@
                 fill="currentFill"
               />
             </svg>
-            <span class="sr-only">Loading...</span>
+            <span class="sr-only">{{ tr("Loading...") }}</span>
           </div>
 
           <!-- social login -->
@@ -207,7 +200,7 @@
               <span
                 class="flex-1 border-t border-slate-200/70 dark:border-slate-700"
               ></span>
-              <span>Or sign in with</span>
+              <span>{{ tr("Or sign in with") }}</span>
               <span
                 class="flex-1 border-t border-slate-200/70 dark:border-slate-700"
               ></span>
@@ -220,11 +213,11 @@
                 [disabled]="loading"
                 (click)="signInWithGoogle()"
                 class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-slate-200 transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4285F4] disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label="Continue with Google"
+                [attr.aria-label]="tr(&quot;Continue with Google&quot;)"
               >
                 <img
                   src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                  alt="Google logo"
+                  [attr.alt]="tr(&quot;Google logo&quot;)"
                   class="h-6 w-6 transition-transform duration-200 group-hover:scale-110"
                 />
               </button>
@@ -279,7 +272,7 @@
                 [disabled]="loading"
                 (click)="signInWithFacebook()"
                 class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-[#1877F2] shadow-md ring-1 ring-[#1877F2]/70 transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1877F2] disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label="Continue with Facebook"
+                [attr.aria-label]="tr(&quot;Continue with Facebook&quot;)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -299,7 +292,7 @@
                 [disabled]="loading"
                 (click)="signInWithX()"
                 class="group relative flex h-12 w-12 items-center justify-center rounded-full bg-black shadow-md ring-1 ring-slate-900/70 transition-all hover:-translate-y-1 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
-                aria-label="Continue with X"
+                [attr.aria-label]="tr(&quot;Continue with X&quot;)"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -319,12 +312,11 @@
           <p
             class="pt-5 text-center text-sm text-slate-600 dark:text-slate-300"
           >
-            Don’t have an account?
-            <a
+            {{ tr(" Don’t have an account? ") }}<a
               [routerLink]="gameReturnUrl ? '/signup' : '/welcome'"
               [queryParams]="gameReturnUrl ? { redirectTo: gameReturnUrl } : null"
               class="font-semibold text-teal-700 hover:underline dark:text-teal-400"
-              >Create one</a
+              >{{ tr("Create one") }}</a
             >
           </p>
         </div>

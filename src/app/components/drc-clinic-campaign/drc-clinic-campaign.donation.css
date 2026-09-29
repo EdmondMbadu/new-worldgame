@@ -547,3 +547,6 @@
     display: none;
   }
 }
+
+.last-light-donation-return { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:14px 24px; background:#133e35; color:#f7f0dc; font-size:14px; }
+.last-light-donation-return a { color:#f2d08b; font-weight:700; text-decoration:none; }

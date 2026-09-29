@@ -56,6 +56,13 @@ export class Soundtrack {
     this.storyAutoplay = autoplay;
     this.narrator?.select(scene, autoplay);
   }
+  changeLanguage() {
+    this.narrator?.dispose();
+    if (this.context && this.narrationGain) {
+      this.narrator = new SceneNarrator(this.context, this.narrationGain, this.clinic);
+      this.narrator.select(this.storyScene, this.storyAutoplay);
+    }
+  }
   toggleNarration() { this.narrator?.toggle(); }
   resumeNarration() { this.narrator?.resume(); }
   arrival() { this.playlist?.request(1); }

@@ -1,0 +1,15 @@
+# Last Light: language, sharing, contributions
+
+English and French are selectable on the start screen and in Settings. An explicit device choice takes precedence over invitation/browser language. The authenticated player's private profile also stores `language` through `saveLastLightLanguage`; pending choices retry on account refresh. Scores and checkpoints keep their existing account ownership and best-score rules.
+
+French strings live in `content/last-light-fr.json`. Use `t()` for display text and `formatText()` for interpolation; do not translate user names, identifiers or URLs. French clinic scripts are in `content/drc-clinic-stories.fr.json` and must match the translated transcripts. Proper names and the Last Light brand remain unchanged.
+
+The ten French scene MP3s were generated on 2026-09-28 using the project's existing Google Cloud Text-to-Speech service, `fr-FR-Neural2-F`, MP3, speaking rate 0.95. These are scripted fictional clinicians with an AI-voice disclosure, as in English. Files are bundled under `audio/story/fr/`; no runtime speech-generation dependency or browser voice fallback. English files are unchanged. Language switching disposes old narration before selecting the new clips. A failed clip offers Retry and retains a readable transcript. First playback still needs network/cache access and the normal browser audio gesture.
+
+Invite 10 friends opens optional WhatsApp, Facebook, X, LinkedIn, email, copy-link and native-share choices. Instagram and TikTok offer a locally generated vertical story image plus a challenge link to add in their apps. Opening a sharing choice does not claim a post was published, count recipients, or send invitations automatically. Public links carry only chapter, difficulty, route, road revision and language; never account IDs or private resume tokens.
+
+Guests can begin immediately. Login and signup carry the game return destination and language through existing account flows. Verification email return paths allow only known standalone-game parameters and trusted origins. Existing progress claiming, score visibility and naming rules are unchanged.
+
+Contribute $10 is prominent beside the team and on the start screen. Game campaign links use `source=last-light`; this selects $10 with editable presets. Ordinary campaign visits retain their existing default. The existing Stripe Payment Link receives the supported `prefilled_amount=1000` and locale; no Stripe account, product or billing configuration changed. Checkout was inspected without making a payment. Its existing product title/description remain managed by the payment account.
+
+Deployment must include the site assets, `saveLastLightLanguage`, `getLastLightAccount` and `sendBrandedVerificationEmail`. Until Functions are deployed, device preferences still work and account language writes remain pending. No deployment was performed as part of this work.

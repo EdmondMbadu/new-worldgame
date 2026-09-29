@@ -341,3 +341,8 @@
 .board-player [role="status"] { margin-top: 6px; color: #f0c98a; font-size: 12px; }
 .leaderboard-dialog .board-player .board-link, .board-player .board-link { background: none; border: 0; padding: 4px 0; min-height: 32px; color: #e9e4d2; font-weight: 400; box-shadow: none; }
 .leaderboard-dialog .board-player .board-link:hover { color: #ffe0a0; background: none; }
+.social-share-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:18px 0; }
+.social-share-grid a,.social-share-grid button { border:1px solid #e6cf9555; background:#153c34; color:#f0e8d2; padding:12px 10px; text-align:center; text-decoration:none; font:inherit; font-size:14px; border-radius:7px; cursor:pointer; }
+.social-share-grid button[aria-expanded="true"] { border-color:#efd08a; }
+.social-story-help { padding:16px; background:#ffffff08; border:1px solid #e6cf9533; border-radius:8px; margin-bottom:16px; }
+@media(max-width:480px) { .social-share-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }

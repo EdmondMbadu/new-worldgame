@@ -9,12 +9,12 @@
     </a>
 
     <nav [attr.aria-label]="tr('Project sections', 'Sections du projet')">
-      <a href="#video" (click)="scrollToSection('video', $event)">{{ tr('Watch', 'Voir') }}</a>
-      <a href="#field-proof" (click)="scrollToSection('field-proof', $event)">{{ tr('Work completed', 'Travaux réalisés') }}</a>
-      <a href="#team" (click)="scrollToSection('team', $event)">{{ tr('Meet the team', 'L’équipe') }}</a>
-      <a href="#geography" (click)="scrollToSection('geography', $event)">{{ tr('DRC map', 'Carte RDC') }}</a>
-      <a href="#clinics" (click)="scrollToSection('clinics', $event)">{{ tr('10 clinics ready', '10 centres prêts') }}</a>
-      <a href="#ledger" (click)="scrollToSection('ledger', $event)">{{ tr('Budget', 'Budget') }}</a>
+      <a [href]="sectionHref('video')" (click)="scrollToSection('video', $event)">{{ tr('Watch', 'Voir') }}</a>
+      <a [href]="sectionHref('field-proof')" (click)="scrollToSection('field-proof', $event)">{{ tr('Work completed', 'Travaux réalisés') }}</a>
+      <a [href]="sectionHref('team')" (click)="scrollToSection('team', $event)">{{ tr('Meet the team', 'L’équipe') }}</a>
+      <a [href]="sectionHref('geography')" (click)="scrollToSection('geography', $event)">{{ tr('DRC map', 'Carte RDC') }}</a>
+      <a [href]="sectionHref('clinics')" (click)="scrollToSection('clinics', $event)">{{ tr('10 clinics ready', '10 centres prêts') }}</a>
+      <a [href]="sectionHref('ledger')" (click)="scrollToSection('ledger', $event)">{{ tr('Budget', 'Budget') }}</a>
     </nav>
 
     <div class="header-actions">
@@ -43,7 +43,7 @@
       </div>
       <a
         class="mission-button mission-button--small"
-        href="#donate"
+        [href]="sectionHref('donate')"
         (click)="scrollToSection('donate', $event)"
       >
         {{ tr('Donate', 'Faire un don') }} <span aria-hidden="true">→</span>
@@ -51,7 +51,8 @@
     </div>
   </header>
 
-  <section
+  <aside *ngIf="fromLastLight" class="last-light-donation-return"><a [href]="'/games/last-light/?lang=' + currentLanguage">← {{ tr('Back to Last Light', 'Retour à Last Light') }}</a><span>{{ tr('Your game stays in its original tab.', 'Votre jeu reste dans son onglet d’origine.') }}</span></aside>
+<section
     id="video"
     class="video-opening"
     [class.video-opening--playing]="isVideoPlaying"
@@ -201,7 +202,7 @@
       <figure class="team-working"><img src="assets/campaigns/drc-clinics/team/team-at-work.jpg" width="1280" height="960" loading="lazy" decoding="async" [alt]="tr('Team members working together around a table with laptops', 'Des membres de l’équipe travaillent ensemble autour d’une table avec des ordinateurs')"><figcaption>{{ tr('Working together, from planning to delivery', 'Ensemble, de la préparation à la réalisation') }}</figcaption></figure>
     </div>
     <div class="team-credits"><p class="eyebrow">{{ tr('PROJECT TEAM', 'ÉQUIPE DU PROJET') }}</p><p>Nicholson Thamba Vuadi <span>·</span> Yves Thamba <span>·</span> Augustin Phambu <span>·</span> Blessing Nguama <span>·</span> Peter Kamango <span>·</span> Clayton Nzau <span>·</span> Isaac Tembo <span>·</span> Mysterdie Nzinga <span>·</span> Francis Thamba</p></div>
-    <div class="team-actions"><p>{{ tr('Last Light draws inspiration from this real work. Your game score records a fictional delivery; contributions support the real campaign.', 'Last Light s’inspire de ce travail réel. Votre score représente une livraison fictive ; les contributions soutiennent la véritable campagne.') }}</p><div><a [href]="solutionUrl" class="team-link">{{ tr('Read the full project', 'Découvrir le projet complet') }} ↗</a><a href="#donate" (click)="scrollToSection('donate', $event)" class="team-link team-link-primary">{{ tr('Contribute to the real project', 'Contribuer au projet réel') }} →</a></div></div>
+    <div class="team-actions"><p>{{ tr('Last Light draws inspiration from this real work. Your game score records a fictional delivery; contributions support the real campaign.', 'Last Light s’inspire de ce travail réel. Votre score représente une livraison fictive ; les contributions soutiennent la véritable campagne.') }}</p><div><a [href]="solutionUrl" class="team-link">{{ tr('Read the full project', 'Découvrir le projet complet') }} ↗</a><a [href]="sectionHref('donate')" (click)="scrollToSection('donate', $event)" class="team-link team-link-primary">{{ tr('Contribute to the real project', 'Contribuer au projet réel') }} →</a></div></div>
   </section>
 
   <section id="geography" class="chapter geography-section">
@@ -324,7 +325,7 @@
             <button type="button" (click)="showPreviousClinicPhoto()" [attr.aria-label]="tr('Previous image', 'Image précédente')">‹</button>
             <button type="button" (click)="showNextClinicPhoto()" [attr.aria-label]="tr('Next image', 'Image suivante')">›</button>
           </div>
-          <a href="#video" (click)="scrollToSection('video', $event)"><i aria-hidden="true">▶</i>{{ tr('Watch film', 'Voir le film') }}</a>
+          <a [href]="sectionHref('video')" (click)="scrollToSection('video', $event)"><i aria-hidden="true">▶</i>{{ tr('Watch film', 'Voir le film') }}</a>
         </div>
         <div *ngIf="selectedClinicSupportingImages.length" class="clinic-feature__thumbs" [attr.aria-label]="tr('More clinic photographs', 'Autres photographies du centre')">
           <button
@@ -450,7 +451,7 @@
       <div class="ledger-actions">
         <a
           class="mission-button"
-          href="#donate"
+          [href]="sectionHref('donate')"
           (click)="scrollToSection('donate', $event)"
         >
           {{ tr('Donate to power clinics', 'Faire un don pour électrifier les centres') }} <span aria-hidden="true">→</span>
@@ -543,7 +544,7 @@
         </output>
 
         <div class="donation-slider-wrap">
-          <span>{{ tr('Increments of $50', 'Par tranches de 50 $') }}</span>
+          <span>{{ currentLanguage === 'fr' ? 'Par tranches de ' + donationStep + ' $' : 'Increments of $' + donationStep }}</span>
           <input
             id="donation-slider"
             class="donation-slider"
@@ -558,7 +559,7 @@
             (input)="updateDonationFromSlider($event)"
           />
           <div class="donation-slider__labels" aria-hidden="true">
-            <span>$50</span><span>$500</span><span>$5,000+</span>
+            <span>${{ donationMinimum }}</span><span>$500</span><span>$5,000+</span>
           </div>
         </div>
 
@@ -581,7 +582,7 @@
             <strong>USD</strong>
           </div>
           <small *ngIf="!isDonationInputValid" id="donation-amount-error" class="donation-custom__error" role="alert">
-            {{ tr('Enter a whole-dollar amount from $50 to $10,000.', 'Saisissez un montant entier compris entre 50 $ et 10 000 $.') }}
+            {{ tr('Enter a whole-dollar amount between', 'Saisissez un montant entier entre') }} {{ donationMinimum }} {{ tr('and 10,000 USD.', 'et 10 000 $ US.') }}
           </small>
         </div>
 
@@ -617,7 +618,7 @@
       <p>{{ tr('Solar power is installed at Ndingi Clinic. Ten more clinics have been visited and are ready for electrification. Our goal is to power 15 clinics.', 'L’énergie solaire est installée au centre de Ndingi. Dix autres centres ont été visités et sont prêts pour l’électrification. Notre objectif est d’électrifier 15 centres.') }}</p>
       <a
         class="mission-button"
-        [href]="donationUrl"
+        [href]="donationCheckoutUrl"
         target="_blank"
         rel="noopener noreferrer"
       >

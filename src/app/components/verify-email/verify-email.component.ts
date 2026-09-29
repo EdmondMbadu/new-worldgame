@@ -1,3 +1,4 @@
+import { t } from '../../../../content/last-light-locale';
 import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn } from 'src/app/services/auth-return';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -10,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
     standalone: false
 })
 export class VerifyEmailComponent implements OnInit {
+  readonly tr = t;
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
   redirectTarget = '/home';
@@ -88,10 +90,10 @@ export class VerifyEmailComponent implements OnInit {
   async resendEmail(): Promise<void> {
     try {
       await this.auth.resendVerificationEmail();
-      alert('Verification email sent! Please check your inbox.');
+      alert(t('Verification email sent! Please check your inbox.'));
     } catch (error) {
       console.error('Error resending email:', error);
-      alert('Failed to resend email. Please try again.');
+      alert(t('Failed to resend email. Please try again.'));
     }
   }
 

@@ -1,3 +1,4 @@
+import { getLanguage, setLanguage as saveGameLanguage } from '../../../../content/last-light-locale';
 import {
   AfterViewInit,
   Component,
@@ -349,11 +350,12 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   powerOffImageLoaded = false;
   powerOnImageLoaded = false;
   powerImageError = false;
-  readonly donationPresets = [50, 100, 250, 500];
-  readonly donationMinimum = 50;
+  fromLastLight = false;
+  donationPresets = [50, 100, 250, 500];
+  donationMinimum = 50;
   readonly donationSliderMaximum = 5000;
   readonly donationInputMaximum = 10000;
-  readonly donationStep = 50;
+  donationStep = 50;
   donationAmount = 250;
   donationAmountInput = '250';
 
@@ -381,12 +383,26 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      const query = new URLSearchParams(location.search);
+      this.fromLastLight = query.get('source') === 'last-light';
+      if (this.fromLastLight) {
+        this.donationPresets = [10, 25, 50, 100];
+        this.donationMinimum = 10;
+        this.donationStep = 1;
+        this.selectDonationAmount(10);
+        this.setLanguage(getLanguage());
+      } else if (query.get('lang') === 'fr' || query.get('lang') === 'en') {
+        this.setLanguage(query.get('lang') as Language);
+      }
+    }
     this.updateDocumentMetadata();
   }
 
   setLanguage(language: Language): void {
     if (this.currentLanguage === language) return;
     this.currentLanguage = language;
+    if (this.fromLastLight) saveGameLanguage(language);
     this.isVideoPlaying = false;
     this.updateDocumentMetadata();
     if (isPlatformBrowser(this.platformId)) {
@@ -493,7 +509,7 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
 
   get formattedDonationAmount(): string {
     if (!this.isDonationInputValid) return '$—';
-    return `$${this.donationAmount.toLocaleString('en-US')}`;
+    return this.currentLanguage === 'fr' ? `${this.donationAmount.toLocaleString('fr-FR')} $ US` : `$${this.donationAmount.toLocaleString('en-US')}`;
   }
 
   get donationSliderValue(): number {
@@ -508,12 +524,19 @@ export class DrcClinicCampaignComponent implements OnInit, AfterViewInit {
     return `${((this.donationSliderValue - this.donationMinimum) / range) * 100}%`;
   }
 
+  sectionHref(section: string): string {
+    const query = new URLSearchParams({ lang: this.currentLanguage });
+    if (this.fromLastLight) { query.set('source', 'last-light'); query.set('amount', '10'); }
+    return `/campaigns/power-drc-clinics?${query}#${section}`;
+  }
+
   get donationCheckoutUrl(): string {
     const separator = this.donationUrl.includes('?') ? '&' : '?';
     const params = new URLSearchParams({
       locale: this.currentLanguage,
+      prefilled_amount: String(this.donationAmount * 100),
       utm_source: 'newworld-game',
-      utm_medium: 'campaign-page',
+      utm_medium: this.fromLastLight ? 'last-light' : 'campaign-page',
       utm_campaign: 'drc-clinics',
       utm_content: `amount-${this.donationAmount}`,
     });

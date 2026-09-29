@@ -1887,3 +1887,15 @@ kbd {
 .setting-leaderboard { border-top: 1px solid #eff1d815; padding: 12px 0 4px; font-size: 12px; }
 .setting-leaderboard .setting-label { display: block; margin-bottom: 2px; }
 .setting-leaderboard .board-player { margin: 0; padding: 0; border: 0; font-size: 12px; }
+/* Language and account choices are available before the first spoken briefing. */
+.language-switch { display:flex; gap:4px; padding:4px; border:1px solid #e9cf8a55; border-radius:999px; width:fit-content; background:#102b29db; }
+.language-switch button { border:0; border-radius:999px; padding:7px 13px; color:#f3eedc; background:transparent; font:600 13px/1.3 inherit; cursor:pointer; }
+.language-switch button[aria-pressed="true"] { background:#efd08a; color:#12342d; }
+.language-switch button:focus-visible { outline:2px solid white; outline-offset:3px; }
+.settings-panel > .language-switch { margin:0 0 20px; }
+.entry-account-actions { display:flex; flex-wrap:wrap; align-items:center; gap:10px; max-width:440px; margin:12px 0; }
+.entry-account-actions button { color:#f0d292; border:0; background:transparent; text-decoration:underline; text-underline-offset:4px; padding:5px 0; cursor:pointer; }
+.entry-account-actions p { flex-basis:100%; font-size:12px; line-height:1.5; color:#c3d0c5; margin:0; }
+.entry-contribute { display:block; max-width:430px; font-size:13px; line-height:1.7; margin:18px 0; color:#d8e4d8; text-decoration:none; }
+.entry-contribute strong { color:#f2d48e; white-space:nowrap; }
+@media(max-width:640px) { .home-header .edition { display:none; } .header-actions { gap:8px; flex-wrap:wrap; justify-content:flex-end; } .language-switch button { padding:8px 10px; } }

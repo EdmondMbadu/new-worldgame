@@ -1,3 +1,4 @@
+import { t as translate } from './locale';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -177,15 +178,21 @@ export function label(
   canvas.width = w;
   canvas.height = h;
   const c = canvas.getContext('2d')!;
-  c.fillStyle = background;
-  c.fillRect(0, 0, w, h);
-  c.fillStyle = color;
-  c.font = `600 ${Math.floor(h * 0.43)}px sans-serif`;
-  c.textAlign = 'center';
-  c.textBaseline = 'middle';
-  c.fillText(text, w / 2, h / 2, w * 0.9);
   const map = new T.CanvasTexture(canvas);
   map.colorSpace = T.SRGBColorSpace;
+  const redraw = () => {
+    c.fillStyle = background;
+    c.fillRect(0, 0, w, h);
+    c.fillStyle = color;
+    c.font = `600 ${Math.floor(h * 0.43)}px sans-serif`;
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(translate(text), w / 2, h / 2, w * 0.9);
+    map.needsUpdate = true;
+  };
+  redraw();
+  window.addEventListener('last-light:language', redraw);
+  map.addEventListener('dispose', () => window.removeEventListener('last-light:language', redraw));
   textures.add(map);
   const mat = new T.MeshBasicMaterial({ map });
   materials.add(mat);

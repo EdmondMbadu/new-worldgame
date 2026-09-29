@@ -1,4 +1,4 @@
-<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>Your Last Light journey is saved.</strong><span>Finish signing in to return to your chapter.</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">Back to your saved game →</a></aside>
+<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>{{ tr("Your game is waiting.") }}</strong><span>{{ tr("Finish signing in to return to your chapter.") }}</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">{{ tr("Back to Last Light →") }}</a></aside>
 <div class="dark:bg-slate-900 min-h-screen">
     <app-navbar [currentPageJoinNow]="true" ></app-navbar>
 
@@ -7,8 +7,8 @@
         <div class="flex flex-col mx-auto m-10">
 
     <div class="bg-white p-10 shadow-lg dark:bg-slate-800">
-        <h1 class="flex flex-col mx-auto text-xl text-center mb-6 dark:text-white">Sign Up</h1>
-        <p *ngIf="gameReturnUrl" class="text-center text-sm mb-6 dark:text-white">Already have an account? <a routerLink="/login" [queryParams]="{ redirectTo: gameReturnUrl }" class="underline">Log in and keep your chapter</a>.</p>
+        <h1 class="flex flex-col mx-auto text-xl text-center mb-6 dark:text-white">{{ tr("Sign Up") }}</h1>
+        <p *ngIf="gameReturnUrl" class="text-center text-sm mb-6 dark:text-white">{{ tr("Already have an account? ") }}<a routerLink="/login" [queryParams]="{ redirectTo: gameReturnUrl }" class="underline">{{ tr("Log in and keep your chapter") }}</a>.</p>
         <div class="flex flex-col mx-auto justify-center my-4 items-center">
             <div class=" w-20 h-20 overflow-hidden bg-gray-100 rounded-full dark:bg-slate-700">
                
@@ -18,43 +18,43 @@
         <div class="grid gap-6 mb-6 md:grid-cols-2 ">
             
             <div>
-                <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">First name </label>
+                <label for="first_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ tr("First name ") }}</label>
                 <input type="text" id="first_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 " placeholder=""  [(ngModel)]="firstName"  required>
             </div>
             <div>
-                <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Last name </label>
+                <label for="last_name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ tr("Last name ") }}</label>
                 <input type="text" id="last_name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [(ngModel)]="lastName"  placeholder="" required>
             </div>
         
         </div>
     
         <div class="mb-6">
-            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email address </label>
+            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ tr("Email address ") }}</label>
             <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=""  [(ngModel)]="email"  required>
         </div> 
         <div class="mb-6">
-            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password </label>
+            <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ tr("Password ") }}</label>
             <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=""  [(ngModel)]="password"  required>
         </div> 
         <div class="mb-6">
-            <label for="confirm_password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password </label>
+            <label for="confirm_password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ tr("Confirm password ") }}</label>
             <input type="password" id="confirm_password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder=""  [(ngModel)]="rePassword"  required>
         </div>
         <!-- Honeypot field - hidden from humans, bots will fill it -->
         <div class="honeypot-field" aria-hidden="true">
-            <label for="website">Website</label>
+            <label for="website">{{ tr("Website") }}</label>
             <input type="text" id="website" name="website" [(ngModel)]="honeypot" tabindex="-1" autocomplete="off">
         </div>
         <div class="mb-6">
-            <label for="goal" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Why do you want to join Global Solutions Lab? <span class="text-red-500">*</span></label>
-            <textarea id="goal" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Tell us about your interest in solving global challenges..." [(ngModel)]="goal" required></textarea>
-            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Minimum 20 characters</p>
+            <label for="goal" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{ tr("Why do you want to join Global Solutions Lab? ") }}<span class="text-red-500">*</span></label>
+            <textarea id="goal" rows="3" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" [attr.placeholder]="tr(&quot;Tell us about your interest in solving global challenges...&quot;)" [(ngModel)]="goal" required></textarea>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ tr("Minimum 20 characters") }}</p>
         </div>
         <div class="flex items-start mb-6">
             <div class="flex items-center h-5">
             <input id="agree" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800" (change)="onCheckboxChangeAgree($event)" required>
             </div>
-            <label for="agree" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree with the <a target="_blank" routerLink="/privacy" class="text-red-600 hover:underline ">terms and conditions</a>.</label>
+            <label for="agree" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">{{ tr("I agree with the ") }}<a target="_blank" routerLink="/privacy" class="text-red-600 hover:underline ">{{ tr("terms and conditions") }}</a>.</label>
             <!-- <label for="remember" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, that I wi <a routerLink="/privacy" class="text-red-600 hover:underline">terms and conditions</a>.</label> -->
         </div>
         <div class="flex items-start mb-6 max-w-sm">
@@ -62,17 +62,15 @@
             <input id="solverEvaluator" type="checkbox" value="" class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800" (change)="onCheckboxChangeAgreeEvaluator($event)"required>
             </div>
            
-            <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">I agree that by submitting this form, I sign up to be both <a target="_blank" routerLink="/overview" class="text-blue-500  underline">a problem solver</a> and <a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">an evaluator</a>.</label>
+            <label for="solverEvaluator" class="ml-2 text-sm font-medium text-gray-900 dark:text-white ">{{ tr("I agree that by submitting this form, I sign up to be both ") }}<a target="_blank" routerLink="/overview" class="text-blue-500  underline">{{ tr("a problem solver") }}</a> {{ tr(" and ") }}<a target="_blank"  routerLink="/evaluators" class="text-blue-500 underline">{{ tr("an evaluator") }}</a>.</label>
         </div>
 
         <div class="flex flex-col items-start mb-6 max-w-sm">
-            <h1 class="font-semibold text-xl mb-4 dark:text-gray-200"> Terms and Conditions</h1>
-            <p class="text-sm  dark:text-gray-300">Global Solutions Lab will not, under any circumstances release, sell, or make available to anyone for any reason any information obtained during your interactions with Global Solutions Lab.
-
-                The solutions written in the platform will be made public for the world to see and use for the benefit of the world.</p>
+            <h1 class="font-semibold text-xl mb-4 dark:text-gray-200"> {{ tr(" Terms and Conditions") }}</h1>
+            <p class="text-sm  dark:text-gray-300">{{ tr("Global Solutions Lab will not, under any circumstances release, sell, or make available to anyone for any reason any information obtained during your interactions with Global Solutions Lab. The solutions written in the platform will be made public for the world to see and use for the benefit of the world.") }}</p>
         </div>
         <button type="button" [disabled]="submitting" (click)="createAccount()" class="text-white bg-teal-700 hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-60 dark:text-white font-medium rounded-full text-sm w-full px-5 py-2.5 text-center">
-            {{ submitting ? 'Creating account…' : 'Submit' }}
+            {{ tr((submitting ? 'Creating account…' : 'Submit')) }}
         </button>
     </div>
 
@@ -90,11 +88,11 @@
                 <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
                 </svg>
-                <span class="sr-only">Check icon</span>
+                <span class="sr-only">{{ tr("Check icon") }}</span>
             </div>
-            <div class="ml-3 text-sm font-normal">Account Created Successfully.</div>
+            <div class="ml-3 text-sm font-normal">{{ tr("Account Created Successfully.") }}</div>
             <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 "  (click)="closeAccountCreatedSuccess()" >
-                <span class="sr-only">Close</span>
+                <span class="sr-only">{{ tr("Close") }}</span>
                 <svg class="w-3 h-3"  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                 </svg>
@@ -106,11 +104,11 @@
             <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
             </svg>
-            <span class="sr-only">Error icon</span>
+            <span class="sr-only">{{ tr("Error icon") }}</span>
         </div>
-        <div class="ml-3 text-sm font-normal">{{ accountErrorMessage || 'We could not create your account. Please try again.' }}</div>
+        <div class="ml-3 text-sm font-normal">{{ tr((accountErrorMessage || 'We could not create your account. Please try again.')) }}</div>
         <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white" (click)="closeAccountCreatedError()">
-            <span class="sr-only">Close</span>
+            <span class="sr-only">{{ tr("Close") }}</span>
             <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
             </svg>

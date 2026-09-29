@@ -33,11 +33,11 @@ describe('compact delivery completion', () => {
     expect(html).toContain(CLINICS[chapter + 1].shortName);
     expect(html).toContain('Next clinic');
     expect(html).toContain('/assets/campaigns/drc-clinics/team/team-portrait.jpg');
-    expect(html).toContain('/campaigns/power-drc-clinics#team');
-    expect(html).toContain('/campaigns/power-drc-clinics#donate');
+    expect(html).toContain('/campaigns/power-drc-clinics?source=last-light&amp;amount=10&amp;lang=en#team');
+    expect(html).toContain('/campaigns/power-drc-clinics?source=last-light&amp;amount=10&amp;lang=en#donate');
     expect(html).toContain('1,510');
     expect(html).toContain('Drive details');
-    expect(html).toContain('Share drive');
+    expect(html).toContain('Invite 10 friends');
     expect(html).toContain('Leaderboard');
     expect(html).not.toContain('<form');
     expect(html).not.toContain('Find a player');
@@ -48,7 +48,7 @@ describe('compact delivery completion', () => {
     expect(html).toContain('WHY IT MATTERS');
     expect(html).toContain(CLINICS[chapter].fact.title);
     expect(html).toContain(CLINICS[chapter].fact.href.replace(/&/g, '&amp;'));
-    expect(html).toContain(chapter === 4 ? 'Here’s how you can help our real-world team' : 'How you can help');
+    expect(html).toContain(chapter === 4 ? 'Here’s how you can help our real-world team' : 'Contribute $10');
   });
   it('returns to the map after the final chapter without inventing a sixth destination', () => {
     const html = render(props(4));
@@ -83,7 +83,7 @@ describe('compact delivery completion', () => {
     expect(html).toContain('Transcript');
     p.narration.status = 'error';
     html = render(p);
-    expect(html).toContain('Message unavailable');
+    expect(html).toContain('Retry message');
     expect(html).toContain('Transcript');
     expect(html).toContain('Next clinic');
     p.settings.sound = false;

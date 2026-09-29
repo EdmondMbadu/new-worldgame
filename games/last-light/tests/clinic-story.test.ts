@@ -110,6 +110,9 @@ describe('scene narration boundaries', () => {
     narrator.update(true); await flush();
     expect(narrator.state.status).toBe('error');
     expect(narrator.playing).toBe(false);
+    narrator.toggle(); await flush();
+    expect(Clip.all[1].load).toHaveBeenCalledOnce();
+    expect(narrator.playing).toBe(true);
   });
   it('treats buffering as silence for music ducking', async () => {
     Clip.all[0].readyState = 2;

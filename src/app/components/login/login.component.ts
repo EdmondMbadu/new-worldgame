@@ -1,3 +1,4 @@
+import { t } from '../../../../content/last-light-locale';
 import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn } from 'src/app/services/auth-return';
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
@@ -19,6 +20,7 @@ import { AngularFireAuth } from '@angular/fire/compat/auth';
     standalone: false
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  readonly tr = t;
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
   private authSubscription?: Subscription;

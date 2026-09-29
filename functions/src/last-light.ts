@@ -238,8 +238,16 @@ export const getLastLightAccount = functions.https.onCall(async (raw, c) => {
       bestJourneys: p.bestJourneys || {},
       active,
       rankingEnabled,
+      language: p.language === "fr" ? "fr" : p.language === "en" ? "en" : null,
     };
   });
+});
+export const saveLastLightLanguage = functions.https.onCall(async (raw, c) => {
+  const uid = user(c, raw);
+  if (raw?.language !== 'en' && raw?.language !== 'fr') fail('invalid-argument', 'Unsupported language.');
+  await limit(c, 'language', 120);
+  await playerRef(uid).set({ language: raw.language, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+  return { language: raw.language };
 });
 export const saveLastLightName = functions.https.onCall(async (raw, c) => {
   const uid = user(c, raw),

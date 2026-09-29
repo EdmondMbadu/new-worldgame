@@ -1,3 +1,4 @@
+import { getLanguage } from './locale';
 import type { Result } from './engine';
 import { parseSave, freshSave, recordResult, type Save } from './save';
 import { ROAD_REVISION } from './vehicle';
@@ -118,7 +119,7 @@ export function invitation(search = location.search) {
   };
 }
 export function challengeUrl(mission: number, mode: string, variant: number) {
-  return `${location.origin}/games/last-light/?${new URLSearchParams({ challenge: '1', chapter: String(mission + 1), mode, variant: String(variant), revision: String(ROAD_REVISION) })}`;
+  return `${location.origin}/games/last-light/?${new URLSearchParams({ challenge: '1', chapter: String(mission + 1), mode, variant: String(variant), revision: String(ROAD_REVISION), lang: getLanguage() })}`;
 }
 export function mergeProgress(save: Save, results: unknown[]): Save {
   return results.reduce<Save>((s, r) => {

@@ -1,4 +1,4 @@
-<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>Your Last Light journey is saved.</strong><span>Finish signing in to return to your chapter.</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">Back to your saved game →</a></aside>
+<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>{{ tr("Your game is waiting.") }}</strong><span>{{ tr("Finish signing in to return to your chapter.") }}</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">{{ tr("Back to Last Light →") }}</a></aside>
 <app-navbar></app-navbar>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
@@ -20,34 +20,29 @@
         <!-- Header -->
         <div class="px-8 pt-8 pb-4 text-center">
           <p class="text-[11px] font-semibold uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400">
-            Email Verification
-          </p>
+            {{ tr(" Email Verification ") }}</p>
           <h1 class="mt-2 text-2xl font-extrabold leading-tight tracking-tight
                      bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
-            Go verify your email
-          </h1>
+            {{ tr(" Go verify your email ") }}</h1>
         </div>
 
         <!-- Message -->
         <div class="px-8 pb-6 text-center">
           <p class="text-sm text-slate-700 dark:text-slate-300">
-            We've sent a verification link to your email address.
-          </p>
+            {{ tr(" We've sent a verification link to your email address. ") }}</p>
           <p class="mt-2 text-sm text-slate-700 dark:text-slate-300">
-            If you don't see it in your inbox, please check your
-            <span class="font-semibold">Spam/Junk</span> (or <span class="font-semibold">Promotions</span>) folder.
-          </p>
+            {{ tr(" If you don't see it in your inbox, please check your ") }}<span class="font-semibold">{{ tr("Spam/Junk") }}</span> {{ tr(" (or ") }}<span class="font-semibold">{{ tr("Promotions") }}</span>{{ tr(") folder. ") }}</p>
         </div>
 
         <div *ngIf="recoveryNotice" class="mx-8 mb-5 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-sm leading-6 text-teal-900 dark:border-teal-800 dark:bg-teal-950/40 dark:text-teal-100">
-          <p class="font-semibold">We found your account</p>
-          <p class="mt-1">{{ recoveryNotice }}</p>
+          <p class="font-semibold">{{ tr("We found your account") }}</p>
+          <p class="mt-1">{{ tr((recoveryNotice)) }}</p>
         </div>
 
         <!-- Error message -->
         <div *ngIf="errorMessage" class="px-8 pb-4">
           <div class="p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm text-center">
-            {{ errorMessage }}
+            {{ tr((errorMessage)) }}
           </div>
         </div>
 
@@ -57,7 +52,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Checking verification status...</p>
+          <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{ tr("Checking verification status...") }}</p>
         </div>
 
         <!-- Actions -->
@@ -73,16 +68,14 @@
                    dark:focus-visible:ring-offset-slate-900
                    disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span *ngIf="!checking">I've Verified My Email</span>
-            <span *ngIf="checking">Checking...</span>
+            <span *ngIf="!checking">{{ tr("I've Verified My Email") }}</span>
+            <span *ngIf="checking">{{ tr("Checking...") }}</span>
           </button>
 
           <!-- Resend email link -->
           <p class="mt-3 text-center text-xs text-slate-600 dark:text-slate-400">
-            Didn't receive it?
-            <button type="button" (click)="resendEmail()" class="text-teal-600 hover:text-teal-700 underline">
-              Resend verification email
-            </button>
+            {{ tr(" Didn't receive it? ") }}<button type="button" (click)="resendEmail()" class="text-teal-600 hover:text-teal-700 underline">
+              {{ tr(" Resend verification email ") }}</button>
           </p>
 
           <button
@@ -90,8 +83,7 @@
             (click)="goToLogin()"
             class="mt-3 inline-flex w-full items-center justify-center rounded-full border border-teal-600 bg-white px-5 py-2.5 text-sm font-semibold text-teal-700 transition hover:bg-teal-50 dark:bg-slate-900 dark:text-teal-300 dark:hover:bg-slate-800"
           >
-            Go to login
-          </button>
+            {{ tr(" Go to login ") }}</button>
         </div>
       </div>
     </div>

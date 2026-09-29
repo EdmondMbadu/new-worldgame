@@ -1,3 +1,4 @@
+import { t, getLocale } from './locale';
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -25,10 +26,10 @@ export function GameDialog({ title, eyebrow, onClose, children }: {
       onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
       <div className="completion-dialog-content">
         <header>
-          <div>{eyebrow && <span className="eyebrow">{eyebrow}</span>}<h2 id={titleId}>{title}</h2></div>
-          <button className="completion-dialog-close" onClick={onClose} aria-label={`Close ${title.toLowerCase()}`}>×</button>
+          <div>{t(eyebrow && <span className="eyebrow">{t(eyebrow)}</span>)}<h2 id={titleId}>{t(title)}</h2></div>
+          <button className="completion-dialog-close" onClick={onClose} aria-label={t(`Close ${title.toLowerCase()}`)}>×</button>
         </header>
-        {children}
+        {t(children)}
       </div>
     </dialog>, document.body,
   );

@@ -1,3 +1,4 @@
+import { getLanguage } from '../../../content/last-light-locale';
 import { captureAuthReturn, gameAuthReturn, navigateAuthReturn, safeAuthReturn } from './auth-return';
 import { Injectable } from '@angular/core';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
@@ -362,7 +363,7 @@ export class AuthService {
         'sendBrandedVerificationEmail'
       );
       const returnTo = gameAuthReturn();
-      await firstValueFrom(sendVerification(returnTo ? {returnTo, origin: window.location.origin} : {}));
+      await firstValueFrom(sendVerification({ ...(returnTo ? { returnTo, origin: window.location.origin } : {}), language: getLanguage() }));
     } catch (error) {
       if ((error as any)?.code === 'functions/resource-exhausted') {
         throw error;
@@ -373,9 +374,10 @@ export class AuthService {
         'Branded verification email failed; using Firebase fallback.',
         error
       );
+      (await this.fireauth.app).auth().languageCode = getLanguage();
       await user.sendEmailVerification({
         url: gameAuthReturn() && ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'].includes(window.location.origin)
-          ? `${window.location.origin}/verify-email?verified=1&redirectTo=${encodeURIComponent(gameAuthReturn()!)}`
+          ? `${window.location.origin}/verify-email?verified=1&lang=${getLanguage()}&redirectTo=${encodeURIComponent(gameAuthReturn()!)}`
           : 'https://newworld-game.org/verify-email?verified=1',
       });
     }
@@ -828,7 +830,8 @@ export class AuthService {
     }
   }
 
-  forgotPassword(email: string): Promise<void> {
+  async forgotPassword(email: string): Promise<void> {
+    (await this.fireauth.app).auth().languageCode = getLanguage();
     return this.fireauth.sendPasswordResetEmail(email);
   }
   private col = this.afs.collection<DemoBooking>('demoBookings');

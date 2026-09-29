@@ -1,3 +1,6 @@
+import { formatText } from './locale';
+import { shareChallenge, challengeCard } from './sharing';
+import { t, getLocale, campaignHref, useLanguage } from './locale';
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Result } from "./engine";
@@ -55,38 +58,36 @@ export function RealProjectCard({
 }) {
   if (compact)
     return (
-      <aside className="completion-team" aria-label="The real project">
+      <aside className="completion-team" aria-label={t("The real project")}>
         <a
           className="completion-team-photo"
-          href="/campaigns/power-drc-clinics#team"
+          href={campaignHref("team")}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Meet the clinic electrification team (opens in a new tab)"
+          aria-label={t("Meet the clinic electrification team (opens in a new tab)")}
         >
           <img
             src="/assets/campaigns/drc-clinics/team/team-portrait.jpg"
-            alt="Members of the real DRC Health Clinic Electrification Team"
+            alt={t("Members of the real DRC Health Clinic Electrification Team")}
             width="1280"
             height="960"
           />
         </a>
         <div className="completion-team-copy">
-          <span className="eyebrow">THE REAL PROJECT</span>
+          <span className="eyebrow">{t("THE REAL PROJECT")}</span>
           <a
             className="completion-team-title"
-            href="/campaigns/power-drc-clinics#team"
+            href={campaignHref("team")}
             target="_blank"
             rel="noopener noreferrer"
-          >
-            Meet the team <span aria-hidden="true">↗</span>
+          >{t(" Meet the team ")}<span aria-hidden="true">↗</span>
           </a>
           <a
-            className="completion-link"
-            href="/campaigns/power-drc-clinics#donate"
+            className="completion-contribute"
+            href={campaignHref()}
             target="_blank"
             rel="noopener noreferrer"
-          >
-            Support the project <span aria-hidden="true">↗</span>
+          >{t("Contribute $10")}<span aria-hidden="true">↗</span>
           </a>
         </div>
       </aside>
@@ -95,44 +96,34 @@ export function RealProjectCard({
     <aside className="real-project">
       <img
         src="/assets/campaigns/drc-clinics/team/team-portrait.jpg"
-        alt="Members of the real DRC Health Clinic Electrification Team"
+        alt={t("Members of the real DRC Health Clinic Electrification Team")}
         loading="lazy"
         width="1280"
         height="960"
       />
       <div>
-        <span className="eyebrow">THE REAL PROJECT</span>
-        <h3>Meet the people bringing the light.</h3>
-        <p>
-          Get to know the clinic electrification team and the work that inspired
-          Last Light.
-        </p>
+        <span className="eyebrow">{t("THE REAL PROJECT")}</span>
+        <h3>{t("Meet the people bringing the light.")}</h3>
+        <p>{t(" Get to know the clinic electrification team and the work that inspired Last Light. ")}</p>
         <div className="community-actions">
           <a
-            href="/campaigns/power-drc-clinics#team"
+            href={campaignHref("team")}
             target="_blank"
             rel="noopener"
             onClick={(e) => {
               if (beforeLeave && !beforeLeave()) e.preventDefault();
             }}
-          >
-            Meet the team ↗
-          </a>
+          >{t(" Meet the team ↗ ")}</a>
           <a
-            href="/campaigns/power-drc-clinics#donate"
+            href={campaignHref()}
             target="_blank"
             rel="noopener"
             onClick={(e) => {
               if (beforeLeave && !beforeLeave()) e.preventDefault();
             }}
-          >
-            Contribute to the real project ↗
-          </a>
+          >{t("Contribute $10")}</a>
         </div>
-        <small>
-          Opens in a new tab; your game stays here. Game scores and real-world
-          contributions are separate.
-        </small>
+        <small>{t(" Opens in a new tab; your game stays here. Game scores and real-world contributions are separate. ")}</small>
       </div>
     </aside>
   );
@@ -277,16 +268,16 @@ function PlayerRow({
           </span>
           <span>
             {row.name}
-            {you && <small className="lb-you-tag">YOU</small>}
+            {you && <small className="lb-you-tag">{t("YOU")}</small>}
             <small className="lb-mobile-clinics">
-              {overall ? `${row.chapters} / 5 clinics` : "Full delivery"}
+              {t(overall ? `${row.chapters} / 5 clinics` : "Full delivery")}
             </small>
           </span>
         </div>
       </td>
       {overall && <td className="lb-clinics">{row.chapters} / 5</td>}
       <td className="lb-points">
-        {row.score.toLocaleString()} <small>pts</small>
+        {t(row.score.toLocaleString(getLocale()))} <small>{t("pts")}</small>
       </td>
     </tr>
   );
@@ -302,17 +293,15 @@ function Rows({
   return (
     <>
       <table className="lb-table">
-        <caption className="sr-only">Confirmed player rankings</caption>
+        <caption className="sr-only">{t("Confirmed player rankings")}</caption>
         <thead>
           <tr>
-            <th scope="col">Rank</th>
-            <th scope="col">Player</th>
+            <th scope="col">{t("Rank")}</th>
+            <th scope="col">{t("Player")}</th>
             {overall && (
-              <th scope="col" className="lb-clinics">
-                Clinics
-              </th>
+              <th scope="col" className="lb-clinics">{t(" Clinics ")}</th>
             )}
-            <th scope="col">{overall ? "Best total" : "Best score"}</th>
+            <th scope="col">{t(overall ? "Best total" : "Best score")}</th>
           </tr>
         </thead>
         <tbody>
@@ -328,9 +317,9 @@ function Rows({
       </table>
       {!data.entries.length && (
         <p className="board-empty">
-          {data.total
+          {t(data.total
             ? "No players match this search."
-            : "No ranked deliveries here yet. Your first full delivery can open the road."}
+            : "No ranked deliveries here yet. Your first full delivery can open the road.")}
         </p>
       )}
     </>
@@ -380,28 +369,25 @@ function YourRecord({
               ? "Personal record · not ranked"
               : "No delivery here yet";
   return (
-    <div className="lb-own" aria-label="Your record">
-      <span className="lb-own-rank">{own ? own.rank : "—"}</span>
+    <div className="lb-own" aria-label={t("Your record")}>
+      <span className="lb-own-rank">{t(own ? own.rank : "—")}</span>
       <span className="lb-avatar" aria-hidden="true">
         {(player?.name || identity().name)[0]}
       </span>
       <div className="lb-own-copy">
         <strong>
-          {player?.name || identity().name}{" "}
-          <small className="lb-you-tag">YOU</small>
+          {player?.name || identity().name}{t(" ")}
+          <small className="lb-you-tag">{t("YOU")}</small>
         </strong>
         <small>
-          {own ? "Confirmed rank" : label}
-          {loading && own ? " · refreshing" : ""}
-          {latest
-            ? ` · Last delivery: ${latest.result.score.toLocaleString()} pts`
-            : ""}
+          {t(own ? "Confirmed rank" : label)}
+          {t(loading && own ? " · refreshing" : "")}
+          {t(latest
+            ? ` · Last delivery: ${latest.result.score.toLocaleString(getLocale())} pts`
+            : "")}
         </small>
         {own && best && best.score > own.score && (
-          <small>
-            Personal best: {best.score.toLocaleString()} pts · includes unranked
-            history
-          </small>
+          <small>{t(" Personal best: ")}{t(best.score.toLocaleString(getLocale()))}{t(" pts · includes unranked history ")}</small>
         )}
       </div>
       {bracket.mission === "all" && (
@@ -410,8 +396,8 @@ function YourRecord({
         </span>
       )}
       <span className="lb-points">
-        {(own?.score ?? best?.score)?.toLocaleString() || "—"}{" "}
-        <small>pts</small>
+        {t((own?.score ?? best?.score)?.toLocaleString(getLocale()) || "—")}{t(" ")}
+        <small>{t("pts")}</small>
       </span>
     </div>
   );
@@ -472,90 +458,84 @@ function MyDrives({ bracket }: { bracket: Bracket }) {
       ]?.score || 0,
     );
   return (
-    <section className="lb-history" aria-label="Your private drive history">
+    <section className="lb-history" aria-label={t("Your private drive history")}>
       <div className="lb-history-summary">
-        <span>
-          Personal-best total <strong>{best.score.toLocaleString()} pts</strong>
-          <small>Best score at each clinic · {best.chapters}/5</small>
+        <span>{t(" Personal-best total ")}<strong>{t(best.score.toLocaleString(getLocale()))}{t(" pts")}</strong>
+          <small>{t("Best score at each clinic · ")}{best.chapters}/5</small>
         </span>
-        <span>
-          Best complete journey{" "}
+        <span>{t(" Best complete journey")}{t(" ")}
           <strong>
-            {single ? `${single.toLocaleString()} pts` : "Not completed yet"}
+            {t(single ? `${single.toLocaleString(getLocale())} pts` : "Not completed yet")}
           </strong>
-          <small>Five clinics in one playthrough</small>
+          <small>{t("Five clinics in one playthrough")}</small>
         </span>
       </div>
-      <label className="lb-history-filter">
-        Show{" "}
+      <label className="lb-history-filter">{t(" Show")}{t(" ")}
         <select
           value={scope}
           onChange={(e) => setScope(e.target.value as "current" | "all")}
         >
-          <option value="current">Current road & difficulty</option>
-          <option value="all">All my drives · includes older editions</option>
+          <option value="current">{t("Current road & difficulty")}</option>
+          <option value="all">{t("All my drives · includes older editions")}</option>
         </select>
       </label>
-      <p className="lb-history-note">
-        Every delivery stays here. Replays improve your best only when you score
-        higher.
-      </p>
-      {busy && <p role="status">Refreshing your drives…</p>}
-      {error && (
+      <p className="lb-history-note">{t(" Every delivery stays here. Replays improve your best only when you score higher. ")}</p>
+      {busy && <p role="status">{t("Refreshing your drives…")}</p>}
+      {t(error && (
         <p role="status">
-          {error} <button onClick={() => void fetchPage()}>Retry</button>
+          {t(error)} <button onClick={() => void fetchPage()}>{t("Retry")}</button>
         </p>
-      )}
+      ))}
       <ol className="lb-drive-list">
         {records.map((d) => (
           <li key={d.id}>
             <span>
-              <strong>{CLINICS[d.result.mission].shortName}</strong>
+              <strong>{t(CLINICS[d.result.mission].shortName)}</strong>
               <small>
-                {d.completedAt
-                  ? new Date(d.completedAt).toLocaleString([], {
+                {t(d.completedAt
+                  ? new Date(d.completedAt).toLocaleString(getLocale(), {
                       dateStyle: "medium",
                       timeStyle: "short",
                     })
-                  : "Earlier personal best"}{" "}
-                · {d.result.mode} ·{" "}
-                {d.result.variant ? "Alternate" : "Original"} · Edition{" "}
+                  : "Earlier personal best")}{t(" ")}
+                · {t(d.result.mode)} ·{t(" ")}
+                {t(d.result.variant ? "Alternate" : "Original")}{t(" · Edition")}{t(" ")}
                 {d.result.revision || 1}
               </small>
               <small>
-                {d.result.practice
+                {t(d.result.practice
                   ? "Practice · unranked"
                   : d.eligible
                     ? "Verified delivery"
-                    : "Personal history · unranked"}{" "}
-                ·{" "}
-                {d.saved
+                    : "Personal history · unranked")}{t(" ")}
+                ·{t(" ")}
+                {t(d.saved
                   ? "Saved to account"
                   : uid
                     ? "Waiting to sync"
-                    : "On this device"}
+                    : "On this device")}
               </small>
             </span>
             <b>
-              {d.result.score.toLocaleString()} <small>pts</small>
+              {t(d.result.score.toLocaleString(getLocale()))} <small>{t("pts")}</small>
             </b>
           </li>
         ))}
       </ol>
       {!records.length && (
-        <p className="board-empty">No completed drives in this view yet.</p>
+        <p className="board-empty">{t("No completed drives in this view yet.")}</p>
       )}
-      {uid && (!page.loaded || page.cursor) && (
+      {t(uid && (!page.loaded || page.cursor) && (
         <button
           disabled={busy}
           onClick={() =>
             void fetchPage(page.owner === uid ? page.cursor : null)
           }
         >
-          {page.loaded ? "Load earlier drives" : "Refresh history"}
+          {t(page.loaded ? "Load earlier drives" : "Refresh history")}
         </button>
-      )}
-      <small>Private history is visible only to you.</small>
+      ))}
+      <small>{t("Private history is visible only to you.")}</small>
     </section>
   );
 }
@@ -636,45 +616,43 @@ export function LeaderboardDialog({
     >
       <div className="lb-shell">
         <header className="lb-heading">
-          <span className="eyebrow">LAST LIGHT · THE PLAYERS</span>
-          <h2 id="leaderboard-title">Leaderboard</h2>
-          <p>Every delivery counts. Your best stays with you.</p>
+          <span className="eyebrow">{t("LAST LIGHT · THE PLAYERS")}</span>
+          <h2 id="leaderboard-title">{t("Leaderboard")}</h2>
+          <p>{t("Every delivery counts. Your best stays with you.")}</p>
           <button
             className="board-close"
             onClick={onClose}
-            aria-label="Close leaderboard"
+            aria-label={t("Close leaderboard")}
           >
             ×
           </button>
         </header>
         <div className="lb-account-strip">
           <span className="lb-avatar" aria-hidden="true">
-            {name[0]}
+            {t(name[0])}
           </span>
           <div>
-            <strong>{name}</strong>
+            <strong>{t(name)}</strong>
             <small>
-              {community.player
+              {t(community.player
                 ? "Signed in to your profile"
-                : "Playing on this device"}
+                : "Playing on this device")}
             </small>
           </div>
           <span className="lb-sync">
-            {community.player
+            {t(community.player
               ? community.synced && !pending
                 ? "✓ Records synced"
                 : "○ Sync pending"
-              : "Local records"}
+              : "Local records")}
             <button
               className="board-link"
               onClick={() => void refreshAccount()}
-            >
-              Refresh
-            </button>
+            >{t(" Refresh ")}</button>
           </span>
         </div>
         <div className="lb-toolbar">
-          <div className="lb-tabs" role="group" aria-label="Leaderboard view">
+          <div className="lb-tabs" role="group" aria-label={t("Leaderboard view")}>
             {(
               [
                 ["all", "Overall"],
@@ -690,13 +668,11 @@ export function LeaderboardDialog({
                   reset();
                 }}
               >
-                {label}
+                {t(label)}
               </button>
             ))}
           </div>
-          <label className="sr-only" htmlFor="lb-road">
-            Difficulty and route
-          </label>
+          <label className="sr-only" htmlFor="lb-road">{t(" Difficulty and route ")}</label>
           <select
             id="lb-road"
             value={`${mode}:${variant}`}
@@ -710,17 +686,16 @@ export function LeaderboardDialog({
             {["standard", "relaxed"].flatMap((m) =>
               [0, 1].map((v) => (
                 <option key={`${m}:${v}`} value={`${m}:${v}`}>
-                  {m === "standard" ? "Standard" : "Relaxed"} ·{" "}
-                  {v ? "Alternate" : "Original"} route
-                </option>
+                  {t(m === "standard" ? "Standard" : "Relaxed")} ·{t(" ")}
+                  {t(v ? "Alternate" : "Original")}{t(" route ")}</option>
               )),
             )}
           </select>
           {tab !== "history" && (
             <input
               type="search"
-              aria-label="Find a player"
-              placeholder="Find player"
+              aria-label={t("Find a player")}
+              placeholder={t("Find player")}
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
@@ -730,8 +705,7 @@ export function LeaderboardDialog({
           )}
         </div>
         {tab === "clinic" && (
-          <label className="lb-clinic-filter">
-            Clinic{" "}
+          <label className="lb-clinic-filter">{t(" Clinic")}{t(" ")}
             <select
               value={mission}
               onChange={(e) => {
@@ -741,7 +715,7 @@ export function LeaderboardDialog({
             >
               {CLINICS.map((c, i) => (
                 <option key={c.id} value={i}>
-                  {i + 1} · {c.shortName}
+                  {i + 1} · {t(c.shortName)}
                 </option>
               ))}
             </select>
@@ -754,32 +728,29 @@ export function LeaderboardDialog({
             <div className="lb-results" aria-busy={loading}>
               {loading && (
                 <p className="lb-status" role="status">
-                  {data ? "Refreshing rankings…" : "Connecting to rankings…"}
+                  {t(data ? "Refreshing rankings…" : "Connecting to rankings…")}
                 </p>
               )}
-              {error && (
+              {t(error && (
                 <p className="lb-status" role="status">
-                  {error}{" "}
-                  <button className="board-link" onClick={retry}>
-                    Retry rankings
-                  </button>
+                  {t(error)}{t(" ")}
+                  <button className="board-link" onClick={retry}>{t(" Retry rankings ")}</button>
                   {data && updatedAt && (
-                    <small>
-                      Last updated{" "}
-                      {new Date(updatedAt).toLocaleTimeString([], {
+                    <small>{t(" Last updated")}{t(" ")}
+                      {t(new Date(updatedAt).toLocaleTimeString([], {
                         hour: "numeric",
                         minute: "2-digit",
-                      })}
+                      }))}
                     </small>
                   )}
                 </p>
-              )}
+              ))}
               {data &&
                 (expanded ? (
                   <div
                     className="lb-ranked-list"
                     role="region"
-                    aria-label="Ranked players"
+                    aria-label={t("Ranked players")}
                     tabIndex={0}
                     key={pages[pages.length - 1] || "first"}
                   >
@@ -790,17 +761,15 @@ export function LeaderboardDialog({
                 ))}
               <YourRecord bracket={bracket} data={yourData} loading={loading} />
               {data?.featured && data.featured.id !== data.own?.id && (
-                <div className="lb-shared">
-                  Shared score · {data.featured.name} · #{data.featured.rank} ·{" "}
-                  {data.featured.score.toLocaleString()} pts
-                </div>
+                <div className="lb-shared">{t(" Shared score · ")}{data.featured.name} · #{data.featured.rank} ·{t(" ")}
+                  {t(data.featured.score.toLocaleString(getLocale()))}{t(" pts ")}</div>
               )}
             </div>
             <footer className="lb-board-footer">
               <small>
-                {bracket.mission === "all"
+                {t(bracket.mission === "all"
                   ? "Overall adds your personal best at each clinic."
-                  : "One best full delivery per player at this clinic."}
+                  : "One best full delivery per player at this clinic.")}
               </small>
               {!expanded ? (
                 <button
@@ -809,24 +778,18 @@ export function LeaderboardDialog({
                     setExpanded(true);
                     reset();
                   }}
-                >
-                  View all {data?.total.toLocaleString() || ""} players →
-                </button>
+                >{t(" View all ")}{t(data?.total.toLocaleString(getLocale()) || "")}{t(" players → ")}</button>
               ) : (
                 <div className="lb-page-controls">
                   <button
                     disabled={pages.length === 1 || loading}
                     onClick={() => setPages((p) => p.slice(0, -1))}
-                  >
-                    ← Previous
-                  </button>
-                  <span>Page {pages.length}</span>
+                  >{t(" ← Previous ")}</button>
+                  <span>{t("Page ")}{pages.length}</span>
                   <button
                     disabled={!data?.nextCursor || loading}
                     onClick={() => setPages((p) => [...p, data!.nextCursor])}
-                  >
-                    Next →
-                  </button>
+                  >{t(" Next → ")}</button>
                 </div>
               )}
             </footer>
@@ -842,37 +805,25 @@ export function LeaderboardDialog({
               pendingVisibility() === true
             }
             onClick={() => void share()}
-          >
-            Share my score ↗
-          </button>
+          >{t(" Share my score ↗ ")}</button>
         </div>
-        {shareNotice && (
+        {t(shareNotice && (
           <div className="lb-share-notice">
-            <p role="status">{shareNotice}</p>
-            <label>
-              Public score link
-              <input
+            <p role="status">{t(shareNotice)}</p>
+            <label>{t(" Public score link ")}<input
                 readOnly
                 value={shareUrl}
                 onFocus={(e) => e.currentTarget.select()}
               />
             </label>
           </div>
-        )}
+        ))}
         {onPublish && !community.player && (
-          <button className="board-link" onClick={onPublish}>
-            Keep these records across devices · sign in
-          </button>
+          <button className="board-link" onClick={onPublish}>{t(" Keep these records across devices · sign in ")}</button>
         )}
         <details className="lb-rules">
-          <summary>How scoring works</summary>
-          <p>
-            Each clinic keeps your highest verified score. Overall combines
-            those five personal bests; it is not a single playthrough. My drives
-            shows each attempt and your best complete journey. Difficulty, route
-            and road edition stay separate. Tied scores use a stable player
-            order. Practice and unverifiable deliveries remain private and
-            unranked. Edition {ROAD_REVISION}.
+          <summary>{t("How scoring works")}</summary>
+          <p>{t(" Each clinic keeps your highest verified score. Overall combines those five personal bests; it is not a single playthrough. My drives shows each attempt and your best complete journey. Difficulty, route and road edition stay separate. Tied scores use a stable player order. Practice and unverifiable deliveries remain private and unranked. Edition ")}{ROAD_REVISION}.
           </p>
         </details>
       </div>
@@ -894,27 +845,23 @@ export function Leaderboard({
   const [open, setOpen] = useState(false),
     trigger = useRef<HTMLButtonElement>(null);
   return (
-    <section className="community-board" aria-label="Chapter leaderboard">
+    <section className="community-board" aria-label={t("Chapter leaderboard")}>
       <div className="community-title">
         <div>
-          <span className="eyebrow">
-            CHAPTER {mission + 1} · {mode.toUpperCase()}
+          <span className="eyebrow">{t(" CHAPTER ")}{mission + 1} · {t(mode.toUpperCase())}
           </span>
-          <h3>Leading the way</h3>
+          <h3>{t("Leading the way")}</h3>
         </div>
-        <button ref={trigger} onClick={() => setOpen(true)}>
-          Leaderboard ↗
-        </button>
+        <button ref={trigger} onClick={() => setOpen(true)}>{t(" Leaderboard ↗ ")}</button>
       </div>
-      {loading && <p role="status">Refreshing the top five…</p>}
-      {error && (
+      {loading && <p role="status">{t("Refreshing the top five…")}</p>}
+      {t(error && (
         <p role="status">
-          {error} <button onClick={retry}>Retry</button>
+          {t(error)} <button onClick={retry}>{t("Retry")}</button>
         </p>
-      )}
+      ))}
       {data && <Rows data={data} />}
-      <small>
-        Top five · best full deliveries · road edition {ROAD_REVISION}
+      <small>{t(" Top five · best full deliveries · road edition ")}{ROAD_REVISION}
       </small>
       {open && (
         <LeaderboardDialog
@@ -928,85 +875,68 @@ export function Leaderboard({
     </section>
   );
 }
-export function InviteFriends({
-  mission,
-  mode,
-  variant,
-  score,
-  compact = false,
-}: {
-  mission: number;
-  mode: string;
-  variant: number;
-  score?: number;
-  compact?: boolean;
+export function InviteFriends({ mission, mode, variant, score, compact = false }: {
+  mission: number; mode: string; variant: number; score?: number; compact?: boolean;
 }) {
-  const [notice, setNotice] = useState("");
-  const url = challengeUrl(mission, mode, variant),
-    text = `Can you bring them the light? ${score ? `I scored ${score.toLocaleString()} points at ${CLINICS[mission].shortName}. ` : ""}Try this Last Light delivery and see how you do.`;
+  const language = useLanguage();
+  const [notice, setNotice] = useState('');
+  const [social, setSocial] = useState<string | null>(null);
+  const [card, setCard] = useState<Blob | null>(null);
+  const [cardError, setCardError] = useState(false);
+  const [cardAttempt, setCardAttempt] = useState(0);
+  const challenge = shareChallenge(mission, mode, variant, score);
+  useEffect(() => {
+    if (!social) return;
+    let active = true; setCard(null); setCardError(false);
+    void challengeCard(mission, score).then(blob => { if(active) setCard(blob); }).catch(() => { if(active) setCardError(true); });
+    return () => { active = false; };
+  }, [mission, score, language, social, cardAttempt]);
   const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
-      setNotice("Challenge link copied. Share it with your friends.");
-    } catch {
-      setNotice("Copy this link from the field below.");
-    }
+    try { await navigator.clipboard.writeText(`${challenge.text}\n${challenge.url}`); setNotice('Challenge link copied. Share it with your friends.'); }
+    catch { setNotice('Copy this link from the field below.'); }
   };
-  return (
-    <div className="invite-friends">
-      {!compact && (
-        <>
-          <span className="eyebrow">A FRIENDLY CHALLENGE</span>
-          <h3>Who would you bring along?</h3>
-        </>
-      )}
-      <p>
-        Invite 5–10 friends to try this delivery. They can join the leaderboard
-        after signing in and completing a full drive.
-      </p>
-      <div className="community-actions">
-        <button onClick={() => void copy()}>Copy challenge link</button>
-        {typeof navigator.share === "function" && (
-          <button
-            onClick={() =>
-              void navigator
-                .share({
-                  title: "Last Light · a delivery challenge",
-                  text,
-                  url,
-                })
-                .catch((e) => {
-                  if (e?.name !== "AbortError")
-                    setNotice(
-                      "Sharing is unavailable. Use Copy challenge link.",
-                    );
-                })
-            }
-          >
-            Share…
-          </button>
-        )}
-        <a
-          href={`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          WhatsApp ↗
-        </a>
-        <a
-          href={`mailto:?subject=${encodeURIComponent("Can you beat my Last Light delivery?")}&body=${encodeURIComponent(`${text}\n\n${url}`)}`}
-        >
-          Email ↗
-        </a>
-      </div>
-      <label className="share-link-label">
-        Challenge link
-        <input readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
-      </label>
-      <small>Inviting is optional. You choose who receives the link.</small>
-      {notice && <p role="status">{notice}</p>}
+  const download = () => {
+    if (!card) return;
+    const url = URL.createObjectURL(card), link = document.createElement('a');
+    link.href = url; link.download = `last-light-${CLINICS[mission].id}-${language}.png`; link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    setNotice('Story image downloaded. Add it in your social app, then paste the challenge link.');
+  };
+  const share = (withCard = false) => {
+    const data: ShareData = { title: challenge.title, text: challenge.text, url: challenge.url };
+    if (withCard && card) {
+      const files = [new File([card], 'last-light-challenge.png', { type: 'image/png' })];
+      if (navigator.canShare?.({ files })) data.files = files;
+      else { download(); return; }
+    }
+    void navigator.share(data).catch(e => { if(e?.name !== 'AbortError') setNotice('Sharing is unavailable. Use Copy challenge link.'); });
+  };
+  return <div className="invite-friends">
+    {!compact && <span className="eyebrow">{t('A FRIENDLY CHALLENGE')}</span>}
+    <h3>{t('Invite 10 friends')}</h3>
+    <p>{t('Bring 10 friends on this journey. They can play as guests or sign in to keep their progress.')}</p>
+    <div className="social-share-grid">
+      {Object.entries(challenge.links).filter(([name]) => name !== 'Email').map(([name, href]) => <a key={name} href={href} target="_blank" rel="noopener noreferrer">{name} ↗</a>)}
+      {['Instagram', 'TikTok'].map(name => <button key={name} aria-expanded={social === name} onClick={() => setSocial(social === name ? null : name)}>{name} ↗</button>)}
     </div>
-  );
+    {social && <div className="social-story-help" role="region" aria-label={social}>
+      <strong>{social}</strong><p>{t('Download the story image, add it in your social app, and paste the challenge link. You choose who receives it.')}</p>
+      <div className="community-actions">
+        <button onClick={download} disabled={!card}>{t(card ? 'Download story image' : cardError ? 'Image unavailable' : 'Preparing story image…')}</button>
+        {cardError && <button onClick={() => setCardAttempt(n => n+1)}>{t('Retry')}</button>}
+        {card && typeof navigator.share === 'function' && <button onClick={() => share(true)}>{t('Share image…')}</button>}
+        <button onClick={() => void copy()}>{t('Copy challenge link')}</button>
+      </div>
+    </div>}
+    <div className="community-actions">
+      <button onClick={() => void copy()}>{t('Copy challenge link')}</button>
+      {typeof navigator.share === 'function' && <button onClick={() => share()}>{t('More…')}</button>}
+      <a href={challenge.links.Email}>{t('Email ↗')}</a>
+    </div>
+    <label className="share-link-label">{t('Challenge link')}<input readOnly aria-label={t('Challenge link')} value={challenge.url} onFocus={e => e.currentTarget.select()} /></label>
+    <small>{t('Inviting is optional. You choose who receives the link.')}</small>
+    {notice && <p role="status">{t(notice)}</p>}
+  </div>;
 }
 export function CompletionAccount({
   result,
@@ -1027,50 +957,39 @@ export function CompletionAccount({
     <section className="community-account">
       <h3>
         {player
-          ? `Your delivery, ${player.name || "saved"}.`
-          : "Keep your journey."}
+          ? formatText("Your delivery, {0}.", player.name || t("saved"))
+          : t("Keep your journey.")}
       </h3>
       <p>
-        {record?.published && !leaderboardHidden()
+        {t(record?.published && !leaderboardHidden()
           ? "Your best eligible score is on the leaderboard."
           : record?.saved && player
             ? "This delivery is saved to your account."
-            : "This delivery is saved on this device."}
+            : "This delivery is saved on this device.")}
       </p>
       {!player && (
         <>
-          <p>
-            Sign in to keep your scores and unfinished journey across devices.
-          </p>
+          <p>{t(" Sign in to keep your scores and unfinished journey across devices. ")}</p>
           <div className="community-actions">
             <button
               disabled={status === "loading"}
               onClick={() => onAuth("signup")}
-            >
-              Create an account
-            </button>
+            >{t(" Create an account ")}</button>
             <button
               disabled={status === "loading"}
               onClick={() => onAuth("login")}
-            >
-              Log in
-            </button>
+            >{t(" Log in ")}</button>
           </div>
         </>
       )}
       {player && !player.verified && (
         <>
-          <p>
-            Your scores are saved privately. Verify your email to appear in the
-            rankings.
-          </p>
-          <button onClick={() => onAuth("verify-email")}>Verify email</button>
+          <p>{t(" Your scores are saved privately. Verify your email to appear in the rankings. ")}</p>
+          <button onClick={() => onAuth("verify-email")}>{t("Verify email")}</button>
         </>
       )}
-      {message && <p role="status">{message}</p>}
-      <button className="board-link" onClick={() => void refreshAccount()}>
-        Retry online saving
-      </button>
+      {t(message && <p role="status">{t(message)}</p>)}
+      <button className="board-link" onClick={() => void refreshAccount()}>{t(" Retry online saving ")}</button>
     </section>
   );
 }
@@ -1097,7 +1016,7 @@ export function PlayerControls() {
         <button
           role="switch"
           aria-checked={!(pending ?? actual)}
-          aria-label="Show me on the leaderboard"
+          aria-label={t("Show me on the leaderboard")}
           className="lb-switch"
           disabled={busy || community.status === "loading"}
           onClick={() => run(setLeaderboardVisibility(!(pending ?? actual)))}
@@ -1105,13 +1024,13 @@ export function PlayerControls() {
           <span />
         </button>
         <div>
-          <strong>Show me on the leaderboard</strong>
+          <strong>{t("Show me on the leaderboard")}</strong>
           <small>
-            {pending !== null
+            {t(pending !== null
               ? "Visibility change pending · public visibility is not confirmed yet."
               : actual
                 ? "Hidden. Your private scores stay saved."
-                : `Shown publicly as: ${publicName}`}
+                : `Shown publicly as: ${publicName}`)}
           </small>
         </div>
       </div>
@@ -1125,9 +1044,7 @@ export function PlayerControls() {
             );
             setEditing(!editing);
           }}
-        >
-          Change leaderboard name
-        </button>
+        >{t(" Change leaderboard name ")}</button>
         {community.player &&
         (community.player.nameSource === "custom" ||
           !community.player.nameSource) ? (
@@ -1141,7 +1058,7 @@ export function PlayerControls() {
               : "Use default name"}
           </button>
         ) : community.player?.nameSource === "account" ? (
-          <span>Using account name</span>
+          <span>{t("Using account name")}</span>
         ) : null}
       </div>
       {editing && (
@@ -1151,44 +1068,35 @@ export function PlayerControls() {
             run(renamePlayer(name));
           }}
         >
-          <label>
-            Leaderboard nickname
-            <input
+          <label>{t(" Leaderboard nickname ")}<input
               required
               minLength={2}
               maxLength={28}
               autoComplete="nickname"
-              placeholder="Choose a name for the leaderboard"
+              placeholder={t("Choose a name for the leaderboard")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </label>
-          <button disabled={busy}>Save</button>
+          <button disabled={busy}>{t("Save")}</button>
           <button
             type="button"
             className="board-link"
             onClick={() => setEditing(false)}
-          >
-            Cancel
-          </button>
+          >{t(" Cancel ")}</button>
         </form>
       )}
       {editing && (
-        <p className="lb-name-help">
-          This nickname is only for the leaderboard. Your account name stays
-          unchanged.
-        </p>
+        <p className="lb-name-help">{t(" This nickname is only for the leaderboard. Your account name stays unchanged. ")}</p>
       )}
-      {error && (
+      {t(error && (
         <p role="status">
-          {error}
+          {t(error)}
           {pending !== null && (
-            <button onClick={() => run(setLeaderboardVisibility(pending))}>
-              Retry visibility change
-            </button>
+            <button onClick={() => run(setLeaderboardVisibility(pending))}>{t(" Retry visibility change ")}</button>
           )}
         </p>
-      )}
+      ))}
     </div>
   );
 }
@@ -1208,7 +1116,7 @@ export function YourRank({
   if (data?.own)
     return (
       <span className="completion-rank">
-        #{data.own.rank} of {data.total.toLocaleString()}
+        #{data.own.rank}{t(" of ")}{t(data.total.toLocaleString(getLocale()))}
       </span>
     );
   return null;

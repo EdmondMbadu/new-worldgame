@@ -1,3 +1,4 @@
+import { setLanguage as setGameLanguage, getLanguage as getGameLanguage } from '../../../content/last-light-locale';
 import { Injectable } from '@angular/core';
 import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 import { Observable, firstValueFrom } from 'rxjs';
@@ -65,6 +66,9 @@ export class LanguageService {
   }
 
   private resolveInitialLanguage(): string {
+    if (typeof location !== 'undefined' && (/^\/(login|signup|verify-email|forgot-password)/.test(location.pathname) || location.search.includes('source=last-light'))) {
+      return getGameLanguage();
+    }
     const storedLanguage = this.getStoredLanguage();
     const browserLanguage = this.translateService.getBrowserLang();
 
@@ -104,6 +108,7 @@ export class LanguageService {
   }
 
   private applySideEffects(language: string) {
+    if (language === 'en' || language === 'fr') setGameLanguage(language);
     this.updateDocumentLanguage(language);
     this.persistLanguage(language);
   }

@@ -1,3 +1,4 @@
+import { getLanguage, setLanguage, type GameLanguage } from './locale';
 import { useEffect, useState } from 'react';
 import type { Result } from './engine';
 import type { DriveSnapshot } from '../../../functions/src/last-light-snapshot';
@@ -89,6 +90,7 @@ function saveIdentity(value: Identity) {
   update({});
 }
 export type Player = {
+  language?: GameLanguage | null;
   uid: string;
   verified: boolean;
   name: string;
@@ -169,6 +171,11 @@ function acceptAccount(
 ) {
   if (state.player?.uid !== player.uid) return;
   const merged = { ...player, ...record };
+  const pendingLanguage = load<GameLanguage | null>(`last-light.language-pending.${player.uid}`, null) || load<GameLanguage | null>('last-light.language-pending.guest', null);
+  if (pendingLanguage) persist('last-light.language-pending.guest', null);
+  if (pendingLanguage) void saveLanguagePreference(pendingLanguage);
+  else if (record.language === 'en' || record.language === 'fr') setLanguage(record.language);
+  else void saveLanguagePreference(getLanguage());
   persist(`last-light.profile.${player.uid}`, record);
   const local = readActive(player.uid),
     cloud = record.active;
@@ -630,6 +637,26 @@ export async function resetLeaderboardName() {
   persist(`last-light.profile.${uid}`, player);
   update({ player });
   boardChanged();
+}
+const languageSaves = new Map<string, Promise<void>>();
+export async function saveLanguagePreference(language: GameLanguage) {
+  const uid = state.player?.uid;
+  if (!uid) { persist('last-light.language-pending.guest', language); return; }
+  const key = `last-light.language-pending.${uid}`;
+  persist(key, language);
+  const saving = (languageSaves.get(uid) || Promise.resolve()).then(async () => {
+    const wanted = load<GameLanguage | null>(key, null);
+    if (!wanted || state.player?.uid !== uid) return;
+    try {
+      await online('saveLastLightLanguage', { accountUid: uid, language: wanted });
+      if (state.player?.uid !== uid || load(key, null) !== wanted) return;
+      persist(key, null);
+      update({ player: { ...state.player, language: wanted } });
+    } catch { /* Retry on account refresh; play stays available. */ }
+  });
+  languageSaves.set(uid, saving);
+  await saving;
+  if (languageSaves.get(uid) === saving) languageSaves.delete(uid);
 }
 export const joinLeaderboard = renamePlayer;
 export async function syncProgress(results: Result[]) {
