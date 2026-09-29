@@ -241,9 +241,23 @@ test('legacy generated aliases adopt the account name while old custom names and
   fake.store.set('lastLightPlayers/legacy-custom-name', { name: 'Chosen Before Upgrade' });
   fake.store.set('users/legacy-custom-name', { firstName: 'Account Name' });
   assert.equal((await call('getLastLightAccount', {}, 'legacy-custom-name')).name, 'Chosen Before Upgrade');
+  fake.store.set('lastLightPlayers/legacy-guest-alias', { name: 'Golden Weaver 72' });
+  fake.store.set('users/legacy-guest-alias', { firstName: 'Edmond', lastName: 'Mbadu' });
+  assert.equal((await call('getLastLightAccount', {}, 'legacy-guest-alias')).name, 'Edmond Mbadu');
   await call('saveLastLightName', { name: generated }, uid);
   assert.equal((await call('getLastLightAccount', {}, uid)).name, generated, 'explicit choice equal to a generated alias remains custom');
   assert.equal((await call('getLastLightAccount', {}, uid)).nameSource, 'custom');
+});
+test('uses trusted display names when profile name fields are absent and rejects guest/account races', async () => {
+  fake.store.set('users/display-only', { displayName: 'Élodie Nsimba', email: 'private@example.com' });
+  assert.equal((await call('getLastLightAccount', {}, 'display-only')).name, 'Élodie Nsimba');
+  const context = ctx('auth-display-only');
+  context.auth.token.name = 'Edmond Mbadu';
+  assert.equal((await ll.getLastLightAccount.run({}, context)).name, 'Edmond Mbadu');
+  fake.store.set('users/auth-display-only', { firstName: 'Updated', lastName: 'Profile' });
+  assert.equal((await ll.getLastLightAccount.run({}, context)).name, 'Updated Profile');
+  await assert.rejects(() => call('setLastLightVisibility', { deviceKey: key(), name:'Guest Name', hidden:true }, 'auth-display-only'), { code:'failed-precondition' });
+  assert.equal((await ll.getLastLightAccount.run({}, context)).hidden, false);
 });
 test('missing profile names use a generated fallback, never email; all account creation paths resolve the name', async () => {
   const uid = 'no-profile-name';

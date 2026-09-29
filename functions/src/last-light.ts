@@ -2,6 +2,7 @@ import * as functions from 'firebase-functions/v1';
 import * as admin from 'firebase-admin';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { validateSnapshot, type DriveSnapshot } from './last-light-snapshot';
+import { accountDisplayName, cleanAccountName, hasCustomPlayerName } from './last-light-names';
 import {
   createHash,
   randomBytes,
@@ -54,34 +55,17 @@ function generatedName(uid: string) {
   const h = hash(uid);
   return `${['Steady', 'Bright', 'Careful', 'Kind'][parseInt(h.slice(0, 2), 16) % 4]} ${['Heron', 'Lantern', 'Baobab', 'Sunbird'][parseInt(h.slice(2, 4), 16) % 4]} ${10 + (parseInt(h.slice(4, 8), 16) % 90)}`;
 }
-function accountDisplayName(profile: admin.firestore.DocumentData = {}) {
-  // Use the same fields as the site's account page. Never derive a name from email.
-  const name = [profile.firstName, profile.lastName]
-    .filter((part): part is string => typeof part === 'string')
-    .join(' ')
-    .normalize('NFKC')
-    .replace(/[\p{Cc}\p{Cf}]/gu, '')
-    .trim()
-    .replace(/\s+/g, ' ');
-  return name && !/[<>@]/.test(name) ? [...name].slice(0, 160).join('') : '';
-}
 async function playerName(
   tx: admin.firestore.Transaction,
   uid: string,
   player: admin.firestore.DocumentData,
   useAccountName = false,
+  authName?: unknown,
 ) {
   const accountName = accountDisplayName(
     (await tx.get(db().collection('users').doc(uid))).data(),
-  );
-  // Before nameSource existed, only the deterministic default can safely be
-  // recognized as generated. Preserve every other existing player name.
-  const custom =
-    !useAccountName &&
-    (player.nameSource === 'custom' ||
-      (!player.nameSource &&
-        player.name &&
-        player.name !== generatedName(uid)));
+  ) || cleanAccountName(authName);
+  const custom = !useAccountName && hasCustomPlayerName(player);
   return {
     name:
       custom && player.name ? player.name : accountName || generatedName(uid),
@@ -218,7 +202,7 @@ export const getLastLightAccount = functions.https.onCall(async (raw, c) => {
       p = (await tx.get(ref)).data() || {};
     const active =
       (await tx.get(ref.collection('state').doc('current'))).data() || null;
-    const naming = await playerName(tx, uid, p),
+    const naming = await playerName(tx, uid, p, false, c.auth?.token.name),
       { name } = naming,
       rankingEnabled = isVerified(c);
     tx.set(
@@ -257,7 +241,7 @@ export const saveLastLightName = functions.https.onCall(async (raw, c) => {
   return db().runTransaction(async (tx) => {
     const ref = playerRef(uid),
       p = (await tx.get(ref)).data() || {};
-    const current = await playerName(tx, uid, p, useAccountName);
+    const current = await playerName(tx, uid, p, useAccountName, c.auth?.token.name);
     const naming = nickname
       ? { ...current, name: nickname, nameSource: 'custom' }
       : current;
@@ -372,7 +356,7 @@ export const submitLastLightRun = functions.https.onCall(async (raw, c) => {
     };
     const best = mergeBest(p.best || {}, [r]),
       published = mergeBest(p.published || {}, [r]);
-    const naming = await playerName(tx, uid, p),
+    const naming = await playerName(tx, uid, p, false, c.auth?.token.name),
       { name } = naming,
       eligible = isVerified(c),
       completedAt = existing?.completedAt || Date.now();
@@ -643,6 +627,8 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
     fail('invalid-argument', 'Choose whether to appear on the leaderboard.');
   const key = raw?.deviceKey ? checked(() => guestKey(raw.deviceKey)) : null,
     uid = c.auth?.uid ? user(c, raw) : null;
+  if (uid && key && !raw.accountUid)
+    fail('failed-precondition', 'The signed-in account changed. Retry from your player record.');
   const rename =
     raw?.name === undefined ? null : checked(() => publicName(raw.name));
   if (!key && !uid)
@@ -671,7 +657,7 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
   return db().runTransaction(async (tx) => {
     const snaps = await Promise.all(refs.map((r) => tx.get(r.ref)));
     const naming = uid
-      ? await playerName(tx, uid, snaps[0].data() || {})
+      ? await playerName(tx, uid, snaps[0].data() || {}, false, c.auth?.token.name)
       : null;
     let name = rename || '';
     snaps.forEach((snap, i) => {
@@ -851,7 +837,7 @@ export const claimLastLightGuest = functions.https.onCall(async (raw, c) => {
       !!p.hidden ||
       (!guest?.migratedTo && !!guest?.hidden) ||
       raw?.hidden === true;
-    const naming = await playerName(tx, uid, p),
+    const naming = await playerName(tx, uid, p, false, c.auth?.token.name),
       { name } = naming,
       published = mergeBest(p.published || {}, results);
     const histories = await Promise.all(

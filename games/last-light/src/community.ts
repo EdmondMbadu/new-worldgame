@@ -1,4 +1,5 @@
-import { getLanguage, setLanguage, type GameLanguage } from './locale';
+import { getLanguage, setLanguage, t, type GameLanguage } from './locale';
+import { cleanAccountName, hasCustomPlayerName } from '../../../functions/src/last-light-names';
 import { useEffect, useState } from 'react';
 import type { Result } from './engine';
 import type { DriveSnapshot } from '../../../functions/src/last-light-snapshot';
@@ -29,6 +30,7 @@ export type Identity = {
   name: string;
   hidden: boolean;
   chosen?: boolean;
+  namePending?: boolean;
   claimedBy?: string;
 };
 const IDENTITY_KEY = 'last-light.player.v1';
@@ -128,6 +130,8 @@ const update = (patch: Partial<CommunityState>) => {
 };
 export const api = () => (apiPromise ??= import('./community-api'));
 export const currentPlayer = () => state.player;
+export const playerDisplayName = (player: Player | null = state.player) =>
+  player ? player.name || t('Your account') : identity().name;
 export const leaderboardHidden = () =>
   state.player ? state.player.hidden : identity().hidden;
 const visibilityKey = (uid: string | null) =>
@@ -251,6 +255,12 @@ export function initializeCommunity() {
             user.emailVerified ||
             user.providerData.some((p) => p.providerId !== 'password'),
         };
+        const accountName = cleanAccountName(cached.accountName) || cleanAccountName(user.displayName);
+        if (!hasCustomPlayerName(player) && accountName) {
+          player.name = accountName;
+          player.accountName = accountName;
+          player.nameSource = 'account';
+        }
         update({
           status: 'signed-in',
           player,
@@ -259,6 +269,18 @@ export function initializeCommunity() {
           synced: false,
         });
         hydrateLocalHistory(user.uid);
+        // Account identity must not wait for, or depend on, importing guest runs.
+        try {
+          const record = await online<Omit<Player, 'uid' | 'verified'>>(
+            'getLastLightAccount', { accountUid: user.uid },
+          );
+          if (request !== generation) return;
+          acceptAccount(player, record);
+          boardChanged();
+        } catch (e) {
+          if (request !== generation) return;
+          update({ message: errorMessage(e) });
+        }
         try {
           const me = identity();
           // Device proof is used only to claim guest-owned runs. The server checks
@@ -464,6 +486,7 @@ export async function publishPending() {
         hidden: true,
         deviceKey: identity().key,
       });
+    if (!uid && identity().namePending) await syncGuestName();
     const runs = pendingRuns().filter(
       (p) =>
         p.owner === uid &&
@@ -604,15 +627,21 @@ export async function renamePlayer(raw: string) {
       'Use 2–28 letters, numbers, spaces, dots, hyphens or underscores.',
     );
   const uid = state.player?.uid;
+  if (!uid) {
+    saveIdentity({ ...identity(), name, chosen: true, namePending: true });
+    boardChanged();
+    try { await syncGuestName(); }
+    catch {
+      update({ message: 'Your name is saved on this device. Online updating will retry when connected.' });
+    }
+    return;
+  }
   const naming = await online<{
     name: string;
     nameSource?: Player['nameSource'];
     accountName?: string;
   }>(
-    uid ? 'saveLastLightName' : 'setLastLightVisibility',
-    uid
-      ? { name, accountUid: uid }
-      : { name, hidden: identity().hidden, deviceKey: identity().key },
+    'saveLastLightName', { name, accountUid: uid },
   );
   if (uid && state.player?.uid === uid) {
     const player = {
@@ -623,8 +652,18 @@ export async function renamePlayer(raw: string) {
     };
     persist(`last-light.profile.${uid}`, player);
     update({ player });
-  } else if (!uid) saveIdentity({ ...identity(), name, chosen: true });
+  }
   boardChanged();
+}
+async function syncGuestName() {
+  const me = identity();
+  await online('setLastLightVisibility', {
+    name: me.name, hidden: load<boolean | null>(visibilityKey(null), null) ?? me.hidden, deviceKey: me.key,
+  });
+  if (!state.player && identity().key === me.key && identity().name === me.name) {
+    saveIdentity({ ...identity(), namePending: false });
+    boardChanged();
+  }
 }
 export async function resetLeaderboardName() {
   const uid = state.player?.uid;

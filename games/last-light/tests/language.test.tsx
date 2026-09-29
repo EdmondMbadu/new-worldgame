@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import openingVoices from '../../../docs/design/last-light/opening-voice-provenance.json';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { setLanguage, t, resolveLanguage, formatText, campaignHref, LANGUAGE_KEY } from '../../../content/last-light-locale';
 import frenchStories from '../../../content/drc-clinic-stories.fr.json';
@@ -19,6 +21,23 @@ beforeEach(() => {
 afterEach(()=>{setLanguage('en');vi.unstubAllGlobals();});
 
 describe('complete French deliveries',()=>{
+  it('uses lumière for illumination and keeps the graphics setting distinct',()=>{
+    expect(t('Light')).toBe('Lumière');
+    expect(t('Lights')).toBe('Lumières');
+    expect(t('Light · older phones and slow graphics')).toContain('Mode allégé');
+  });
+  it('ships the revised opening audio paired with every current English and French script',()=>{
+    expect(openingVoices.recordings).toHaveLength(10);
+    for (const recording of openingVoices.recordings) {
+      const clinics = recording.language === 'fr' ? frenchStories.clinics : CLINICS;
+      const script = clinics.find(c=>c.id===recording.clinic)!.opening;
+      expect(createHash('sha256').update(script).digest('hex')).toBe(recording.scriptSha256);
+      const file = new URL(`../../../${recording.file}`, import.meta.url);
+      expect(createHash('sha256').update(readFileSync(file)).digest('hex')).toBe(recording.audioSha256);
+      setLanguage(recording.language as 'en'|'fr');
+      expect(storyClip(CLINICS.find(c=>c.id===recording.clinic)!, 'opening')).toContain('?v=20260928');
+    }
+  });
   it.each(CLINICS.map((clinic,chapter)=>({clinic,chapter})))('translates both scenes and ships both recordings for $clinic.id',({clinic,chapter})=>{
     const translated=frenchStories.clinics[chapter];
     expect(t(clinic.opening)).toBe(translated.opening);

@@ -9,6 +9,7 @@ import { ROAD_REVISION } from "./vehicle";
 import {
   online,
   currentPlayer,
+  playerDisplayName,
   leaderboardHidden,
   pendingVisibility,
   identity,
@@ -145,7 +146,7 @@ export function localBest(bracket: Bracket): Local {
       player?.best,
     );
   return best.chapters
-    ? { name: player?.name || identity().name, ...best }
+    ? { name: playerDisplayName(player), ...best }
     : null;
 }
 function useRecords() {
@@ -372,11 +373,11 @@ function YourRecord({
     <div className="lb-own" aria-label={t("Your record")}>
       <span className="lb-own-rank">{t(own ? own.rank : "—")}</span>
       <span className="lb-avatar" aria-hidden="true">
-        {(player?.name || identity().name)[0]}
+        {(playerDisplayName(player))[0]}
       </span>
       <div className="lb-own-copy">
         <strong>
-          {player?.name || identity().name}{t(" ")}
+          {playerDisplayName(player)}{t(" ")}
           <small className="lb-you-tag">{t("YOU")}</small>
         </strong>
         <small>
@@ -578,7 +579,7 @@ export function LeaderboardDialog({
       search,
       pages.at(-1),
     );
-  const name = community.player?.name || identity().name,
+  const name = playerDisplayName(community.player),
     pending = driveHistory(community.player?.uid || null).some((d) => !d.saved),
     reset = () => setPages([null]);
   useEffect(() => {
@@ -997,7 +998,7 @@ export function PlayerControls() {
   const community = useCommunity(),
     actual = leaderboardHidden(),
     pending = pendingVisibility();
-  const publicName = community.player?.name || identity().name;
+  const publicName = playerDisplayName(community.player);
   const [editing, setEditing] = useState(false),
     [name, setName] = useState(publicName),
     [busy, setBusy] = useState(false),
@@ -1046,16 +1047,13 @@ export function PlayerControls() {
           }}
         >{t(" Change leaderboard name ")}</button>
         {community.player &&
-        (community.player.nameSource === "custom" ||
-          !community.player.nameSource) ? (
+        (community.player.nameSource !== "account") ? (
           <button
             className="board-link"
             disabled={busy}
             onClick={() => run(resetLeaderboardName())}
           >
-            {community.player.accountName
-              ? "Use account name"
-              : "Use default name"}
+            {t("Use account name")}
           </button>
         ) : community.player?.nameSource === "account" ? (
           <span>{t("Using account name")}</span>

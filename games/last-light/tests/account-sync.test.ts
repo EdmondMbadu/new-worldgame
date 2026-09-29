@@ -86,6 +86,58 @@ async function initialized() {
   return c;
 }
 describe('account-first synchronization', () => {
+  it('loads the account name even when importing guest scores fails', async () => {
+    const original = mock.call.getMockImplementation()!;
+    mock.call.mockImplementation(async (name, raw) => {
+      if (name === 'claimLastLightGuest') throw new Error('guest import offline');
+      const reply = await original(name, raw);
+      return name === 'getLastLightAccount'
+        ? { ...reply, name: 'Edmond Mbadu', nameSource: 'account', accountName: 'Edmond Mbadu' }
+        : reply;
+    });
+    const c = await import('../src/community');
+    c.initializeCommunity();
+    await vi.waitFor(() => expect(c.currentPlayer()?.name).toBe('Edmond Mbadu'));
+    await vi.waitFor(() => expect(mock.call.mock.calls.some(([name]) => name === 'claimLastLightGuest')).toBe(true));
+    expect(c.playerDisplayName()).toBe('Edmond Mbadu');
+    expect(mock.call.mock.calls.findIndex(([n]) => n === 'getLastLightAccount')).toBeLessThan(
+      mock.call.mock.calls.findIndex(([n]) => n === 'claimLastLightGuest'));
+  });
+  it('uses the authenticated name while offline without replacing an explicit nickname', async () => {
+    mock.auth.currentUser = { ...user('alice'), displayName: 'Alice Account' };
+    mock.call.mockRejectedValue(new Error('offline'));
+    const c = await import('../src/community');
+    c.initializeCommunity();
+    await vi.waitFor(() => expect(c.currentPlayer()?.name).toBe('Alice Account'));
+    expect(c.playerDisplayName()).not.toBe(c.identity().name);
+    localStorage.setItem('last-light.profile.bob', JSON.stringify({ name:'Road Friend', nameSource:'custom' }));
+    mock.auth.currentUser = { ...user('bob'), displayName:'Bob Account' };
+    await mock.watch(mock.auth.currentUser);
+    expect(c.playerDisplayName()).toBe('Road Friend');
+  });
+  it('never substitutes a guest alias for a signed-in account waiting for its name', async () => {
+    mock.call.mockRejectedValue(new Error('offline'));
+    const c = await import('../src/community');
+    c.initializeCommunity();
+    await vi.waitFor(() => expect(c.currentPlayer()?.uid).toBe('alice'));
+    expect(c.playerDisplayName()).toBe('Your account');
+  });
+  it('retains a guest nickname offline and retries it after reloading', async () => {
+    mock.auth.currentUser = null;
+    mock.call.mockRejectedValue(new Error('offline'));
+    let c = await import('../src/community');
+    c.initializeCommunity();
+    await vi.waitFor(() => expect(mock.watch).toBeTypeOf('function'));
+    await c.renamePlayer('Ami de la route');
+    expect(c.identity()).toMatchObject({ name:'Ami de la route', chosen:true, namePending:true });
+    vi.resetModules();
+    mock.call.mockResolvedValue({});
+    c = await import('../src/community');
+    expect(c.identity().name).toBe('Ami de la route');
+    c.initializeCommunity();
+    await vi.waitFor(() => expect(c.identity().namePending).toBe(false));
+    expect(mock.call.mock.calls.some(([n, raw]) => n === 'setLastLightVisibility' && raw.name === 'Ami de la route')).toBe(true);
+  });
   it('never sends signed-in or unverified completions to a device player and honors published:false', async () => {
     mock.auth.currentUser = user('alice', false);
     const c = await initialized();
