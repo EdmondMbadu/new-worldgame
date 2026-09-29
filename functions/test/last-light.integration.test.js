@@ -17,6 +17,14 @@ const drive = {
   encounters: 5,
   lives: 3,
 };
+async function eventually(check) {
+  const until = Date.now() + 15000;
+  while (Date.now() < until) {
+    if (await check()) return;
+    await new Promise(resolve => setTimeout(resolve, 150));
+  }
+  assert.fail('Profile name propagation did not complete within 15 seconds');
+}
 async function player(name, verified = true) {
   const email = `${prefix}-${name}@last-light.test`,
     password = "Emulator-only-pass-42";
@@ -356,4 +364,36 @@ test('account history, default alias, opt-out and concurrent checkpoint ownershi
     const url=`http://127.0.0.1:8186/v1/projects/demo-last-light/databases/(default)/documents/${path}`;
     assert.equal((await fetch(url,{headers:{Authorization:`Bearer ${owner.token}`}})).status,403,'private nested records stay callable-only');
   }
+});
+
+test('account names follow profile edits, custom nicknames survive, and reset preserves rank and privacy', {skip: !enabled}, async () => {
+  const person = await player('profile-names');
+  const profile = db.doc(`users/${person.uid}`), record = db.doc(`lastLightPlayers/${person.uid}`);
+  await profile.set({firstName:'Aline',lastName:'Mbala',email:'private-name-test@example.com'});
+  const account = await call('getLastLightAccount', {}, person);
+  assert.equal(account.name, 'Aline Mbala');
+  assert.equal(account.nameSource, 'account');
+  await call('submitLastLightRun', {...await maturedTicket(person),result:drive}, person);
+  const own = (await call('getLastLightLeaderboard', base, person)).own;
+  await profile.update({lastName:'Kabila'});
+  await eventually(async () => (await record.get()).data().name === 'Aline Kabila');
+  assert.equal((await call('getLastLightLeaderboard', base, person)).own.name, 'Aline Kabila');
+  await call('saveLastLightName', {name:'River Driver'}, person);
+  await profile.update({firstName:'Marie'});
+  await eventually(async () => (await record.get()).data().accountName === 'Marie Kabila');
+  assert.equal((await call('getLastLightLeaderboard', base, person)).own.name, 'River Driver');
+  await call('saveLastLightName', {useAccountName:true}, person);
+  const reset = (await call('getLastLightLeaderboard', base, person)).own;
+  assert.deepEqual({...reset,name:own.name}, own);
+  assert.equal(reset.name,'Marie Kabila');
+  assert.equal((await profile.get()).data().firstName, 'Marie');
+  assert.equal((await call('getLastLightDrives', {}, person)).drives.length,1);
+  await call('setLastLightVisibility', {hidden:true}, person);
+  await call('saveLastLightName', {name:'Private Driver'}, person);
+  await call('saveLastLightName', {useAccountName:true}, person);
+  await profile.update({lastName:'Mbala'});
+  await eventually(async () => (await record.get()).data().name === 'Marie Mbala');
+  assert.equal((await call('getLastLightLeaderboard', base, person)).own,null);
+  assert.equal((await call('getLastLightAccount', {}, person)).hidden,true);
+  await assert.rejects(() => call('saveLastLightName', {accountUid:person.uid,useAccountName:true}, bob), {code:'PERMISSION_DENIED'});
 });

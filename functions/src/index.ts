@@ -13202,4 +13202,4 @@ Design direction:
   });
 
 // Last Light: private progress and server-owned public scoreboards.
-export { beginLastLightRun, getLastLightAccount, saveLastLightName, syncLastLightProgress, submitLastLightRun, getLastLightLeaderboard, publishLastLightDrive, setLastLightVisibility, getLastLightDrives, saveLastLightHistory, claimLastLightGuest, saveLastLightJourney, resumeLastLightJourney, discardLastLightJourney } from './last-light';
+export { beginLastLightRun, getLastLightAccount, saveLastLightName, syncLastLightAccountName, syncLastLightProgress, submitLastLightRun, getLastLightLeaderboard, publishLastLightDrive, setLastLightVisibility, getLastLightDrives, saveLastLightHistory, claimLastLightGuest, saveLastLightJourney, resumeLastLightJourney, discardLastLightJourney } from './last-light';

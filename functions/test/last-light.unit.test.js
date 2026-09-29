@@ -178,3 +178,85 @@ test('private history is paginated and cannot manufacture public ranking eligibi
   assert.equal((await call('getLastLightLeaderboard',base,uid)).own,null);
   await assert.rejects(()=>call('getLastLightDrives',{accountUid:uid},'other'),{code:'permission-denied'});
 });
+
+async function profileNameChanged(uid, before, after) {
+  fake.store.set(`users/${uid}`, after);
+  await ll.syncLastLightAccountName.run({ before: { data: () => before }, after: { data: () => after } }, { params: { uid } });
+}
+test('account names are the default, nicknames are independent, and reset preserves scores and privacy', async () => {
+  const uid = 'profile-name-player', profile = { firstName: 'Élise', lastName: 'N’Goma', email: 'private@example.com' };
+  fake.store.set(`users/${uid}`, profile);
+  let account = await call('getLastLightAccount', {}, uid);
+  assert.equal(account.name, 'Élise N’Goma');
+  assert.equal(account.nameSource, 'account');
+  await call('submitLastLightRun', { ...(await matured(uid)), result: drive }, uid);
+  const original = (await call('getLastLightLeaderboard', base, uid)).own;
+  const originalBest = (await call('getLastLightAccount', {}, uid)).best;
+  await call('saveLastLightName', { name: 'River Driver' }, uid);
+  const renamed = { ...profile, firstName: 'Aline' };
+  await profileNameChanged(uid, profile, renamed);
+  account = await call('getLastLightAccount', {}, uid);
+  assert.equal(account.name, 'River Driver');
+  assert.equal(account.nameSource, 'custom');
+  assert.equal(account.accountName, 'Aline N’Goma');
+  assert.equal((await call('getLastLightLeaderboard', base, uid)).own.name, 'River Driver');
+  assert.deepEqual(fake.store.get(`users/${uid}`), renamed, 'nickname never changes the account profile');
+  const reset = await call('saveLastLightName', { useAccountName: true }, uid);
+  assert.equal(reset.name, 'Aline N’Goma');
+  assert.equal(reset.nameSource, 'account');
+  const updated = (await call('getLastLightLeaderboard', base, uid)).own;
+  assert.deepEqual({ ...updated, name: original.name }, original, 'name changes preserve identity, rank and score');
+  assert.deepEqual((await call('getLastLightAccount', {}, uid)).best, originalBest);
+  assert.equal((await call('getLastLightDrives', {}, uid)).drives.length, 1);
+  await call('setLastLightVisibility', { hidden: true }, uid);
+  await call('saveLastLightName', { name: 'Hidden Driver' }, uid);
+  await call('saveLastLightName', { useAccountName: true }, uid);
+  await profileNameChanged(uid, renamed, { ...renamed, firstName: 'Marie' });
+  assert.equal((await call('getLastLightAccount', {}, uid)).hidden, true);
+  assert.equal((await call('getLastLightLeaderboard', base, uid)).own, null);
+  assert.ok(!JSON.stringify(updated).includes(profile.email));
+  await assert.rejects(() => call('saveLastLightName', { accountUid: uid, useAccountName: true }, 'another-account'), { code: 'permission-denied' });
+});
+test('profile change events follow the latest account name without a game visit and ignore stale events', async () => {
+  const uid = 'profile-event-player', first = { firstName: 'First', lastName: 'Name' };
+  fake.store.set(`users/${uid}`, first);
+  await call('submitLastLightRun', { ...(await matured(uid)), result: drive }, uid);
+  const latest = { firstName: 'Latest', lastName: 'Name' };
+  await profileNameChanged(uid, first, latest);
+  let own = (await call('getLastLightLeaderboard', base, uid)).own;
+  assert.equal(own.name, 'Latest Name');
+  await ll.syncLastLightAccountName.run({ before: { data: () => ({}) }, after: { data: () => first } }, { params: { uid } });
+  assert.equal((await call('getLastLightLeaderboard', base, uid)).own.name, 'Latest Name');
+  await profileNameChanged('not-a-player', {}, { firstName: 'No game' });
+  assert.equal(fake.store.has('lastLightPlayers/not-a-player'), false);
+});
+test('legacy generated aliases adopt the account name while old custom names and explicit choices survive', async () => {
+  const uid = 'legacy-auto-name';
+  const generated = (await call('getLastLightAccount', {}, uid)).name;
+  fake.store.set(`lastLightPlayers/${uid}`, { name: generated, hidden: true });
+  fake.store.set(`users/${uid}`, { firstName: 'Edmond', lastName: 'Mbadu' });
+  const migrated = await call('getLastLightAccount', {}, uid);
+  assert.equal(migrated.name, 'Edmond Mbadu');
+  assert.equal(migrated.hidden, true);
+  fake.store.set('lastLightPlayers/legacy-custom-name', { name: 'Chosen Before Upgrade' });
+  fake.store.set('users/legacy-custom-name', { firstName: 'Account Name' });
+  assert.equal((await call('getLastLightAccount', {}, 'legacy-custom-name')).name, 'Chosen Before Upgrade');
+  await call('saveLastLightName', { name: generated }, uid);
+  assert.equal((await call('getLastLightAccount', {}, uid)).name, generated, 'explicit choice equal to a generated alias remains custom');
+  assert.equal((await call('getLastLightAccount', {}, uid)).nameSource, 'custom');
+});
+test('missing profile names use a generated fallback, never email; all account creation paths resolve the name', async () => {
+  const uid = 'no-profile-name';
+  fake.store.set(`users/${uid}`, { email: 'secret@example.com', firstName: 'secret@example.com' });
+  const fallback = await call('getLastLightAccount', {}, uid);
+  assert.equal(fallback.nameSource, 'generated');
+  assert.ok(!fallback.name.includes('@'));
+  await profileNameChanged(uid, {}, { firstName: '李', lastName: '明' });
+  assert.equal((await call('getLastLightAccount', {}, uid)).name, '李 明');
+  fake.store.set('users/visibility-first', { firstName: 'Visibility', lastName: 'First' });
+  await call('setLastLightVisibility', { hidden: false }, 'visibility-first');
+  assert.equal(fake.store.get('lastLightPlayers/visibility-first').name, 'Visibility First');
+  fake.store.set('users/claim-first', { firstName: 'Claim', lastName: 'First' });
+  await call('claimLastLightGuest', { deviceKey: key() }, 'claim-first');
+  assert.equal(fake.store.get('lastLightPlayers/claim-first').name, 'Claim First');
+});

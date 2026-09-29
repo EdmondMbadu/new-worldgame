@@ -10,6 +10,7 @@ admin.initializeApp({projectId:'demo-last-light'});
 const db=admin.firestore(), email='ui-player@last-light.test';
 let account;
 try{account=await admin.auth().getUserByEmail(email);}catch{account=await admin.auth().createUser({email,password:'Emulator-only-pass-42',emailVerified:true});}
+await db.doc(`users/${account.uid}`).set({firstName:'River',lastName:'Driver'});
 const names=['Amani','Claire','Patrick','Grace','Jean','Mado','Aline','Joseph','David','Nadine','Mireille','River Driver','Daniel','Luc','Sophie','Paul','Florence','Marie','André','Alex','Joy','Thomas','Nora','Hugo','Esther','Camille'];
 const seconds=[235,255,270,285,300], lives=[3,5,6,8,12];
 for(let i=0;i<names.length;i++){
@@ -22,7 +23,7 @@ for(let i=0;i<names.length;i++){
     best=mergeBest(best,[result]);
     if(i===11){const id=randomUUID(),completedAt=Date.now()-(6-mission)*3600000;await db.doc(`lastLightPlayers/${uid}/drives/${id}`).set({id,result,completedAt,sortKey:`${String(9999999999999-completedAt).padStart(13,'0')}:${id}`,eligible:true,journeyId});}
   }
-  await db.doc(`lastLightPlayers/${uid}`).set({name:names[i],best,published:best,hidden:false,rankingEnabled:true,bestJourneys:{'r6-v0-standard-all':{id:journeyId,score:Object.values(best).reduce((s,r)=>s+r.score,0),completedAt:Date.now()-3600000}}});
+  await db.doc(`lastLightPlayers/${uid}`).set({name:names[i],...(i===11?{nameSource:'account',accountName:'River Driver'}:{}),best,published:best,hidden:false,rankingEnabled:true,bestJourneys:{'r6-v0-standard-all':{id:journeyId,score:Object.values(best).reduce((s,r)=>s+r.score,0),completedAt:Date.now()-3600000}}});
   const boards=boardsFor(best);
   for(const row of [...boards.chapters.map(({board,drive})=>({board,score:drive.score,chapters:1})),...boards.overall]){
     await db.doc(`lastLightBoards/${row.board}/players/${publicId}`).set({id:publicId,name:names[i],searchName:names[i].toLowerCase(),score:row.score,chapters:row.chapters,rankKey:`${String(10000-row.score).padStart(5,'0')}:${publicId}`});

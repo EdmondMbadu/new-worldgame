@@ -11,6 +11,7 @@ import {
   identity,
   refreshAccount,
   renamePlayer,
+  resetLeaderboardName,
   setLeaderboardVisibility,
   useCommunity,
   errorMessage,
@@ -1110,19 +1111,39 @@ export function PlayerControls() {
               ? "Visibility change pending · public visibility is not confirmed yet."
               : actual
                 ? "Hidden. Your private scores stay saved."
-                : "Public player name and eligible scores only. Hide anytime."}
+                : `Shown publicly as: ${publicName}`}
           </small>
         </div>
       </div>
-      <button
-        className="board-link lb-rename"
-        onClick={() => {
-          setName(publicName);
-          setEditing(!editing);
-        }}
-      >
-        Edit public name
-      </button>
+      <div className="lb-name-actions">
+        <button
+          className="board-link"
+          disabled={busy}
+          onClick={() => {
+            setName(
+              community.player?.nameSource === "account" ? "" : publicName,
+            );
+            setEditing(!editing);
+          }}
+        >
+          Change leaderboard name
+        </button>
+        {community.player &&
+        (community.player.nameSource === "custom" ||
+          !community.player.nameSource) ? (
+          <button
+            className="board-link"
+            disabled={busy}
+            onClick={() => run(resetLeaderboardName())}
+          >
+            {community.player.accountName
+              ? "Use account name"
+              : "Use default name"}
+          </button>
+        ) : community.player?.nameSource === "account" ? (
+          <span>Using account name</span>
+        ) : null}
+      </div>
       {editing && (
         <form
           onSubmit={(e) => {
@@ -1131,12 +1152,13 @@ export function PlayerControls() {
           }}
         >
           <label>
-            Public player name
+            Leaderboard nickname
             <input
               required
               minLength={2}
               maxLength={28}
               autoComplete="nickname"
+              placeholder="Choose a name for the leaderboard"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -1150,6 +1172,12 @@ export function PlayerControls() {
             Cancel
           </button>
         </form>
+      )}
+      {editing && (
+        <p className="lb-name-help">
+          This nickname is only for the leaderboard. Your account name stays
+          unchanged.
+        </p>
       )}
       {error && (
         <p role="status">

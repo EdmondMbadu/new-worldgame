@@ -428,9 +428,18 @@
   font-size: 12px;
   min-height: 44px;
 }
-.lb-privacy .lb-rename {
-  font-size: 10px;
+.lb-name-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
   margin-left: 59px;
+  color: #b3c3b1;
+  font-size: 10px;
+}
+.lb-dialog .lb-privacy .lb-name-actions .board-link,
+.lb-privacy .lb-name-actions .board-link {
+  font-size: 10px;
   min-height: 24px;
   padding: 4px 0;
 }
@@ -719,11 +728,6 @@
   .lb-rules {
     margin-top: 6px;
   }
-}
-.lb-dialog .lb-privacy .lb-rename {
-  min-height: 24px;
-  padding: 4px 0;
-  font-size: 10px;
 }
 .restart-dialog {
   width: min(440px, calc(100vw - 32px));

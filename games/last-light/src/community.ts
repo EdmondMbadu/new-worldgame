@@ -93,6 +93,8 @@ export type Player = {
   verified: boolean;
   name: string;
   publicId: string;
+  nameSource?: 'account' | 'custom' | 'generated';
+  accountName?: string;
   best: Record<string, Result>;
   hidden: boolean;
   rankingEnabled: boolean;
@@ -595,15 +597,38 @@ export async function renamePlayer(raw: string) {
       'Use 2–28 letters, numbers, spaces, dots, hyphens or underscores.',
     );
   const uid = state.player?.uid;
-  await online(
+  const naming = await online<{
+    name: string;
+    nameSource?: Player['nameSource'];
+    accountName?: string;
+  }>(
     uid ? 'saveLastLightName' : 'setLastLightVisibility',
     uid
       ? { name, accountUid: uid }
       : { name, hidden: identity().hidden, deviceKey: identity().key },
   );
-  if (uid && state.player?.uid === uid)
-    update({ player: { ...state.player, name } });
-  else if (!uid) saveIdentity({ ...identity(), name, chosen: true });
+  if (uid && state.player?.uid === uid) {
+    const player = {
+      ...state.player,
+      ...naming,
+      name: naming.name || name,
+      nameSource: 'custom' as const,
+    };
+    persist(`last-light.profile.${uid}`, player);
+    update({ player });
+  } else if (!uid) saveIdentity({ ...identity(), name, chosen: true });
+  boardChanged();
+}
+export async function resetLeaderboardName() {
+  const uid = state.player?.uid;
+  if (!uid) throw new Error('Sign in to use your account name.');
+  const naming = await online<
+    Pick<Player, 'name' | 'nameSource' | 'accountName'>
+  >('saveLastLightName', { accountUid: uid, useAccountName: true });
+  if (state.player?.uid !== uid) return;
+  const player = { ...state.player, ...naming };
+  persist(`last-light.profile.${uid}`, player);
+  update({ player });
   boardChanged();
 }
 export const joinLeaderboard = renamePlayer;

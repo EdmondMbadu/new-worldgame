@@ -92,7 +92,8 @@ describe('automatic leaderboard', () => {
     await expect(c.renamePlayer('me@example.com')).rejects.toThrow(/Use 2–28/);
     const { PlayerControls } = await import('../src/CommunityPanel');
     const html = renderToStaticMarkup(<PlayerControls />);
-    expect(html).toContain('Edit public name');
+    expect(html).toContain('Change leaderboard name');
+    expect(html).toContain('Shown publicly as: Mama Kinshasa');
     expect(html).toContain('Show me on the leaderboard');
   });
 });

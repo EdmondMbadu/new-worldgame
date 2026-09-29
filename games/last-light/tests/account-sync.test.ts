@@ -197,4 +197,25 @@ describe('account-first synchronization', () => {
       mock.call.mock.calls.filter(([name]) => name === 'submitLastLightRun'),
     ).toHaveLength(1);
   });
+  it('persists confirmed nickname choices and can reset to the server account name', async () => {
+    const c = await initialized();
+    const original = mock.call.getMockImplementation()!;
+    mock.call.mockImplementation(async (name, raw) => name === 'saveLastLightName'
+      ? { name: raw.useAccountName ? 'Alice Account' : raw.name, nameSource: raw.useAccountName ? 'account' : 'custom', accountName: 'Alice Account' }
+      : original(name, raw));
+    await c.renamePlayer('Road Driver');
+    expect(c.currentPlayer()).toMatchObject({ name:'Road Driver', nameSource:'custom', accountName:'Alice Account' });
+    const { renderToStaticMarkup } = await import('react-dom/server');
+    const { createElement } = await import('react');
+    const { PlayerControls } = await import('../src/CommunityPanel');
+    expect(renderToStaticMarkup(createElement(PlayerControls))).toContain('Use account name');
+    await c.resetLeaderboardName();
+    expect(c.currentPlayer()).toMatchObject({ name:'Alice Account', nameSource:'account' });
+    expect(JSON.parse(localStorage.getItem('last-light.profile.alice')!)).toMatchObject({ name:'Alice Account', nameSource:'account' });
+    expect(renderToStaticMarkup(createElement(PlayerControls))).toContain('Using account name');
+    expect(mock.call.mock.calls.some(([name, raw]) => name === 'saveLastLightName' && raw.accountUid === 'alice' && raw.useAccountName === true)).toBe(true);
+    mock.call.mockImplementationOnce(async () => { throw new Error('offline'); });
+    await expect(c.renamePlayer('Not Saved')).rejects.toThrow('offline');
+    expect(c.currentPlayer()?.name).toBe('Alice Account');
+  });
 });

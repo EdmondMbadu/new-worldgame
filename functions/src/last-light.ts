@@ -54,6 +54,42 @@ function generatedName(uid: string) {
   const h = hash(uid);
   return `${['Steady', 'Bright', 'Careful', 'Kind'][parseInt(h.slice(0, 2), 16) % 4]} ${['Heron', 'Lantern', 'Baobab', 'Sunbird'][parseInt(h.slice(2, 4), 16) % 4]} ${10 + (parseInt(h.slice(4, 8), 16) % 90)}`;
 }
+function accountDisplayName(profile: admin.firestore.DocumentData = {}) {
+  // Use the same fields as the site's account page. Never derive a name from email.
+  const name = [profile.firstName, profile.lastName]
+    .filter((part): part is string => typeof part === 'string')
+    .join(' ')
+    .normalize('NFKC')
+    .replace(/[\p{Cc}\p{Cf}]/gu, '')
+    .trim()
+    .replace(/\s+/g, ' ');
+  return name && !/[<>@]/.test(name) ? [...name].slice(0, 160).join('') : '';
+}
+async function playerName(
+  tx: admin.firestore.Transaction,
+  uid: string,
+  player: admin.firestore.DocumentData,
+  useAccountName = false,
+) {
+  const accountName = accountDisplayName(
+    (await tx.get(db().collection('users').doc(uid))).data(),
+  );
+  // Before nameSource existed, only the deterministic default can safely be
+  // recognized as generated. Preserve every other existing player name.
+  const custom =
+    !useAccountName &&
+    (player.nameSource === 'custom' ||
+      (!player.nameSource &&
+        player.name &&
+        player.name !== generatedName(uid)));
+  return {
+    name:
+      custom && player.name ? player.name : accountName || generatedName(uid),
+    nameSource:
+      custom && player.name ? 'custom' : accountName ? 'account' : 'generated',
+    accountName,
+  };
+}
 function checkTicket(raw: any, run: any, uid: string | null) {
   if (
     !run ||
@@ -182,15 +218,20 @@ export const getLastLightAccount = functions.https.onCall(async (raw, c) => {
       p = (await tx.get(ref)).data() || {};
     const active =
       (await tx.get(ref.collection('state').doc('current'))).data() || null;
-    const name = p.name || generatedName(uid),
+    const naming = await playerName(tx, uid, p),
+      { name } = naming,
       rankingEnabled = isVerified(c);
-    tx.set(ref, { name, hidden: !!p.hidden, rankingEnabled }, { merge: true });
+    tx.set(
+      ref,
+      { ...naming, hidden: !!p.hidden, rankingEnabled },
+      { merge: true },
+    );
     // Verification can arrive after a privately saved completion. Rebuild from
     // validated tickets only, never from imported/offline personal bests.
     if (rankingEnabled && !p.hidden)
       writeRows(tx, publicIdOf(uid), name, p.published || {});
     return {
-      name,
+      ...naming,
       best: p.best || {},
       publicId: publicIdOf(uid),
       hidden: !!p.hidden,
@@ -202,21 +243,54 @@ export const getLastLightAccount = functions.https.onCall(async (raw, c) => {
 });
 export const saveLastLightName = functions.https.onCall(async (raw, c) => {
   const uid = user(c, raw),
-    name = checked(() => publicName(raw?.name));
+    useAccountName = raw?.useAccountName === true,
+    nickname = useAccountName ? null : checked(() => publicName(raw?.name));
   await limit(c, 'profile', 20);
-  await db().runTransaction(async (tx) => {
+  return db().runTransaction(async (tx) => {
     const ref = playerRef(uid),
-      p = (await tx.get(ref)).data();
+      p = (await tx.get(ref)).data() || {};
+    const current = await playerName(tx, uid, p, useAccountName);
+    const naming = nickname
+      ? { ...current, name: nickname, nameSource: 'custom' }
+      : current;
     tx.set(
       ref,
-      { name, updatedAt: FieldValue.serverTimestamp() },
+      { ...naming, updatedAt: FieldValue.serverTimestamp() },
       { merge: true },
     );
     if (!p?.hidden && isVerified(c))
-      writeRows(tx, publicIdOf(uid), name, p?.published || {});
+      writeRows(tx, publicIdOf(uid), naming.name, p?.published || {});
+    return naming;
   });
-  return { name };
 });
+/** Profile edits update account-based names even when the game is closed. */
+export const syncLastLightAccountName = functions.firestore
+  .document('users/{uid}')
+  .onWrite(async (change, context) => {
+    if (
+      accountDisplayName(change.before.data()) ===
+      accountDisplayName(change.after.data())
+    )
+      return;
+    const uid = context.params.uid;
+    await db().runTransaction(async (tx) => {
+      const ref = playerRef(uid),
+        p = (await tx.get(ref)).data();
+      if (!p || p.guest) return;
+      // Read the current profile in the transaction, not the event payload: an
+      // older or retried event must never roll back a more recent account name.
+      const naming = await playerName(tx, uid, p);
+      if (
+        p.name === naming.name &&
+        p.nameSource === naming.nameSource &&
+        p.accountName === naming.accountName
+      )
+        return;
+      tx.set(ref, naming, { merge: true });
+      if (p.name !== naming.name && !p.hidden && p.rankingEnabled === true)
+        writeRows(tx, publicIdOf(uid), naming.name, p.published || {});
+    });
+  });
 export const syncLastLightProgress = functions.https.onCall(async (raw, c) => {
   const uid = user(c, raw);
   if (!Array.isArray(raw?.results) || raw.results.length > 20)
@@ -290,7 +364,8 @@ export const submitLastLightRun = functions.https.onCall(async (raw, c) => {
     };
     const best = mergeBest(p.best || {}, [r]),
       published = mergeBest(p.published || {}, [r]);
-    const name = p.name || generatedName(uid),
+    const naming = await playerName(tx, uid, p),
+      { name } = naming,
       eligible = isVerified(c),
       completedAt = existing?.completedAt || Date.now();
     // A journey has exactly one accepted attempt for each of its five legs.
@@ -336,7 +411,7 @@ export const submitLastLightRun = functions.https.onCall(async (raw, c) => {
     tx.set(
       player,
       {
-        name,
+        ...naming,
         best,
         published,
         bestJourneys,
@@ -587,16 +662,18 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
   ];
   return db().runTransaction(async (tx) => {
     const snaps = await Promise.all(refs.map((r) => tx.get(r.ref)));
+    const naming = uid
+      ? await playerName(tx, uid, snaps[0].data() || {})
+      : null;
     let name = rename || '';
     snaps.forEach((snap, i) => {
       const { ref, id, guest } = refs[i],
         p = snap.data(),
         publicId = guest ? publicIdOf(id) : hash(id).slice(0, 24);
-      // Account names stay stable; device players may rename freely.
-      const nextName = guest && rename ? rename : p?.name;
+      const nextName = guest ? rename || p?.name : naming!.name;
       if (!p && !guest) {
         tx.set(ref, {
-          name: generatedName(id),
+          ...naming,
           hidden: raw.hidden,
           rankingEnabled: isVerified(c),
         });
@@ -616,12 +693,13 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
         });
         return;
       }
-      if (guest && nextName) name = nextName;
+      if (nextName) name = nextName;
       tx.set(
         ref,
         {
           hidden: raw.hidden,
           ...(guest && rename ? { name: rename } : {}),
+          ...(!guest ? naming : {}),
           updatedAt: FieldValue.serverTimestamp(),
         },
         { merge: true },
@@ -765,7 +843,8 @@ export const claimLastLightGuest = functions.https.onCall(async (raw, c) => {
       !!p.hidden ||
       (!guest?.migratedTo && !!guest?.hidden) ||
       raw?.hidden === true;
-    const name = p.name || generatedName(uid),
+    const naming = await playerName(tx, uid, p),
+      { name } = naming,
       published = mergeBest(p.published || {}, results);
     const histories = await Promise.all(
       owned.map((d) => tx.get(guestRef.collection('drives').doc(d.id))),
@@ -789,7 +868,7 @@ export const claimLastLightGuest = functions.https.onCall(async (raw, c) => {
     tx.set(
       account,
       {
-        name,
+        ...naming,
         hidden,
         published,
         best: mergeBest(p.best || {}, results),
