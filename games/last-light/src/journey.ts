@@ -155,6 +155,9 @@ export function updatePending(p: Pending) {
     [...runs.filter((x) => x.id !== p.id), next],
   );
 }
+export function discardPending(id: string) {
+  return persist(pendingKey, pendingRuns().filter(p => p.id !== id));
+}
 export function claimGuestRuns(uid: string): Result[] {
   const results: Result[] = [];
   for (const p of pendingRuns()) {

@@ -7,6 +7,7 @@ import {
   claimGuestRuns,
   pendingRuns,
   updatePending,
+  discardPending,
   load,
   persist,
   type Pending,
@@ -18,6 +19,7 @@ import {
   rememberRun,
   hydrateLocalHistory,
   claimLocalHistory,
+  clearGuestHistory,
   readActive,
   storeActive,
   removeActive,
@@ -25,6 +27,7 @@ import {
   type DriveRecord,
 } from './records';
 import { ROAD_REVISION } from './vehicle';
+import { requireClinicAccess } from './account-access';
 export type Identity = {
   key: string;
   name: string;
@@ -202,6 +205,98 @@ function acceptAccount(
   }
   update({ player: merged, synced: true, message: '' });
 }
+const migrating = new Map<string, Promise<void>>();
+const migrated = new Set<string>();
+async function migrateGuestProgress(uid: string): Promise<void> {
+  const existing = migrating.get(uid);
+  if (existing) return existing;
+  if (identity().claimedBy && identity().claimedBy !== uid) return;
+  const work = (async () => {
+    const me = identity();
+    // Device proof is used only to claim guest-owned runs. The server checks
+    // their original owners and refuses a second account's claim.
+    if (!me.claimedBy || me.claimedBy === uid) {
+      hydrateLocalHistory(null);
+      let more = true;
+      while (more && state.player?.uid === uid) {
+        const reply = await online<{ more: boolean; ownerMismatch?: boolean }>(
+          'claimLastLightGuest',
+          {
+            accountUid: uid,
+            deviceKey: me.key,
+            hidden:
+              !me.claimedBy &&
+              (me.hidden ||
+                load<boolean | null>(visibilityKey(null), null) === true),
+          },
+        );
+        if (reply.ownerMismatch) throw new Error('This device record already belongs to another account.');
+        more = reply.more;
+      }
+      if (state.player?.uid !== uid) return;
+      claimGuestRuns(uid);
+      if (!claimLocalHistory(uid, false)) throw new Error('Guest progress could not be copied. Enable browser storage and retry.');
+      saveIdentity({ ...me, claimedBy: uid });
+    }
+    const record = await online<Omit<Player, 'uid' | 'verified'>>(
+      'getLastLightAccount',
+      { accountUid: uid },
+    );
+    if (state.player?.uid !== uid) return;
+    const guestJourney = readActive(null);
+    const accountJourney = readActive(uid);
+    const unfinished = (journey: ActiveJourney | null) => !!journey && ['driving', 'between'].includes(journey.status);
+    if (
+      (!me.claimedBy || me.claimedBy === uid) &&
+      !unfinished(record.active) &&
+      !unfinished(accountJourney) &&
+      guestJourney
+    ) {
+      if (storeActive({ ...guestJourney, owner: uid, version: Math.max(record.active?.version || 0, accountJourney?.version || 0), dirty: true }))
+        removeActive(null);
+    }
+    if (state.player?.uid !== uid) return;
+    acceptAccount(state.player, record);
+    await syncHistory();
+    await syncProgress(
+      driveHistory(uid)
+        .filter((d) => !d.result.practice)
+        .map((d) => d.result)
+        .filter((r) => r.revision === ROAD_REVISION)
+        .reduce<Result[]>((all, r) => {
+          const at = all.findIndex(
+            (x) =>
+              x.mission === r.mission &&
+              x.mode === r.mode &&
+              x.variant === r.variant,
+          );
+          if (at < 0) all.push(r);
+          else if (all[at].score < r.score) all[at] = r;
+          return all;
+        }, []),
+    );
+    if (state.player?.uid === uid) { clearGuestHistory(); migrated.add(uid); update({}); }
+  })().finally(() => { migrating.delete(uid); });
+  migrating.set(uid, work);
+  return work;
+}
+
+/** Offer this only after the device's progress has been claimed by this owner. */
+export function guestJourneyConflict(): ActiveJourney | null {
+  const uid = state.player?.uid;
+  if (!uid || !state.synced || !migrated.has(uid) || identity().claimedBy !== uid) return null;
+  const guest = readActive(null), account = readActive(uid);
+  return guest && ['driving', 'between'].includes(guest.status) && account && ['driving', 'between'].includes(account.status) && guest.journeyId !== account.journeyId ? guest : null;
+}
+export function adoptGuestJourney(): boolean {
+  const guest = guestJourneyConflict(), uid = state.player?.uid;
+  if (!guest || !uid) return false;
+  const account = readActive(uid);
+  if (!storeActive({ ...guest, owner: uid, version: account?.version || 0, dirty: true })) return false;
+  removeActive(null);
+  return true;
+}
+
 export function initializeCommunity() {
   if (initialized) return;
   initialized = true;
@@ -282,65 +377,7 @@ export function initializeCommunity() {
           update({ message: errorMessage(e) });
         }
         try {
-          const me = identity();
-          // Device proof is used only to claim guest-owned runs. The server checks
-          // their original owners and refuses a second account's claim.
-          if (!me.claimedBy || me.claimedBy === user.uid) {
-            hydrateLocalHistory(null);
-            let more = true;
-            while (more && request === generation) {
-              const reply = await online<{ more: boolean }>(
-                'claimLastLightGuest',
-                {
-                  accountUid: user.uid,
-                  deviceKey: me.key,
-                  hidden:
-                    !me.claimedBy &&
-                    (me.hidden ||
-                      load<boolean | null>(visibilityKey(null), null) === true),
-                },
-              );
-              more = reply.more;
-            }
-            if (request !== generation) return;
-            claimGuestRuns(user.uid);
-            claimLocalHistory(user.uid);
-            saveIdentity({ ...me, claimedBy: user.uid });
-          }
-          const record = await online<Omit<Player, 'uid' | 'verified'>>(
-            'getLastLightAccount',
-            { accountUid: user.uid },
-          );
-          if (request !== generation) return;
-          const guestJourney = readActive(null);
-          if (
-            (!me.claimedBy || me.claimedBy === user.uid) &&
-            !record.active &&
-            !readActive(user.uid) &&
-            guestJourney
-          ) {
-            if (storeActive({ ...guestJourney, owner: user.uid, dirty: true }))
-              removeActive(null);
-          }
-          acceptAccount(player, record);
-          await syncHistory();
-          await syncProgress(
-            driveHistory(user.uid)
-              .filter((d) => !d.result.practice)
-              .map((d) => d.result)
-              .filter((r) => r.revision === ROAD_REVISION)
-              .reduce<Result[]>((all, r) => {
-                const at = all.findIndex(
-                  (x) =>
-                    x.mission === r.mission &&
-                    x.mode === r.mode &&
-                    x.variant === r.variant,
-                );
-                if (at < 0) all.push(r);
-                else if (all[at].score < r.score) all[at] = r;
-                return all;
-              }, []),
-          );
+          await migrateGuestProgress(user.uid);
           void publishPending();
         } catch (e) {
           if (request === generation) update({ message: errorMessage(e) });
@@ -379,6 +416,7 @@ export function beginRun(
   variant: number,
   journeyId: string = crypto.randomUUID(),
 ) {
+  requireClinicAccess(state.status, mission);
   const run: Pending = {
     id: crypto.randomUUID(),
     owner: state.player?.uid || null,
@@ -425,13 +463,22 @@ export function beginRun(
       if (run.result) void publishPending();
       else void flushCheckpoint();
     })(),
-  ).catch(() => {
+  ).catch((error) => {
+    // Authentication failures are policy decisions, never an offline ticket.
+    if (['functions/unauthenticated', 'functions/permission-denied'].includes(error?.code)) {
+      if (activeRun?.id === run.id) activeRun = null;
+      if (readActive(run.owner)?.runId === run.id) removeActive(run.owner);
+      discardPending(run.id);
+      window.dispatchEvent(new CustomEvent('last-light:account-required', { detail: errorMessage(error) }));
+      return;
+    }
     run.offline = true;
     updatePending(run);
     rememberRun(run);
   });
 }
-export function beginPractice() {
+export function beginPractice(mission = readActive(state.player?.uid || null)?.mission || 0) {
+  requireClinicAccess(state.status, mission);
   abandonDrive();
   // A practice attempt gets its own private record, never the ranked ticket or
   // journey of the delivery from which the player entered practice.
@@ -734,6 +781,7 @@ export async function refreshAccount(publish = true) {
     );
     acceptAccount(player, record);
     boardChanged();
+    if (!identity().claimedBy || driveHistory(null).length) await migrateGuestProgress(player.uid);
     if (publish) await publishPending();
   } catch (e) {
     if (state.player?.uid === player.uid) update({ message: errorMessage(e) });
@@ -841,6 +889,7 @@ export async function continueJourney(): Promise<ActiveJourney> {
   }
   if (!local || !['driving', 'between'].includes(local.status))
     throw new Error('No unfinished journey is saved.');
+  requireClinicAccess(state.status, local.mission);
   if (local.status === 'between') return local;
   if (uid && !local.localOnly) {
     await flushCheckpoint();

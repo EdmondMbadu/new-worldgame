@@ -295,3 +295,72 @@ describe('language belongs to the current account',()=>{
     expect(c.currentPlayer()?.language).toBe('fr');
   });
 });
+
+describe('guest access and durable conversion', () => {
+  it('rejects unknown auth and guest later-clinic starts before changing any records', async () => {
+    mock.auth.currentUser = null;
+    const c = await import('../src/community'), journey = await import('../src/journey');
+    expect(() => c.beginRun(0, 'standard', 0)).toThrow('Account connection');
+    c.initializeCommunity();
+    await vi.waitFor(() => expect(mock.watch).toBeTypeOf('function'));
+    c.beginRun(0, 'standard', 0);
+    const started = journey.pendingRuns()[0];
+    expect(started.owner).toBeNull();
+    for (let mission=1; mission<5; mission++) {
+      expect(() => c.beginRun(mission,'relaxed',1)).toThrow('Create a free account');
+      expect(() => c.beginPractice(mission)).toThrow('Create a free account');
+    }
+    expect(journey.pendingRuns()).toEqual([started]);
+  });
+  it('refuses the next saved guest leg instead of restoring it as an offline drive', async () => {
+    mock.auth.currentUser = null;
+    const c = await import('../src/community'), records = await import('../src/records');
+    c.initializeCommunity(); await vi.waitFor(() => expect(mock.watch).toBeTypeOf('function'));
+    records.storeActive({owner:null,runId:crypto.randomUUID(),journeyId:crypto.randomUUID(),version:0,savedAt:Date.now(),status:'between',mission:1,mode:'standard',variant:0,revision:6,dirty:true,localOnly:true});
+    await expect(c.continueJourney()).rejects.toThrow('Create a free account');
+    expect(records.readActive(null)?.mission).toBe(1);
+  });
+  it('lets an unverified account start a later clinic', async () => {
+    mock.auth.currentUser = user('alice',false);
+    const c = await initialized(); c.beginRun(1,'standard',0);
+    await vi.waitFor(() => expect(mock.call.mock.calls.some(([n,r])=>n==='beginLastLightRun'&&r.mission===1&&r.accountUid==='alice')).toBe(true));
+  });
+  it('does not turn a server authorization rejection into an offline ticket', async () => {
+    const c = await initialized(), records = await import('../src/records'), journey = await import('../src/journey');
+    const original=mock.call.getMockImplementation()!;
+    mock.call.mockImplementation(async (name,raw)=> { if(name==='beginLastLightRun') throw Object.assign(new Error('Sign in required'),{code:'functions/unauthenticated'}); return original(name,raw); });
+    const denied=vi.fn(); window.addEventListener('last-light:account-required',denied);
+    c.beginRun(1,'standard',0);
+    await vi.waitFor(() => expect(denied).toHaveBeenCalledTimes(1));
+    expect(records.readActive('alice')).toBeNull(); expect(journey.pendingRuns()).toHaveLength(0);
+    window.removeEventListener('last-light:account-required',denied);
+  });
+  it('keeps the guest copy through sync failure and retries without duplicates', async () => {
+    const records = await import('../src/records');
+    records.rememberDrive({id:'guest-first',owner:null,result,completedAt:100});
+    const original=mock.call.getMockImplementation()!;
+    let failing=true;
+    mock.call.mockImplementation(async(name,raw)=> { if(name==='saveLastLightHistory'&&failing) throw new Error('offline'); return original(name,raw); });
+    const c=await import('../src/community'); c.initializeCommunity();
+    await vi.waitFor(()=>expect(c.currentPlayer()?.name).toBe('Bright Heron 42'));
+    await vi.waitFor(()=>expect(mock.call.mock.calls.some(([n])=>n==='saveLastLightHistory')).toBe(true));
+    expect(records.driveHistory(null)).toHaveLength(1); expect(records.driveHistory('alice')).toHaveLength(1);
+    failing=false; await c.refreshAccount();
+    await vi.waitFor(()=>expect(records.driveHistory(null)).toHaveLength(0));
+    expect(records.driveHistory('alice')).toHaveLength(1);
+  });
+  it('preserves an existing account journey until its owner explicitly chooses the guest journey', async () => {
+    const records=await import('../src/records');
+    const guest={owner:null,runId:crypto.randomUUID(),journeyId:crypto.randomUUID(),version:0,savedAt:100,status:'between' as const,mission:1,mode:'standard' as const,variant:0,revision:6,dirty:true,localOnly:true};
+    const account={...guest,owner:'alice',runId:crypto.randomUUID(),journeyId:crypto.randomUUID(),version:7,mission:3};
+    records.storeActive(guest); records.storeActive(account);
+    const original=mock.call.getMockImplementation()!;
+    mock.call.mockImplementation(async(name,raw)=>name==='getLastLightAccount'? {...await original(name,raw),active:account}:original(name,raw));
+    const c=await initialized();
+    await vi.waitFor(()=>expect(c.guestJourneyConflict()?.journeyId).toBe(guest.journeyId));
+    expect(records.readActive('alice')?.journeyId).toBe(account.journeyId);
+    expect(c.adoptGuestJourney()).toBe(true);
+    expect(records.readActive('alice')).toMatchObject({journeyId:guest.journeyId,mission:1,version:7,dirty:true});
+    expect(records.readActive(null)).toBeNull();
+  });
+});

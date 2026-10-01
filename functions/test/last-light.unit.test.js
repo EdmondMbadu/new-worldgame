@@ -20,49 +20,42 @@ async function matured(uid, b = base) {
   return t;
 }
 const key = () => randomUUID().replace(/-/g, '').repeat(2);
-test('device players publish automatically, see themselves, rename and opt out', async () => {
+test('guests save first deliveries privately, retry safely, rename and retain ranking candidates', async () => {
   const deviceKey = key(), other = key(), name = 'Steady Heron 42';
-  await assert.rejects(async () => call('publishLastLightDrive', { deviceKey: 'bad', name, result: drive, id: randomUUID(), secret: 'a'.repeat(48) }), { code: 'invalid-argument' });
-  const t0 = await matured();
-  const first = await call('publishLastLightDrive', { ...t0, result: drive, deviceKey, name });
-  assert.deepEqual(first.published, true);
-  assert.equal((await call('publishLastLightDrive', { ...t0, result: drive, deviceKey, name })).published, true);
-  await assert.rejects(async () => call('publishLastLightDrive', { ...t0, result: drive, deviceKey: other, name: 'Someone Else' }), { code: 'already-exists' });
-  await assert.rejects(async () => call('publishLastLightDrive', { ...(await matured()), result: { ...drive, score: 1999 }, deviceKey, name }), { code: 'invalid-argument' });
-  let board = await call('getLastLightLeaderboard', { ...base, deviceKey });
-  assert.equal(board.own.name, name);
-  assert.equal(board.own.score, 1800);
-  assert.equal(board.own.rank, 1);
-  assert.equal(board.total, 1);
-  assert.equal((await call('getLastLightLeaderboard', { ...base, mission: 'all', deviceKey })).own.chapters, 1);
-  assert.equal((await call('getLastLightLeaderboard', base)).own, null);
-  // Signed-in drives stay with the account session; unmatured tickets are refused.
-  await assert.rejects(async () => call('publishLastLightDrive', { ...(await matured('alice')), result: drive, deviceKey, name }), { code: 'permission-denied' });
-  await assert.rejects(() => call('publishLastLightDrive', { ...t0, result: drive, deviceKey: other, name }, 'carol'), { code: 'failed-precondition' });
-  assert.equal((await call('submitLastLightRun', { ...(await matured('carol')), result: drive }, 'carol')).published, true);
-  await assert.rejects(async () => call('publishLastLightDrive', { ...(await call('beginLastLightRun', base)), result: drive, deviceKey, name }), { code: 'invalid-argument' });
-  // Rename, then hide, then publish privately, then return.
-  await call('setLastLightVisibility', { deviceKey, hidden: false, name: 'Night Lantern 7' });
-  board = await call('getLastLightLeaderboard', { ...base, deviceKey });
-  assert.equal(board.own.name, 'Night Lantern 7');
-  assert.equal(board.total, 2);
-  await call('setLastLightVisibility', { deviceKey, hidden: true });
-  board = await call('getLastLightLeaderboard', { ...base, deviceKey });
-  assert.equal(board.own, null);
-  assert.equal(board.total, 1);
-  assert.equal((await call('getLastLightLeaderboard', { ...base, mission: 'all', deviceKey })).own, null);
-  assert.equal((await call('publishLastLightDrive', { ...(await matured(undefined, { ...base, mission: 1 })), result: d1, deviceKey, name: 'Night Lantern 7' })).published, false);
-  assert.equal((await call('getLastLightLeaderboard', { ...base, mission: 1, deviceKey })).own, null);
-  await call('setLastLightVisibility', { deviceKey, hidden: false });
-  const overall = await call('getLastLightLeaderboard', { ...base, mission: 'all', deviceKey });
-  assert.equal(overall.own.chapters, 2);
-  assert.equal(overall.own.score, 3600);
-  assert.equal(overall.own.name, 'Night Lantern 7');
-  assert.equal((await call('getLastLightLeaderboard', { ...base, mission: 1, deviceKey })).own.score, 1800);
-  assert.ok(overall.entries.every((r) => Object.keys(r).sort().join(',') === 'chapters,id,name,rank,score'));
-  // Nothing private leaks into player records on the board.
-  for (const [path, data] of fake.store) if (path.startsWith('lastLightBoards/')) assert.ok(!JSON.stringify(data).includes(deviceKey));
+  await assert.rejects(() => call('publishLastLightDrive', {deviceKey:'bad', name, result:drive, id:randomUUID(), secret:'a'.repeat(48)}), {code:'invalid-argument'});
+  const ticket = await matured();
+  const first = await call('publishLastLightDrive', {...ticket,result:drive,deviceKey,name});
+  assert.equal(first.published,false);
+  assert.equal((await call('publishLastLightDrive',{...ticket,result:drive,deviceKey,name})).published,false);
+  await assert.rejects(() => call('publishLastLightDrive',{...ticket,result:drive,deviceKey:other,name:'Someone Else'}), {code:'already-exists'});
+  await assert.rejects(async () => call('publishLastLightDrive',{...(await matured()),result:{...drive,score:1999},deviceKey,name}), {code:'invalid-argument'});
+  for (const mission of [0,'all']) assert.equal((await call('getLastLightLeaderboard',{...base,mission,deviceKey})).own,null);
+  await call('setLastLightVisibility',{deviceKey,hidden:false,name:'Night Lantern 7'});
+  assert.equal((await call('getLastLightLeaderboard',{...base,deviceKey})).own,null);
+  await call('setLastLightVisibility',{deviceKey,hidden:true});
+  assert.equal((await call('publishLastLightDrive',{...(await matured()),result:drive,deviceKey,name})).published,false);
+  await call('setLastLightVisibility',{deviceKey,hidden:false});
+  assert.equal((await call('getLastLightLeaderboard',{...base,deviceKey})).own,null,'visibility cannot bypass verification');
+  const guest = [...fake.store.entries()].find(([path,data]) => path.startsWith('lastLightPlayers/') && !path.includes('/drives/') && data.name==='Night Lantern 7')[1];
+  assert.equal(guest.best['0:standard:r6:v1'].score,1800);
+  assert.equal(guest.published['0:standard:r6:v1'].score,1800,'validated candidates survive privately');
+  await assert.rejects(async () => call('publishLastLightDrive',{...(await matured('alice')),result:drive,deviceKey,name}), {code:'permission-denied'});
+  await assert.rejects(() => call('publishLastLightDrive',{...ticket,result:drive,deviceKey:other,name},'carol'), {code:'failed-precondition'});
+  await assert.rejects(async () => call('publishLastLightDrive',{...(await call('beginLastLightRun',base)),result:drive,deviceKey,name}), {code:'invalid-argument'});
+  for (const [path,data] of fake.store) if (path.startsWith('lastLightBoards/')) assert.ok(!JSON.stringify(data).includes(deviceKey));
 });
+
+test('only the first clinic starts as a guest; all later modes and routes require an account',async()=>{
+  for (const mode of ['standard','relaxed']) for (const variant of [0,1]) {
+    assert.ok((await call('beginLastLightRun',{...base,mode,variant})).id);
+    for (let mission=1;mission<5;mission++) {
+      await assert.rejects(() => call('beginLastLightRun',{...base,mission,mode,variant}),{code:'unauthenticated'});
+      assert.ok((await ll.beginLastLightRun.run({...base,mission,mode,variant},ctx('unverified-starter',false))).id);
+    }
+  }
+  await assert.rejects(()=>call('beginLastLightRun',{...base,mission:1,accountUid:'someone-else'}),{code:'unauthenticated'});
+});
+
 test('account players keep their flow and can opt out too', async () => {
   await call('saveLastLightName', { name: 'Alice Account' }, 'alice');
   const t = await matured('alice', { ...base, variant: 0 });

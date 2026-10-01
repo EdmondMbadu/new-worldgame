@@ -1,4 +1,53 @@
-<aside *ngIf="gameReturnUrl" class="game-return-note"><strong>{{ tr("Your game is waiting.") }}</strong><span>{{ tr("Finish signing in to return to your chapter.") }}</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">{{ tr("Back to Last Light →") }}</a></aside>
+<section *ngIf="gameReturnUrl; else standardSignup" class="game-signup">
+  <a class="game-back" [href]="gameReturnUrl" (click)="cancelGameReturn()">← {{ tr('Back to Last Light') }}</a>
+  <div class="game-signup-card">
+    <p class="game-eyebrow">LAST LIGHT · {{ tr('YOUR JOURNEY CONTINUES') }}</p>
+    <h1>{{ tr('Save your delivery. Keep bringing the light.') }}</h1>
+    <p>{{ tr('Create a free account to save your score and continue to the other four clinics.') }}</p>
+    <p>{{ tr('Already have an account?') }} <a routerLink="/login" [queryParams]="{ redirectTo: gameReturnUrl }">{{ tr('Log in') }}</a></p>
+    <form (ngSubmit)="createAccount()" novalidate [attr.aria-busy]="submitting">
+      <div class="game-name-fields">
+      <div class="game-field"><label for="game-firstName">{{ tr('First name') }}</label>
+        <input id="game-firstName" name="firstName" type="text" autocomplete="given-name" [(ngModel)]="firstName" [disabled]="submitting" [attr.aria-invalid]="fieldErrors['firstName'] ? 'true' : null" [attr.aria-describedby]="fieldErrors['firstName'] ? 'error-firstName' : null" maxlength="80" required>
+        <small *ngIf="fieldErrors['firstName']" id="error-firstName" class="field-error">{{ tr(fieldErrors['firstName']) }}</small>
+      </div>
+      <div class="game-field"><label for="game-lastName">{{ tr('Last name') }}</label>
+        <input id="game-lastName" name="lastName" type="text" autocomplete="family-name" [(ngModel)]="lastName" [disabled]="submitting" [attr.aria-invalid]="fieldErrors['lastName'] ? 'true' : null" [attr.aria-describedby]="fieldErrors['lastName'] ? 'error-lastName' : null" maxlength="80" required>
+        <small *ngIf="fieldErrors['lastName']" id="error-lastName" class="field-error">{{ tr(fieldErrors['lastName']) }}</small>
+      </div>
+      </div>
+      <div class="game-field"><label for="game-email">{{ tr('Email address') }}</label>
+        <input id="game-email" name="email" type="email" autocomplete="email" [(ngModel)]="email" [disabled]="submitting" [attr.aria-invalid]="fieldErrors['email'] ? 'true' : null" [attr.aria-describedby]="fieldErrors['email'] ? 'error-email' : null" maxlength="254" required>
+        <small *ngIf="fieldErrors['email']" id="error-email" class="field-error">{{ tr(fieldErrors['email']) }}</small>
+      </div>
+      <div class="game-field"><label for="game-password">{{ tr('Password') }}</label>
+        <div class="game-password"><input id="game-password" name="password" [type]="showPassword ? 'text' : 'password'" autocomplete="new-password" [(ngModel)]="password" [disabled]="submitting" [attr.aria-invalid]="fieldErrors['password'] ? 'true' : null" aria-describedby="password-hint error-password" minlength="6" required>
+          <button type="button" (click)="showPassword = !showPassword" [attr.aria-pressed]="showPassword" [disabled]="submitting">{{ tr(showPassword ? 'Hide' : 'Show') }}</button>
+        </div>
+        <small id="password-hint">{{ tr('Use at least 6 characters. You can paste a password or use your password manager.') }}</small>
+        <small *ngIf="fieldErrors['password']" id="error-password" class="field-error">{{ tr(fieldErrors['password']) }}</small>
+      </div>
+      <div class="honeypot-field" aria-hidden="true"><label for="game-website">Website</label><input id="game-website" name="website" [(ngModel)]="honeypot" tabindex="-1" autocomplete="off"></div>
+      <label class="game-terms"><input name="agree" type="checkbox" [(ngModel)]="agree" [disabled]="submitting" [attr.aria-invalid]="fieldErrors['agree'] ? 'true' : null" aria-describedby="error-agree" required>
+        <span>{{ tr('I agree to the') }} <a routerLink="/privacy" target="_blank" rel="noopener noreferrer">{{ tr('terms and conditions') }}</a>.</span>
+      </label>
+      <small *ngIf="fieldErrors['agree']" id="error-agree" class="field-error">{{ tr(fieldErrors['agree']) }}</small>
+      <div *ngIf="createAccountError" class="game-account-error" role="alert">
+        <p>{{ tr(accountErrorMessage) }}</p>
+        <a routerLink="/login" [queryParams]="{ redirectTo: gameReturnUrl }">{{ tr('Log in') }}</a> · <a routerLink="/forgot-password" [queryParams]="{ redirectTo: gameReturnUrl }">{{ tr('Reset password') }}</a>
+      </div>
+      <button class="game-create" type="submit" [disabled]="submitting">{{ tr(submitting ? 'Creating your account…' : 'Create account and continue') }} →</button>
+      <p class="game-signup-hint" role="status">{{ tr('You can keep playing while you verify your email. Verification is needed for the leaderboard.') }}</p>
+    </form>
+    <aside class="game-support">
+      <strong>{{ tr('Help power the real clinics.') }}</strong>
+      <p>{{ tr('Sharing and contributing are optional. Everyone can help bring the light.') }}</p>
+      <div><button type="button" (click)="inviteFriends()">{{ tr('Invite 10 friends') }} ↗</button><a [href]="contributionUrl" target="_blank" rel="noopener noreferrer">{{ tr('Contribute $10') }} ↗</a></div>
+      <small *ngIf="shareNotice" role="status">{{ tr(shareNotice) }}</small>
+    </aside>
+  </div>
+</section>
+<ng-template #standardSignup>
 <div class="dark:bg-slate-900 min-h-screen">
     <app-navbar [currentPageJoinNow]="true" ></app-navbar>
 
@@ -117,3 +166,5 @@
 
     <app-footer></app-footer>
 </div>
+
+</ng-template>

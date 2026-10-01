@@ -10,10 +10,14 @@ import { DrivingGuide, keyLabel } from './DrivingGuide';
 import { OpeningBriefing, openingBeat } from './OpeningBriefing';
 import { OPENING_STORIES } from './opening-story';
 import './clinic-story.css';
+import type { AccountStatus } from './account-access';
 
 export type ClinicStoryProps = {
   onAuth?: (page: "login" | "signup" | "verify-email") => void;
   handoffError?: string;
+  accountStatus?: AccountStatus;
+  emailVerified?: boolean;
+  onGuestReplay?: () => void;
   clinic: ClinicStory;
   chapter: number;
   scene: StoryScene;

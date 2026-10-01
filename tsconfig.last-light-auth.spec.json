@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "compilerOptions": { "resolveJsonModule": true },
+  "include": ["src/app/services/auth.last-light.spec.ts", "src/app/components/signup/last-light-signup.spec.ts"]
+}

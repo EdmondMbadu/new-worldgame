@@ -121,3 +121,23 @@ describe('account controls inside drive details', () => {
     expect(html).not.toContain('Your best eligible delivery is on the leaderboard');
   });
 });
+
+describe('first guest delivery conversion', () => {
+  it('celebrates the score and shows signup, login, replay, sharing and contribution together', () => {
+    const p = props(0); p.accountStatus = 'guest'; p.onGuestReplay = () => {};
+    const html = render(p);
+    for (const text of ['DELIVERY COMPLETE','1,510','Create account and continue','Already have an account? Log in','Replay the first delivery','Invite 10 friends','Contribute $10']) expect(html).toContain(text);
+    expect(html).not.toContain('>Next clinic<');
+  });
+  it('allows unverified members to proceed with a visible leaderboard reminder', () => {
+    const p = props(0); p.accountStatus = 'signed-in'; p.emailVerified = false;
+    const html = render(p);
+    expect(html).toContain('Next clinic'); expect(html).toContain('Verify email');
+    expect(html).not.toContain('Create account and continue');
+  });
+  it('keeps first-clinic practice and guest retries available', () => {
+    const p = props(0); p.accountStatus = 'guest'; p.result!.practice = true;
+    expect(render(p)).toContain('Start a full delivery');
+    expect(render(p)).not.toContain('Create account and continue');
+  });
+});

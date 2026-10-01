@@ -236,67 +236,31 @@ test(
   },
 );
 test(
-  "Last Light device players: automatic publishing, own row, rename and opt-out",
+  "Last Light guests: private first delivery and verified account migration",
   { skip: !enabled },
   async () => {
-    const deviceKey = randomUUID().replace(/-/g, "").repeat(2);
-    const other = randomUUID().replace(/-/g, "").repeat(2);
-    const v1 = { ...base, variant: 1 };
-    const d0 = { ...drive, variant: 1 };
-    const d1 = { ...d0, mission: 1, lives: 5, remaining: 127.5 };
-    const name = `Steady Heron ${prefix}`;
-    await assert.rejects(
-      async () => call("publishLastLightDrive", { ...(await maturedTicket(undefined, v1)), result: d0, deviceKey: "nope", name }),
-      { code: "INVALID_ARGUMENT" },
-    );
-    const t0 = await maturedTicket(undefined, v1);
-    const first = await call("publishLastLightDrive", { ...t0, result: d0, deviceKey, name });
-    assert.equal(first.published, true);
-    assert.equal(first.name, name);
-    // Retrying the same drive is harmless; another device cannot take it.
-    assert.equal((await call("publishLastLightDrive", { ...t0, result: d0, deviceKey, name })).published, true);
-    await assert.rejects(
-      () => call("publishLastLightDrive", { ...t0, result: d0, deviceKey: other, name: "Someone Else" }),
-      { code: "ALREADY_EXISTS" },
-    );
-    let board = await call("getLastLightLeaderboard", { ...v1, deviceKey });
-    assert.equal(board.own.name, name);
-    assert.equal(board.own.score, 1800);
-    assert.ok(board.entries.some((e) => e.id === board.own.id));
-    assert.equal((await call("getLastLightLeaderboard", { ...v1, mission: "all", deviceKey })).own.chapters, 1);
-    // Without the device key, the same row is simply another player.
-    assert.equal((await call("getLastLightLeaderboard", v1)).own, null);
-    // A drive begun while signed in stays with that account.
-    const owned = await maturedTicket(alice, v1);
-    await assert.rejects(
-      () => call("publishLastLightDrive", { ...owned, result: d0, deviceKey, name }),
-      { code: "PERMISSION_DENIED" },
-    );
-    const quick = await call("beginLastLightRun", v1);
-    await assert.rejects(
-      () => call("publishLastLightDrive", { ...quick, result: d0, deviceKey, name }),
-      { code: "INVALID_ARGUMENT" },
-    );
-    // Rename updates every row at once.
-    await call("setLastLightVisibility", { deviceKey, hidden: false, name: `Night Lantern ${prefix}` });
-    board = await call("getLastLightLeaderboard", { ...v1, deviceKey });
-    assert.equal(board.own.name, `Night Lantern ${prefix}`);
-    // Opting out removes the rows; new drives stay private.
-    const before = board.total;
-    await call("setLastLightVisibility", { deviceKey, hidden: true });
-    board = await call("getLastLightLeaderboard", { ...v1, deviceKey });
-    assert.equal(board.own, null);
-    assert.equal(board.total, before - 1);
-    const t1 = await maturedTicket(undefined, { ...v1, mission: 1 });
-    assert.equal((await call("publishLastLightDrive", { ...t1, result: d1, deviceKey, name })).published, false);
-    assert.equal((await call("getLastLightLeaderboard", { ...v1, mission: 1, deviceKey })).own, null);
-    // Opting back in restores both chapters and the overall total.
-    await call("setLastLightVisibility", { deviceKey, hidden: false });
-    const overall = await call("getLastLightLeaderboard", { ...v1, mission: "all", deviceKey });
-    assert.equal(overall.own.chapters, 2);
-    assert.equal(overall.own.score, 3600);
-    assert.equal(overall.own.name, `Night Lantern ${prefix}`);
-    assert.ok(overall.entries.every((r) => Object.keys(r).sort().join(",") === "chapters,id,name,rank,score"));
+    const deviceKey=randomUUID().replace(/-/g,'').repeat(2), name=`Steady Heron ${prefix}`;
+    const v1={...base,variant:1}, d0={...drive,variant:1};
+    for(let mission=1;mission<5;mission++) await assert.rejects(()=>call('beginLastLightRun',{...v1,mission}),{code:'UNAUTHENTICATED'});
+    const t=await maturedTicket(undefined,v1);
+    assert.equal((await call('publishLastLightDrive',{...t,result:d0,deviceKey,name})).published,false);
+    assert.equal((await call('publishLastLightDrive',{...t,result:d0,deviceKey,name})).published,false);
+    assert.equal((await call('getLastLightLeaderboard',{...v1,deviceKey})).own,null);
+    await call('setLastLightVisibility',{deviceKey,hidden:false,name:`Night Lantern ${prefix}`});
+    assert.equal((await call('getLastLightLeaderboard',{...v1,deviceKey})).own,null);
+    const unverified=await player('guest-migration',false);
+    await call('claimLastLightGuest',{deviceKey},unverified);
+    assert.equal((await call('getLastLightAccount',{},unverified)).best['0:standard:r6:v1'].score,1800);
+    assert.equal((await call('getLastLightDrives',{},unverified)).drives.length,1);
+    assert.equal((await call('getLastLightLeaderboard',v1,unverified)).own,null);
+    assert.ok((await call('beginLastLightRun',{...v1,mission:1},unverified)).id,'verification does not block play');
+    await admin.auth().updateUser(unverified.uid,{emailVerified:true});
+    const verified=await admin.auth().getUser(unverified.uid);
+    // Refresh the password session to include the verified claim.
+    const response=await fetch('http://127.0.0.1:9106/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=demo-key',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:verified.email,password:'Emulator-only-pass-42',returnSecureToken:true})});
+    unverified.token=(await response.json()).idToken;
+    await call('getLastLightAccount',{},unverified);
+    assert.equal((await call('getLastLightLeaderboard',v1,unverified)).own.score,1800);
   },
 );
 test(

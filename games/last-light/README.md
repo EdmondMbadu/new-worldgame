@@ -130,7 +130,11 @@ Game libraries are independent of the Angular application and Lost in Orbit. Hea
 
 ## Completion screen
 
-The completed clinic stays visible above a compact action panel with the real team photo, drive summary, sharing, leaderboard and next clinic. Full statistics and account controls open in Drive details; the leaderboard also links to those account controls. Sharing works for guests, and practice shares omit a recorded score. Narration uses the existing audio controls and transcript preference; the full transcript remains available when audio is muted or unavailable. Small screens can scroll the panel, and dialogs support Escape and return focus to their trigger. The final chapter returns to the map; practice starts a full delivery of the same chapter.
+The completed clinic stays visible above a compact action panel with the real team photo, drive summary, sharing, leaderboard and next clinic. After a guest's first delivery, account creation, login and replay are visible in the primary actions. Members continue directly; unverified members can play with a leaderboard verification reminder. Full statistics and additional account controls open in Drive details. Sharing works for guests, and practice shares omit a recorded score. Narration uses the existing audio controls and transcript preference; the full transcript remains available when audio is muted or unavailable. Small screens can scroll the panel, and dialogs support Escape and return focus to their trigger. The final chapter returns to the map; practice starts a full delivery of the same chapter.
+
+### First-delivery guest access
+
+Guests can retry and replay the first clinic. The other four clinics require a free account, using the game's four-field signup or existing-account login. Progress transfers without discarding a better score or replacing an existing unfinished account journey without a choice. Invite 10 friends and Contribute $10 remain available to guests and members, independently of signup. See [account conversion verification](../../docs/design/last-light/account-conversion-verification.md) for the behavior and checks. Run `npm run test:last-light-auth` from the repository root for the focused signup and return-flow tests.
 
 ## Verification
 

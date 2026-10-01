@@ -57,6 +57,10 @@
 
         <!-- Actions -->
         <div class="px-8 pb-8">
+          <div *ngIf="gameReturnUrl" class="mb-4 text-center">
+            <p class="mb-3 text-sm text-slate-700 dark:text-slate-300">{{ tr('You can keep playing while you verify your email. Verification is needed for the leaderboard.') }}</p>
+            <button type="button" (click)="continuePlaying()" class="w-full rounded-full bg-teal-700 px-5 py-3 font-semibold text-white">{{ tr('Continue playing') }} →</button>
+          </div>
           <button
             type="button"
             [disabled]="checking"
@@ -74,9 +78,10 @@
 
           <!-- Resend email link -->
           <p class="mt-3 text-center text-xs text-slate-600 dark:text-slate-400">
-            {{ tr(" Didn't receive it? ") }}<button type="button" (click)="resendEmail()" class="text-teal-600 hover:text-teal-700 underline">
+            {{ tr(" Didn't receive it? ") }}<button type="button" [disabled]="resending" (click)="resendEmail()" class="text-teal-600 hover:text-teal-700 underline">
               {{ tr(" Resend verification email ") }}</button>
           </p>
+          <p *ngIf="resendNotice" role="status" class="mt-3 text-center text-sm text-slate-700 dark:text-slate-300">{{ tr(resendNotice) }}</p>
 
           <button
             type="button"

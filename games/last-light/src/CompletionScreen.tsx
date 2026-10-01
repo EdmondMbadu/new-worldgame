@@ -21,6 +21,7 @@ export function CompletionScreen(p: ClinicStoryProps) {
   const practice = !!result?.practice;
   const nextChapter = practice ? p.chapter : p.chapter + 1;
   const nextClinic = CLINICS[nextChapter];
+  const accountRequired = p.accountStatus === 'guest' && !practice && !!nextClinic;
   const muted = !settings.sound || !settings.voice || settings.volume === 0;
   const playing = !muted && narration.status === 'playing';
   const loading = !muted && narration.status === 'loading';
@@ -93,7 +94,10 @@ export function CompletionScreen(p: ClinicStoryProps) {
               <p>{t(nextClinic ? nextClinic.shortName : 'Five journeys. One reason to keep going.')}</p>
             </div>
             <div className="completion-next-actions">
-              <button className="completion-primary" onClick={p.onContinue}>{t(practice ? 'Start a full delivery' : nextClinic ? 'Next clinic' : 'Chapter map')} <span aria-hidden="true">→</span></button>
+              {accountRequired && <p className="completion-account-note">{t('Your delivery is complete. Create a free account to save your score and continue to the other four clinics.')}</p>}
+              <button className="completion-primary" disabled={p.accountStatus === 'loading'} onClick={accountRequired && p.onAuth ? () => p.onAuth!('signup') : p.onContinue}>{t(accountRequired ? 'Create account and continue' : practice ? 'Start a full delivery' : nextClinic ? 'Next clinic' : 'Chapter map')} <span aria-hidden="true">→</span></button>
+              {accountRequired && <div className="completion-account-links"><button className="completion-link" onClick={() => p.onAuth?.('login')}>{t('Already have an account? Log in')}</button><button className="completion-link" onClick={p.onGuestReplay}>{t('Replay the first delivery')}</button></div>}
+              {p.accountStatus === 'signed-in' && !p.emailVerified && <p className="completion-account-note">{t('Keep playing. Verify your email to join the leaderboard.')} <button className="completion-link" onClick={() => p.onAuth?.('verify-email')}>{t('Verify email')}</button></p>}
               {nextClinic ? <button className="completion-link" onClick={p.onHome}>{t("Chapter map")}</button> : <button className="completion-link" onClick={p.onReplay}>{t("Replay arrival")}</button>}
             </div>
           </div>

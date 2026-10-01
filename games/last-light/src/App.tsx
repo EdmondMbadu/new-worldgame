@@ -1,7 +1,10 @@
 import { t, getLocale, getLanguage, useLanguage, LanguageSwitch, campaignHref } from './locale';
-import { Leaderboard, LeaderboardDialog, PlayerControls, RealProjectCard } from './CommunityPanel';
-import { beginRun, beginPractice, finishRun, useCommunity, syncProgress, publishPending, saveDriveCheckpoint, continueJourney, currentJourneyId, abandonDrive, saveLanguagePreference } from './community';
-import { readCheckpoint, invitation, checkpointHref, mergeProgress, claimGuestRuns, load, persist } from './journey';
+import { Leaderboard, LeaderboardDialog, PlayerControls, RealProjectCard, InviteFriends } from './CommunityPanel';
+import { GameDialog } from './GameDialog';
+import { SupportActions } from './SupportActions';
+import { clinicAccess, AccountRequiredError } from './account-access';
+import { beginRun, beginPractice, finishRun, useCommunity, syncProgress, publishPending, saveDriveCheckpoint, continueJourney, currentJourneyId, abandonDrive, saveLanguagePreference, guestJourneyConflict, adoptGuestJourney } from './community';
+import { readCheckpoint, invitation, checkpointHref, mergeProgress, load, persist } from './journey';
 import { readActive, type ActiveJourney } from './records';
 import { routePoint } from "./routes";
 import {
@@ -389,6 +392,11 @@ export default function App() {
   const [handoffError, setHandoffError] = useState(() => new URLSearchParams(location.search).has('resume') && !checkpoint ? 'This return point is not available in this browser. Open the original game tab, or choose a chapter here. Signed-in progress will load when connected.' : '');
   const connectedOwner = useRef<string | null | undefined>(undefined);
   const claimedCheckpoint = useRef(false);
+  const checkpointOpened = useRef(false);
+  const [accountGate, setAccountGate] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [verificationDelayed] = useState(() => { try { return sessionStorage.getItem('last-light.verification-notice') === 'pending'; } catch { return false; } });
+  const [journeyChoiceDismissed, setJourneyChoiceDismissed] = useState('');
   const synced = useRef('');
   const [save, setSave] = useState(() => {
     const initial = readSave();
@@ -398,7 +406,7 @@ export default function App() {
   }),
     [selected, setSelected] = useState(checkpoint?.mission ?? challenge?.mission ?? 0),
     [variant, setVariant] = useState(checkpoint?.variant ?? challenge?.variant ?? 0),
-    [inGame, setInGame] = useState(!!checkpoint && !checkpoint.owner),
+    [inGame, setInGame] = useState(false),
     [opening, setOpening] = useState(false),
     [previewPaused, setPreviewPaused] = useState(false),
     [run, setRun] = useState(0),
@@ -430,6 +438,10 @@ export default function App() {
   const e = engine.current;
   const savedJourney = readActive(community.player?.uid || null);
   const canContinue = savedJourney && ['driving','between'].includes(savedJourney.status);
+  const guestConflict = guestJourneyConflict();
+  const conflictKey = guestConflict ? `${community.player?.uid}:${guestConflict.journeyId}` : '';
+  const dismissedConflict = journeyChoiceDismissed === conflictKey || load<string>(`last-light.journey-choice.${community.player?.uid}`, '') === conflictKey;
+  const dismissConflict = () => { persist(`last-light.journey-choice.${community.player?.uid}`, conflictKey); setJourneyChoiceDismissed(conflictKey); };
   useEffect(() => { const changed = () => setTick(t => t+1); window.addEventListener('last-light:records', changed); return () => window.removeEventListener('last-light:records', changed); }, []);
   const qa =
     import.meta.env.DEV &&
@@ -451,6 +463,7 @@ export default function App() {
     if (connectedOwner.current !== uid) {
       if (connectedOwner.current !== undefined && connectedOwner.current !== uid && engine.current) { engine.current.pause(); setInGame(false); restoreDrive.current = null; }
       connectedOwner.current = uid;
+      checkpointOpened.current = false;
       synced.current = '';
       setSave(previous => ({...readSave(uid || undefined), settings:previous.settings}));
     }
@@ -458,10 +471,8 @@ export default function App() {
       if (checkpoint.owner && checkpoint.owner !== uid) {
         if (uid) { restore.current = null; setInGame(false); setHandoffError('This saved chapter belongs to another account. Its scores have not been copied.'); }
       } else if (uid) {
-        if (checkpoint.owner === uid) setInGame(true);
+        if (!checkpointOpened.current) { checkpointOpened.current = true; setInGame(true); }
         const claimedBy = load<string | null>('last-light.guest-claimed', null);
-        const claimedResults = claimGuestRuns(uid);
-        setSave(previous => mergeProgress(previous, claimedResults));
         if (checkpoint.owner === uid || !claimedBy || claimedBy === uid) {
           persist('last-light.guest-claimed', uid);
           setSave(previous => mergeProgress(previous, Object.values(checkpoint.save.story.best)));
@@ -469,6 +480,11 @@ export default function App() {
         claimedCheckpoint.current = true;
         void publishPending();
       } else {
+        if (!checkpointOpened.current) {
+          checkpointOpened.current = true;
+          if (clinicAccess(community.status, checkpoint.mission) === 'allowed') setInGame(true);
+          else setAccountGate(true);
+        }
         setSave(previous => mergeProgress(previous, Object.values(checkpoint.save.story.best)));
       }
     }
@@ -485,6 +501,11 @@ export default function App() {
     const retry = () => { void publishPending(); synced.current = ''; setSave(s => ({...s,story:{...s.story,best:{...s.story.best}}})); };
     window.addEventListener('online',retry);
     return () => window.removeEventListener('online',retry);
+  }, []);
+  useEffect(() => {
+    const denied = () => { engine.current?.pause(); sound.current?.silence(); setInGame(false); setAccountGate(true); };
+    window.addEventListener('last-light:account-required', denied);
+    return () => window.removeEventListener('last-light:account-required', denied);
   }, []);
   // While the menu is open, fetch what the first drive needs, so pressing
   // Begin on a slow connection does not start from zero. Data saver skips it.
@@ -772,7 +793,14 @@ export default function App() {
     engine.current?.skip();
     setTick((t) => t + 1);
   }, []);
+  const guardClinic = (id: number) => {
+    const access = clinicAccess(community.status, id);
+    if (access === 'account-required') { setAccountGate(true); return false; }
+    if (access === 'pending') { setHandoffError('Account connection is still being checked. Your saved progress is safe. Please try again.'); return false; }
+    return true;
+  };
   const start = (id = selected, journeyId?: string, confirmed = false) => {
+    if (!guardClinic(id)) return;
     const unfinished = readActive(community.player?.uid || null);
     if (!confirmed && !journeyId && unfinished && ['driving','between'].includes(unfinished.status)) {
       engine.current?.pause(); setRestartChoice({ id }); return;
@@ -781,7 +809,8 @@ export default function App() {
     restore.current = null;
     setHandoffError('');
     history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
-    beginRun(id,settingsRef.current.mode,variant,journeyId);
+    try { beginRun(id,settingsRef.current.mode,variant,journeyId); }
+    catch (err) { setHandoffError(err instanceof Error ? err.message : 'Unable to start this delivery.'); return; }
     if (sound.current) sound.current.beginChapter(CLINICS[id]);
     else sound.current = new Soundtrack(settingsRef.current, CLINICS[id]);
     openingRef.current = true;
@@ -803,6 +832,8 @@ export default function App() {
   };
   const resumeSaved = async () => {
     if (continuing) return;
+    const local = readActive(community.player?.uid || null);
+    if (local && !guardClinic(local.mission)) return;
     setContinuing(true); setHandoffError('');
     // Let the restoring overlay paint before loading the saved journey.
     await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -820,7 +851,7 @@ export default function App() {
         openingRef.current = false; setOpening(false); setReady(false); setInGame(true); setShowSettings(false); setRun(r => r+1);
         history.replaceState(null,'',location.pathname + (qa ? '?qa=1' : ''));
       }
-    } catch (err) { setHandoffError(err instanceof Error ? err.message : 'Unable to restore this journey. Your scores are safe.'); }
+    } catch (err) { if (err instanceof AccountRequiredError) setAccountGate(true); else setHandoffError(err instanceof Error ? err.message : 'Unable to restore this journey. Your scores are safe.'); }
     finally { setContinuing(false); }
   };
   const nextLeg = useRef<ActiveJourney | null>(null);
@@ -848,9 +879,17 @@ export default function App() {
     sound.current?.silence();
     setShowSettings(true);
   };
-  const authHandoff = (page:'login'|'signup'|'verify-email') => {
+  const authHandoff = (page:'login'|'signup'|'verify-email', reauthenticate = false) => {
     const instance = engine.current;
-    const href = !inGame ? `/games/last-light/?${new URLSearchParams({ ...Object.fromEntries(new URLSearchParams(location.search)), lang: getLanguage() })}` : checkpointHref({mission:selected,variant,mode:instance?.mode || save.settings.mode,
+    const snapshot = checkpointOf(instance);
+    if (snapshot && !saveDriveCheckpoint(snapshot, true)) {
+      setHandoffError('Your browser cannot save a return point. Keep this game open and continue as a guest; enable browser storage before signing in.');
+      return;
+    }
+    // Result/failure handoffs restore the exact scene. An unfinished drive is
+    // already stored as an active journey and resumes from the chapter map.
+    const sceneHandoff = inGame && (instance?.result || instance?.phase === 'failed');
+    const href = !sceneHandoff ? `/games/last-light/?${new URLSearchParams({ ...(!inGame ? Object.fromEntries(new URLSearchParams(location.search)) : {}), lang: getLanguage() })}` : checkpointHref({mission:selected,variant,mode:instance?.mode || save.settings.mode,
       result:instance?.result || undefined, failure:instance?.phase === 'failed' ? instance.failure : undefined,
       safeZ:instance?.safeZ,safeAlt:instance?.safeAlt,owner:saveRef.current.owner || null,save:saveRef.current});
     if (!href || !writeSave(saveRef.current)) {
@@ -859,7 +898,7 @@ export default function App() {
     }
     sound.current?.silence();
     try { sessionStorage.setItem('redirectTo',href); } catch { /* The URL carries the same destination. */ }
-    const target = `/${page}?lang=${getLanguage()}&redirectTo=${encodeURIComponent(href)}`;
+    const target = `/${page}?lang=${getLanguage()}&redirectTo=${encodeURIComponent(href)}${reauthenticate ? '&reauth=1' : ''}`;
     if (window.top && window.top !== window) window.top.location.assign(target);
     else window.location.assign(target);
   };
@@ -893,6 +932,20 @@ export default function App() {
       className={`last-light ${inGame ? "in-game" : "at-home"}`}
       data-phase={inGame ? opening ? 'opening' : e?.phase || 'loading' : 'menu'}
     >
+      {guestConflict && !dismissedConflict && <GameDialog title={t('Which journey would you like to continue?')} onClose={dismissConflict}>
+        <p>{t('Your guest delivery has been saved. Your account also has an unfinished journey. Choose which one to continue; your best scores are kept.')}</p>
+        <div className="account-gate-actions"><button className="completion-primary" onClick={() => { dismissConflict(); home(); }}>{t('Keep my account journey')}</button>
+          <button className="completion-secondary" onClick={() => { if (adoptGuestJourney()) { dismissConflict(); home(); } else setHandoffError('Guest progress could not be copied. Enable browser storage and retry.'); }}>{t('Continue this guest journey')}</button></div>
+        {handoffError && <p role="alert">{t(handoffError)}</p>}
+      </GameDialog>}
+      {accountGate && <GameDialog title={t('Keep bringing the light.')} eyebrow="YOUR JOURNEY CONTINUES" onClose={() => setAccountGate(false)}>
+        <p>{t(community.player ? 'Your account session needs to be refreshed. Log in again to continue. Your saved progress is safe.' : 'Play the first delivery as a guest. Create a free account to save your score and continue to the other four clinics.')}</p>
+        <div className="account-gate-actions"><button className="completion-primary" onClick={() => authHandoff(community.player ? 'login' : 'signup', !!community.player)}>{t(community.player ? 'Log in again' : 'Create account and continue')} →</button>{!community.player && <button className="completion-secondary" onClick={() => authHandoff('login')}>{t('Already have an account? Log in')}</button>}
+          <button className="completion-link" onClick={() => { setAccountGate(false); setSelected(0); start(0); }}>{t('Play the first delivery as a guest')}</button></div>
+        {handoffError && <p role="alert">{t(handoffError)}</p>}
+        <SupportActions onShare={() => { setAccountGate(false); setSharing(true); }} />
+      </GameDialog>}
+      {sharing && <GameDialog title={t('Invite 10 friends')} onClose={() => setSharing(false)}><InviteFriends mission={selected} mode={save.settings.mode} variant={variant} score={result?.practice ? undefined : result?.score ?? save.story.best[bestKey(selected,save.settings.mode,variant)]?.score} compact /></GameDialog>}
       {continuing && !inGame && <div className="journey-restoring" role="status" aria-live="polite" aria-busy="true">
         <span className="eyebrow">{t('LAST LIGHT')}</span>
         <h2>{t('Restoring journey…')}</h2>
@@ -931,15 +984,18 @@ export default function App() {
               <p>{t("Clinic ")}{savedJourney.mission + 1} · {t(CLINICS[savedJourney.mission]?.shortName)}<br/>{t(savedJourney.snapshot ? `${time(savedJourney.snapshot.remaining)} reserve · ${Math.round(savedJourney.snapshot.integrity)}% kit · safe checkpoint` : 'Your next delivery is ready.')}</p>
               <small>{t(savedJourney.dirty ? 'Latest save on this device' : community.player ? 'Saved to your account' : 'Saved on this device')} · {t(new Date(savedJourney.savedAt).toLocaleString(getLocale(), { dateStyle: 'medium', timeStyle: 'short' }))}</small>
             </div>}
+            {guestConflict && dismissedConflict && <button className="text-button" onClick={() => { persist(`last-light.journey-choice.${community.player?.uid}`, ''); setJourneyChoiceDismissed(''); }}>{t('Choose which journey to continue')}</button>}
             <button className={canContinue ? 'secondary start-button' : 'primary start-button'} disabled={continuing || community.status === 'loading'} onClick={() => start(canContinue ? 0 : selected)}>
               <span>{t(canContinue ? 'Start new journey' : save.story.completed.includes(selected) ? 'Drive again' : community.player ? 'Begin the journey' : 'Play as guest')}</span><span>↗</span>
             </button>
             {!community.player && <div className="entry-account-actions">
               <button onClick={() => authHandoff('signup')}>{t('Create an account')}</button>
               <span aria-hidden="true">·</span><button onClick={() => authHandoff('login')}>{t('Log in')}</button>
-              <p>{t('Guest progress stays on this device. An account keeps it across devices.')}</p>
+              <p>{t('Play the first delivery as a guest. Create a free account to save your score and continue to the other four clinics.')}</p>
             </div>}
-            <a className="entry-contribute" href={campaignHref()} target="_blank" rel="noopener noreferrer">{t('Help power the real clinics.')} <strong>{t('Contribute $10')} ↗</strong></a>
+            {community.status === 'unavailable' && <p className="entry-verification" role="status">{t(community.message)} <button className="text-button" onClick={() => location.reload()}>{t('Retry connection')}</button></p>}
+            {community.player && !community.player.verified && <p className="entry-verification" role="status">{t(verificationDelayed ? 'Your account is ready. Verification email is delayed. Keep playing, or resend it for leaderboard access.' : 'Keep playing. Verify your email to join the leaderboard.')} <button className="text-button" onClick={() => authHandoff('verify-email')}>{t('Verify email')}</button></p>}
+            <SupportActions onShare={() => setSharing(true)} />
             <div
               className="road-edition"
               role="group"
@@ -988,20 +1044,20 @@ export default function App() {
                 return (
                   <button
                     key={i}
-                    className={`chapter ${selected === i ? "selected" : ""} ${save.story.completed.includes(i) ? "complete" : ""}`}
-                    disabled={!open}
-                    onClick={() => setSelected(i)}
+                    className={`chapter ${selected === i ? "selected" : ""} ${save.story.completed.includes(i) ? "complete" : ""} ${community.status === 'guest' && i > 0 ? 'account-locked' : ''}`}
+                    disabled={!open && community.status !== 'guest'}
+                    onClick={() => { if (guardClinic(i)) setSelected(i); }}
                     aria-pressed={selected === i}
                   >
                     <span className="chapter-number">
                       {t(String(i + 1).padStart(2, "0"))}{t(" ")}
                       <span>
-                        {t(save.story.completed.includes(i) ? "✦" : open ? "↗" : "○")}
+                        {t(community.status === 'guest' && i > 0 ? "○" : save.story.completed.includes(i) ? "✦" : open ? "↗" : "○")}
                       </span>
                     </span>
                     <strong>{t(m.title)}</strong>
                     <span className="chapter-detail">
-                      {t(best
+                      {t(community.status === 'guest' && i > 0 ? 'Free account required' : best
                         ? `${"★".repeat(best.stars)} · ${best.score.toLocaleString(getLocale())} pts`
                         : open
                           ? m.place
@@ -1013,7 +1069,7 @@ export default function App() {
             </div>
           </section>
           {t(handoffError && <p className="challenge-welcome" role="status">{t(handoffError)}</p>)}
-          {challenge && <aside className="challenge-welcome"><strong>{t("You’re invited to chapter ")}{challenge.mission+1}: {t(CLINICS[challenge.mission].shortName)}.</strong><p>{t("Try the same ")}{t(challenge.mode)}{t(" delivery on the ")}{t(challenge.variant ? 'alternate' : 'original')}{t(" route. This invitation opens this chapter; earlier chapters still count only when you complete them.")}</p></aside>}
+          {challenge && <aside className="challenge-welcome"><strong>{t("You’re invited to chapter ")}{challenge.mission+1}: {t(CLINICS[challenge.mission].shortName)}.</strong><p>{t(community.status === 'guest' && challenge.mission > 0 ? 'Create an account or log in to play this challenge. You can also try the first delivery as a guest.' : 'This invitation opens this chapter; earlier chapters still count only when you complete them.')}</p>{community.status === 'guest' && challenge.mission > 0 && <button className="secondary" onClick={() => { setSelected(0); start(0); }}>{t('Play the first delivery as a guest')}</button>}</aside>}
           <section className="home-community" aria-label={t("The players and the real project")}><Leaderboard mission={selected} mode={save.settings.mode} variant={variant}/><RealProjectCard/></section>
           <footer className="home-footer">
             <a href="/games/lost-in-orbit/" target="_top">{t(" ← Adventure 01 · Lost in Orbit ")}</a>
@@ -1050,6 +1106,8 @@ export default function App() {
               onTouch={() => setTouch(!touch)} touch={touch} ready={ready} loading={loading}
               completed={save.story.completed} result={opening ? undefined : result || undefined}
               onAuth={authHandoff} handoffError={handoffError}
+              accountStatus={community.status} emailVerified={community.player?.verified}
+              onGuestReplay={() => start(0)}
             />
           )}
           {!ready && !error && !opening && (
@@ -1280,7 +1338,8 @@ export default function App() {
                     <button
                       className="secondary"
                       onClick={() => {
-                        beginPractice();
+                        if (!guardClinic(selected)) return;
+                        beginPractice(selected);
                         e.practiceFromCheckpoint();
                         controls.current?.clear();
                       }}
@@ -1308,7 +1367,8 @@ export default function App() {
                     <button
                       className="text-button"
                       onClick={() => {
-                        beginPractice();
+                        if (!guardClinic(selected)) return;
+                        beginPractice(selected);
                         e.practiceFromCheckpoint();
                         controls.current?.clear();
                       }}

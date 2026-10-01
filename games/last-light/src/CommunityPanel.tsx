@@ -980,7 +980,7 @@ export function CompletionAccount({
       </p>
       {!player && (
         <>
-          <p>{t(" Sign in to keep your scores and unfinished journey across devices. ")}</p>
+          <p>{t('Create a free account to continue to the other four clinics. Verify your email to join the leaderboard.')}</p>
           <div className="community-actions">
             <button
               disabled={status === "loading"}

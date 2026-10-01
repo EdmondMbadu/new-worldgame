@@ -1898,4 +1898,12 @@ kbd {
 .entry-account-actions p { flex-basis:100%; font-size:12px; line-height:1.5; color:#c3d0c5; margin:0; }
 .entry-contribute { display:block; max-width:430px; font-size:13px; line-height:1.7; margin:18px 0; color:#d8e4d8; text-decoration:none; }
 .entry-contribute strong { color:#f2d48e; white-space:nowrap; }
+.support-actions { max-width:450px; margin:20px 0; padding:16px; border:1px solid #e1c98470; border-radius:10px; color:#e8eddc; background:#16372ed9; }
+.support-actions p { margin:0 0 10px; font-size:14px; font-weight:700; }
+.support-actions div { display:flex; flex-wrap:wrap; gap:10px; }
+.support-actions button,.support-actions a { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:10px 14px; border:1px solid #f0d292; border-radius:6px; color:#f0d292; background:transparent; text-decoration:none; font:600 14px/1.4 inherit; cursor:pointer; }
+.support-actions small { display:block; margin-top:10px; font-size:11px; line-height:1.5; color:#bacbbf; }
+.account-gate-actions { display:flex; flex-direction:column; gap:12px; margin:20px 0; }
+.entry-verification { max-width:430px; font-size:12px; color:#d5e2d5; }
+.chapter.account-locked .chapter-detail { color:#dacb9b; }
 @media(max-width:640px) { .home-header .edition { display:none; } .header-actions { gap:8px; flex-wrap:wrap; justify-content:flex-end; } .language-switch button { padding:8px 10px; } }

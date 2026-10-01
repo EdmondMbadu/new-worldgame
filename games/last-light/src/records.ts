@@ -143,17 +143,18 @@ export function hydrateLocalHistory(owner: string | null) {
       });
   }
 }
-export function claimLocalHistory(uid: string) {
+export function claimLocalHistory(uid: string, clearGuest = true) {
   const records = driveHistory(null);
   let saved = true;
   for (const d of records)
     saved = rememberDrive({ ...d, owner: uid, saved: false }) && saved;
-  if (saved) {
-    const guest = readSave();
-    persist(key(null, 'history'), []);
-    writeSave({ ...freshSave(), settings: guest.settings });
-  }
+  if (saved && clearGuest) clearGuestHistory();
   return saved;
+}
+export function clearGuestHistory() {
+  const guest = readSave();
+  persist(key(null, 'history'), []);
+  writeSave({ ...freshSave(), settings: guest.settings });
 }
 export function readActive(owner: string | null): ActiveJourney | null {
   const a = load<ActiveJourney | null>(key(owner, 'active'), null);

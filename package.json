@@ -23,7 +23,8 @@
     "build:games": "npm run build:game && npm --prefix games/last-light run build",
     "test:last-light": "npm --prefix games/last-light test",
     "test:games": "npm run test:game && npm run test:last-light",
-    "test:last-light-community": "node scripts/test-last-light-community.mjs"
+    "test:last-light-community": "node scripts/test-last-light-community.mjs",
+    "test:last-light-auth": "ng test --watch=false --browsers=ChromeHeadless --ts-config=tsconfig.last-light-auth.spec.json --include=src/app/services/auth.last-light.spec.ts --include=src/app/components/signup/last-light-signup.spec.ts"
   },
   "private": true,
   "dependencies": {

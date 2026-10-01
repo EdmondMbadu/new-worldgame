@@ -18,6 +18,12 @@ export class VerifyEmailComponent implements OnInit {
   checking = false;
   errorMessage = '';
   recoveryNotice = '';
+  resending = false;
+  resendNotice = '';
+
+  continuePlaying() {
+    if (this.gameReturnUrl) navigateAuthReturn(this.router, this.gameReturnUrl);
+  }
 
   constructor(
     private router: Router,
@@ -88,13 +94,16 @@ export class VerifyEmailComponent implements OnInit {
    * Resend the verification email.
    */
   async resendEmail(): Promise<void> {
+    if (this.resending) return;
+    this.resending = true;
+    this.resendNotice = '';
     try {
       await this.auth.resendVerificationEmail();
-      alert(t('Verification email sent! Please check your inbox.'));
+      try { sessionStorage.removeItem('last-light.verification-notice'); } catch { /* Optional notice. */ }
+      this.resendNotice = 'Verification email sent! Please check your inbox.';
     } catch (error) {
-      console.error('Error resending email:', error);
-      alert(t('Failed to resend email. Please try again.'));
-    }
+      this.resendNotice = 'Failed to resend email. Please try again.';
+    } finally { this.resending = false; }
   }
 
   goToLogin(): void {

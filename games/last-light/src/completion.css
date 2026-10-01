@@ -208,3 +208,7 @@
 .completion-team-title { overflow-wrap:anywhere; }
 .completion-social button { white-space:normal; }
 @media(max-width:900px) { .completion-contribute { padding:9px 11px; font-size:13px; } }
+.completion-account-note { font-size:12px; line-height:1.5; margin:0; }
+.completion-account-links { display:flex; flex-wrap:wrap; gap:8px 16px; }
+.completion-next:has(.completion-account-note) { grid-template-columns:1fr; }
+.completion-next:has(.completion-account-note) .completion-next-actions { grid-template-columns:1fr; gap:10px; }

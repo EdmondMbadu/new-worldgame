@@ -174,6 +174,8 @@ async function limit(
 export const beginLastLightRun = functions.https.onCall(async (raw, c) => {
   if (raw?.accountUid) user(c, raw);
   const b = checked(() => bracket(raw));
+  if (!c.auth && b.mission > 0)
+    fail('unauthenticated', 'Create a free account or log in to continue to the next clinic.');
   await limit(c, 'runs', 120);
   const journeyId = uuid(raw?.journeyId) ? raw.journeyId : randomUUID();
   const id = uuid(raw?.clientRunId) ? raw.clientRunId : randomUUID(),
@@ -579,7 +581,7 @@ export const publishLastLightDrive = functions.https.onCall(async (raw, c) => {
         run!.claimedBy === playerId &&
         JSON.stringify(validateDrive(run!.result)) === JSON.stringify(r)
       )
-        return { published: !p?.hidden, publicId, name: p?.name || name };
+        return { published: false, publicId, name: p?.name || name };
       fail('already-exists', 'This drive has already been recorded.');
     }
     if (
@@ -617,8 +619,10 @@ export const publishLastLightDrive = functions.https.onCall(async (raw, c) => {
       eligible: true,
       journeyId: run!.journeyId || raw.id,
     });
-    if (!p?.hidden) writeRows(tx, publicId, stableName, published);
-    return { published: !p?.hidden, publicId, name: stableName };
+    // Keep validated candidates for claiming later. Public ranking requires a
+    // verified account; a device key alone cannot establish that identity.
+    deleteRows(tx, publicId, published);
+    return { published: false, publicId, name: stableName };
   });
 });
 /** Opt out (or back in), and rename a device player; boards update at once. */
@@ -698,8 +702,8 @@ export const setLastLightVisibility = functions.https.onCall(async (raw, c) => {
         },
         { merge: true },
       );
-      if (raw.hidden) deleteRows(tx, publicId, p.published || {});
-      else if (nextName && (guest || isVerified(c)))
+      if (raw.hidden || guest) deleteRows(tx, publicId, p.published || {});
+      else if (nextName && isVerified(c))
         writeRows(tx, publicId, nextName, p.published || {});
     });
     return { hidden: raw.hidden, name };
@@ -828,7 +832,7 @@ export const claimLastLightGuest = functions.https.onCall(async (raw, c) => {
     const guest = guestSnap.data(),
       p = accountSnap.data() || {};
     if (guest?.migratedTo && guest.migratedTo !== uid)
-      return { claimed: 0, more: false };
+      return { claimed: 0, more: false, ownerMismatch: true };
     const owned = runs.docs
       .slice(0, 200)
       .filter((d) => !d.data().owner || d.data().owner === uid);

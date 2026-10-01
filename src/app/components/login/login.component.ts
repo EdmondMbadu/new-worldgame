@@ -43,11 +43,12 @@ export class LoginComponent implements OnInit, OnDestroy {
 
     const destination = captureAuthReturn();
     if (destination) this.auth.setRedirectUrl(destination);
-    // Do not race interactive sign-in or bypass email verification.
+    const reauthenticate = this.route.snapshot.queryParamMap.get('reauth') === '1';
+    // A rejected game session needs an actual sign-in, rather than an automatic return.
     this.authSubscription = this.afAuth.authState.subscribe(user => {
-      if (user && destination && !this.loading) {
+      if (user && destination && !this.loading && !reauthenticate) {
         const verified = user.emailVerified || user.providerData.some(p => !!p?.providerId && p.providerId !== 'password');
-        if (verified) navigateAuthReturn(this.router, destination);
+        if (verified || this.gameReturnUrl) navigateAuthReturn(this.router, destination);
         else this.router.navigate(['/verify-email'], {queryParams:{redirectTo:destination}});
       }
     });

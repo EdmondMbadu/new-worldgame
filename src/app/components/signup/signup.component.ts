@@ -1,5 +1,5 @@
-import { t } from '../../../../content/last-light-locale';
-import { clearAuthReturn, captureAuthReturn, gameAuthReturn } from 'src/app/services/auth-return';
+import { t, campaignHref } from '../../../../content/last-light-locale';
+import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn } from 'src/app/services/auth-return';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
@@ -27,6 +27,19 @@ export class SignupComponent implements OnInit {
   createAccountError: boolean = false;
   submitting: boolean = false;
   accountErrorMessage: string = '';
+  fieldErrors: Record<string, string> = {};
+  showPassword = false;
+  readonly contributionUrl = campaignHref();
+  shareNotice = '';
+  async inviteFriends() {
+    const url = 'https://newworld-game.org/games/last-light/';
+    try {
+      if (navigator.share) await navigator.share({ title: 'Last Light', text: t('Help bring solar panels and batteries to health clinics. Play Last Light and invite your friends!'), url });
+      else { await navigator.clipboard.writeText(url); this.shareNotice = 'Link copied. Send it to 10 friends!'; }
+    } catch (error: any) {
+      if (error?.name !== 'AbortError') this.shareNotice = 'Share this link: https://newworld-game.org/games/last-light/';
+    }
+  }
 
   // Bot protection fields
   honeypot: string = ''; // Hidden field - bots will fill this
@@ -90,6 +103,7 @@ export class SignupComponent implements OnInit {
 
   async createAccount() {
     if (this.submitting) return;
+    if (this.gameReturnUrl) { await this.createGameAccount(); return; }
     // Bot detection: honeypot field should be empty
     if (this.honeypot !== '') {
       console.log('Bot detected: honeypot filled');
@@ -175,6 +189,38 @@ export class SignupComponent implements OnInit {
     }
   }
 
+  private async createGameAccount() {
+    this.fieldErrors = {};
+    this.createAccountError = false;
+    this.accountErrorMessage = '';
+    const validName = (value: string) => value.trim().length > 0 && value.trim().length <= 80 && /\p{L}/u.test(value) && !/[\u0000-\u001f\u007f]/.test(value);
+    if (!validName(this.firstName)) this.fieldErrors['firstName'] = 'Enter your first name.';
+    if (!validName(this.lastName)) this.fieldErrors['lastName'] = 'Enter your last name.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email.trim())) this.fieldErrors['email'] = 'Enter a valid email address.';
+    if (this.password.length < 6) this.fieldErrors['password'] = 'Use at least 6 characters for your password.';
+    if (!this.agree) this.fieldErrors['agree'] = 'Please agree to the terms and conditions.';
+    if (Object.keys(this.fieldErrors).length) {
+      requestAnimationFrame(() => document.querySelector<HTMLElement>('.game-signup [aria-invalid="true"]')?.focus());
+      return;
+    }
+    if (this.honeypot) { this.accountErrorMessage = 'We could not finish creating your account. Please try again.'; this.createAccountError = true; return; }
+    this.submitting = true;
+    try {
+      const outcome = await this.auth.register(this.firstName.trim(), this.lastName.trim(), this.email.trim(), this.password,
+        'Play Last Light and save my journey.', [], { continueGame: true });
+      try {
+        if (outcome.verificationSent === false) sessionStorage.setItem('last-light.verification-notice', 'pending');
+        else sessionStorage.removeItem('last-light.verification-notice');
+      } catch { /* The in-game reminder remains available without storage. */ }
+      this.password = '';
+      this.returnToGame();
+    } catch (error: any) {
+      this.accountErrorMessage = this.registrationErrorMessage(error);
+      this.createAccountError = true;
+    } finally { this.submitting = false; }
+  }
+  private returnToGame() { navigateAuthReturn(this.router, this.gameReturnUrl!); }
+
   private registrationErrorMessage(error: any): string {
     switch (error?.code) {
       case 'auth/email-already-in-use':
@@ -187,6 +233,8 @@ export class SignupComponent implements OnInit {
         return 'Choose a stronger password with at least 6 characters.';
       case 'auth/network-request-failed':
         return 'We could not reach the server. Check your connection and try again.';
+      case 'auth/game-profile-pending':
+        return 'Your account was created, but its profile is still syncing. Check your connection and try again with the same details.';
       default:
         return 'We could not finish creating your account. Please try again.';
     }

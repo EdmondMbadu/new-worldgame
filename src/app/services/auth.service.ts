@@ -42,9 +42,9 @@ interface RegisterSchoolMeta {
 }
 
 export type RegistrationOutcome =
-  | { status: 'created'; profileRepaired: true }
-  | { status: 'recovered-unverified'; profileRepaired: boolean }
-  | { status: 'recovered-verified'; profileRepaired: boolean };
+  | { status: 'created'; profileRepaired: true; verificationSent?: boolean }
+  | { status: 'recovered-unverified'; profileRepaired: boolean; verificationSent?: boolean }
+  | { status: 'recovered-verified'; profileRepaired: boolean; verificationSent?: boolean };
 
 @Injectable({
   providedIn: 'root',
@@ -155,8 +155,10 @@ export class AuthService {
     email: string,
     password: string,
     goal: string,
-    sdgsSelected: string[]
+    sdgsSelected: string[],
+    options: { continueGame?: boolean } = {}
   ): Promise<RegistrationOutcome> {
+    const continueGame = options.continueGame === true && !!gameAuthReturn();
     // `undefined` means registration is still in progress. Setting this to
     // false here made the UI briefly show a failure before the async work
     // completed successfully.
@@ -178,7 +180,8 @@ export class AuthService {
             email,
             password,
             goal,
-            sdgsSelected
+            sdgsSelected,
+            continueGame
           );
           this.newUser.success = true;
           return outcome;
@@ -192,16 +195,16 @@ export class AuthService {
       // Create the profile before sending the user away. Awaiting this write is
       // important: the previous fire-and-forget flow reported success even when
       // Firestore rejected the profile document.
-      await this.addNewUser(
+      await this.registrationProfile(this.addNewUser(
         firstName.trim(),
         lastName.trim(),
         credential.user,
         goal,
         sdgsSelected
-      );
-      await this.sendEmailForVerification(credential.user);
+      ), continueGame);
+      const verificationSent = await this.registrationVerification(credential.user, continueGame);
       this.newUser.success = true;
-      return { status: 'created', profileRepaired: true };
+      return { status: 'created', profileRepaired: true, verificationSent };
     } catch (error: any) {
       this.newUser.success = false;
       this.newUser.errorMessage =
@@ -216,7 +219,8 @@ export class AuthService {
     email: string,
     password: string,
     goal: string,
-    sdgsSelected: string[]
+    sdgsSelected: string[],
+    continueGame = false
   ): Promise<RegistrationOutcome> {
     let credential: firebase.auth.UserCredential;
     try {
@@ -241,32 +245,51 @@ export class AuthService {
     }
 
     await user.reload();
-    const profileRepaired = await this.repairRegistrationProfile(
+    const profileRepaired = await this.registrationProfile(this.repairRegistrationProfile(
       user,
       firstName,
       lastName,
       goal,
       sdgsSelected
-    );
+    ), continueGame);
 
     if (user.emailVerified) {
-      await this.markUserVerified(user.uid);
+      try { await this.markUserVerified(user.uid); }
+      catch (error) { if (!continueGame) throw error; }
       // Send the user through a deliberate login after recovery so they start
       // with a fresh token and a predictable post-repair session.
-      await this.fireauth.signOut();
+      if (!continueGame) await this.fireauth.signOut();
       return { status: 'recovered-verified', profileRepaired };
     }
 
+    const verificationSent = await this.registrationVerification(user, continueGame, true);
+    return { status: 'recovered-unverified', profileRepaired, verificationSent };
+  }
+
+  private async registrationVerification(user: firebase.User, continueGame: boolean, recovering = false): Promise<boolean> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      await this.sendEmailForVerification(user);
+      const sending = this.sendEmailForVerification(user);
+      // Email delivery must not hold a successfully created game account hostage.
+      if (continueGame) await Promise.race([sending, new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Verification email is taking longer than expected.')), 10000);
+      })]);
+      else await sending;
+      return true;
     } catch (error: any) {
-      // A recent request may already have sent the email. The account is still
-      // safely recovered and the verification screen offers a resend action.
-      if (error?.code !== 'functions/resource-exhausted') {
-        throw error;
-      }
-    }
-    return { status: 'recovered-unverified', profileRepaired };
+      if (!continueGame && !(recovering && error?.code === 'functions/resource-exhausted')) throw error;
+      return false;
+    } finally { if (timer) clearTimeout(timer); }
+  }
+
+  private async registrationProfile<T>(writing: Promise<T>, continueGame: boolean): Promise<T> {
+    if (!continueGame) return writing;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([writing, new Promise<never>((_, reject) => {
+        timer = setTimeout(() => reject(Object.assign(new Error('Your account profile is still syncing.'), { code: 'auth/game-profile-pending' })), 18000);
+      })]);
+    } finally { if (timer) clearTimeout(timer); }
   }
 
   private async repairRegistrationProfile(
@@ -1137,11 +1160,15 @@ export class AuthService {
         console.warn('Unable to sync verified profile flag:', user.uid, error);
       }
       const dest = this.popRedirect();
-      navigateAuthReturn(this.router, dest);
+      this.navigateToDestination(dest);
+    } else if (gameAuthReturn()) {
+      this.navigateToDestination(this.popRedirect());
     } else {
       this.router.navigate(['/verify-email'], {queryParams: {redirectTo: captureAuthReturn()}});
     }
   }
+
+  private navigateToDestination(target: string) { navigateAuthReturn(this.router, target); }
 
   private async markUserVerified(uid: string): Promise<void> {
     const userRef = this.afs.doc<User>(`users/${uid}`);
