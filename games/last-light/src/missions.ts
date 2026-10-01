@@ -91,7 +91,7 @@ export const MISSIONS: Mission[] = [
     place: 'Kijani Valley Clinic',
     tagline: 'A small delivery. A whole world of difference.',
     briefing:
-      'Amani, the clinic is running on its last reserve. The solar connections are ready. Bring the panels and the charged battery — we will do the rest.',
+      'Amani, the clinic is running on its last reserve. The solar connections are ready. Bring the solar panels and the charged battery — we will do the rest.',
     outcome:
       'Emergency care is back. Three patients have the power they need, and the valley has a brighter tomorrow.',
     length: 1050,
@@ -241,7 +241,7 @@ export const MISSIONS: Mission[] = [
     place: 'Nyota Maternity Clinic',
     tagline: 'Carry a little light into the night.',
     briefing:
-      'Amani, this is Mina. We have mothers and newborns in the ward. The high road is foggy, but the reflectors will guide you. We are ready for your battery.',
+      'Amani, this is Mina. We have mothers and newborns in the ward. The high road is foggy, but the reflectors will guide you. We are ready for your solar panels and charged battery.',
     outcome:
       'The maternity ward is bright again. Eight patients and their families can face the night with hope.',
     length: 1280,

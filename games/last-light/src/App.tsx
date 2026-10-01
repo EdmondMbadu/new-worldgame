@@ -598,7 +598,7 @@ export default function App() {
         engine.current = instance;
         setLoading("Bringing the valley to life");
         await new Promise<void>((resolve) =>
-          requestAnimationFrame(() => resolve()),
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
         );
         if (cancelled) {
           instance.dispose();
@@ -802,7 +802,10 @@ export default function App() {
     setAutopilot(false);
   };
   const resumeSaved = async () => {
+    if (continuing) return;
     setContinuing(true); setHandoffError('');
+    // Let the restoring overlay paint before loading the saved journey.
+    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
     try {
       const saved = await continueJourney();
       settingsRef.current = { ...settingsRef.current, mode: saved.mode };
@@ -890,6 +893,12 @@ export default function App() {
       className={`last-light ${inGame ? "in-game" : "at-home"}`}
       data-phase={inGame ? opening ? 'opening' : e?.phase || 'loading' : 'menu'}
     >
+      {continuing && !inGame && <div className="journey-restoring" role="status" aria-live="polite" aria-busy="true">
+        <span className="eyebrow">{t('LAST LIGHT')}</span>
+        <h2>{t('Restoring journey…')}</h2>
+        <div className="loading-line" />
+        <p>{t('Your saved progress is safe. Checking your checkpoint and preparing the road…')}</p>
+      </div>}
       {!inGame && (
         <>
           <div
@@ -922,7 +931,7 @@ export default function App() {
               <p>{t("Clinic ")}{savedJourney.mission + 1} · {t(CLINICS[savedJourney.mission]?.shortName)}<br/>{t(savedJourney.snapshot ? `${time(savedJourney.snapshot.remaining)} reserve · ${Math.round(savedJourney.snapshot.integrity)}% kit · safe checkpoint` : 'Your next delivery is ready.')}</p>
               <small>{t(savedJourney.dirty ? 'Latest save on this device' : community.player ? 'Saved to your account' : 'Saved on this device')} · {t(new Date(savedJourney.savedAt).toLocaleString(getLocale(), { dateStyle: 'medium', timeStyle: 'short' }))}</small>
             </div>}
-            <button className={canContinue ? 'secondary start-button' : 'primary start-button'} disabled={community.status === 'loading'} onClick={() => start(canContinue ? 0 : selected)}>
+            <button className={canContinue ? 'secondary start-button' : 'primary start-button'} disabled={continuing || community.status === 'loading'} onClick={() => start(canContinue ? 0 : selected)}>
               <span>{t(canContinue ? 'Start new journey' : save.story.completed.includes(selected) ? 'Drive again' : community.player ? 'Begin the journey' : 'Play as guest')}</span><span>↗</span>
             </button>
             {!community.player && <div className="entry-account-actions">

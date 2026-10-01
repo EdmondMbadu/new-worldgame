@@ -42,7 +42,7 @@ export function OpeningBriefing({ mission, seconds, still, onPause, paused }: {
     { label: 'THE CALL', title: `${t(story.lead)} ${t(story.emphasis)}`, detail: 'A charged battery for tonight. Solar panels for the days ahead.' },
     { label: 'THE CARE', title: story.careTitle, detail: story.careDetail },
     { label: 'THE ROAD', title: story.roadTitle, detail: story.roadDetail },
-    { label: 'THE KIT', title: 'Tonight’s power is on your truck.', detail: 'Keep the battery and panels secure. A safe arrival matters more than a fast corner.' },
+    { label: 'THE KIT', title: 'Tonight’s power is on your truck.', detail: 'Keep the battery and solar panels secure. A safe arrival matters more than a fast corner.' },
     { label: 'YOUR TURN', title: `Bring the power to ${clinic.shortName}.`, detail: 'Reach the marked courtyard. Stop safely. Hand over the kit.' },
   ];
   return <aside className="opening-visual" aria-label={t("Delivery briefing")}>

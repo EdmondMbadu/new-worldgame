@@ -9,7 +9,7 @@ export const OPENING_STORIES = [
     lead: 'The clinic is on its', emphasis: 'last reserve.',
     objective: 'Bring a charged battery and solar panels to Ndingi. Reach the courtyard before the backup power runs out—and keep the kit safe.',
     careTitle: 'The night shift cannot wait for daylight.',
-    careDetail: 'A patient rests under a blanket. A clinician keeps watch by a small reserve lamp. Your battery will help keep the care room lit.',
+    careDetail: 'A patient rests under a blanket. A clinician keeps watch by a small reserve lamp. Your solar panels and charged battery will help keep the care room lit.',
     roadTitle: 'One valley road. A team waiting.',
     roadDetail: 'Brake before the ruts, give others room, and choose the firmer left fork.',
   },

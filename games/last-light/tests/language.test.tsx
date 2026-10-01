@@ -35,7 +35,7 @@ describe('complete French deliveries',()=>{
       const file = new URL(`../../../${recording.file}`, import.meta.url);
       expect(createHash('sha256').update(readFileSync(file)).digest('hex')).toBe(recording.audioSha256);
       setLanguage(recording.language as 'en'|'fr');
-      expect(storyClip(CLINICS.find(c=>c.id===recording.clinic)!, 'opening')).toContain('?v=20260928');
+      expect(storyClip(CLINICS.find(c=>c.id===recording.clinic)!, 'opening')).toContain('?v=20261001');
     }
   });
   it.each(CLINICS.map((clinic,chapter)=>({clinic,chapter})))('translates both scenes and ships both recordings for $clinic.id',({clinic,chapter})=>{
@@ -74,7 +74,7 @@ describe('private progress and public invitations',()=>{
     expect(url.searchParams.get('chapter')).toBe('4');expect(url.searchParams.get('lang')).toBe('fr');
     expect(s.text).toContain('1\u202f510');expect(s.text).not.toContain('I scored');
     expect(new URL(s.links.Facebook).searchParams.get('u')).toBe(s.url);
-    expect(new URL(s.links.X).searchParams.get('text')).toBe(s.text);
+    expect(new URL(s.links.X).searchParams.get('text')).toBe(s.xText);
     for(const link of Object.values(s.links))expect(decodeURIComponent(link)).not.toContain('private-');
     const html=renderToStaticMarkup(<InviteFriends mission={3} mode="relaxed" variant={1} score={1510}/>);
     for(const platform of ['WhatsApp','Facebook','Instagram','TikTok','LinkedIn'])expect(html).toContain(platform);

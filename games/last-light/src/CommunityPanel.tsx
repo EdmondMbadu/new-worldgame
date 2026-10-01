@@ -883,17 +883,22 @@ export function InviteFriends({ mission, mode, variant, score, compact = false }
   const [notice, setNotice] = useState('');
   const [social, setSocial] = useState<string | null>(null);
   const [card, setCard] = useState<Blob | null>(null);
+  const [cardUrl, setCardUrl] = useState('');
+  useEffect(() => {
+    if (!card) { setCardUrl(''); return; }
+    const url = URL.createObjectURL(card); setCardUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [card]);
   const [cardError, setCardError] = useState(false);
   const [cardAttempt, setCardAttempt] = useState(0);
   const challenge = shareChallenge(mission, mode, variant, score);
   useEffect(() => {
-    if (!social) return;
     let active = true; setCard(null); setCardError(false);
     void challengeCard(mission, score).then(blob => { if(active) setCard(blob); }).catch(() => { if(active) setCardError(true); });
     return () => { active = false; };
-  }, [mission, score, language, social, cardAttempt]);
+  }, [mission, score, language, cardAttempt]);
   const copy = async () => {
-    try { await navigator.clipboard.writeText(`${challenge.text}\n${challenge.url}`); setNotice('Challenge link copied. Share it with your friends.'); }
+    try { await navigator.clipboard.writeText(`${challenge.text}\n${challenge.url}`); setNotice('Invitation copied. Paste it with the image in your social app.'); }
     catch { setNotice('Copy this link from the field below.'); }
   };
   const download = () => {
@@ -926,14 +931,19 @@ export function InviteFriends({ mission, mode, variant, score, compact = false }
         <button onClick={download} disabled={!card}>{t(card ? 'Download story image' : cardError ? 'Image unavailable' : 'Preparing story image…')}</button>
         {cardError && <button onClick={() => setCardAttempt(n => n+1)}>{t('Retry')}</button>}
         {card && typeof navigator.share === 'function' && <button onClick={() => share(true)}>{t('Share image…')}</button>}
-        <button onClick={() => void copy()}>{t('Copy challenge link')}</button>
+        <button onClick={() => void copy()}>{t('Copy invitation')}</button>
       </div>
     </div>}
     <div className="community-actions">
-      <button onClick={() => void copy()}>{t('Copy challenge link')}</button>
-      {typeof navigator.share === 'function' && <button onClick={() => share()}>{t('More…')}</button>}
+      <button onClick={() => void copy()}>{t('Copy invitation')}</button>
+      <button onClick={download} disabled={!card}>{t(card ? 'Download image' : cardError ? 'Image unavailable' : 'Preparing image…')}</button>
+      {cardError && <button onClick={() => setCardAttempt(n => n + 1)}>{t('Retry')}</button>}
+      {typeof navigator.share === 'function' && <button onClick={() => share(true)} disabled={!card}>{t('Share image')}</button>}
+      {typeof navigator.share === 'function' && <button onClick={() => share()}>{t('Share invitation')}</button>}
       <a href={challenge.links.Email}>{t('Email ↗')}</a>
     </div>
+    {cardUrl && <img className="share-image-preview" src={cardUrl} alt={t('Share preview')} loading="lazy" />}
+    <p className="share-invitation">{challenge.text}</p>
     <label className="share-link-label">{t('Challenge link')}<input readOnly aria-label={t('Challenge link')} value={challenge.url} onFocus={e => e.currentTarget.select()} /></label>
     <small>{t('Inviting is optional. You choose who receives the link.')}</small>
     {notice && <p role="status">{t(notice)}</p>}

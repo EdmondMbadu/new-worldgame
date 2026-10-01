@@ -6,7 +6,7 @@ export const CLINICS = manifest.clinics;
 export type ClinicStory = (typeof CLINICS)[number];
 export type StoryScene = 'opening' | 'closing';
 export const storyClip = (clinic: ClinicStory, scene: StoryScene) =>
-  `${import.meta.env.BASE_URL}audio/story/${getLanguage() === 'fr' ? 'fr/' : ''}${clinic.id}-${scene}.mp3${scene === 'opening' ? '?v=20260928' : ''}`;
+  `${import.meta.env.BASE_URL}audio/story/${getLanguage() === 'fr' ? 'fr/' : ''}${clinic.id}-${scene}.mp3?v=20261001`;
 export const STORY_DISCLOSURE = manifest.narration;
 export const CAMPAIGN_HREF = manifest.source;
 /** Real-world context shown after each arrival; sourced and kept apart from the fiction. */

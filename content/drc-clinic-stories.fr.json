@@ -22,7 +22,7 @@
       "headline": "Le centre utilise ses dernières réserves.",
       "context": "Les soins continuent après le coucher du soleil. Vivez une livraison fictive inspirée du projet solaire réalisé à Ndingi.",
       "projectNote": "L’énergie solaire est déjà installée à Ndingi. Ce chapitre reconstitue une livraison inspirée de ce projet achevé.",
-      "opening": "Ici Ndingi. Les soins ne peuvent pas s’arrêter au coucher du soleil. Ce voyage rappelle pourquoi notre projet solaire était essentiel : des patients attendaient, et l’équipe avait besoin de lumière pour les soigner. Apportez la batterie chargée dans la cour, en sécurité. D’autres centres attendent encore une électricité fiable. Ce travail est urgent.",
+      "opening": "Ici Ndingi. Les soins ne peuvent pas s’arrêter au coucher du soleil. Ce voyage rappelle pourquoi notre projet solaire était essentiel : des patients attendaient, et l’équipe avait besoin de lumière pour les soigner. Apportez les panneaux solaires et la batterie chargée dans la cour, en sécurité. D’autres centres attendent encore une électricité fiable. Ce travail est urgent.",
       "closing": "Le matériel est arrivé auprès de notre équipe. Merci de l’avoir apporté en toute sécurité. Dans le véritable projet de Ndingi, l’énergie solaire alimente cinq espaces de soins, de la maternité au bloc opératoire. Votre trajet s’achève ici. Notre travail continue.",
       "routeNote": "Gardez la droite et laissez de la place aux autres véhicules. À la bifurcation, la route de gauche est plus longue mais plus ferme. Freinez avant les ornières.",
       "fact": {
@@ -45,7 +45,7 @@
       "headline": "Une raison de continuer.",
       "context": "Un centre ophtalmologique prépare son prochain chapitre solaire. Transportez le matériel sous la pluie jusqu’à l’équipe.",
       "projectNote": "Le centre a été visité et documenté. Le dimensionnement final du système solaire et le calendrier d’installation restent à confirmer.",
-      "opening": "Ici Nganga Tsanga. Les patients ont besoin de soins oculaires, quel que soit le temps. Une électricité fiable, c’est de la lumière pour examiner et continuer à soigner. Notre centre prépare son projet solaire. Dans cette histoire, vous apportez le matériel sous la pluie. Ralentissez dans les virages boueux. Aidons les soins à avancer.",
+      "opening": "Ici Nganga Tsanga. Les patients ont besoin de soins oculaires, quel que soit le temps. Une électricité fiable, c’est de la lumière pour examiner et continuer à soigner. Notre centre prépare son projet solaire. Dans cette histoire, vous apportez les panneaux solaires et la batterie chargée sous la pluie. Ralentissez dans les virages boueux. Aidons les soins à avancer.",
       "closing": "Vous avez traversé la pluie, et le matériel est arrivé en toute sécurité. Merci pour cette livraison attentive. Un tel trajet n’est qu’une étape dans un effort bien plus long. Soufflez un peu. Le prochain centre vous attend.",
       "routeNote": "La pluie rend le raccourci boueux. Freinez tôt, braquez doucement et prenez la crête de gauche, plus longue mais plus ferme.",
       "fact": {
@@ -68,7 +68,7 @@
       "headline": "Les soins valent la traversée.",
       "context": "Le centre ophtalmologique de Nsioni a été documenté pour un projet solaire. Dans cette histoire, votre livraison rapproche l’équipe de son objectif.",
       "projectNote": "Le centre a été visité et photographié. Le dimensionnement solaire, le calendrier d’installation et la localisation exacte restent à confirmer.",
-      "opening": "Ici Nsioni. Attendre l’électricité, c’est attendre des soins qui ne devraient pas attendre. Notre centre ophtalmologique prépare son projet solaire. Dans cette histoire, l’équipe attend votre matériel de l’autre côté de la rivière. Vérifiez le passage, laissez passer les véhicules et prenez la crête si nécessaire. Apportez la lumière en sécurité.",
+      "opening": "Ici Nsioni. Attendre l’électricité, c’est attendre des soins qui ne devraient pas attendre. Notre centre ophtalmologique prépare son projet solaire. Dans cette histoire, l’équipe attend vos panneaux solaires et votre batterie chargée de l’autre côté de la rivière. Vérifiez le passage, laissez passer les véhicules et prenez la crête si nécessaire. Apportez la lumière en sécurité.",
       "closing": "La traversée est derrière vous. Le matériel est arrivé auprès de notre équipe. Merci d’en avoir pris soin, et d’avoir respecté les autres usagers de la route. Ce trajet est terminé. Nous poursuivrons le travail.",
       "routeNote": "Le pont endommagé ne laisse qu’un passage étroit balisé. Restez au centre, sous les 20 km/h, ou prenez le contournement par la crête à gauche. Laissez passer les véhicules engagés.",
       "fact": {
@@ -91,7 +91,7 @@
       "headline": "Apportez un peu de lumière.",
       "context": "Un centre prépare son accès à une énergie solaire fiable. Suivez les réflecteurs dans la nuit et apportez le matériel à l’équipe.",
       "projectNote": "L’extérieur et les salles de soins ont été documentés. Les prochaines étapes sont le dimensionnement du système solaire et la programmation de l’installation.",
-      "opening": "Ici Kiobo Kwimba. La nuit est tombée, mais les besoins de soins demeurent. Les familles ont besoin de centres qui restent disponibles après le coucher du soleil. Une électricité fiable le permet. Notre projet solaire reste à réaliser. Ce soir, dans cette histoire, suivez les réflecteurs et apportez la batterie en sécurité. Chaque soin compte.",
+      "opening": "Ici Kiobo Kwimba. La nuit est tombée, mais les besoins de soins demeurent. Les familles ont besoin de centres qui restent disponibles après le coucher du soleil. Une électricité fiable le permet. Notre projet solaire reste à réaliser. Ce soir, dans cette histoire, suivez les réflecteurs et apportez les panneaux solaires et la batterie chargée en sécurité. Chaque soin compte.",
       "closing": "Vos phares ont guidé l’équipe vers la cour. Le matériel est maintenant ici, intact et prêt à être remis. Merci d’avoir effectué ce trajet avec autant de soin. Reposez-vous un instant avant la dernière route.",
       "routeNote": "Le brouillard et l’obscurité réduisent la visibilité. Suivez les réflecteurs, ralentissez avant les virages sans visibilité et restez à distance du bord de la falaise.",
       "fact": {
@@ -114,8 +114,8 @@
       "headline": "Encore une lumière au bout du chemin.",
       "context": "Le dernier trajet mène au Mont Sinaï, à Boma. Apportez le dernier chargement à l’équipe de l’hôpital.",
       "projectNote": "L’hôpital a été visité et photographié. Les salles et les équipements à alimenter doivent être confirmés avant le dimensionnement final et l’installation.",
-      "opening": "Ici Mont Sinaï, à Boma. C’est votre dernière livraison, mais le travail réel continue. Des personnes attendent encore une électricité fiable. Les soins hospitaliers ne peuvent dépendre du jour ou de la chance. Dans cette histoire, apportez le dernier kit à travers l’orage, en sécurité. Puis aidez notre équipe à faire avancer le projet solaire.",
-      "closing": "Le matériel est arrivé auprès de l’équipe. Merci pour chaque décision prudente prise en chemin. Vous avez amené la batterie et les panneaux jusqu’à la cour en toute sécurité. Les équipes soignantes poursuivent leur travail. Pour l’instant, soufflez un peu et profitez de la lumière.",
+      "opening": "Ici Mont Sinaï, à Boma. C’est votre dernière livraison, mais le travail réel continue. Des personnes attendent encore une électricité fiable. Les soins hospitaliers ne peuvent dépendre du jour ou de la chance. Dans cette histoire, apportez les derniers panneaux solaires et la batterie chargée à travers l’orage, en sécurité. Puis aidez notre équipe à faire avancer le projet solaire.",
+      "closing": "Le matériel est arrivé auprès de l’équipe. Merci pour chaque décision prudente prise en chemin. Vous avez amené la batterie et les panneaux solaires jusqu’à la cour en toute sécurité. Les équipes soignantes poursuivent leur travail. Pour l’instant, soufflez un peu et profitez de la lumière.",
       "routeNote": "Observez les repères de crue et freinez avant les passages accidentés. Prenez le contournement plus ferme lorsque la route basse semble difficile. Protégez le matériel jusqu’au dernier virage.",
       "fact": {
         "figure": null,

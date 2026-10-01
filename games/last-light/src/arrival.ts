@@ -45,9 +45,9 @@ export const stillShot = (t: number): ArrivalShot =>
 
 export const ARRIVAL_CAPTIONS: Record<ArrivalShot, { eyebrow: string; title: string; detail: string; note?: string }> = {
   arrive: { eyebrow: 'ARRIVAL', title: 'You made it.', detail: 'The team comes out to meet the truck.' },
-  unload: { eyebrow: 'THE HANDOVER', title: 'Careful hands for tonight’s power.', detail: 'The charged battery goes straight to the power cabinet.' },
-  connect: { eyebrow: 'CONNECTED', title: 'The battery takes the load.', detail: 'The inverter lamp turns green. The reserve can rest.' },
-  panels: { eyebrow: 'THE PANELS', title: 'Sunlight for the days ahead.', detail: 'The roof array will recharge the battery every day.', note: 'Time-lapse · a real installation takes a trained team several days' },
+  unload: { eyebrow: 'THE HANDOVER', title: 'Careful hands for tonight’s power.', detail: 'The solar panels are handed over. The charged battery goes straight to the power cabinet.' },
+  connect: { eyebrow: 'CONNECTED', title: 'The battery takes the load.', detail: 'The inverter lamp turns green. Solar panels will recharge the battery for the days ahead.' },
+  panels: { eyebrow: 'THE PANELS', title: 'Sunlight for the days ahead.', detail: 'The solar panels on the roof will recharge the battery every day.', note: 'Time-lapse · a real installation takes a trained team several days' },
   inside: { eyebrow: 'FIRST LIGHT', title: 'The care room comes back to life.', detail: 'Light for the night shift. A cold fridge for vaccines. A monitor that works.' },
   pullback: { eyebrow: 'A BRIGHTER NIGHT', title: 'The clinic is awake.', detail: 'Tonight’s care continues on its own power.' },
 };

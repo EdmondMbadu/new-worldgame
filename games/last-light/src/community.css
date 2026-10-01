@@ -346,3 +346,11 @@
 .social-share-grid button[aria-expanded="true"] { border-color:#efd08a; }
 .social-story-help { padding:16px; background:#ffffff08; border:1px solid #e6cf9533; border-radius:8px; margin-bottom:16px; }
 @media(max-width:480px) { .social-share-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+.share-invitation { white-space: pre-line; font-size: 14px; line-height: 1.6; }
+.journey-restoring { position: fixed; inset: 0; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 32px; background: #102e29f5; color: #f5f0df; text-align: center; }
+.journey-restoring h2 { font: 600 clamp(28px, 5vw, 48px) Georgia, serif; }
+.journey-restoring p { max-width: 480px; line-height: 1.6; }
+.journey-restoring .loading-line { width: min(320px, 80vw); }
+
+.share-image-preview { display: block; width: min(100%, 320px); height: auto; border-radius: 8px; margin: 16px auto; }
