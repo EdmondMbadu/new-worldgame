@@ -66,34 +66,35 @@ button:active:not(:disabled) {
 .at-home {
   padding: 0 5vw;
   overflow: hidden;
-  background: #142d2f;
+  background: #0b1928;
 }
 .key-art,
 .home-shade {
   position: absolute;
-  inset: 0;
+  inset: 0 0 auto;
+  height: clamp(760px, 62vw, 1080px);
   z-index: -2;
 }
 .key-art {
   background-size: cover;
-  background-position: 57% 40%;
-  opacity: 0.88;
+  background-position: 62% top;
+  opacity: 1;
 }
 .home-shade {
   z-index: -1;
   background:
     linear-gradient(
       90deg,
-      rgba(8, 28, 29, 0.91),
-      rgba(8, 27, 28, 0.65) 36%,
-      rgba(8, 27, 28, 0.04) 72%
+      rgba(5, 16, 30, 0.65),
+      rgba(5, 16, 30, 0.3) 30%,
+      transparent 60%
     ),
     linear-gradient(
       0deg,
-      #102c2b 0%,
-      rgba(14, 34, 34, 0.65) 22%,
-      transparent 56%,
-      rgba(13, 34, 36, 0.3)
+      #0b1928 0%,
+      rgba(11, 25, 40, 0.7) 12%,
+      transparent 38%,
+      rgba(5, 16, 30, 0.12)
     );
 }
 .home-header {
@@ -162,16 +163,26 @@ button:active:not(:disabled) {
   box-shadow: 0 0 14px #f6da9b66;
 }
 .hero h1 {
-  font-family: "Barlow Condensed", Impact, sans-serif;
-  font-size: clamp(100px, 10vw, 156px);
+  font-family: Georgia, serif;
+  font-size: clamp(104px, 10vw, 148px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -6px;
+  margin: 34px 0 25px;
+  text-shadow: 0 4px 32px #07122266;
+}
+.title-prelude {
+  display: block;
+  margin-bottom: 12px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-size: 16px;
   font-weight: 500;
-  line-height: 0.78;
-  letter-spacing: 2px;
-  margin: 32px 0 27px;
+  line-height: 1.5;
+  letter-spacing: 6px;
 }
 .hero h1 em {
   font-family: Georgia, serif;
-  font-size: 0.76em;
+  font-size: 1em;
   font-weight: 400;
   letter-spacing: -5px;
 }
@@ -230,13 +241,17 @@ button:active:not(:disabled) {
   border-radius: 50%;
 }
 .mission-preview {
-  position: absolute;
-  right: 5vw;
-  top: 45%;
-  max-width: 265px;
-  text-shadow: 0 2px 10px #142c2a;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 24px;
+  padding: 20px 0;
+  margin-bottom: 20px;
+  border-top: 1px solid #eee5cb25;
 }
 .mission-preview > .eyebrow {
+  flex-basis: 100%;
   font-size: 9px;
   color: #e5d7af;
 }
@@ -244,18 +259,17 @@ button:active:not(:disabled) {
   font-family: Georgia, serif;
   font-weight: 400;
   font-size: 29px;
-  margin: 10px 0;
+  margin: 0;
 }
 .mission-preview p {
+  max-width: 380px;
+  margin: 0;
   font-size: 12px;
   color: #d5d9c7;
   line-height: 1.6;
 }
 .preview-rule {
-  height: 1px;
-  background: #e9e4ca55;
-  margin: 20px 0 15px;
-  width: 40px;
+  display: none;
 }
 .mission-preview > span:not(.eyebrow) {
   display: block;
@@ -1151,7 +1165,7 @@ kbd {
     padding-top: 90px;
   }
   .hero h1 {
-    font-size: 174px;
+    font-size: 160px;
   }
   .hero-description {
     font-size: 15px;
@@ -1175,11 +1189,10 @@ kbd {
     padding-top: 45px;
   }
   .hero h1 {
-    font-size: 120px;
+    font-size: 116px;
   }
   .mission-preview {
-    right: 4vw;
-    max-width: 235px;
+    gap: 8px 16px;
   }
   .hero-meta {
     font-size: 7px;
@@ -1219,8 +1232,12 @@ kbd {
     padding: 40px 0 28px;
   }
   .hero h1 {
-    font-size: 112px;
-    line-height: 0.8;
+    font-size: clamp(92px, 26vw, 112px);
+    line-height: 0.95;
+  }
+  .title-prelude {
+    font-size: 13px;
+    letter-spacing: 4px;
   }
   .hero-tagline {
     font-size: 19px;
@@ -1229,14 +1246,16 @@ kbd {
     font-size: 12px;
   }
   .key-art {
-    background-position: 68% 20%;
-    background-size: auto 77vh;
+    height: 760px;
+    background-position: 68% top;
+    background-size: auto 650px;
     background-repeat: no-repeat;
   }
   .home-shade {
+    height: 760px;
     background:
-      linear-gradient(90deg, #0d2a2bf2, #0d2a2b6b 65%, #0d2a2b26),
-      linear-gradient(0deg, #102c2b 24%, transparent 82%);
+      linear-gradient(90deg, #071321bf, #07132155 65%, #07132122),
+      linear-gradient(0deg, #0b1928 12%, #0b1928bb 30%, transparent 72%);
   }
   .mission-preview {
     display: none;

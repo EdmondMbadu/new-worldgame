@@ -35,7 +35,7 @@ export class GameLauncherComponent {
   readonly title: string;
   constructor(route: ActivatedRoute, sanitizer: DomSanitizer) {
     const lastLight = route.snapshot.data['game'] === 'last-light';
-    this.title = lastLight ? 'Last Light' : 'Lost in Orbit';
+    this.title = lastLight ? 'Let There Be Light' : 'Lost in Orbit';
     this.source = sanitizer.bypassSecurityTrustResourceUrl(
       (lastLight ? '/games/last-light/index.html' : '/games/lost-in-orbit/index.html') +
         (lastLight && typeof location !== 'undefined' ? location.search : '')

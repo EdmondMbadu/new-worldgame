@@ -105,7 +105,7 @@ export function RealProjectCard({
       <div>
         <span className="eyebrow">{t("THE REAL PROJECT")}</span>
         <h3>{t("Meet the people bringing the light.")}</h3>
-        <p>{t(" Get to know the clinic electrification team and the work that inspired Last Light. ")}</p>
+        <p>{t(" Get to know the clinic electrification team and the work that inspired Let There Be Light. ")}</p>
         <div className="community-actions">
           <a
             href={campaignHref("team")}
@@ -617,7 +617,7 @@ export function LeaderboardDialog({
     >
       <div className="lb-shell">
         <header className="lb-heading">
-          <span className="eyebrow">{t("LAST LIGHT · THE PLAYERS")}</span>
+          <span className="eyebrow">{t("LET THERE BE LIGHT · THE PLAYERS")}</span>
           <h2 id="leaderboard-title">{t("Leaderboard")}</h2>
           <p>{t("Every delivery counts. Your best stays with you.")}</p>
           <button

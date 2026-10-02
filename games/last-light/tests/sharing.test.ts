@@ -15,7 +15,7 @@ it('shares the actual delivery, impact, attribution and a playable public URL fr
 });
 it('does not invent a score when inviting without a completed delivery', () => {
   const share = shareChallenge(0, 'relaxed', 1);
-  expect(share.text).not.toContain('I scored'); expect(share.text).toContain('Try this Last Light game');
+  expect(share.text).not.toContain('I scored'); expect(share.text).toContain('Try this Let There Be Light game');
 });
 it('renders the supplied driving screenshot into the downloadable score image', async () => {
   const drawImage = vi.fn(), fillText = vi.fn();

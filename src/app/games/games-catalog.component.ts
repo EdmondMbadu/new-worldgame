@@ -18,8 +18,8 @@ const GAMES = [
   {
     slug: 'last-light',
     number: '02',
-    title: 'Last Light',
-    image: '/assets/games/last-light.png',
+    title: 'Let There Be Light',
+    image: '/assets/games/let-there-be-light.webp',
     href: '/games/last-light/',
     copy: 'games.lastLight',
     duration: 'games.lastLight.duration',
@@ -41,7 +41,7 @@ export class GamesCatalogComponent implements OnInit {
       title: 'Games · Global Solutions Lab',
       robots: 'noindex, nofollow',
       description:
-        'Play Lost in Orbit and Last Light: 3D adventures about resourcefulness, rescue, and bringing power to the people who need it.',
+        'Play Lost in Orbit and Let There Be Light: 3D adventures about resourcefulness, rescue, and bringing power to the people who need it.',
       url: 'https://newworld-game.org/games',
     });
   }

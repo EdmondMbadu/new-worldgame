@@ -64,7 +64,7 @@ for (const game of games) {
   if (total > game.totalBudget)
     fail(`${game.name} exceeds its total asset budget.`);
   if (game.slug === "last-light") {
-    for (const art of ["key-art.webp", "key-art-small.webp"])
+    for (const art of ["let-there-be-light.webp", "let-there-be-light-small.webp"])
       if (!existsSync(path.join(root, art)))
         fail("Last Light is missing its menu art.");
     if (!existsSync(path.join(root, "sw.js")))

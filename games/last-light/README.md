@@ -1,4 +1,4 @@
-# Last Light — Adventure 02
+# Let There Be Light — Adventure 02
 
 ## Chapter openings and driving guidance
 
@@ -23,7 +23,7 @@ npm start
 
 After pulling revision 7, run `npm install` in `games/last-light` once (it adds the streamed physics package `@dimforge/rapier3d`).
 
-Open http://localhost:4200/games and choose Last Light. `npm start` runs Angular and both isolated game servers. For Last Light alone, run `npm run start:last-light` and visit http://127.0.0.1:5175/games/last-light/.
+Open http://localhost:4200/games and choose Let There Be Light. `npm start` runs Angular and both isolated game servers. For Let There Be Light alone, run `npm run start:last-light` and visit http://127.0.0.1:5175/games/last-light/.
 
 The combined development command uses Angular's `games` configuration to let requests reach the live game servers. `npm run start:app` retains the static, prebuilt game assets for an Angular-only preview.
 

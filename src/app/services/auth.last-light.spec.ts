@@ -1,7 +1,7 @@
 import { fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
 import { AuthService } from './auth.service';
 
-describe('Last Light account creation and return', () => {
+describe('Let There Be Light account creation and return', () => {
   let service: any;
   let user: any;
   let originalUrl: string;
@@ -33,12 +33,12 @@ describe('Last Light account creation and return', () => {
     spyOn(service, 'popRedirect').and.returnValue(destination);
   });
   afterEach(() => { history.replaceState(null, '', originalUrl); sessionStorage.removeItem('redirectTo'); });
-  const register = () => service.register(' 李 ', ' NG ', ' player@example.test ', 'test-pass-42', 'Play Last Light.', [], {continueGame:true});
+  const register = () => service.register(' 李 ', ' NG ', ' player@example.test ', 'test-pass-42', 'Play Let There Be Light.', [], {continueGame:true});
 
   it('awaits profile creation, trims names and returns even when verification delivery fails', async () => {
     service.sendEmailForVerification.and.rejectWith(new Error('email offline'));
     const outcome = await register();
-    expect(service.addNewUser).toHaveBeenCalledWith('李','NG',user,'Play Last Light.',[]);
+    expect(service.addNewUser).toHaveBeenCalledWith('李','NG',user,'Play Let There Be Light.',[]);
     expect(outcome).toEqual({status:'created',profileRepaired:true,verificationSent:false});
     expect(service.newUser.success).toBeTrue();
   });

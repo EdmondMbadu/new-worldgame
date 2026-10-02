@@ -60,7 +60,7 @@ function OpeningStoryView(p: ClinicStoryProps) {
       <div className="story-art" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}story/clinic-evening.webp)` }} aria-hidden="true" />
       <div className="story-shade" aria-hidden="true" />
       <header className="story-header">
-        <button className="story-back" onClick={p.onHome} aria-label={t("Back to chapter map")}>← <span>{t("LAST LIGHT")}</span></button>
+        <button className="story-back" onClick={p.onHome} aria-label={t("Back to chapter map")}>← <span>{t("LET THERE BE LIGHT")}</span></button>
         <span className="eyebrow">{t(`CHAPTER ${String(p.chapter + 1).padStart(2, '0')} / 05`)}</span>
         <button className="text-button" onClick={p.onSettings}>{t("Settings")}</button>
       </header>

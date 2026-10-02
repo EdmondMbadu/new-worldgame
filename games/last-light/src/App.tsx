@@ -47,12 +47,12 @@ import { DriveCoach } from "./DriveCoach";
 import { keyLabel } from "./DrivingGuide";
 
 const base = import.meta.env.BASE_URL;
-/** Phones get a 960 px menu image (80 KB); larger screens the full one (210 KB). */
+/** Phones get a smaller menu image; larger screens the full artwork. */
 const KEY_ART =
   typeof innerWidth !== 'undefined' &&
   innerWidth * Math.min(devicePixelRatio || 1, 2) > 1100
-    ? 'key-art.webp'
-    : 'key-art-small.webp';
+    ? 'let-there-be-light.webp'
+    : 'let-there-be-light-small.webp';
 const time = (n: number) => {
   const seconds = Math.ceil(Math.max(0, n));
   return `${Math.floor(seconds / 60)
@@ -947,7 +947,7 @@ export default function App() {
       </GameDialog>}
       {sharing && <GameDialog title={t('Invite 10 friends')} onClose={() => setSharing(false)}><InviteFriends mission={selected} mode={save.settings.mode} variant={variant} score={result?.practice ? undefined : result?.score ?? save.story.best[bestKey(selected,save.settings.mode,variant)]?.score} compact /></GameDialog>}
       {continuing && !inGame && <div className="journey-restoring" role="status" aria-live="polite" aria-busy="true">
-        <span className="eyebrow">{t('LAST LIGHT')}</span>
+        <span className="eyebrow">{t('LET THERE BE LIGHT')}</span>
         <h2>{t('Restoring journey…')}</h2>
         <div className="loading-line" />
         <p>{t('Your saved progress is safe. Checking your checkpoint and preparing the road…')}</p>
@@ -973,9 +973,9 @@ export default function App() {
           <section className="hero">
             <div className="eyebrow">
               <span className="live-dot" />{t(" A JOURNEY WORTH MAKING ")}</div>
-            <h1> LAST <br />
-              <em>LIGHT</em>
-              <span className="title-period">.</span>
+            <h1 aria-label="Let There Be Light">
+              <span className="title-prelude">LET THERE BE</span>
+              <em>light</em><span className="title-period">.</span>
             </h1>
             <p className="hero-tagline">{t(" The road is rough. ")}<br />{t(" The reason is everything. ")}</p>
             <p className="hero-description">{t(" Five nights. One reason to keep going. ")}<br />{t(" Reach the clinic. Bring the light. ")}</p>
@@ -1084,7 +1084,7 @@ export default function App() {
             ref={canvas}
             className="game-canvas"
             tabIndex={-1}
-            aria-label={t(`Last Light: drive to ${mission.place}`)}
+            aria-label={t(`Let There Be Light: drive to ${mission.place}`)}
           />
           <div className="game-vignette" />
           {!error && (opening || (ready && e?.phase === 'results' && result)) && (
@@ -1112,7 +1112,7 @@ export default function App() {
           )}
           {!ready && !error && !opening && (
             <div className="loading-screen">
-              <span className="eyebrow">{t(" LAST LIGHT / CHAPTER ")}{t(String(selected + 1).padStart(2, "0"))}
+              <span className="eyebrow">{t(" LET THERE BE LIGHT / CHAPTER ")}{t(String(selected + 1).padStart(2, "0"))}
               </span>
               <h2>{t(mission.title)}</h2>
               <div className="loading-line" />
@@ -1124,7 +1124,7 @@ export default function App() {
             <>
               {!['restoring', 'results'].includes(e.phase) && <header className="drive-header">
                 <div className="drive-identity">
-                  <span className="eyebrow">{t(" LAST LIGHT / ")}{t(String(selected + 1).padStart(2, "0"))}
+                  <span className="eyebrow">{t(" LET THERE BE LIGHT / ")}{t(String(selected + 1).padStart(2, "0"))}
                   </span>
                   <strong>{t(clinic.shortName)}</strong>
                 </div>

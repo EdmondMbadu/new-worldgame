@@ -9,7 +9,7 @@ export const games = [
   },
   {
     slug: "last-light",
-    name: "Last Light",
+    name: "Let There Be Light",
     port: 5175,
     // Physics ships as a separate streamed .wasm, so JS + CSS stay small.
     codeBudget: 500 * 1024,

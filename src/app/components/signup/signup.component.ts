@@ -34,7 +34,7 @@ export class SignupComponent implements OnInit {
   async inviteFriends() {
     const url = 'https://newworld-game.org/games/last-light/';
     try {
-      if (navigator.share) await navigator.share({ title: 'Last Light', text: t('Help bring solar panels and batteries to health clinics. Play Last Light and invite your friends!'), url });
+      if (navigator.share) await navigator.share({ title: 'Let There Be Light', text: t('Help bring solar panels and batteries to health clinics. Play Let There Be Light and invite your friends!'), url });
       else { await navigator.clipboard.writeText(url); this.shareNotice = 'Link copied. Send it to 10 friends!'; }
     } catch (error: any) {
       if (error?.name !== 'AbortError') this.shareNotice = 'Share this link: https://newworld-game.org/games/last-light/';
@@ -49,7 +49,7 @@ export class SignupComponent implements OnInit {
     const destination = captureAuthReturn();
     if (destination) this.auth.setRedirectUrl(destination);
     window.scroll(0, 0);
-    if (this.gameReturnUrl) this.goal = t('Play Last Light, save my progress, and join the player leaderboard.');
+    if (this.gameReturnUrl) this.goal = t('Play Let There Be Light, save my progress, and join the player leaderboard.');
     this.formLoadTime = Date.now(); // Record form load time
   }
   constructor(private auth: AuthService, private router: Router) {}
@@ -207,7 +207,7 @@ export class SignupComponent implements OnInit {
     this.submitting = true;
     try {
       const outcome = await this.auth.register(this.firstName.trim(), this.lastName.trim(), this.email.trim(), this.password,
-        'Play Last Light and save my journey.', [], { continueGame: true });
+        'Play Let There Be Light and save my journey.', [], { continueGame: true });
       try {
         if (outcome.verificationSent === false) sessionStorage.setItem('last-light.verification-notice', 'pending');
         else sessionStorage.removeItem('last-light.verification-notice');

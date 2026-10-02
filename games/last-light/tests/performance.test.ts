@@ -23,8 +23,8 @@ describe('what a first drive downloads', () => {
     for (let id = 0; id < 5; id++) expect(existsSync(asset(`models/clinic-${id}.glb`))).toBe(false);
     // The unused sky HDR and roughness map are gone; the menu art is WebP.
     for (const gone of ['textures/sky.hdr', 'textures/road-arm.jpg', 'key-art.png']) expect(existsSync(asset(gone))).toBe(false);
-    expect(size('key-art.webp')).toBeLessThan(250 * 1024);
-    expect(size('key-art-small.webp')).toBeLessThan(100 * 1024);
+    expect(size('let-there-be-light.webp')).toBeLessThan(250 * 1024);
+    expect(size('let-there-be-light-small.webp')).toBeLessThan(100 * 1024);
     const story = JSON.parse(readFileSync(new URL('../../../content/drc-clinic-stories.json', import.meta.url), 'utf8'));
     for (const clinic of story.clinics.slice(0, 5))
       for (const scene of ['opening', 'closing']) expect(size(`audio/story/${clinic.id}-${scene}.mp3`)).toBeLessThan(150 * 1024);

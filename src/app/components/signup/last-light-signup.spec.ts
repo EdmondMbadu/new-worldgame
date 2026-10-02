@@ -6,7 +6,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { SignupComponent } from './signup.component';
 
-describe('Last Light signup form', () => {
+describe('Let There Be Light signup form', () => {
   let fixture: ComponentFixture<SignupComponent>, component: SignupComponent, auth: any;
   beforeEach(async () => {
     auth={register:jasmine.createSpy('register').and.resolveTo({status:'created',profileRepaired:true}),setRedirectUrl:jasmine.createSpy('setRedirectUrl')};
@@ -31,7 +31,7 @@ describe('Last Light signup form', () => {
   it('accepts international and short names immediately, without a repeated password, pledge or five-second wait', async () => {
     component.firstName='李'; component.lastName='NG'; component.email='player@example.test'; component.password='test-pass-42'; component.agree=true;
     await component.createAccount();
-    expect(auth.register).toHaveBeenCalledWith('李','NG','player@example.test','test-pass-42','Play Last Light and save my journey.',[],{continueGame:true});
+    expect(auth.register).toHaveBeenCalledWith('李','NG','player@example.test','test-pass-42','Play Let There Be Light and save my journey.',[],{continueGame:true});
     expect((component as any).returnToGame).toHaveBeenCalled(); expect(component.password).toBe('');
   });
   it('keeps the entered details and supports retry when the profile request fails', async () => {

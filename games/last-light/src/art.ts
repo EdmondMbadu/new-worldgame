@@ -411,7 +411,7 @@ export function createTruck() {
   box(fixed, dark, 0, 0.06, 2.45, 0.24, 0.1, 0.08, 0.02);
   box(
     tailgate,
-    label('LAST LIGHT', '#eff1df', '#25665b', 512, 96),
+    label('LET THERE BE LIGHT', '#eff1df', '#25665b', 512, 96),
     0,
     0.235,
     -0.062,

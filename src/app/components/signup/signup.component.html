@@ -1,7 +1,7 @@
 <section *ngIf="gameReturnUrl; else standardSignup" class="game-signup">
-  <a class="game-back" [href]="gameReturnUrl" (click)="cancelGameReturn()">← {{ tr('Back to Last Light') }}</a>
+  <a class="game-back" [href]="gameReturnUrl" (click)="cancelGameReturn()">← {{ tr('Back to Let There Be Light') }}</a>
   <div class="game-signup-card">
-    <p class="game-eyebrow">LAST LIGHT · {{ tr('YOUR JOURNEY CONTINUES') }}</p>
+    <p class="game-eyebrow">LET THERE BE LIGHT · {{ tr('YOUR JOURNEY CONTINUES') }}</p>
     <h1>{{ tr('Save your delivery. Keep bringing the light.') }}</h1>
     <p>{{ tr('Create a free account to save your score and continue to the other four clinics.') }}</p>
     <p>{{ tr('Already have an account?') }} <a routerLink="/login" [queryParams]="{ redirectTo: gameReturnUrl }">{{ tr('Log in') }}</a></p>

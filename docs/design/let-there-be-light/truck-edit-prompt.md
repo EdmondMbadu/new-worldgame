@@ -1,0 +1,12 @@
+# Let There Be Light — solar delivery truck revision
+
+Edited with the built-in image generation tool on October 2, 2026, using `master-art.png` as the reference. The final original is `master-art-truck.png`. This truck revision supplies all current menu, catalog and social-preview editions. The artwork contains no title text.
+
+```text
+Use case: precise-object-edit
+Edit target: the attached landscape artwork for "Let There Be Light".
+Primary request: Add the game's solar-delivery pickup truck to this existing image, while preserving the beautiful Michelangelo-inspired hands, spark, light trails, rural clinics, patients, landscape, palette, and composition almost exactly. No text anywhere in the artwork.
+Add one realistic unbranded off-white rugged pickup truck carrying clearly recognizable dark-blue photovoltaic solar panels and a compact secured battery kit in its open bed, with sturdy tie-down straps. It is the human delivery connecting the sacred promise in the sky to care on the ground. Place it on the red-earth foreground road in the lower middle of the composition, immediately left of the warmly illuminated nearest clinic, naturally arriving toward the clinic. Rear three-quarter view so the cargo is unmistakable. Give it physical weight: dust on tires and lower body, natural suspension, coherent wheel geometry, muted red tail lamps, a tiny warm headlight pool on the road ahead, gold edge light from the clinic and spark. The truck should be noticeable and beautifully painted, approximately 17 percent of the whole image width, yet subordinate to the hands and clinic. Slightly widen only the local foreground road if needed for its correct perspective; no floating truck, no giant vehicle, no obstruction of patients or the clinic doorway. Harmonize its brushwork and light with the fresco-like cinematic painting.
+Invariants: preserve the aspect ratio and overall scene; preserve both hands and anatomically correct fingers, their nearly touching gesture, fingertip spark, all golden light branches, clinic roofs with solar panels, human figures, moody hills, clouds, and subtle plaster texture; keep the left 30 percent quiet and dark for a separate HTML title.
+Constraints: absolutely no lettering, no game name, no logos, no badges, no license-plate text, no watermark. Change only what is needed to integrate one truck and a small natural dust wake. This must remain one coherent masterpiece.
+```

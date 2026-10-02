@@ -54,7 +54,7 @@ describe('complete French deliveries',()=>{
       const html=renderToStaticMarkup(<ClinicStoryView {...props} scene={scene} narration={{scene,status:'playing',progress:.5}}/>);
       expect(html).toContain('Soignant fictif');expect(html).toContain(translated[scene]);
       expect(html).not.toContain(clinic[scene]);expect(html).not.toContain('Settings');
-      expect(html).not.toContain('Take a moment');expect(html).toContain('LAST LIGHT');
+      expect(html).not.toContain('Take a moment');expect(html).toContain('LET THERE BE LIGHT');
       if(scene==='closing')expect(html).toContain('Contribuer 10 $ US');
     }
     setLanguage('en');expect(storyClip(clinic,'opening')).not.toContain('/fr/');expect(t(clinic.opening)).toBe(clinic.opening);

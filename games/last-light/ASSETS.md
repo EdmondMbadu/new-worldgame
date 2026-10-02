@@ -45,7 +45,9 @@ Revision 7 removed two earlier downloads that did not reach the screen: the Grav
 
 `public/audio/engine.wav` is `loop_0.wav` from [racing car engine sound loops](https://opengameart.org/content/racing-car-engine-sound-loops), by **domasx2**, released as **CC0**. The author identifies the source as a public-domain car recording and notes that the files were remade from that source. The bundled WAV is unchanged; playback normalizes amplitude, varies pitch with simulated engine speed/gearing, and filters/blends it with original surface and weather layers. A synthesized motor remains available if the optional recording cannot be loaded or decoded.
 
-## Menu and catalog art
+## Menu and catalog art — Let There Be Light
+
+On October 2, 2026, the menu and catalog were reimagined using the built-in image generation tool: Michelangelo-inspired hands connect a golden spark to solar-powered rural health clinics, while a pickup arrives carrying solar panels and a battery kit. The original artwork and exact generation and edit prompts are preserved in `../../docs/design/let-there-be-light/`. Current runtime editions are `public/let-there-be-light.webp`, `public/let-there-be-light-small.webp`, `public/let-there-be-light-share.jpg` and `../../src/assets/games/let-there-be-light.webp`. The title is rendered as accessible HTML rather than baked into the artwork. The previous WebP menu artwork is archived in the same design directory as `previous-key-art.webp` and `previous-key-art-small.webp` so unused art does not increase the game download.
 
 `public/key-art.webp` (1672×941, 212 KB; revision 7 WebP of the original PNG), `public/key-art-small.webp` (960×540, 79 KB, for small screens) and the catalog copy at `../../src/assets/games/last-light.png` were created in generation mode with the built-in image-generation tool. They are illustrative key art, not captures of the implemented renderer.
 

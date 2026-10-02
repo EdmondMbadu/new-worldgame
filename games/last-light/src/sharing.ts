@@ -6,19 +6,19 @@ export function shareChallenge(mission: number, mode: string, variant: number, s
   const achievement = score === undefined ? '' : formatText('I scored {0} points driving solar panels and batteries to {1}.', score.toLocaleString(getLocale()), CLINICS[mission].shortName);
   const text = [
     t('This game is really cool! More than 25,000 health clinics lack reliable power. Nearly 1 billion people around the world are impacted. Can you help bring them the light?'),
-    [achievement, t('Try this Last Light game and see how you do!')].filter(Boolean).join(' '),
+    [achievement, t('Try this Let There Be Light game and see how you do!')].filter(Boolean).join(' '),
     `(${t('Powered by Astra 6 and the Global Solutions Lab.')})`,
   ].join('\n\n');
   // X has a 280-character limit; the complete invitation remains available to copy.
-  const xText = [t('25,000+ clinics need reliable power. Nearly 1 billion people affected.'), achievement, t('Play Last Light! (Astra 6 · Global Solutions Lab)')].filter(Boolean).join('\n\n');
+  const xText = [t('25,000+ clinics need reliable power. Nearly 1 billion people affected.'), achievement, t('Play Let There Be Light! (Astra 6 · Global Solutions Lab)')].filter(Boolean).join('\n\n');
   const links = {
     WhatsApp: `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`,
     Facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
     X: `https://twitter.com/intent/tweet?text=${encodeURIComponent(xText)}&url=${encodeURIComponent(url)}`,
     LinkedIn: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
-    Email: `mailto:?subject=${encodeURIComponent(t('Can you beat my Last Light delivery?'))}&body=${encodeURIComponent(`${text}\n\n${url}`)}`,
+    Email: `mailto:?subject=${encodeURIComponent(t('Can you beat my Let There Be Light delivery?'))}&body=${encodeURIComponent(`${text}\n\n${url}`)}`,
   };
-  return { url, text, xText, title: t('Last Light · a delivery challenge'), links };
+  return { url, text, xText, title: t('Let There Be Light · a delivery challenge'), links };
 }
 /** A reusable driving screenshot with the selected clinic and real score. */
 export async function challengeCard(mission: number, score?: number): Promise<Blob> {
@@ -30,7 +30,7 @@ export async function challengeCard(mission: number, score?: number): Promise<Bl
   c.fillStyle = '#102e29'; c.fillRect(0, 0, 1200, 1200);
   c.fillStyle = '#f3d187'; c.font = '600 24px sans-serif';
   c.fillText('GLOBAL SOLUTIONS LAB', 48, 52);
-  c.fillStyle = '#f5f0df'; c.font = 'bold 76px Georgia'; c.fillText('LAST LIGHT', 48, 140);
+  c.fillStyle = '#f5f0df'; c.font = 'bold 54px Georgia'; c.fillText('LET THERE BE LIGHT', 48, 140, 1104);
   const h = 1200 * picture.height / picture.width;
   c.drawImage(picture, 0, 180, 1200, h);
   c.fillStyle = '#f5f0df'; c.font = '600 32px sans-serif';

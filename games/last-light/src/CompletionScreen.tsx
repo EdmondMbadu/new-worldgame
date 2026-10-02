@@ -36,7 +36,7 @@ export function CompletionScreen(p: ClinicStoryProps) {
       aria-labelledby="clinic-story-heading" data-story-scene="closing">
       <div className="completion-shade" aria-hidden="true" />
       <header className="completion-header">
-        <button className="completion-back" onClick={p.onHome} aria-label={t("Back to chapter map")}>← <span>{t("LAST LIGHT")}</span></button>
+        <button className="completion-back" onClick={p.onHome} aria-label={t("Back to chapter map")}>← <span>{t("LET THERE BE LIGHT")}</span></button>
         <div className="completion-progress" aria-label={t(`${p.completed.length} of five chapters complete`)}>
           <span>{p.completed.length} / 5 <span className="completion-chapters-label">{t("chapters")}</span></span>
           <div aria-hidden="true">{CLINICS.map((c, index) => <i key={c.id} className={p.completed.includes(index) ? 'is-complete' : ''} />)}</div>
