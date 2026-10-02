@@ -1,5 +1,9 @@
 <div #page class="aip-page">
-  <app-navbar [currenPageLabBanner]="false" [showLoginButton]="true"></app-navbar>
+  <app-navbar
+    [currenPageLabBanner]="false"
+    [showLoginButton]="true"
+    [pageSections]="navSections"
+  ></app-navbar>
 
   <div class="aip-progress" aria-hidden="true">
     <div class="aip-progress-fill"></div>
@@ -103,7 +107,7 @@
     </section>
 
     <!-- =========================== PRINCIPLES =========================== -->
-    <section class="aip-section" aria-labelledby="aip-principles-heading">
+    <section id="principles" class="aip-section" aria-labelledby="aip-principles-heading">
       <div class="aip-grid">
         <p class="aip-marker reveal">III.&ensp;Principles</p>
         <div>
@@ -127,7 +131,7 @@
     </section>
 
     <!-- ============================= ON FEAR ============================ -->
-    <section class="aip-section aip-section-tint" aria-labelledby="aip-fear-heading">
+    <section id="on-fear" class="aip-section aip-section-tint" aria-labelledby="aip-fear-heading">
       <div class="aip-grid">
         <p class="aip-marker reveal">IV.&ensp;On fear</p>
         <div>
@@ -175,7 +179,7 @@
     </section>
 
     <!-- ========================== IN PRACTICE =========================== -->
-    <section class="aip-section" aria-labelledby="aip-practice-heading">
+    <section id="in-practice" class="aip-section" aria-labelledby="aip-practice-heading">
       <div class="aip-grid">
         <p class="aip-marker reveal">V.&ensp;In practice</p>
         <div>

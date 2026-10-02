@@ -84,6 +84,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   @Input() currenPageLabBanner: boolean = true;
   @Input() showLoginButton: boolean = true;
   @Input() showLogo: boolean = true;
+  /**
+   * Optional in-page section links. When provided, they replace the default
+   * landing-page links (About / How It Works / Impact) in the public navbar,
+   * so standalone pages can point to their own sections.
+   */
+  @Input() pageSections: Array<{ label: string; id: string }> | null = null;
   profilePicturePath: string = '';
 
   hasSchoolAccess = false; // show link for admins OR invited students
@@ -403,6 +409,24 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   togglePublicMobileMenu() {
     this.publicMobileMenuOpen = !this.publicMobileMenuOpen;
+  }
+
+  scrollToPageSection(id: string, event?: Event) {
+    if (typeof document === 'undefined') {
+      return;
+    }
+    const target = document.getElementById(id);
+    if (!target) {
+      return;
+    }
+    event?.preventDefault();
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({
+      behavior: reduceMotion ? 'auto' : 'smooth',
+      block: 'start',
+    });
   }
 
   closePublicMobileMenu() {

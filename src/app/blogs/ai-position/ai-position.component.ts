@@ -39,6 +39,13 @@ export class AiPositionComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('sphere', { static: false }) sphereRef?: ElementRef<SVGGElement>;
   @ViewChild('page', { static: false }) pageRef?: ElementRef<HTMLElement>;
 
+  /** Section links shown in the navbar in place of the landing-page links. */
+  readonly navSections = [
+    { label: 'Principles', id: 'principles' },
+    { label: 'On fear', id: 'on-fear' },
+    { label: 'In practice', id: 'in-practice' },
+  ];
+
   readonly principles: Principle[] = [
     {
       number: '01',

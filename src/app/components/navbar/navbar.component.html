@@ -109,6 +109,17 @@
     </div>
 
     <div class="hidden items-center gap-1 lg:flex" aria-label="Primary navigation">
+      <ng-container *ngIf="pageSections?.length; else defaultDesktopLinks">
+        <a
+          *ngFor="let section of pageSections"
+          [href]="'#' + section.id"
+          (click)="scrollToPageSection(section.id, $event)"
+          class="rounded-full px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-teal-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-teal-200"
+        >
+          {{ section.label }}
+        </a>
+      </ng-container>
+      <ng-template #defaultDesktopLinks>
       <a
         routerLink="/about"
         class="rounded-full px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-teal-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-teal-200"
@@ -129,6 +140,7 @@
       >
         {{ 'navbar.impact' | translate }}
       </a>
+      </ng-template>
     </div>
 
     <!-- <a *ngIf="currenPageLabBanner" routerLink="/global-lab" class="hidden md:inline-flex justify-between items-center py-1 px-1 pr-4 mb-7 text-sm text-teal-900 bg-teal-100 rounded-full dark:bg-teal-900 dark:text-white hover:bg-teal-200 dark:hover:bg-teal-800" role="alert">
@@ -294,6 +306,17 @@
     class="absolute left-3 right-3 top-full mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900 lg:hidden"
   >
     <div class="max-h-[calc(100vh-5.25rem)] overflow-y-auto p-2">
+      <ng-container *ngIf="pageSections?.length; else defaultMobileLinks">
+        <a
+          *ngFor="let section of pageSections"
+          [href]="'#' + section.id"
+          (click)="scrollToPageSection(section.id, $event); closePublicMobileMenu()"
+          class="block rounded-xl px-4 py-2.5 text-base font-semibold text-slate-900 hover:bg-slate-100 dark:text-white dark:hover:bg-slate-800"
+        >
+          {{ section.label }}
+        </a>
+      </ng-container>
+      <ng-template #defaultMobileLinks>
       <a
         routerLink="/about"
         (click)="closePublicMobileMenu()"
@@ -317,6 +340,7 @@
       >
         {{ 'navbar.impact' | translate }}
       </a>
+      </ng-template>
 
       <div *ngIf="canShowLanguageSwitcher" class="mt-2 border-t border-slate-200 pt-3 dark:border-slate-700">
         <p class="px-4 pb-2 text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
