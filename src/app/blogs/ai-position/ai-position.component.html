@@ -1,0 +1,253 @@
+<div #page class="aip-page">
+  <app-navbar [currenPageLabBanner]="false" [showLoginButton]="true"></app-navbar>
+
+  <div class="aip-progress" aria-hidden="true">
+    <div class="aip-progress-fill"></div>
+  </div>
+
+  <main>
+    <!-- ============================== HERO ============================== -->
+    <header class="aip-hero">
+      <div class="aip-hero-inner">
+        <div class="aip-hero-copy">
+          <p class="aip-eyebrow">
+            <span class="aip-eyebrow-rule" aria-hidden="true"></span>
+            Global Solutions Lab &middot; Position statement
+          </p>
+
+          <h1 class="aip-title">
+            Human&#8209;led,<br />
+            <em>world&#8209;serving.</em>
+          </h1>
+
+          <p class="aip-subtitle">Our position on artificial intelligence</p>
+
+          <p class="aip-meta">October 2026 &middot; 4&#8209;minute read</p>
+
+          <button type="button" class="aip-scroll-cue" (click)="scrollToEssay()">
+            <span>Read the position</span>
+            <svg viewBox="0 0 16 24" aria-hidden="true">
+              <path d="M8 2v18M2 14l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        </div>
+
+        <figure class="aip-hero-figure" aria-hidden="true">
+          <svg class="aip-sphere" viewBox="-240 -240 480 480">
+            <defs>
+              <radialGradient id="aip-core-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) scale(90)">
+                <stop offset="0" stop-color="#f97316" stop-opacity="0.55" />
+                <stop offset="1" stop-color="#f97316" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <circle class="aip-sphere-halo" cx="0" cy="0" r="214" />
+            <g #sphere class="aip-sphere-lines"></g>
+            <circle cx="0" cy="0" r="90" fill="url(#aip-core-glow)" />
+            <circle class="aip-core" cx="0" cy="0" r="7" />
+          </svg>
+          <figcaption class="aip-figure-caption">
+            <span class="aip-caption-dot"></span>People at the center
+          </figcaption>
+        </figure>
+      </div>
+    </header>
+
+    <!-- ============================ THE MOMENT ========================== -->
+    <section id="the-moment" class="aip-section">
+      <div class="aip-grid">
+        <p class="aip-marker reveal">I.&ensp;The moment</p>
+        <div class="aip-prose reveal">
+          <p class="aip-lede">
+            A fear is spreading through the world: that we have built something we
+            cannot steer, and that it will end badly for us. We take that fear
+            seriously, but we don’t accept that the ending is already decided.
+          </p>
+          <p>
+            Artificial intelligence is a tool of unusual power. Fire, the printing
+            press and the electric grid were too, and what each became depended on
+            the people who built it, governed it and used it. AI is no different.
+          </p>
+          <p class="aip-emphasis">
+            Its outcome isn’t written yet. People are deciding it now, and that is
+            where our position and our hope begin.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== FULLER QUOTE ========================== -->
+    <section class="aip-quote-band">
+      <div class="aip-quote-inner">
+        <p class="aip-marker aip-marker-light reveal">II.&ensp;Our starting point</p>
+        <p class="aip-quote-intro reveal">
+          The Global Solutions Lab grows out of Buckminster Fuller’s World Game and
+          its challenge:
+        </p>
+        <blockquote class="aip-quote reveal">
+          <p>
+            “To make the world work for 100% of humanity, in the shortest possible
+            time, through spontaneous cooperation, without ecological offense or the
+            disadvantage of anyone.”
+          </p>
+          <cite>R. Buckminster Fuller &middot; The World Game</cite>
+        </blockquote>
+        <div class="aip-quote-outro reveal">
+          <p class="aip-quote-standard">We hold AI to the same standard.</p>
+          <p>
+            How intelligent it is doesn’t matter much. What matters is whether it
+            helps more people live with dignity, security and opportunity, on a
+            planet that can sustain them.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================== PRINCIPLES =========================== -->
+    <section class="aip-section" aria-labelledby="aip-principles-heading">
+      <div class="aip-grid">
+        <p class="aip-marker reveal">III.&ensp;Principles</p>
+        <div>
+          <h2 id="aip-principles-heading" class="aip-h2 reveal">What we stand for</h2>
+
+          <ol class="aip-principles">
+            <li
+              *ngFor="let p of principles; let first = first"
+              class="aip-principle reveal"
+              [class.aip-principle-lead]="first"
+            >
+              <span class="aip-principle-num">{{ p.number }}</span>
+              <div class="aip-principle-body">
+                <h3>{{ p.title }}</h3>
+                <p>{{ p.body }}</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= ON FEAR ============================ -->
+    <section class="aip-section aip-section-tint" aria-labelledby="aip-fear-heading">
+      <div class="aip-grid">
+        <p class="aip-marker reveal">IV.&ensp;On fear</p>
+        <div>
+          <h2 id="aip-fear-heading" class="aip-h2 reveal">The risks are real.</h2>
+          <div class="aip-prose reveal">
+            <p>
+              AI can be misused. It can concentrate power, erode trust and displace
+              work and meaning. Some systems may act in ways we don’t fully
+              understand. Ignoring these risks would be reckless.
+            </p>
+            <p>
+              Fear that paralyzes is a risk of its own, though. It hands the
+              decisions to whoever is least concerned with the common good.
+            </p>
+          </div>
+
+          <div class="aip-ledger reveal">
+            <div class="aip-ledger-col">
+              <p class="aip-ledger-label">What we take seriously</p>
+              <ul>
+                <li *ngFor="let r of risks">{{ r }}</li>
+              </ul>
+            </div>
+
+            <div class="aip-ledger-arrow" aria-hidden="true">
+              <svg viewBox="0 0 48 24">
+                <path d="M2 12h42M34 4l10 8-10 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+
+            <div class="aip-ledger-col aip-ledger-col-answer">
+              <p class="aip-ledger-label">How we answer it</p>
+              <ul>
+                <li *ngFor="let r of responses">{{ r }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="aip-statement reveal">
+            Retreat is the wrong answer to fear.
+            <span>The right answer is responsibility.</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================== IN PRACTICE =========================== -->
+    <section class="aip-section" aria-labelledby="aip-practice-heading">
+      <div class="aip-grid">
+        <p class="aip-marker reveal">V.&ensp;In practice</p>
+        <div>
+          <h2 id="aip-practice-heading" class="aip-h2 reveal">How we practice it</h2>
+          <div class="aip-prose reveal">
+            <p>
+              In our labs, AI works with participants in the design process, but it
+              never does the designing.
+            </p>
+          </div>
+
+          <div class="aip-flow reveal" role="group" aria-label="How AI and people divide the work in a Global Solutions Lab">
+            <div class="aip-lane aip-lane-ai">
+              <p class="aip-lane-label">
+                <span class="aip-lane-key" aria-hidden="true"></span>AI assists
+              </p>
+              <ol>
+                <li *ngFor="let s of aiSteps">
+                  <strong>{{ s.verb }}</strong>
+                  <span>{{ s.detail }}</span>
+                </li>
+              </ol>
+            </div>
+
+            <div class="aip-flow-join" aria-hidden="true">
+              <span></span>
+            </div>
+
+            <div class="aip-lane aip-lane-human">
+              <p class="aip-lane-label">
+                <span class="aip-lane-key" aria-hidden="true"></span>People decide
+              </p>
+              <ol>
+                <li *ngFor="let s of humanSteps">
+                  <strong>{{ s.verb }}</strong>
+                  <span>{{ s.detail }}</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <p class="aip-note reveal">
+            We teach participants to question AI’s outputs as hard as they question
+            their own.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================= CLOSING ============================ -->
+    <section class="aip-closing">
+      <div class="aip-closing-inner">
+        <p class="aip-closing-line reveal">
+          The future of AI won’t be decided by AI.
+        </p>
+        <p class="aip-closing-sub reveal">
+          It will be decided by whether people choose to use it wisely, together and
+          for everyone.
+        </p>
+        <p class="aip-closing-choice reveal">We choose to.</p>
+
+        <div class="aip-actions reveal">
+          <a routerLink="/get-started" class="aip-btn aip-btn-primary">
+            Join a Global Solutions Lab
+          </a>
+          <a routerLink="/about" class="aip-btn aip-btn-ghost">About Global Solutions Lab</a>
+        </div>
+
+        <p class="aip-signoff reveal">The Global Solutions Lab</p>
+      </div>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+</div>

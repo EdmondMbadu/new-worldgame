@@ -75,6 +75,7 @@ import { DymaxionComponent } from '../components/dymaxion/dymaxion.component';
 import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/drc-clinic-campaign.component';
 import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
 import { BoundlessSfComponent } from '../blogs/boundless-sf/boundless-sf.component';
+import { AiPositionComponent } from '../blogs/ai-position/ai-position.component';
 
 @NgModule({
   declarations: [
@@ -148,6 +149,7 @@ import { BoundlessSfComponent } from '../blogs/boundless-sf/boundless-sf.compone
     DrcClinicCampaignComponent,
     TournamentDetailsComponent,
     BoundlessSfComponent,
+    AiPositionComponent,
   ],
   imports: [
     CommonModule,
