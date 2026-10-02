@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, SafeResourceUrl, Title } from '@angular/platform-browser';
 
 // ng serve falls back to Angular for directory URLs. Load the exact static entry
 // in its own document. Hosting and the combined dev proxy serve it directly.
@@ -33,9 +33,10 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 export class GameLauncherComponent {
   readonly source: SafeResourceUrl;
   readonly title: string;
-  constructor(route: ActivatedRoute, sanitizer: DomSanitizer) {
+  constructor(route: ActivatedRoute, sanitizer: DomSanitizer, titleService: Title) {
     const lastLight = route.snapshot.data['game'] === 'last-light';
     this.title = lastLight ? 'Let There Be Light' : 'Lost in Orbit';
+    titleService.setTitle(`${this.title} · Global Solutions Lab`);
     this.source = sanitizer.bypassSecurityTrustResourceUrl(
       (lastLight ? '/games/last-light/index.html' : '/games/lost-in-orbit/index.html') +
         (lastLight && typeof location !== 'undefined' ? location.search : '')
