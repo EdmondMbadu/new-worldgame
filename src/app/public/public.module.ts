@@ -76,6 +76,7 @@ import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/dr
 import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
 import { BoundlessSfComponent } from '../blogs/boundless-sf/boundless-sf.component';
 import { AiPositionComponent } from '../blogs/ai-position/ai-position.component';
+import { ForProfessorsComponent } from '../blogs/for-professors/for-professors.component';
 
 @NgModule({
   declarations: [
@@ -150,6 +151,7 @@ import { AiPositionComponent } from '../blogs/ai-position/ai-position.component'
     TournamentDetailsComponent,
     BoundlessSfComponent,
     AiPositionComponent,
+    ForProfessorsComponent,
   ],
   imports: [
     CommonModule,

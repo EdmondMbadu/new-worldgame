@@ -69,6 +69,7 @@ import { DrcClinicCampaignComponent } from '../components/drc-clinic-campaign/dr
 import { TournamentDetailsComponent } from '../components/tournament-details/tournament-details.component';
 import { BoundlessSfComponent } from '../blogs/boundless-sf/boundless-sf.component';
 import { AiPositionComponent } from '../blogs/ai-position/ai-position.component';
+import { ForProfessorsComponent } from '../blogs/for-professors/for-professors.component';
 
 const routes: Routes = [
   { path: '', component: LandingPageComponent, canActivate: [NoAuthGuard] },
@@ -157,6 +158,9 @@ const routes: Routes = [
   { path: 'ai-position', component: AiPositionComponent },
   { path: 'position-on-ai', component: AiPositionComponent },
   { path: 'our-position-on-ai', component: AiPositionComponent },
+  { path: 'for-professors', component: ForProfessorsComponent },
+  { path: 'professors', component: ForProfessorsComponent },
+  { path: 'for-faculty', component: ForProfessorsComponent },
   { path: 'solution-launch/:solutionId/fund', component: SlpFundComponent },
   { path: 'solution-launch/:solutionId/partner', component: SlpPartnerComponent },
   { path: 'solution-launch/:solutionId/reach', component: SlpReachComponent },

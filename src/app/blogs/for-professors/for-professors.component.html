@@ -1,0 +1,529 @@
+<div #page class="fp-page">
+  <app-navbar
+    [currenPageLabBanner]="false"
+    [showLoginButton]="true"
+    [pageSections]="navSections"
+  ></app-navbar>
+
+  <div class="fp-progress" aria-hidden="true">
+    <div class="fp-progress-fill"></div>
+  </div>
+
+  <main>
+    <!-- ================================ HERO ================================ -->
+    <header class="fp-hero">
+      <div class="fp-aurora" aria-hidden="true">
+        <span class="fp-aurora-a"></span>
+        <span class="fp-aurora-b"></span>
+        <span class="fp-aurora-c"></span>
+      </div>
+      <div class="fp-grain" aria-hidden="true"></div>
+
+      <div class="fp-hero-inner">
+        <div class="fp-hero-copy">
+          <p class="fp-eyebrow fp-intro-anim" style="--d: 0s">
+            <span class="fp-eyebrow-rule" aria-hidden="true"></span>
+            Global Solutions Lab &middot; For college faculty
+          </p>
+
+          <h1 class="fp-title">
+            <span class="fp-title-line">
+              <span class="fp-word" *ngFor="let w of titleLine1; let i = index" [style.--d]="wordDelay(0, i)">{{ w }}&#32;</span>
+            </span>
+            <em class="fp-title-line">
+              <span class="fp-word" *ngFor="let w of titleLine2; let i = index" [style.--d]="wordDelay(1, i)">{{ w }}&#32;</span>
+            </em>
+          </h1>
+
+          <p class="fp-lede fp-intro-anim" style="--d: 1s">
+            Global Solutions Lab turns your course into a working lab. Student teams take on a real
+            local or global problem, work through four structured steps with AI colleagues as
+            coaches, and finish with a solution they can enter in the Global Solutions Lab
+            Tournament.
+          </p>
+
+          <div class="fp-actions fp-intro-anim" style="--d: 1.15s">
+            <a class="fp-btn fp-btn-primary" [routerLink]="demoLink">
+              <span>Book a 20-minute demo</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+            <a class="fp-btn fp-btn-ghost" [routerLink]="registerLink">Register your class</a>
+          </div>
+
+          <ul class="fp-hero-facts fp-intro-anim" style="--d: 1.3s">
+            <li><strong>Free</strong> for classes through 2026&ndash;27</li>
+            <li><strong>15 minutes</strong> to set up</li>
+            <li><strong>Used at</strong> Drexel University</li>
+          </ul>
+        </div>
+
+        <!-- Illustrative class space, floating over a slowly turning geodesic sphere -->
+        <div class="fp-stage fp-intro-anim" style="--d: 0.5s">
+          <svg class="fp-hero-sphere" viewBox="-260 -260 520 520" aria-hidden="true">
+            <defs>
+              <radialGradient id="fp-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="scale(230)">
+                <stop offset="0" stop-color="#0b6f68" stop-opacity="0.16" />
+                <stop offset="1" stop-color="#0b6f68" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <circle cx="0" cy="0" r="230" fill="url(#fp-glow)" />
+            <circle class="fp-orbit" cx="0" cy="0" r="250" />
+            <g #heroSphere class="fp-sphere-lines"></g>
+          </svg>
+
+          <figure #mock class="fp-mock" aria-label="Illustration of a Global Solutions Lab class space">
+            <div class="fp-mock-card">
+              <div class="fp-mock-bar">
+                <span></span><span></span><span></span>
+                <p>Class space</p>
+                <div class="fp-presence" aria-hidden="true">
+                  <i style="--c: #0b6f68">M</i><i style="--c: #c2410c">L</i><i style="--c: #1d4ed8">+</i>
+                </div>
+              </div>
+              <div class="fp-mock-body">
+                <p class="fp-mock-kicker">Drexel University &middot; Summer 2026</p>
+                <p class="fp-mock-course">ENTP 601: Social and Sustainable Innovation</p>
+                <div class="fp-mock-meta">
+                  <span>24 students</span>
+                  <span>Syllabus</span>
+                  <span>Discussion</span>
+                  <span class="fp-mock-live"><i></i>Meeting room</span>
+                </div>
+
+                <ul class="fp-mock-teams">
+                  <li>
+                    <div class="fp-mock-team-head">
+                      <p>Philadelphia Food Recovery Network</p>
+                      <span>6 members</span>
+                    </div>
+                    <p class="fp-mock-topic">Keeping the city&rsquo;s food waste out of landfills</p>
+                    <div class="fp-mock-steps" aria-hidden="true">
+                      <i class="on" style="--i: 0"></i><i class="on" style="--i: 1"></i><i class="on" style="--i: 2"></i><i></i>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="fp-mock-team-head">
+                      <p>Philadelphia Air Pollution</p>
+                      <span>3 members</span>
+                    </div>
+                    <p class="fp-mock-topic">Traffic, industry, the port and energy production</p>
+                    <div class="fp-mock-steps" aria-hidden="true">
+                      <i class="on" style="--i: 1"></i><i class="on" style="--i: 2"></i><i></i><i></i>
+                    </div>
+                  </li>
+                </ul>
+
+                <div class="fp-mock-ai">
+                  <img src="assets/img/bucky.png" alt="" width="36" height="36" />
+                  <p>
+                    <strong>Bucky</strong>
+                    <span class="fp-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                    <span #typed class="fp-typed"></span><span class="fp-caret" aria-hidden="true"></span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="fp-toast" aria-hidden="true">
+              <span class="material-symbols-outlined">task_alt</span>
+              In Movimento finished Step 2
+            </div>
+          </figure>
+          <p class="fp-stage-note">Illustration of a class space. Step progress is for example only.</p>
+        </div>
+      </div>
+
+      <button type="button" class="fp-scroll-cue" aria-label="Scroll to the next section" (click)="scrollToId('the-problem')">
+        <span></span>
+      </button>
+    </header>
+
+    <!-- ============================ THE PROBLEM ============================ -->
+    <section id="the-problem" class="fp-section" aria-labelledby="fp-problem-heading">
+      <div class="fp-wrap">
+        <div class="fp-section-head reveal">
+          <p class="fp-label">The problem</p>
+          <h2 id="fp-problem-heading" class="fp-h2">
+            Teaching changed when AI arrived. <em>Most assignments didn&rsquo;t.</em>
+          </h2>
+        </div>
+
+        <ol class="fp-problems">
+          <li class="reveal" *ngFor="let p of problems; let i = index" [style.--stagger]="i">
+            <span class="fp-problem-num">{{ p.number }}</span>
+            <h3>{{ p.title }}</h3>
+            <p>{{ p.body }}</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================ HOW IT WORKS ============================ -->
+    <section id="how-it-works" class="fp-section fp-section-tint" aria-labelledby="fp-how-heading">
+      <div class="fp-wrap">
+        <div class="fp-section-head reveal">
+          <p class="fp-label">How it works</p>
+          <h2 id="fp-how-heading" class="fp-h2">
+            Four steps from a real problem <em>to a plan someone could act on.</em>
+          </h2>
+          <p class="fp-intro">
+            The method comes from design science: define the problem, define the goal, design the
+            path between them, then plan the work. Each step has its own questions, and you can
+            rewrite them to fit your course. Scroll to watch an example solution take shape.
+          </p>
+        </div>
+
+        <div class="fp-story">
+          <!-- Left: the steps -->
+          <div #stepsList class="fp-steps-col">
+          <span class="fp-steps-rail" aria-hidden="true"><span class="fp-steps-rail-fill"></span></span>
+          <ol class="fp-steps">
+            <li class="fp-step" *ngFor="let s of steps; let i = index" [class.is-active]="activeStep === i">
+              <div class="fp-step-index">
+                <span>Step</span>
+                <strong>{{ s.number }}</strong>
+              </div>
+              <div class="fp-step-body">
+                <h3>{{ s.name }}</h3>
+                <p class="fp-step-q">{{ s.question }}</p>
+                <dl>
+                  <div>
+                    <dt>Students</dt>
+                    <dd>{{ s.students }}</dd>
+                  </div>
+                  <div>
+                    <dt>AI colleagues</dt>
+                    <dd>{{ s.ai }}</dd>
+                  </div>
+                </dl>
+
+                <!-- Mobile: the example draft sits inline under each step -->
+                <div class="fp-draft-inline">
+                  <p class="fp-draft-kicker">Example draft</p>
+                  <p class="fp-draft-heading">{{ s.draft.heading }}</p>
+                  <p class="fp-draft-body">{{ s.draft.body }}</p>
+                </div>
+              </div>
+            </li>
+          </ol>
+          </div>
+
+          <!-- Right: a sticky example solution that writes itself as you scroll -->
+          <aside class="fp-doc-wrap" aria-label="Example solution">
+            <div class="fp-doc">
+              <div class="fp-doc-head">
+                <p class="fp-doc-label">Example solution</p>
+                <p class="fp-doc-title">Rescuing surplus food</p>
+                <div class="fp-doc-tabs" role="tablist" aria-label="Steps">
+                  <button
+                    type="button"
+                    role="tab"
+                    *ngFor="let s of steps; let i = index"
+                    [class.done]="i < activeStep"
+                    [class.active]="i === activeStep"
+                    [attr.aria-selected]="i === activeStep"
+                    (click)="goToStep(i)"
+                  >
+                    <span>{{ s.number }}</span>{{ s.name }}
+                  </button>
+                </div>
+                <div class="fp-doc-progress"><span [style.width.%]="((activeStep + 1) / steps.length) * 100"></span></div>
+              </div>
+
+              <div class="fp-doc-stack">
+                <div
+                  class="fp-doc-page"
+                  *ngFor="let s of steps; let i = index"
+                  [class.is-shown]="i === activeStep"
+                  [attr.aria-hidden]="i !== activeStep"
+                >
+                  <p class="fp-doc-step">Step {{ s.number }} &middot; {{ s.name }}</p>
+                  <p class="fp-doc-heading">{{ s.draft.heading }}</p>
+                  <p class="fp-doc-body">{{ s.draft.body }}</p>
+                  <ul class="fp-doc-chips">
+                    <li *ngFor="let c of s.draft.chips">{{ c }}</li>
+                  </ul>
+                  <div class="fp-doc-note">
+                    <img [src]="s.draft.colleague.avatar" alt="" width="34" height="34" loading="lazy" />
+                    <div>
+                      <p class="fp-doc-note-name">{{ s.draft.colleague.name }} <span>AI colleague</span></p>
+                      <p class="fp-doc-note-text">{{ s.draft.colleague.note }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="fp-doc-caption">Illustrative example, not a real team&rsquo;s work.</p>
+          </aside>
+        </div>
+
+        <div class="fp-tournament reveal">
+          <span class="material-symbols-outlined" aria-hidden="true">emoji_events</span>
+          <p class="fp-tournament-text">
+            Then teams present their solution and can enter it in the
+            <strong>Global Solutions Lab Tournament</strong>, so the work has an audience beyond the
+            gradebook.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ YOUR COURSE ============================ -->
+    <section id="your-course" class="fp-section" aria-labelledby="fp-course-heading">
+      <div class="fp-wrap">
+        <div class="fp-section-head reveal">
+          <p class="fp-label">Fits your course</p>
+          <h2 id="fp-course-heading" class="fp-h2">
+            A week, a unit or the whole term. <em>You decide how deep it goes.</em>
+          </h2>
+        </div>
+
+        <div class="fp-formats">
+          <article class="fp-format reveal" *ngFor="let f of formats; let i = index" [style.--stagger]="i">
+            <p class="fp-format-len">{{ f.length }}</p>
+            <h3>{{ f.name }}</h3>
+            <p class="fp-format-scope">{{ f.scope }}</p>
+            <div class="fp-term" aria-hidden="true">
+              <span class="fp-term-fill" [style.--span]="f.span"></span>
+            </div>
+            <p class="fp-term-label" aria-hidden="true"><span>Week 1</span><span>Week 15</span></p>
+            <p class="fp-format-out">{{ f.outcome }}</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="fp-marquee reveal" aria-label="Courses it works in">
+        <p class="fp-label fp-marquee-label">Courses it works in</p>
+        <div class="fp-marquee-row">
+          <ul class="fp-marquee-track">
+            <li *ngFor="let d of disciplinesA">{{ d }}</li>
+            <li *ngFor="let d of disciplinesA" aria-hidden="true">{{ d }}</li>
+          </ul>
+        </div>
+        <div class="fp-marquee-row fp-marquee-reverse">
+          <ul class="fp-marquee-track">
+            <li *ngFor="let d of disciplinesB">{{ d }}</li>
+            <li *ngFor="let d of disciplinesB" aria-hidden="true">{{ d }}</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= WHAT YOU GET ========================= -->
+    <section id="instructor" class="fp-section fp-section-tint" aria-labelledby="fp-instructor-heading">
+      <div class="fp-wrap">
+        <div class="fp-section-head reveal">
+          <p class="fp-label">For the instructor</p>
+          <h2 id="fp-instructor-heading" class="fp-h2">
+            Everything a team project needs, <em>already built.</em>
+          </h2>
+        </div>
+
+        <div class="fp-features">
+          <article class="fp-feature reveal" *ngFor="let f of features; let i = index" [style.--stagger]="i % 3">
+            <span class="material-symbols-outlined fp-feature-icon" aria-hidden="true">{{ f.icon }}</span>
+            <h3>{{ f.title }}</h3>
+            <p>{{ f.body }}</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ DREXEL ============================ -->
+    <section id="drexel" class="fp-band" aria-labelledby="fp-drexel-heading">
+      <div class="fp-stars" aria-hidden="true"></div>
+      <div class="fp-wrap fp-band-inner">
+        <div class="fp-band-copy reveal">
+          <p class="fp-label fp-label-invert">In the classroom</p>
+          <h2 id="fp-drexel-heading" class="fp-h2 fp-h2-invert">
+            Drexel University, <em>ENTP 601: Social and Sustainable Innovation</em>
+          </h2>
+          <p>
+            In Summer 2026, graduate students in Drexel&rsquo;s entrepreneurship program ran their
+            team projects in a single Global Solutions Lab class space, with the syllabus,
+            discussion and meeting room in one place.
+          </p>
+          <p>
+            Most teams chose problems in their own city: the
+            <strong>Philadelphia Food Recovery Network</strong>, <strong>Philadelphia Air
+            Pollution</strong>, and the waste and recycling piling up on Philadelphia&rsquo;s
+            streets. Others took on access to wellness, youth wellbeing and climate resilience.
+          </p>
+        </div>
+
+        <dl class="fp-band-stats reveal">
+          <div>
+            <dt>Students in one class space</dt>
+            <dd data-count="24">24</dd>
+          </div>
+          <div>
+            <dt>Student teams, each with its own solution</dt>
+            <dd data-count="6">6</dd>
+          </div>
+          <div>
+            <dt>Cost to the class</dt>
+            <dd data-count="0" data-prefix="$">$0</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ============================ LINEAGE ============================ -->
+    <section class="fp-section fp-lineage-section" aria-labelledby="fp-lineage-heading">
+      <div class="fp-wrap fp-lineage">
+        <figure class="fp-lineage-fig reveal">
+          <div class="fp-lineage-frame">
+            <img src="assets/img/fuller.jpg" alt="R. Buckminster Fuller" width="320" height="400" loading="lazy" />
+          </div>
+          <figcaption>R. Buckminster Fuller</figcaption>
+        </figure>
+        <div class="fp-lineage-copy reveal">
+          <p class="fp-label">Where the method comes from</p>
+          <blockquote class="fp-quote">
+            <p>&ldquo;Make the world work for 100% of humanity.&rdquo;</p>
+            <cite>The aim of Fuller&rsquo;s World Game</cite>
+          </blockquote>
+          <p>
+            In the 1960s, Buckminster Fuller proposed a &ldquo;World Game&rdquo;: a way for anyone to
+            work out how to make the world work for everyone, using real data and design science
+            instead of politics. Medard Gabel worked with Fuller and spent the next five decades
+            turning that idea into workshops run with students, universities and organizations
+            around the world.
+          </p>
+          <p>
+            Global Solutions Lab is the online version of that method, with AI colleagues added
+            to give every team the kind of feedback a workshop facilitator would.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ TIMELINE ============================ -->
+    <section id="getting-started" class="fp-section fp-section-tint" aria-labelledby="fp-timeline-heading">
+      <div class="fp-wrap">
+        <div class="fp-section-head reveal">
+          <p class="fp-label">Getting started</p>
+          <h2 id="fp-timeline-heading" class="fp-h2">
+            From a demo to your first class, <em>in about a week.</em>
+          </h2>
+        </div>
+
+        <ol class="fp-timeline reveal">
+          <li *ngFor="let t of timeline; let i = index" [style.--stagger]="i">
+            <span class="fp-node" aria-hidden="true"></span>
+            <p class="fp-when">{{ t.when }}</p>
+            <h3>{{ t.what }}</h3>
+            <p class="fp-when-detail">{{ t.detail }}</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============================ PRICING ============================ -->
+    <section id="pricing" class="fp-section" aria-labelledby="fp-pricing-heading">
+      <div class="fp-wrap fp-pricing">
+        <div class="fp-pricing-copy reveal">
+          <p class="fp-label">Cost</p>
+          <h2 id="fp-pricing-heading" class="fp-h2">
+            Free for classes <em>through the 2026&ndash;27 academic year.</em>
+          </h2>
+          <p>
+            No credit card, no license to request, nothing for students to buy. If it works for your
+            course, keep using it.
+          </p>
+        </div>
+        <div class="fp-price-shell reveal">
+          <div class="fp-price-card">
+            <p class="fp-price-tag">Class plan</p>
+            <p class="fp-price"><span>$0</span> per class</p>
+            <ul>
+              <li>Up to 30 students or five teams</li>
+              <li>Full platform access, including AI colleagues</li>
+              <li>Private class space, discussion and meeting room</li>
+              <li>Unlimited tournament entries</li>
+            </ul>
+            <a class="fp-btn fp-btn-primary fp-btn-block" [routerLink]="registerLink"><span>Register your class</span></a>
+            <p class="fp-price-note">
+              Bigger class or several sections?
+              <a routerLink="/contact-us">Contact us</a> and we&rsquo;ll set it up.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== FAQ ============================== -->
+    <section id="faq" class="fp-section fp-section-tint" aria-labelledby="fp-faq-heading">
+      <div class="fp-wrap fp-faq-layout">
+        <div class="fp-section-head reveal">
+          <p class="fp-label">Questions</p>
+          <h2 id="fp-faq-heading" class="fp-h2">What professors ask <em>before they try it.</em></h2>
+        </div>
+
+        <ul class="fp-faq reveal">
+          <li *ngFor="let f of faqs; let i = index" [class.open]="openFaq === i">
+            <button
+              type="button"
+              class="fp-faq-q"
+              [attr.aria-expanded]="openFaq === i"
+              [attr.aria-controls]="'fp-faq-a-' + i"
+              (click)="toggleFaq(i)"
+            >
+              <span>{{ f.q }}</span>
+              <i class="fp-plus" aria-hidden="true"></i>
+            </button>
+            <div class="fp-faq-a" [id]="'fp-faq-a-' + i" role="region">
+              <div><p>{{ f.a }}</p></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============================ FINAL CTA ============================ -->
+    <section class="fp-final" aria-labelledby="fp-final-heading">
+      <div class="fp-stars" aria-hidden="true"></div>
+      <svg class="fp-final-sphere" viewBox="-280 -280 560 560" aria-hidden="true">
+        <defs>
+          <radialGradient id="fp-glow-final" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="scale(260)">
+            <stop offset="0" stop-color="#5fd4c4" stop-opacity="0.18" />
+            <stop offset="1" stop-color="#5fd4c4" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <circle cx="0" cy="0" r="260" fill="url(#fp-glow-final)" />
+        <g #finalSphere class="fp-sphere-lines fp-sphere-lines-invert"></g>
+      </svg>
+
+      <div class="fp-wrap fp-final-inner reveal">
+        <p class="fp-label fp-label-invert fp-label-center">Your class, this term</p>
+        <h2 id="fp-final-heading" class="fp-final-title">
+          See it with your course in mind. <em>Twenty minutes.</em>
+        </h2>
+        <p class="fp-final-lede">
+          Tell us what you teach and we&rsquo;ll show you how a class space, the four steps and the
+          AI colleagues would work for your students.
+        </p>
+        <div class="fp-actions fp-actions-center">
+          <a class="fp-btn fp-btn-light" [routerLink]="demoLink">
+            <span>Book a 20-minute demo</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </a>
+          <a class="fp-btn fp-btn-ghost-invert" [routerLink]="registerLink">Register your class</a>
+        </div>
+        <div class="fp-host">
+          <div class="fp-host-faces">
+            <img src="assets/img/medard.jpeg" alt="Medard Gabel" width="44" height="44" loading="lazy" />
+            <img src="assets/img/jim.jpeg" alt="Jim Walker" width="44" height="44" loading="lazy" />
+            <img src="assets/img/edmond.png" alt="Edmond Mbadu" width="44" height="44" loading="lazy" />
+          </div>
+          <p>
+            Demos are led by the Global Solutions Lab team:<br />
+            <strong>Medard Gabel, Jim Walker and Edmond Mbadu</strong>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <app-footer></app-footer>
+</div>
