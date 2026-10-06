@@ -342,3 +342,70 @@ body {
     padding: 1.25rem !important;
   }
 }
+
+
+/* Keyframes for /for-professors. Kept global so the page's split component
+   stylesheets can share them (Angular scopes keyframes per stylesheet). */
+@keyframes fp-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fp-word {
+  from { opacity: 0; transform: translateY(0.35em); filter: blur(10px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes fp-drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(-6rem, 4rem) scale(1.15); }
+}
+@keyframes fp-drift-b {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(5rem, -3rem) scale(0.9); }
+}
+@keyframes fp-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes fp-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes fp-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes fp-live {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5); }
+  100% { box-shadow: 0 0 0 7px rgba(22, 163, 74, 0); }
+}
+@keyframes fp-pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(11, 111, 104, 0.45); }
+  70%, 100% { box-shadow: 0 0 0 8px rgba(11, 111, 104, 0); }
+}
+@keyframes fp-bounce {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50% { transform: translateY(-3px); opacity: 1; }
+}
+@keyframes fp-blink {
+  50% { opacity: 0; }
+}
+@keyframes fp-toast {
+  from { opacity: 0; transform: translate3d(0, 14px, 40px) scale(0.96); }
+  to { opacity: 1; transform: translate3d(0, 0, 40px) scale(1); }
+}
+@keyframes fp-cue {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  80% { transform: translateY(2.6rem); opacity: 1; }
+  100% { transform: translateY(2.8rem); opacity: 0; }
+}
+@keyframes fp-marquee {
+  to { transform: translateX(calc(-50% - 0.375rem)); }
+}
+@keyframes fp-twinkle {
+  from { opacity: 0.35; }
+  to { opacity: 0.7; }
+}
+@keyframes fp-rotate {
+  to { --fp-angle: 360deg; }
+}
+

@@ -177,7 +177,11 @@ class GeodesicSphere {
 @Component({
   selector: 'app-for-professors',
   templateUrl: './for-professors.component.html',
-  styleUrls: ['./for-professors.component.css'],
+  styleUrls: [
+    './for-professors.component.css',
+    './for-professors.sections.css',
+    './for-professors.closing.css',
+  ],
   standalone: false,
 })
 export class ForProfessorsComponent implements OnInit, AfterViewInit, OnDestroy {
