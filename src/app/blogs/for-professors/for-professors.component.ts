@@ -219,13 +219,13 @@ export class ForProfessorsComponent implements OnInit, AfterViewInit, OnDestroy 
       number: '02',
       title: 'Team projects drift.',
       body:
-        'Without structure, groups stall after the first meeting and one person carries the rest. Each team gets a shared workspace, a discussion board, a meeting room and a clear next step, so momentum doesn’t depend on you chasing them.',
+        'Without structure, groups stall after the first meeting and one person carries the rest. In Global Solutions Lab, each team gets a shared workspace, a discussion board, a video meeting room and a clear next step, so momentum doesn’t depend on you chasing them.',
     },
     {
       number: '03',
       title: 'Students ask what it’s for.',
       body:
-        'Students work harder on a problem that exists outside the classroom. Teams pick a real local or global issue, apply what your course teaches to it, and can enter the result in the Global Solutions Lab Tournament.',
+        'Students work harder on a problem that exists outside the classroom. Teams (or you) pick a real local or global issue, apply what your course teaches to it, and can enter the result in the Global Solutions Lab Tournament.',
     },
   ];
 
@@ -351,7 +351,7 @@ export class ForProfessorsComponent implements OnInit, AfterViewInit, OnDestroy 
     {
       icon: 'lock',
       title: 'A private space for your class',
-      body: 'One page for your course with your teams, your challenges and your participants. Keep it private or make it public.',
+      body: 'One home for your course with your teams, your challenges and your participants. Keep it private or make it public.',
     },
     {
       icon: 'edit_note',
