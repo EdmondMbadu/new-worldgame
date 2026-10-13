@@ -153,7 +153,7 @@
             <span class="text-sm text-slate-600 dark:text-slate-300"></span>
             <a
               routerLink="/forgot-password"
-              [queryParams]="gameReturnUrl ? { redirectTo: gameReturnUrl } : null"
+              [queryParams]="returnUrl ? { redirectTo: returnUrl } : null"
               class="text-sm font-medium text-teal-600 hover:text-emerald-600 dark:text-teal-400"
             >
               {{ tr(" Forgot password? ") }}</a>
@@ -313,8 +313,8 @@
             class="pt-5 text-center text-sm text-slate-600 dark:text-slate-300"
           >
             {{ tr(" Don’t have an account? ") }}<a
-              [routerLink]="gameReturnUrl ? '/signup' : '/welcome'"
-              [queryParams]="gameReturnUrl ? { redirectTo: gameReturnUrl } : null"
+              [routerLink]="classReturn ? '/create-class' : gameReturnUrl ? '/signup' : '/welcome'"
+              [queryParams]="returnUrl ? { redirectTo: returnUrl } : null"
               class="font-semibold text-teal-700 hover:underline dark:text-teal-400"
               >{{ tr("Create one") }}</a
             >

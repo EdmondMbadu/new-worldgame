@@ -9,6 +9,10 @@ import { protectedPathsCanMatch } from './protected/protected-paths.can-match';
 
 const routes: Routes = [
   {
+    path: 'create-class',
+    loadComponent: () => import('./components/create-class/create-class.component').then(m => m.CreateClassComponent),
+  },
+  {
     path: 'games/last-light',
     pathMatch: 'full',
     data: { game: 'last-light' },

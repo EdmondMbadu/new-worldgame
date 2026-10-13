@@ -14,6 +14,7 @@ export class VerifyEmailComponent implements OnInit {
   readonly tr = t;
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
+  classReturn = captureAuthReturn() === '/create-class';
   redirectTarget = '/home';
   checking = false;
   errorMessage = '';

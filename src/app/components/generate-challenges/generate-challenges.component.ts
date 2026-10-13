@@ -58,6 +58,7 @@ export class GenerateChallengesComponent implements OnInit {
       this.isClassMode = mode === 'class';
       
       if (this.isClassMode) {
+        void this.router.navigate(['/create-class'], { replaceUrl: true, queryParams: this.schoolId ? { sid: this.schoolId } : {} });
         this.pageTitle = 'Create Class';
         this.pageSubtitle = 'Set up a new class for your school';
         this.nameLabel = 'Class Name';

@@ -193,7 +193,7 @@ export class ForProfessorsComponent implements OnInit, AfterViewInit, OnDestroy 
   @ViewChild('stepsList', { static: false }) stepsListRef?: ElementRef<HTMLElement>;
 
   readonly demoLink = '/scheduler';
-  readonly registerLink = '/signup-school-free';
+  readonly registerLink = '/create-class';
 
   readonly navSections = [
     { label: 'How it works', id: 'how-it-works' },

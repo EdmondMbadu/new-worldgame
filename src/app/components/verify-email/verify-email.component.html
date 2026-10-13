@@ -55,6 +55,8 @@
           <p class="mt-2 text-sm text-slate-600 dark:text-slate-400">{{ tr("Checking verification status...") }}</p>
         </div>
 
+        <p *ngIf="classReturn" class="px-8 pb-5 text-center text-sm text-teal-800 dark:text-teal-200">Verify your email to continue creating your class space. Your class details are saved in this browser.</p>
+
         <!-- Actions -->
         <div class="px-8 pb-8">
           <div *ngIf="gameReturnUrl" class="mb-4 text-center">

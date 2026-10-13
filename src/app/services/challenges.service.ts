@@ -346,17 +346,7 @@ export class ChallengesService {
   }
 
   getAllChallengePages(): Observable<ChallengePage[]> {
-    return this.afs
-      .collection<ChallengePage>('challengePages')
-      .valueChanges({ idField: 'id' } as any)
-      .pipe(
-        map((pages: any[]) =>
-          (pages || []).map((page) => ({
-            ...page,
-            challengePageId: page.challengePageId || page.id,
-          }))
-        )
-      );
+    return this.fns.httpsCallable('listAccessibleChallengeSpaces')({}).pipe(map(result => result.pages || []));
   }
 
   getFeaturedChallengeSpaceConfig(): Observable<FeaturedChallengeSpaceConfig | null> {
@@ -424,92 +414,19 @@ export class ChallengesService {
   }
 
   getChallengePageByCustomUrl(customUrl: string): Observable<ChallengePage | null> {
-    return this.afs
-      .collection<ChallengePage>('challengePages', (ref) =>
-        ref.where('customUrl', '==', customUrl).limit(1)
-      )
-      .valueChanges()
-      .pipe(
-        map((pages) => (pages && pages.length > 0 ? pages[0] : null))
-      );
+    return this.fns.httpsCallable('resolveAccessibleChallengeSpace')({ idOrSlug: customUrl }).pipe(map(result => result?.data || null));
   }
 
-  async resolveChallengePage(
-    idOrSlug: string
-  ): Promise<ResolvedChallengePage | null> {
+  async resolveChallengePage(idOrSlug: string): Promise<ResolvedChallengePage | null> {
     const value = String(idOrSlug || '').trim();
-    if (!value) {
-      return null;
-    }
-
-    if (/^[A-Za-z0-9]{20}$/.test(value)) {
-      const idSnapshot = await this.afs.doc<ChallengePage>(
-        `challengePages/${value}`
-      ).ref.get({ source: 'server' });
-      if (idSnapshot.exists) {
-        return {
-          id: idSnapshot.id,
-          data: idSnapshot.data() as ChallengePage,
-          loadedByCustomUrl: false,
-        };
-      }
-    }
-
-    const customUrlSnapshot = await this.afs
-      .collection<ChallengePage>('challengePages', (ref) =>
-        ref.where('customUrl', '==', value).limit(1)
-      )
-      .ref.get({ source: 'server' });
-    const customUrlDoc = customUrlSnapshot.docs[0];
-    if (customUrlDoc) {
-      return {
-        id: customUrlDoc.id,
-        data: customUrlDoc.data() as ChallengePage,
-        loadedByCustomUrl: true,
-      };
-    }
-
-    if (!/^[A-Za-z0-9]{20}$/.test(value)) {
-      const idSnapshot = await this.afs.doc<ChallengePage>(
-        `challengePages/${value}`
-      ).ref.get({ source: 'server' });
-      if (idSnapshot.exists) {
-        return {
-          id: idSnapshot.id,
-          data: idSnapshot.data() as ChallengePage,
-          loadedByCustomUrl: false,
-        };
-      }
-    }
-
-    return null;
+    if (!value) return null;
+    return firstValueFrom(this.fns.httpsCallable('resolveAccessibleChallengeSpace')({ idOrSlug: value }));
   }
 
   async checkCustomUrlExists(customUrl: string, excludePageId?: string): Promise<boolean> {
-    if (!customUrl || !customUrl.trim()) {
-      return false;
-    }
-    
-    const normalizedUrl = this.normalizeCustomUrl(customUrl);
-    
-    return new Promise((resolve) => {
-      this.afs.collection<ChallengePage>('challengePages', (ref) =>
-        ref.where('customUrl', '==', normalizedUrl)
-      ).get().subscribe((snapshot) => {
-        if (snapshot.empty) {
-          resolve(false);
-          return;
-        }
-
-        // If we're checking for an existing page (updating), exclude it from the check
-        if (excludePageId) {
-          const docs = snapshot.docs.filter(doc => doc.id !== excludePageId);
-          resolve(docs.length > 0);
-        } else {
-          resolve(true);
-        }
-      });
-    });
+    if (!customUrl.trim()) return false;
+    const result = await firstValueFrom(this.fns.httpsCallable('checkChallengeSpaceSlug')({ slug: this.normalizeCustomUrl(customUrl), excludePageId: excludePageId || '' }));
+    return result.exists === true;
   }
 
   normalizeCustomUrl(url: string): string {

@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "compilerOptions": { "resolveJsonModule": true },
+  "include": [
+    "src/app/components/create-class/create-class.component.spec.ts",
+    "src/app/services/auth.last-light.spec.ts"
+  ]
+}

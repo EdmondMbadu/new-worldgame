@@ -1,3 +1,4 @@
+export { createClassSpace, listAccessibleChallengeSpaces, resolveAccessibleChallengeSpace, checkChallengeSpaceSlug } from './class-spaces';
 import { lastLightReturn } from './last-light-return';
 /**
  * Import function triggers from their respective submodules:
@@ -1209,7 +1210,7 @@ export const sendBrandedVerificationEmail = functions.https.onCall(
 
     const request = _data as {returnTo?: unknown; origin?: unknown; language?: unknown} | null;
     const french = request?.language === 'fr';
-    const gameReturn = lastLightReturn(request?.returnTo);
+    const gameReturn = lastLightReturn(request?.returnTo) || (request?.returnTo === '/create-class' ? '/create-class' : null);
     const allowedOrigins = ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'];
     const returnOrigin = typeof request?.origin === 'string' && allowedOrigins.includes(request.origin) ? request.origin : APP_BASE_URL;
     const verificationContinue = gameReturn ? `${returnOrigin}/verify-email?verified=1&lang=${french ? "fr" : "en"}&redirectTo=${encodeURIComponent(gameReturn)}` : `${APP_BASE_URL}/verify-email?verified=1`;

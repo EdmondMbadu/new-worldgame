@@ -135,6 +135,7 @@ export class HomeChallengeComponent implements OnDestroy {
   isPrivate = false;
   allowAccess = false; // computed locally
   pageReady = false;
+  showClassWelcome = false;
   handouts: { name: string; url: string }[] = [];
   showEditHandouts = false;
 
@@ -298,6 +299,7 @@ export class HomeChallengeComponent implements OnDestroy {
       }
       window.scrollTo(0, 0);
       this.pageReady = false;
+    this.showClassWelcome = false;
       const storedPageId = this.getStoredChallengePageId(idOrSlug);
       void this.loadChallengePage(idOrSlug, storedPageId);
     });
@@ -387,7 +389,9 @@ export class HomeChallengeComponent implements OnDestroy {
         return;
       }
       if (!resolved) {
-        console.error('Challenge page not found');
+        console.error('Challenge page not found or access denied');
+        this.isPrivate = true;
+        this.allowAccess = false;
         this.pageReady = true;
         return;
       }
@@ -410,6 +414,8 @@ export class HomeChallengeComponent implements OnDestroy {
         return;
       }
       console.error('Unable to load challenge page', error);
+      this.isPrivate = true;
+      this.allowAccess = false;
       this.pageReady = true;
     }
   }
@@ -465,6 +471,7 @@ export class HomeChallengeComponent implements OnDestroy {
     loadToken: number = this.pageLoadToken
   ): void {
         this.challengePage = data;
+        this.showClassWelcome = data.classSetupVersion === 1 && this.activatedRoute.snapshot.queryParamMap.get('setup') === '1';
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
         this.isPrivate = !!data.isPrivate;
@@ -492,7 +499,7 @@ export class HomeChallengeComponent implements OnDestroy {
             (e || '').toLowerCase()
           );
         if (Array.isArray(data.adminUids)) this.adminUids = data.adminUids;
-        // after: this.challengePage = data;
+        // Resolve the owner profile for the instructor controls.
         const ownerId = this.challengePage.authorId;
         if (ownerId) {
           firstValueFrom(this.auth.getAUser(ownerId))

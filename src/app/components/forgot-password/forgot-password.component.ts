@@ -1,5 +1,5 @@
 import { t } from '../../../../content/last-light-locale';
-import { clearAuthReturn, gameAuthReturn } from 'src/app/services/auth-return';
+import { clearAuthReturn, captureAuthReturn, gameAuthReturn } from 'src/app/services/auth-return';
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
@@ -14,6 +14,7 @@ export class ForgotPasswordComponent {
   readonly tr = t;
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
+  returnUrl = captureAuthReturn();
   resetNotice = '';
   myForm: FormGroup;
   loading: boolean = false;

@@ -348,6 +348,59 @@ service cloud.firestore {
         && resource.data.email == request.auth.token.email;
     }
 
+    // New class spaces: classSetupVersion, authorId, createdByUid and schoolId
+    // are immutable. Verified owners create them through createClassSpace.
+    // Legacy challenge spaces retain their existing behavior.
+    function isManagedClass(page) {
+      return page.get('classSetupVersion', 0) == 1;
+    }
+    function managesClass(page) {
+      return isSignedIn() && (
+        page.authorId == request.auth.uid
+        || page.get('adminUids', []).hasAny([request.auth.uid])
+        || page.get('adminEmails', []).hasAny([authEmail()])
+        || isPlatformAdmin()
+      );
+    }
+    function readsClass(page) {
+      return page.get('isPrivate', true) == false || managesClass(page)
+        || (isSignedIn() && page.get('participants', []).hasAny([authEmail()]));
+    }
+    function validClass(page) {
+      return page.classSetupVersion == 1 && page.type == 'class'
+        && page.name is string && page.name.size() > 0 && page.name.size() <= 140
+        && page.authorId is string && page.createdByUid == page.authorId
+        && page.isPrivate is bool && page.participants is list
+        && page.adminUids is list && page.adminEmails is list;
+    }
+    match /challengePages/{pageId} {
+      allow read: if (!isManagedClass(resource.data) && request.time < timestamp.date(2028, 11, 3))
+        || readsClass(resource.data);
+      // Managed-class creation is server-only. Prevent legacy records from
+      // being promoted by a direct client write as well.
+      allow create: if !isManagedClass(request.resource.data)
+        && request.time < timestamp.date(2028, 11, 3);
+      allow update: if (
+          !isManagedClass(resource.data) && !isManagedClass(request.resource.data)
+          && request.time < timestamp.date(2028, 11, 3)
+        ) || (
+          isManagedClass(resource.data) && validClass(request.resource.data)
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            'authorId', 'createdByUid', 'classSetupVersion', 'type', 'schoolId'
+          ])
+          && (managesClass(resource.data) || (
+            isSignedIn() && resource.data.participants.hasAny([authEmail()])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['discussion'])
+          ))
+        );
+      allow delete: if (!isManagedClass(resource.data) && request.time < timestamp.date(2028, 11, 3))
+        || managesClass(resource.data);
+      match /{child=**} {
+        allow read: if readsClass(get(/databases/$(database)/documents/challengePages/$(pageId)).data);
+        allow write: if managesClass(get(/databases/$(database)/documents/challengePages/$(pageId)).data);
+      }
+    }
+
     // Callable functions own these records, including nested leaderboard rows.
     match /lastLightPlayers/{document=**} { allow read, write: if false; }
     match /lastLightRuns/{document=**} { allow read, write: if false; }
@@ -369,6 +422,7 @@ service cloud.firestore {
         && topLevelCollection != 'tournaments'
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
+        && topLevelCollection != 'challengePages'
         && topLevelCollection != 'publicCommunitySolutions'
         && topLevelCollection != 'solutionModerationQueue'
         && topLevelCollection != 'solutionModerationPolicies'
@@ -385,6 +439,7 @@ service cloud.firestore {
         && topLevelCollection != 'gsl-workshop-announcement-signups'
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
+        && topLevelCollection != 'challengePages'
         && topLevelCollection != 'publicCommunitySolutions'
         && topLevelCollection != 'solutionModerationQueue'
         && topLevelCollection != 'solutionModerationPolicies'

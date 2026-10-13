@@ -25,11 +25,16 @@ export class AuthGuard {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean | UrlTree> {
+    if (route.url[0]?.path === 'generate-challenges' && route.queryParamMap.get('mode') === 'class') {
+      return of(this.router.createUrlTree(['/create-class'], {
+        queryParams: route.queryParamMap.get('sid') ? { sid: route.queryParamMap.get('sid') } : {},
+      }));
+    }
     const requireParticipant = route.data['requireParticipant'] === true;
     const requireAdmin = route.data['requireAdmin'] === true; // platform admin only
     const requireAdminOrPaid = route.data['requireAdminOrPaid'] === true; // legacy paid gate
     const requireAdminOrSchoolAdmin =
-      route.data['requireAdminOrSchoolAdmin'] === true; // NEW
+      route.data['requireAdminOrSchoolAdmin'] === true && route.queryParamMap.get('mode') !== 'class';
     const requireSchoolAdmin = route.data['requireSchoolAdmin'] === true; // optional
 
     if (requireParticipant) return this.checkParticipant(route, state);
@@ -52,7 +57,9 @@ export class AuthGuard {
           this.auth.user$.pipe(take(1)).subscribe(u => {
             if (u && u.verified !== true) {
               // User is logged in but not verified
-              this.router.navigate(['/verify-email']);
+              this.auth.setRedirectUrl(state.url);
+              sessionStorage.setItem('redirectTo', state.url);
+              this.router.navigate(['/verify-email'], { queryParams: { redirectTo: state.url } });
             } else {
               // User is not logged in
               this.auth.setRedirectUrl(state.url);

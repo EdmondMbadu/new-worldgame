@@ -23,6 +23,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   readonly tr = t;
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
+  returnUrl = captureAuthReturn();
+  classReturn = this.returnUrl === '/create-class';
   private authSubscription?: Subscription;
   ngOnDestroy() { this.authSubscription?.unsubscribe(); }
   myForm: FormGroup;
@@ -31,6 +33,9 @@ export class LoginComponent implements OnInit, OnDestroy {
   ngOnInit() {
     window.scroll(0, 0);
     this.auth.logingError = of(null);
+    if (this.classReturn) this.accountNotice = 'Sign in to finish creating your class space. Your class details are saved.';
+    const prefillEmail = this.route.snapshot.queryParamMap.get('email');
+    if (prefillEmail) this.myForm.patchValue({ email: prefillEmail });
     const accountRecovered =
       this.route.snapshot.queryParamMap.get('accountRecovered');
     if (accountRecovered === 'repaired') {

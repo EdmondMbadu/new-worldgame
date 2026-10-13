@@ -83,6 +83,15 @@ export class SolutionEnvironment {
 }
 
 export class ChallengePage {
+  type?: 'class';
+  classSetupVersion?: number;
+  institutionName?: string;
+  independentEducator?: boolean;
+  courseCode?: string;
+  term?: string;
+  schoolId?: string;
+  createdByUid?: string;
+  createdAt?: string;
   name?: string;
   heading?: string;
   subHeading?: string;

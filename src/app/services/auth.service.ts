@@ -385,7 +385,7 @@ export class AuthService {
       const sendVerification = this.fns.httpsCallable(
         'sendBrandedVerificationEmail'
       );
-      const returnTo = gameAuthReturn();
+      const returnTo = gameAuthReturn() || (captureAuthReturn() === '/create-class' ? '/create-class' : null);
       await firstValueFrom(sendVerification({ ...(returnTo ? { returnTo, origin: window.location.origin } : {}), language: getLanguage() }));
     } catch (error) {
       if ((error as any)?.code === 'functions/resource-exhausted') {
@@ -399,9 +399,9 @@ export class AuthService {
       );
       (await this.fireauth.app).auth().languageCode = getLanguage();
       await user.sendEmailVerification({
-        url: gameAuthReturn() && ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'].includes(window.location.origin)
-          ? `${window.location.origin}/verify-email?verified=1&lang=${getLanguage()}&redirectTo=${encodeURIComponent(gameAuthReturn()!)}`
-          : 'https://newworld-game.org/verify-email?verified=1',
+        url: (gameAuthReturn() || captureAuthReturn() === '/create-class') && ['https://globalsolutionlab.com', 'https://www.globalsolutionlab.com', 'https://newworld-game.org', 'https://www.newworld-game.org'].includes(window.location.origin)
+          ? `${window.location.origin}/verify-email?verified=1&lang=${getLanguage()}&redirectTo=${encodeURIComponent(gameAuthReturn() || '/create-class')}`
+          : `https://newworld-game.org/verify-email?verified=1${captureAuthReturn() === '/create-class' ? '&redirectTo=%2Fcreate-class' : ''}`,
       });
     }
   }
