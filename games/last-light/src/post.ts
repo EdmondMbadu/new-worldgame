@@ -58,7 +58,11 @@ class SunShaftsPass extends Pass {
   }
 }
 
-/** Filmic grade in linear HDR: warm highlights, cool shadows, saturation, vignette, grain. */
+/**
+ * Filmic grade in linear HDR: log-space contrast, saturation with vibrance
+ * (muted colours lift more than vivid ones), warm highlights, cool shadows,
+ * vignette and grain.
+ */
 class GradePass extends Pass {
   quad: FullScreenQuad;
   material: T.ShaderMaterial;
@@ -68,6 +72,8 @@ class GradePass extends Pass {
       uniforms: {
         tDiffuse: { value: null },
         uSat: { value: 1.12 },
+        uContrast: { value: 1.12 },
+        uVibrance: { value: 0.25 },
         uVignette: { value: 0.35 },
         uTime: { value: 0 },
         uGrain: { value: 0.025 },
@@ -76,14 +82,18 @@ class GradePass extends Pass {
       },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
       fragmentShader: `
-        uniform sampler2D tDiffuse; uniform float uSat, uVignette, uTime, uGrain, uWarm, uAberration;
+        uniform sampler2D tDiffuse; uniform float uSat, uContrast, uVibrance, uVignette, uTime, uGrain, uWarm, uAberration;
         varying vec2 vUv;
         float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + uTime * 3.1) * 43758.5453); }
         void main(){
           vec2 off = (vUv - 0.5) * uAberration;
           vec3 col = vec3(texture2D(tDiffuse, vUv + off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - off).b);
+          // Contrast around mid-grey in log space: deeper shadows, crisper midtones.
+          col = pow(max(col, vec3(0.)) / 0.18, vec3(uContrast)) * 0.18;
           float l = dot(col, vec3(0.2126, 0.7152, 0.0722));
-          col = mix(vec3(l), col, uSat);
+          float hi = max(col.r, max(col.g, col.b)), lo = min(col.r, min(col.g, col.b));
+          float chroma = (hi - lo) / max(hi, 1e-4);
+          col = mix(vec3(l), col, uSat + uVibrance * (1. - chroma));
           vec3 shadowTint = vec3(0.9, 0.97, 1.08);
           vec3 lightTint = mix(vec3(1.0), vec3(1.07, 1.0, 0.9), uWarm);
           col *= mix(shadowTint, lightTint, smoothstep(0.02, 0.6, l));
@@ -169,7 +179,9 @@ export class PostFX {
     const g = this.grade.material.uniforms;
     g.uTime.value = this.time % 100;
     g.uWarm.value = 1 - f.darkness * 0.8;
-    g.uSat.value = 1.14 - f.darkness * 0.12;
+    g.uSat.value = 1.1 - f.darkness * 0.12;
+    g.uContrast.value = 1.09 - f.darkness * 0.08;
+    g.uVibrance.value = 0.26 * (1 - f.darkness * 0.7);
     g.uVignette.value = 0.32 + f.darkness * 0.18;
     g.uAberration.value = f.impact * 0.006;
     if (this.bloom) {

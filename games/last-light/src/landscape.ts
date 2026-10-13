@@ -16,18 +16,20 @@ export function routeBounds(m: Mission) {
 }
 
 /**
- * Layered mountain ranges on rings around the valley. Each ring is a single
- * mesh; the atmospheric fog turns the layers into receding blue silhouettes.
+ * Layered ranges on rings around the valley: the rounded, forest-covered hills
+ * of Kongo Central near, bluer and higher behind. Each ring is a single mesh.
+ * A canopy pattern breaks up the near slopes, and the atmospheric fog turns
+ * the farther layers into receding blue silhouettes.
  */
-export function ridgelines(m: Mission, bounds: T.Box3, snow: boolean) {
+export function ridgelines(m: Mission, bounds: T.Box3) {
   const group = new T.Group();
   const center = bounds.getCenter(new T.Vector3());
   const size = bounds.getSize(new T.Vector3());
   const rng = random(m.seed * 3 + 101);
   const rings = [
-    { margin: 470, base: 55, amp: 70, color: '#3f5a36', seg: 220 },
-    { margin: 760, base: 105, amp: 120, color: '#44584f', seg: 200 },
-    { margin: 1150, base: 170, amp: 230, color: '#56626a', seg: 180 },
+    { margin: 470, base: 55, amp: 78, color: '#2c5a2a', seg: 360, round: 1, canopy: 1 },
+    { margin: 760, base: 100, amp: 128, color: '#305446', seg: 300, round: 1, canopy: 0.7 },
+    { margin: 1150, base: 150, amp: 210, color: '#3f5a6c', seg: 220, round: 1, canopy: 0.35 },
   ];
   rings.forEach((ring, r) => {
     const rx = size.x / 2 + ring.margin,
@@ -38,8 +40,7 @@ export function ridgelines(m: Mission, bounds: T.Box3, snow: boolean) {
       col: number[] = [],
       idx: number[] = [];
     const cCrest = new T.Color(ring.color),
-      cFoot = new T.Color(ring.color).multiplyScalar(0.55),
-      cSnow = new T.Color('#e4e8ea');
+      cFoot = new T.Color(ring.color).multiplyScalar(0.5);
     for (let i = 0; i <= ring.seg; i++) {
       const u = i / ring.seg,
         a = u * Math.PI * 2;
@@ -49,15 +50,21 @@ export function ridgelines(m: Mission, bounds: T.Box3, snow: boolean) {
       const px = center.x + Math.sign(ca) * Math.pow(Math.abs(ca), 0.6) * rx;
       const pz = center.z + Math.sign(sa) * Math.pow(Math.abs(sa), 0.6) * rz;
       const n = new T.Vector3(px - center.x, 0, pz - center.z).normalize();
+      // |sin| gives rounded tops with creased valleys: the Mayombe's
+      // "half-orange" hills. Lower `round` blends toward sharper crests.
+      const lobe = (x: number) => T.MathUtils.lerp(1 - Math.abs(Math.sin(x)), Math.abs(Math.sin(x)), ring.round);
       let h = 0;
-      h += (1 - Math.abs(Math.sin(a * 7 + phases[0]))) * 0.45;
-      h += (1 - Math.abs(Math.sin(a * 17 + phases[1]))) * 0.25;
-      h += Math.sin(a * 31 + phases[2]) * 0.08 + Math.sin(a * 63 + phases[3]) * 0.04;
+      h += lobe(a * 7 + phases[0]) * 0.45;
+      h += lobe(a * 17 + phases[1]) * 0.25;
+      h += Math.abs(Math.sin(a * 41 + phases[2])) * 0.035 + Math.sin(a * 83 + phases[3]) * 0.012;
       for (const p of peaks) {
         const d = Math.min(Math.abs(u - p.at), 1 - Math.abs(u - p.at));
-        h += Math.exp(-(d * d) / (p.w * p.w)) * p.h * (r === 2 ? 1 : 0.5);
+        // Broad massifs rather than spires: Kongo Central has no alpine peaks.
+        h += Math.exp(-(d * d) / (p.w * p.w * 4)) * p.h * (r === 2 ? 0.55 : 0.35);
       }
       const crest = ring.base + h * ring.amp;
+      // Creases (valleys between lobes) are darker: forest gullies in shade.
+      const crease = 0.78 + 0.22 * Math.min(1, Math.abs(Math.sin(a * 17 + phases[1])) * 1.6);
       const rows: [number, number, T.Color][] = [
         [-110, -140, cFoot],
         [0, crest, cCrest],
@@ -65,9 +72,8 @@ export function ridgelines(m: Mission, bounds: T.Box3, snow: boolean) {
       ];
       for (const [out, y, c] of rows) {
         pos.push(px + n.x * out, y, pz + n.z * out);
-        const snowy = snow && r === 2 && y > ring.base + ring.amp * 0.95;
-        const shade = 0.85 + Math.sin(a * 41 + phases[4]) * 0.1;
-        const cc = snowy ? cSnow : c.clone().multiplyScalar(shade);
+        const shade = (0.88 + Math.sin(a * 41 + phases[4]) * 0.08) * (y === crest ? 1 : crease);
+        const cc = c.clone().multiplyScalar(shade);
         col.push(cc.r, cc.g, cc.b);
       }
       if (i < ring.seg)
@@ -84,6 +90,29 @@ export function ridgelines(m: Mission, bounds: T.Box3, snow: boolean) {
     g.computeVertexNormals();
     geometries.add(g);
     const mat = new T.MeshStandardMaterial({ vertexColors: true, roughness: 1, side: T.DoubleSide });
+    // Forest canopy: crowns and shadows in world space, so the slopes read as
+    // trees rather than paint. Fades with the ring's distance.
+    const canopy = ring.canopy.toFixed(2);
+    mat.onBeforeCompile = (shader) => {
+      shader.vertexShader =
+        'varying vec3 vRidgeW;\n' +
+        shader.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvRidgeW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      shader.fragmentShader =
+        `varying vec3 vRidgeW;
+        float rgH(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        float rgN(vec2 p){ vec2 i = floor(p), f = fract(p); vec2 u = f*f*(3.-2.*f);
+          return mix(mix(rgH(i), rgH(i+vec2(1,0)), u.x), mix(rgH(i+vec2(0,1)), rgH(i+vec2(1,1)), u.x), u.y); }\n` +
+        shader.fragmentShader.replace(
+          '#include <color_fragment>',
+          `#include <color_fragment>
+          vec2 rp = vec2(vRidgeW.x + vRidgeW.z, vRidgeW.y * 2.2);
+          float crowns = rgN(rp * 0.09) * 0.55 + rgN(rp * 0.27 + 7.1) * 0.3 + rgN(rp * 0.8 + 3.3) * 0.15;
+          float patches = rgN(rp * 0.018 + 1.7);
+          diffuseColor.rgb *= mix(1.0, 0.62 + crowns * 0.75, ${canopy});
+          diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(1.18, 1.12, 0.8), smoothstep(0.62, 0.85, patches) * ${canopy} * 0.6);`,
+        );
+    };
+    mat.customProgramCacheKey = () => 'ridge-canopy-' + canopy;
     materials.add(mat);
     const mesh = new T.Mesh(g, mat);
     mesh.frustumCulled = false;

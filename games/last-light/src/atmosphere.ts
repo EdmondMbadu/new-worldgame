@@ -17,10 +17,12 @@ type Key = {
   exposure: number;
 };
 const KEYS: Key[] = [
-  { e: 30, zenith: '#3d78bd', horizon: '#cfe0e4', sun: '#fff3dc', sunI: 3.4, hemiSky: '#bdd5e8', hemiGround: '#6d5a3c', hemiI: 1.0, fog: '#c7d4d4', exposure: 0.82 },
-  { e: 14, zenith: '#3868a8', horizon: '#e9cfa2', sun: '#ffe0b0', sunI: 3.2, hemiSky: '#a2bcd6', hemiGround: '#735536', hemiI: 0.9, fog: '#cdbfa0', exposure: 0.8 },
-  { e: 6, zenith: '#34599a', horizon: '#f7b57a', sun: '#ffb86e', sunI: 2.9, hemiSky: '#8ea6c8', hemiGround: '#6c4a2e', hemiI: 0.8, fog: '#d6ab86', exposure: 0.86 },
-  { e: 1.5, zenith: '#2b4884', horizon: '#ff9152', sun: '#ff8d48', sunI: 2.2, hemiSky: '#7c8cb9', hemiGround: '#5d3e29', hemiI: 0.7, fog: '#d0916f', exposure: 0.98 },
+  // Daylight is clear and deep: a saturated zenith, blue aerial perspective on
+  // the far ridges and red-earth bounce light, so the near ground stays crisp.
+  { e: 30, zenith: '#2a68bd', horizon: '#b9d3e4', sun: '#fff3dc', sunI: 3.7, hemiSky: '#a6c4e2', hemiGround: '#8a5232', hemiI: 0.92, fog: '#9fb9cc', exposure: 0.9 },
+  { e: 14, zenith: '#2a5fae', horizon: '#e2c9a0', sun: '#ffe2b2', sunI: 3.55, hemiSky: '#90b0d4', hemiGround: '#8a5230', hemiI: 0.88, fog: '#9fb2bf', exposure: 0.9 },
+  { e: 6, zenith: '#2a5296', horizon: '#f3ad70', sun: '#ffb466', sunI: 3.2, hemiSky: '#839fc6', hemiGround: '#70412a', hemiI: 0.8, fog: '#ae9f98', exposure: 0.95 },
+  { e: 1.5, zenith: '#26437f', horizon: '#ff8d4e', sun: '#ff8a44', sunI: 2.35, hemiSky: '#7887b6', hemiGround: '#5d3a28', hemiI: 0.72, fog: '#c08a76', exposure: 1.04 },
   { e: -1.5, zenith: '#233a73', horizon: '#e0706a', sun: '#f06a44', sunI: 0.55, hemiSky: '#66709f', hemiGround: '#433027', hemiI: 0.55, fog: '#96707e', exposure: 1.12 },
   { e: -5, zenith: '#172653', horizon: '#7b5577', sun: '#b77a7a', sunI: 0, hemiSky: '#56628f', hemiGround: '#302a2a', hemiI: 0.48, fog: '#4c4c6c', exposure: 1.3 },
   { e: -9, zenith: '#0e1837', horizon: '#2f3a60', sun: '#9ab0d6', sunI: 0, hemiSky: '#4d6189', hemiGround: '#28282a', hemiI: 0.46, fog: '#223050', exposure: 1.45 },
@@ -118,6 +120,8 @@ export const atmosphereUniforms = {
   uFogFalloff: { value: 0.07 },
   uHaze: { value: 1 },
   uMist: { value: 0.6 },
+  /** Metres of clear air around the camera before haze begins. */
+  uFogClear: { value: 45 },
   uTime: { value: 0 },
   uCloud: { value: 0.4 },
   uStorm: { value: 0.2 },
@@ -152,6 +156,7 @@ const FOG_FRAGMENT_PARS = `
   uniform float uFogFalloff;
   uniform float uHaze;
   uniform float uMist;
+  uniform float uFogClear;
   #ifdef FOG_EXP2
     uniform float fogDensity;
   #else
@@ -169,7 +174,8 @@ const FOG_FRAGMENT = `
     // Height fog: dense mist settles in valleys, thin air on the ridges.
     float fogH = max(vFogWorld.y - uFogBase, 0.0);
     float fogLocal = fogDensity * (1.0 + uMist * 3.0 * exp(-fogH * uFogFalloff));
-    float fogFactor = 1.0 - exp(-fogDist * fogLocal * uHaze);
+    // The first stretch of road stays crisp; haze builds with distance beyond it.
+    float fogFactor = 1.0 - exp(-max(fogDist - uFogClear, 0.0) * fogLocal * uHaze);
   #else
     float fogFactor = smoothstep(fogNear, fogFar, vFogDepth);
   #endif
@@ -209,6 +215,11 @@ float hash12(vec2 p){ vec3 p3=fract(vec3(p.xyx)*.1031); p3+=dot(p3,p3.yzx+33.33)
 float vnoise(vec2 p){ vec2 i=floor(p), f=fract(p); vec2 u=f*f*(3.-2.*f);
   return mix(mix(hash12(i),hash12(i+vec2(1,0)),u.x), mix(hash12(i+vec2(0,1)),hash12(i+vec2(1,1)),u.x), u.y); }
 float fbm(vec2 p){ float v=0., a=.5; mat2 r=mat2(.8,.6,-.6,.8); for(int i=0;i<6;i++){ v+=a*vnoise(p); p=r*p*2.03+11.7; a*=.5; } return v; }
+float hash13(vec3 p){ p=fract(p*.1031); p+=dot(p,p.zyx+31.32); return fract((p.x+p.y)*p.z); }
+float vnoise3(vec3 x){ vec3 i=floor(x), f=fract(x); f=f*f*(3.-2.*f);
+  return mix(mix(mix(hash13(i),hash13(i+vec3(1,0,0)),f.x), mix(hash13(i+vec3(0,1,0)),hash13(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(hash13(i+vec3(0,0,1)),hash13(i+vec3(1,0,1)),f.x), mix(hash13(i+vec3(0,1,1)),hash13(i+vec3(1,1,1)),f.x),f.y), f.z); }
+float fbm3(vec3 p){ float v=0., a=.5; for(int i=0;i<5;i++){ v+=a*vnoise3(p); p=p*2.07+vec3(5.1,1.3,7.7); a*=.5; } return v; }
 `;
 
 export function skyMaterial() {
@@ -229,9 +240,9 @@ export function skyMaterial() {
         float mu = dot(d, uSunDir);
         // Sky gradient with a broad, warm glow along the sun side of the horizon.
         float up = clamp(h, 0., 1.);
-        vec3 col = mix(uHorizon, uZenith, pow(up, 0.42));
+        vec3 col = mix(uHorizon, uZenith, pow(up, 0.55));
         float sunSide = pow(max(mu, 0.) , 2.0);
-        col = mix(col, uSunColor * 1.0, sunSide * exp(-up * 6.) * 0.6);
+        col = mix(col, uSunColor * 1.0, sunSide * exp(-up * 6.) * 0.45);
         // Below the horizon: haze that meets the fog.
         col = mix(col, uHorizon * 0.9, smoothstep(0.02, -0.12, h));
         // Mie halo and sun disc.
@@ -245,7 +256,8 @@ export function skyMaterial() {
         float base = fbm(uv * 0.55 + wind);
         float detail = fbm(uv * 1.9 - wind * 1.6);
         float cover = mix(0.72, 0.28, uCloud);
-        float density = smoothstep(cover, cover + 0.34, base * 0.72 + detail * 0.38);
+        // A tighter ramp gives clouds defined, sunlit edges instead of a milky veil.
+        float density = smoothstep(cover, cover + 0.24, base * 0.72 + detail * 0.38);
         density *= smoothstep(-0.02, 0.12, h);
         // Keep a window around the sun on stormy chapters, like light breaking through.
         density *= 1. - smoothstep(0.93, 0.995, mu) * 0.55;
@@ -256,8 +268,23 @@ export function skyMaterial() {
         vec3 cloudCol = mix(belly, lit, 0.35 + 0.45 * thin) + uSunColor * silver;
         cloudCol = mix(cloudCol, cloudCol * vec3(0.35, 0.4, 0.55), uDark);
         col = mix(col, cloudCol, density * (0.92));
+        // Towering cumulus along the horizon, as over the Congo basin: billows
+        // lit gold on the sun side, blue-grey bellies, softened by distance haze.
+        vec2 around = normalize(d.xz + vec2(1e-4));
+        vec3 cp = vec3(around * 2.6, h * 7.5) + vec3(uTime * 0.002, 0., 0.);
+        float billow = fbm3(cp * 1.6) * 0.7 + fbm3(cp * 4.3 + 3.1) * 0.3;
+        float tower = billow * 1.2 - h * (1.9 - uCloud * 0.5) - 0.26 + uCloud * 0.2;
+        float cumulus = smoothstep(0.2, 0.3, tower) * smoothstep(-0.005, 0.03, h) * (1. - uStorm * 0.35);
+        float rim = 1. - smoothstep(0.2, 0.36, tower);
+        float sunward = pow(max(mu, 0.) * .5 + .5, 2.);
+        vec3 cuBelly = mix(uZenith * 0.55 + uHorizon * 0.35, vec3(0.2, 0.22, 0.26), uStorm * 0.7);
+        vec3 cuLit = mix(uHorizon * 1.1 + vec3(0.06), uSunColor * 1.5, sunward * 0.7);
+        vec3 cuCol = mix(cuBelly, cuLit, smoothstep(0.0, 0.18, h) * 0.55 + rim * 0.45 * sunward + 0.15);
+        cuCol = mix(cuCol, uHorizon, exp(-h * 22.) * 0.55);
+        cuCol = mix(cuCol, cuCol * vec3(0.32, 0.36, 0.5), uDark);
+        col = mix(col, cuCol, cumulus * 0.95 * (1. - density * 0.6));
         // Horizon haze band softens the join between terrain and sky.
-        col = mix(col, uHorizon, exp(-abs(h) * 16.) * 0.35 * uHaze);
+        col = mix(col, uHorizon, exp(-abs(h) * 16.) * 0.25 * uHaze);
         // Stars appear as the light goes.
         vec2 sp = d.xz / (h + 1.2) * 180.;
         float star = step(0.9965, hash12(floor(sp))) * smoothstep(0.05, 0.3, h);

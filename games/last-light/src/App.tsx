@@ -651,6 +651,8 @@ export default function App() {
           input.clear();
         });
         controls.current = input;
+        // Development QA only: lets scripted checks and capture runs reach the drive.
+        if (qa) Object.assign(window, { __lastLight: { engine: instance, world: view } });
         input.enabled = !openingRef.current;
         setReady(true);
         last = performance.now();

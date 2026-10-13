@@ -8,7 +8,7 @@ import { roadSections } from './road-sections';
  * (colliders) and the renderer (meshes). Everything here is in route
  * coordinates: x is lateral, z is the station along the road.
  */
-export type PlantKind = 'acacia' | 'baobab' | 'palm' | 'banana' | 'euphorbia' | 'broadleaf';
+export type PlantKind = 'acacia' | 'baobab' | 'palm' | 'banana' | 'euphorbia' | 'broadleaf' | 'oilpalm' | 'canopy' | 'mango';
 export type Plant = { kind: PlantKind; x: number; z: number; scale: number; yaw: number; tint: number };
 export type Boulder = { x: number; z: number; sx: number; sy: number; sz: number; yaw: number };
 export type Mound = { x: number; z: number; scale: number; yaw: number };
@@ -23,12 +23,19 @@ export const TRUNK_RADIUS: Record<PlantKind, number> = {
   banana: 0,
   euphorbia: 0.34,
   broadleaf: 0.36,
+  oilpalm: 0.3,
+  canopy: 0.5,
+  mango: 0.42,
 };
 
-/** 0 is dry savanna, 1 is rainforest. */
-export const LUSH = [0.25, 1, 0.7, 0.55, 0.85];
+/**
+ * 0 is dry savanna, 1 is rainforest. Every clinic is in Kongo Central: green
+ * grass hills with forest in the valleys, the Mayombe rainforest, the river
+ * country and the baobab country around Boma.
+ */
+export const LUSH = [0.55, 1, 0.75, 0.6, 0.85];
 /** Relative number of trees per chapter. */
-const DENSITY = [0.85, 1.6, 1.05, 1, 1.15];
+const DENSITY = [1.05, 1.6, 1.1, 1, 1.15];
 
 export type SceneryLayout = {
   plants: Plant[];
@@ -142,15 +149,24 @@ function posts(m: Mission): Post[] {
   return list;
 }
 
-function pickKind(lush: number, r: number, nearVillage: boolean): PlantKind {
-  if (nearVillage && r < 0.35) return r < 0.2 ? 'banana' : 'palm';
+/**
+ * Kongo Central's trees: oil palms and mangoes around every village, tall
+ * rainforest canopy trees on the Mayombe slopes, rounded broadleaves in the
+ * gallery forests, and baobabs in the country around Boma (the last clinic).
+ */
+function pickKind(lush: number, r: number, nearVillage: boolean, chapter: number): PlantKind {
+  if (nearVillage && r < 0.45) return r < 0.16 ? 'banana' : r < 0.32 ? 'oilpalm' : 'mango';
+  const boma = chapter === 4;
   const w: [PlantKind, number][] = [
-    ['acacia', 0.5 * (1 - lush) + 0.06],
-    ['baobab', 0.1 * (1 - lush) + 0.01],
-    ['euphorbia', 0.12 * (1 - lush)],
-    ['broadleaf', 0.2 + 0.45 * lush],
-    ['palm', 0.08 + 0.2 * lush],
-    ['banana', 0.02 + 0.1 * lush],
+    ['acacia', 0.06 * (1 - lush)],
+    ['baobab', boma ? 0.1 : 0.012 * (1 - lush)],
+    ['euphorbia', 0.03 * (1 - lush)],
+    ['broadleaf', 0.3 + 0.22 * lush],
+    ['canopy', 0.04 + 0.3 * lush],
+    ['oilpalm', 0.12 + 0.12 * lush],
+    ['palm', boma ? 0.06 : 0.02],
+    ['mango', 0.05],
+    ['banana', 0.02 + 0.08 * lush],
   ];
   const total = w.reduce((n, [, v]) => n + v, 0);
   let t = r * total;
@@ -189,12 +205,12 @@ export function sceneryLayout(m: Mission): SceneryLayout {
     const side = rng() > 0.5 ? 1 : -1;
     const x = roadX(m, z) + side * (near ? nearest + rng() * 38 : 40 + rng() * 150);
     const nearVillage = sites.some((s) => Math.abs(s - z) < 55);
-    const kind = pickKind(lush, rng(), nearVillage);
+    const kind = pickKind(lush, rng(), nearVillage, m.id);
     const scale =
       kind === 'baobab' ? 0.8 + rng() * 0.5 : kind === 'banana' ? 0.8 + rng() * 0.45 : 0.7 + rng() * 0.65;
     const yaw = rng() * Math.PI * 2,
       tint = rng();
-    const clearance = kind === 'baobab' ? 9 : kind === 'acacia' ? 7 : 5;
+    const clearance = kind === 'baobab' ? 9 : kind === 'acacia' || kind === 'canopy' || kind === 'mango' ? 7 : 5;
     if (blocked(x, z, clearance)) continue;
     plants.push({ kind, x, z, scale, yaw, tint });
   }

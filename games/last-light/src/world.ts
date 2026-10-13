@@ -82,19 +82,29 @@ const craneEase = (x: number) => 1 - Math.pow(1 - x * x * (3 - 2 * x), 3);
 
 /** Terrain palette, parsed once instead of once per vertex. */
 const PALETTE = {
-  dry: new T.Color('#b39a58'),
-  grass: new T.Color('#5c7a30'),
-  lushGrass: new T.Color('#3e6926'),
-  earth: new T.Color('#9b4f2d'),
+  dry: new T.Color('#a39b52'),
+  grass: new T.Color('#4a7a2c'),
+  lushGrass: new T.Color('#2f6224'),
+  earth: new T.Color('#a5492a'),
   rock: new T.Color('#6f675c'),
-  bank: new T.Color('#8e4a2b'),
+  bank: new T.Color('#8e4428'),
   mud: new T.Color('#5a2f1c'),
   silt: new T.Color('#4d3a2a'),
   sand: new T.Color('#b7a27a'),
   scar: new T.Color('#7a3d22'),
   creek: new T.Color('#3f2c20'),
-  roadEdge: new T.Color('#8a6a3a'),
+  roadEdge: new T.Color('#8a5f34'),
 };
+/**
+ * Per-tree colour variation: from cool blue-green to sunny yellow-green, and
+ * from shaded to bright. It multiplies the species' own greens, so it stays
+ * close to white and never turns the forest khaki.
+ */
+const TINT_COOL = new T.Color(0.8, 0.97, 0.9),
+  TINT_WARM = new T.Color(1.1, 1.04, 0.78);
+function foliageTint(hue: number, light: number, out: T.Color) {
+  return out.copy(TINT_COOL).lerp(TINT_WARM, hue).multiplyScalar(0.84 + light * 0.32);
+}
 type Chunk = { mesh: T.Object3D; start: number; end: number; ahead: number; behind: number };
 type Knock = { index: number; t: number; vx: number; vz: number; spin: number };
 
@@ -788,9 +798,10 @@ export class GameWorld {
         idx: number[] = [];
       const start = section.from,
         end = section.to;
-      const laterite = new T.Color('#b0603a'),
-        packed = new T.Color('#8c4629'),
-        crown = new T.Color('#bf7449'),
+      // Kongo laterite: a vivid red-orange road, packed darker in the wheel tracks.
+      const laterite = new T.Color('#b6552e'),
+        packed = new T.Color('#8a3f24'),
+        crown = new T.Color('#c46a3d'),
         mud = new T.Color('#633420'),
         freshEarth = new T.Color('#6f3a22'),
         creekBed = new T.Color('#3f2c20');
@@ -1053,7 +1064,8 @@ export class GameWorld {
     const layout = sceneryLayout(m);
     const lush = LUSH[m.id] ?? 0.5;
     const palette = paletteFor(lush);
-    const detail = this.low ? 0 : 1;
+    // Rounder, leafier crowns on capable GPUs; the lightest tier keeps the simplest shapes.
+    const detail = this.tier === 2 ? 2 : this.low ? 0 : 1;
     const treeMat = foliageMaterial(this.windTime, 0.09 + m.rain * 0.05, { double: true });
     const obj = new T.Object3D();
     const tint = new T.Color();
@@ -1076,7 +1088,7 @@ export class GameWorld {
           obj.scale.setScalar(p.scale);
           obj.updateMatrix();
           inst.setMatrixAt(i, obj.matrix);
-          inst.setColorAt(i, tint.setHSL(0.1 + p.tint * 0.05, 0.14, 0.5 + p.tint * 0.14).multiplyScalar(1.75));
+          inst.setColorAt(i, foliageTint(p.tint, (p.tint * 7.31) % 1, tint));
         });
         inst.castShadow = true;
         inst.receiveShadow = true;
@@ -1107,7 +1119,7 @@ export class GameWorld {
       obj.scale.set(s * (1 + rng() * 0.6), s * (0.8 + rng() * 0.5), s * (1 + rng() * 0.6));
       obj.updateMatrix();
       hills.setMatrixAt(placed, obj.matrix);
-      hills.setColorAt(placed, tint.setHSL(0.1 + rng() * 0.05, 0.16, 0.46 + rng() * 0.16).multiplyScalar(1.75));
+      hills.setColorAt(placed, foliageTint(rng(), rng() * 0.8, tint));
       placed++;
     }
     hills.count = placed;
@@ -1210,7 +1222,7 @@ export class GameWorld {
   }
   private buildLandscape(m: Mission, look: ReturnType<typeof chapterLook>) {
     const bounds = routeBounds(m);
-    this.scene.add(ridgelines(m, bounds, m.id >= 2));
+    this.scene.add(ridgelines(m, bounds));
     this.scene.add(valleyWater(this.waterLevel, bounds));
     this.scene.add(mistDecks(this.waterLevel, bounds, look.mist));
     this.birds = new Birds(TIERS.birds[this.tier]);
@@ -1434,6 +1446,8 @@ export class GameWorld {
     const rain = rainAt(m, e.progress);
     (this.scene.fog as T.FogExp2).density = 0.00072 * (1 + sky.darkness * 0.9) * (1 + rain * 0.7) * (m.id === 3 ? 1.5 : 1);
     atmosphereUniforms.uMist.value = chapterLook(m).mist * (0.45 + 0.55 * sky.darkness);
+    // Clear air around the truck by day; rain and night pull the haze closer.
+    atmosphereUniforms.uFogClear.value = 45 * (1 - sky.darkness * 0.6) * (1 - rain * 0.45);
     atmosphereUniforms.uFogBase.value = (careShot ? roadY(m, m.length) : p.y) - 16;
     const lightning =
       m.id === 4 &&
@@ -1852,7 +1866,7 @@ export class GameWorld {
       sun: sky.sunDir,
       sunColor: sky.sunColor,
       darkness: sky.darkness,
-      shaftStrength: this.low ? 0 : 0.6 * (1 - chapterLook(m).storm * 0.2),
+      shaftStrength: this.low ? 0 : 0.48 * (1 - chapterLook(m).storm * 0.2),
       impact: this.settings.reducedMotion ? 0 : e.impactPulse,
       bloomScale: this.bloomAdapt,
     });
