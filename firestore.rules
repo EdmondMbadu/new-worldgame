@@ -395,9 +395,38 @@ service cloud.firestore {
         );
       allow delete: if (!isManagedClass(resource.data) && request.time < timestamp.date(2028, 11, 3))
         || managesClass(resource.data);
-      match /{child=**} {
+      match /{subcollection}/{child=**} {
         allow read: if readsClass(get(/databases/$(database)/documents/challengePages/$(pageId)).data);
         allow write: if managesClass(get(/databases/$(database)/documents/challengePages/$(pageId)).data);
+      }
+    }
+
+    // A school dashboard summary must not expose a private class's roster.
+    function managesSchool(schoolId) {
+      let school = get(/databases/$(database)/documents/schools/$(schoolId)).data;
+      return isSignedIn() && (school.ownerUid == request.auth.uid
+        || school.get('adminUids', []).hasAny([request.auth.uid]) || isPlatformAdmin());
+    }
+    match /schools/{schoolId} {
+      allow read, write: if request.time < timestamp.date(2028, 11, 3);
+      match /classes/{classId} {
+        allow read: if (!isManagedClass(resource.data) && request.time < timestamp.date(2028, 11, 3))
+          || managesSchool(schoolId) || readsClass(resource.data);
+        allow create: if !isManagedClass(request.resource.data)
+          && request.time < timestamp.date(2028, 11, 3);
+        allow update: if (!isManagedClass(resource.data) && !isManagedClass(request.resource.data)
+            && request.time < timestamp.date(2028, 11, 3))
+          || (isManagedClass(resource.data) && managesClass(resource.data)
+            && validClass(request.resource.data)
+            && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+              'authorId', 'createdByUid', 'classSetupVersion', 'type', 'schoolId'
+            ]));
+        allow delete: if (!isManagedClass(resource.data) && request.time < timestamp.date(2028, 11, 3))
+          || managesClass(resource.data);
+      }
+      match /{subcollection}/{document=**} {
+        allow read, write: if subcollection != 'classes'
+          && request.time < timestamp.date(2028, 11, 3);
       }
     }
 
@@ -423,6 +452,7 @@ service cloud.firestore {
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
         && topLevelCollection != 'challengePages'
+        && topLevelCollection != 'schools'
         && topLevelCollection != 'publicCommunitySolutions'
         && topLevelCollection != 'solutionModerationQueue'
         && topLevelCollection != 'solutionModerationPolicies'
@@ -440,6 +470,7 @@ service cloud.firestore {
         && topLevelCollection != 'solutions'
         && topLevelCollection != 'challengeQuestionTemplates'
         && topLevelCollection != 'challengePages'
+        && topLevelCollection != 'schools'
         && topLevelCollection != 'publicCommunitySolutions'
         && topLevelCollection != 'solutionModerationQueue'
         && topLevelCollection != 'solutionModerationPolicies'

@@ -15,7 +15,7 @@ const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'verify-email', component: VerifyEmailComponent },
   { path: 'signup-school', component: SchoolSignupComponent },
-  { path: 'signup-school-free', redirectTo: 'create-class', pathMatch: 'full' },
+  { path: 'signup-school-free', redirectTo: '/create-class', pathMatch: 'full' },
   { path: 'community-signup', component: CommunitySignupComponent },
   { path: 'sign-un-free', component: UnSignupFreeComponent },
 ];

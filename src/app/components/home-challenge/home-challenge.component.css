@@ -1,0 +1,53 @@
+/* First-run class checklist — matches the editorial class-setup pages. */
+.class-welcome {
+  --cw-paper: #fcfaf6;
+  --cw-ink: #0d1b2e;
+  --cw-muted: #596575;
+  --cw-green: #32766d;
+  --cw-soft: #eaf0e9;
+  --cw-line: #dcded6;
+  background: var(--cw-paper);
+  border: 1px solid var(--cw-line);
+  border-radius: 20px;
+  padding: 28px 32px 22px;
+  color: var(--cw-ink);
+  box-shadow: 0 14px 40px rgba(13, 27, 46, 0.04);
+}
+:host-context(.dark) .class-welcome {
+  --cw-paper: #0f1a2a;
+  --cw-ink: #f1f5f9;
+  --cw-muted: #a5b1c2;
+  --cw-green: #7cc2b5;
+  --cw-soft: #16302d;
+  --cw-line: #253447;
+  box-shadow: none;
+}
+.class-welcome__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.class-welcome__eyebrow { margin: 0 0 10px; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--cw-green); }
+.class-welcome__title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; font-size: clamp(24px, 3vw, 30px); line-height: 1.2; letter-spacing: -0.6px; }
+.class-welcome__lede { margin: 10px 0 0; max-width: 620px; font-size: 14px; line-height: 1.65; color: var(--cw-muted); }
+.class-welcome__close { flex-shrink: 0; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--cw-line); background: transparent; color: var(--cw-muted); cursor: pointer; transition: color .15s, border-color .15s; }
+.class-welcome__close:hover { color: var(--cw-ink); border-color: var(--cw-ink); }
+.class-welcome__progress { display: flex; align-items: center; gap: 14px; margin: 22px 0 18px; }
+.class-welcome__bar { flex: 1; height: 4px; border-radius: 4px; background: var(--cw-line); overflow: hidden; }
+.class-welcome__bar span { display: block; height: 100%; background: var(--cw-green); border-radius: 4px; transition: width .4s ease; }
+.class-welcome__count { font-size: 12px; font-weight: 700; color: var(--cw-green); white-space: nowrap; }
+.class-welcome__steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.class-welcome__steps li { display: flex; }
+.class-welcome__step { width: 100%; display: flex; align-items: flex-start; gap: 14px; text-align: left; padding: 18px; border: 1px solid var(--cw-line); border-radius: 14px; background: transparent; color: inherit; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; }
+.class-welcome__step:hover { border-color: var(--cw-green); background: var(--cw-soft); }
+.class-welcome__step:focus-visible, .class-welcome__close:focus-visible, .class-welcome__foot button:focus-visible { outline: 3px solid rgba(50, 118, 109, .55); outline-offset: 3px; }
+.class-welcome__num { flex-shrink: 0; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--cw-line); font-size: 12px; font-weight: 700; color: var(--cw-muted); }
+.class-welcome__step.is-done .class-welcome__num { background: var(--cw-green); border-color: var(--cw-green); color: var(--cw-paper); }
+.class-welcome__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.class-welcome__label { font-size: 10px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: var(--cw-green); }
+.class-welcome__body strong { font-size: 15px; font-weight: 700; line-height: 1.35; color: var(--cw-ink); }
+.class-welcome__hint { font-size: 12px; line-height: 1.55; color: var(--cw-muted); }
+.class-welcome__step.is-done strong { color: var(--cw-muted); }
+.class-welcome__arrow { align-self: center; color: var(--cw-green); font-size: 16px; transition: transform .15s; }
+.class-welcome__step:hover .class-welcome__arrow { transform: translateX(3px); }
+.class-welcome__foot { margin: 18px 0 0; padding-top: 16px; border-top: 1px solid var(--cw-line); font-size: 12px; color: var(--cw-muted); }
+.class-welcome__foot button { margin-left: 4px; border: 0; background: none; padding: 0; font: inherit; font-weight: 700; color: var(--cw-green); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+@media (max-width: 900px) { .class-welcome__steps { grid-template-columns: 1fr; } }
+@media (max-width: 540px) { .class-welcome { padding: 22px 18px 18px; border-radius: 16px; } .class-welcome__step { padding: 15px; } }

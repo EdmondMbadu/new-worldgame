@@ -3,11 +3,12 @@ import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn 
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
+import { hasPendingClassSetup } from '../create-class/class-setup-intent';
 
 @Component({
     selector: 'app-verify-email',
     templateUrl: './verify-email.component.html',
-    styleUrls: ['./verify-email.component.css'],
+    styleUrls: ['./verify-email.component.css', '../create-class/create-class.component.css'],
     standalone: false
 })
 export class VerifyEmailComponent implements OnInit {
@@ -15,6 +16,7 @@ export class VerifyEmailComponent implements OnInit {
   cancelGameReturn() { clearAuthReturn(); this.auth.setRedirectUrl(''); }
   gameReturnUrl = gameAuthReturn();
   classReturn = captureAuthReturn() === '/create-class';
+  classEmail = '';
   redirectTarget = '/home';
   checking = false;
   errorMessage = '';
@@ -34,7 +36,16 @@ export class VerifyEmailComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     window.scroll(0, 0);
-    this.redirectTarget = captureAuthReturn() || '/home';
+    const destination = captureAuthReturn();
+    this.redirectTarget = destination || '/home';
+    const user = await this.auth.getCurrentUserPromise().catch(() => null);
+    this.classEmail = user?.email || '';
+    if (!this.gameReturnUrl && (this.classReturn || (!destination && hasPendingClassSetup(user?.uid || '')))) {
+      this.classReturn = true;
+      this.redirectTarget = '/create-class';
+      this.auth.setRedirectUrl(this.redirectTarget);
+      try { sessionStorage.setItem('redirectTo', this.redirectTarget); } catch { /* Optional storage. */ }
+    }
     const recoveryState = this.route.snapshot.queryParamMap.get('recovered');
     if (recoveryState === 'repaired') {
       this.recoveryNotice =

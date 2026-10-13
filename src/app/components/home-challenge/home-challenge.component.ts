@@ -471,7 +471,8 @@ export class HomeChallengeComponent implements OnDestroy {
     loadToken: number = this.pageLoadToken
   ): void {
         this.challengePage = data;
-        this.showClassWelcome = data.classSetupVersion === 1 && this.activatedRoute.snapshot.queryParamMap.get('setup') === '1';
+        this.showClassWelcome = data.classSetupVersion === 1;
+        try { this.showClassWelcome = this.showClassWelcome && localStorage.getItem('gsl.class-welcome.' + this.challengePageId) !== 'dismissed'; } catch { /* Optional storage. */ }
         this.heading = this.challengePage.heading!;
         this.subHeading = this.challengePage.subHeading!;
         this.isPrivate = !!data.isPrivate;
@@ -677,6 +678,18 @@ export class HomeChallengeComponent implements OnDestroy {
 
     this.showJoinPrompt = true;
     this.hasHandledJoinPrompt = true;
+  }
+
+  get classSetupCompletedSteps(): number {
+    return Number(this.hasClassStudents) + Number(!!this.programPDF) + Number(this.pageChallengeCards.length > 0);
+  }
+  get hasClassStudents(): boolean {
+    const ownerEmail = this.normalizeEmail(this.auth.currentUser?.email || '');
+    return this.participants.some(email => this.normalizeEmail(email) !== ownerEmail);
+  }
+  dismissClassWelcome(): void {
+    this.showClassWelcome = false;
+    try { localStorage.setItem('gsl.class-welcome.' + this.challengePageId, 'dismissed'); } catch { /* Optional storage. */ }
   }
 
   get isAuthorPage(): boolean {

@@ -30,14 +30,19 @@ export class LoginComponent implements OnInit, OnDestroy {
   myForm: FormGroup;
   loading: boolean = false;
   accountNotice: string = '';
+  accountNoticeTitle: string = 'Your account is ready';
   ngOnInit() {
     window.scroll(0, 0);
     this.auth.logingError = of(null);
-    if (this.classReturn) this.accountNotice = 'Sign in to finish creating your class space. Your class details are saved.';
+    if (this.classReturn) {
+      this.accountNoticeTitle = 'Creating your class space';
+      this.accountNotice = 'Sign in with your existing account and we’ll take you straight back to set up your class. Anything you entered is saved.';
+    }
     const prefillEmail = this.route.snapshot.queryParamMap.get('email');
     if (prefillEmail) this.myForm.patchValue({ email: prefillEmail });
     const accountRecovered =
       this.route.snapshot.queryParamMap.get('accountRecovered');
+    if (accountRecovered) this.accountNoticeTitle = 'Your account is ready';
     if (accountRecovered === 'repaired') {
       this.accountNotice =
         'Your existing account was already verified. We restored its missing profile—sign in to continue.';

@@ -1,3 +1,18 @@
+<div *ngIf="classReturn" class="class-setup">
+  <header class="setup-header"><a routerLink="/for-professors" class="brand"><img src="/assets/img/gsl-logo.png" alt="" width="44" height="44"><span>Global Solutions Lab<small>For educators</small></span></a><a routerLink="/create-class" class="back-link">← Back to class setup</a></header>
+  <main><div class="intro"><p class="eyebrow">YOUR ACCOUNT IS THE FIRST STEP</p><h1>Next, your <em>class space.</em></h1><p>Confirm your email, then we’ll help you create a private home for your students.</p></div>
+    <ol class="steps" aria-label="Class setup progress"><li class="current" aria-current="step"><span>1</span>Your account</li><li><span>2</span>Your class</li><li><span>3</span>Ready to teach</li></ol>
+    <div class="setup-grid"><section class="form-card" aria-labelledby="class-verification-title"><div class="milestone-icon" aria-hidden="true">✓</div><p class="eyebrow">{{ classEmail ? 'YOUR ACCOUNT IS CREATED' : 'CONTINUE YOUR CLASS SETUP' }}</p><h2 id="class-verification-title">{{ classEmail ? 'One quick email check.' : 'Your class is coming next.' }}</h2><p class="form-lede">{{ classEmail ? "Your class space is coming next. Verify your email so you can manage your class and invite students." : "Sign in to continue. We’ll check your email and take you straight to class setup." }}</p>
+      <div *ngIf="classEmail" class="inbox-card"><span class="mail-icon" aria-hidden="true">✉</span><div><strong>Check your inbox</strong><p>Open the verification link{{ classEmail ? ' sent to ' + classEmail : ' in your email' }}. Check your spam folder if you don’t see it.</p></div></div>
+      <p *ngIf="errorMessage" class="message error" role="alert">{{ errorMessage }}</p><p *ngIf="resendNotice" class="message" role="status">{{ resendNotice }}</p>
+      <button *ngIf="classEmail" type="button" class="primary-button" [disabled]="checking" (click)="onVerifiedClick()">{{ checking ? 'Checking your email…' : 'I’ve verified — set up my class' }} →</button>
+      <button *ngIf="!classEmail" type="button" class="primary-button" (click)="goToLogin()">Sign in & set up my class →</button>
+      <button *ngIf="classEmail" type="button" class="text-button resend" [disabled]="resending" (click)="resendEmail()">{{ resending ? 'Sending…' : 'Resend verification email' }}</button>
+      <p *ngIf="classEmail" class="form-note">Opened the link on another device? Return here and select the button above.</p><button *ngIf="classEmail" type="button" class="text-button resend" (click)="goToLogin()">Sign in to continue class setup →</button>
+    </section><aside class="preview-panel"><p class="eyebrow">HERE’S WHAT HAPPENS NEXT</p><div class="preview-card"><div class="preview-cover"><span>YOUR FUTURE CLASS SPACE</span><span class="private-badge">Private</span></div><div class="preview-body"><h3>A home for your next class.</h3><div class="preview-tags"><span>Syllabus</span><span>Student projects</span><span>Discussion</span></div><div class="preview-project"><span class="project-icon">↗</span><div><strong>Real problems. Shared progress.</strong><p>Bring your course and your student teams together.</p></div></div></div></div><ol class="welcome-map"><li class="done"><span>✓</span><div><strong>Create your account</strong><p>You’ve completed this step.</p></div></li><li class="active"><span>2</span><div><strong>Name your class</strong><p>Add your course and institution. About 2 minutes.</p></div></li><li><span>3</span><div><strong>Welcome your students</strong><p>Add a syllabus, pick a challenge, and send invitations.</p></div></li></ol><p class="form-note">Free through the 2026–27 academic year. No credit card required.</p></aside></div>
+  </main><footer>Need help getting started? <a routerLink="/contact-us">Talk to our team →</a></footer>
+</div>
+<ng-container *ngIf="!classReturn">
 <aside *ngIf="gameReturnUrl" class="game-return-note"><strong>{{ tr("Your game is waiting.") }}</strong><span>{{ tr("Finish signing in to return to your chapter.") }}</span><a [href]="gameReturnUrl" (click)="cancelGameReturn()">{{ tr("Back to Let There Be Light →") }}</a></aside>
 <app-navbar></app-navbar>
 
@@ -96,3 +111,5 @@
     </div>
   </div>
 </div>
+
+</ng-container>

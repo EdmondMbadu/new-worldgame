@@ -4,16 +4,16 @@
     <a routerLink="/for-professors" class="back-link">← Back to overview</a>
   </header>
   <main>
-    <div class="intro"><p class="eyebrow">YOUR COURSE. YOUR STUDENTS. YOUR SPACE.</p><h1>Create your <em>class space.</em></h1><p>A home for your students, team projects, syllabus, and discussions.</p></div>
-    <ol class="steps" aria-label="Class setup progress"><li [class.current]="!verified" [class.complete]="verified" [attr.aria-current]="!verified ? 'step' : null"><span>{{ verified ? '✓' : '1' }}</span>Your account</li><li [class.current]="verified" [attr.aria-current]="verified ? 'step' : null"><span>2</span>Your class</li></ol>
+    <div class="intro"><p class="eyebrow">FROM YOUR FIRST SIGN-IN TO YOUR FIRST CLASS</p><h1>Create your <em>class space.</em></h1><p>Create your account, set up your class, then invite your students.</p></div>
+    <ol class="steps" aria-label="Class setup progress"><li [class.current]="!verified" [class.complete]="verified" [attr.aria-current]="!verified ? 'step' : null"><span>{{ verified ? '✓' : '1' }}</span>Your account</li><li [class.current]="verified" [attr.aria-current]="verified ? 'step' : null"><span>2</span>Your class</li><li><span>3</span>Ready to teach</li></ol>
     <p *ngIf="loadingSession" class="session-status" role="status">Checking your account…</p>
     <div *ngIf="!loadingSession" class="setup-grid">
-      <section class="form-card" aria-labelledby="form-title" [attr.aria-busy]="submitting">
+      <section #stepPanel tabindex="-1" class="form-card" aria-labelledby="form-title" [attr.aria-busy]="submitting">
         <div *ngIf="error" class="message error" role="alert">{{ error }} <button *ngIf="!verified" type="button" class="text-button" (click)="signIn()" [disabled]="submitting">Sign in →</button></div>
         <p *ngIf="notice" class="message" role="status">{{ notice }}</p>
         <p *ngIf="storageNotice" class="message" role="status">{{ storageNotice }}</p>
         <ng-container *ngIf="!user">
-          <p class="eyebrow">STEP 1 OF 2</p><h2 id="form-title">Start with your account</h2><p class="form-lede">Your account lets you manage your class and return to it anytime.</p>
+          <p class="eyebrow">STEP 1 · YOUR ACCOUNT</p><h2 id="form-title">Start with your account</h2><p class="form-lede">Your account lets you manage your class and return to it anytime.</p>
           <div class="existing-account"><span>Already have an account?</span><button type="button" (click)="signIn()" [disabled]="submitting">Sign in →</button></div>
           <form #accountForm="ngForm" (ngSubmit)="createAccount(accountForm)" novalidate>
             <fieldset [disabled]="submitting">
@@ -31,34 +31,75 @@
           </form>
         </ng-container>
         <ng-container *ngIf="user && !verified">
-          <p class="eyebrow">ONE QUICK ACCOUNT STEP</p><h2 id="form-title">Verify your email</h2><p class="form-lede">You’re signed in as <strong>{{ user.email }}</strong>. Verify this address to create and manage your class.</p>
-          <p>Your class details will be waiting here when you return.</p>
-          <button type="button" class="primary-button" (click)="verifyEmail()" [disabled]="submitting">{{ submitting ? 'Finishing your account…' : 'Continue to email verification' }} →</button>
-          <button type="button" class="text-button resend" (click)="resendVerification()" [disabled]="submitting">Send verification email</button>
+          <div class="milestone-icon" aria-hidden="true">✓</div>
+          <p class="eyebrow">{{ accountCreated ? 'YOUR ACCOUNT IS CREATED' : 'YOUR ACCOUNT IS READY' }}</p><h2 id="form-title">Next, your class space.</h2>
+          <p class="form-lede">First, confirm your email so we can keep your class secure. Then you’ll name your course and create its private home.</p>
+          <div class="inbox-card"><span class="mail-icon" aria-hidden="true">✉</span><div><strong>Check your inbox</strong><p>Open the verification link sent to <b>{{ user.email }}</b>. Check your spam folder if you don’t see it.</p></div></div>
+          <button type="button" class="primary-button" (click)="checkVerification()" [disabled]="submitting || checkingVerification">{{ checkingVerification ? 'Checking your email…' : 'I’ve verified — set up my class' }} <span aria-hidden="true">→</span></button>
+          <button type="button" class="text-button resend" (click)="resendVerification()" [disabled]="submitting || checkingVerification">{{ submitting ? 'Sending…' : 'Resend verification email' }}</button>
+          <p class="form-note">Keep this tab open. Come back here after you open the email link.</p>
+          <div class="next-step"><span>COMING UP NEXT</span><h3>Make it your class.</h3><p>Add your course name and institution. Images, syllabus, and student invitations can come afterward.</p></div>
         </ng-container>
-        <ng-container *ngIf="verified">
-          <p class="eyebrow">STEP 2 OF 2</p><h2 id="form-title">Tell us about your class</h2><p class="signed-in">✓ Signed in as {{ user.email }}</p>
+        <ng-container *ngIf="verified && showClassIntroduction">
+          <div class="milestone-icon" aria-hidden="true">✓</div><p class="eyebrow">YOUR ACCOUNT IS READY</p>
+          <h2 id="form-title">Welcome{{ user.firstName ? ', ' + user.firstName : '' }}.<br>Let’s bring your class together.</h2>
+          <p class="form-lede">Your next step is to create a private class space. It will be the home for your students, projects, syllabus, and discussions.</p>
+          <ol class="welcome-map"><li class="done"><span>✓</span><div><strong>Your account</strong><p>Created and verified. You’re ready to go.</p></div></li><li class="active"><span>2</span><div><strong>Create your class space</strong><p>Give it a name and add your institution. About 2 minutes.</p></div></li><li><span>3</span><div><strong>Make it ready for students</strong><p>Add a syllabus, choose a challenge, and invite your class.</p></div></li></ol>
+          <button type="button" class="primary-button" (click)="continueToClass()">Set up my class space <span aria-hidden="true">→</span></button>
+          <p class="form-note">You can adjust everything later. Start with just a class name and institution.</p>
+        </ng-container>
+        <ng-container *ngIf="verified && !showClassIntroduction">
+          <p class="eyebrow">STEP 2 · YOUR CLASS</p><h2 id="form-title">Tell us about your class</h2>
+          <div class="signed-in"><span>✓ Signed in as <b>{{ user.email }}</b></span><button type="button" class="text-button" (click)="switchAccount()" [disabled]="submitting">Not you?</button></div>
           <form #classForm="ngForm" (ngSubmit)="createClass(classForm)" novalidate>
             <fieldset [disabled]="submitting">
+              <h3 class="form-section">The essentials</h3>
               <div class="field"><label for="class-name">Class / course name</label><input id="class-name" name="className" [(ngModel)]="draft.name" (ngModelChange)="saveDraft()" #className="ngModel" required maxlength="140" placeholder="e.g., Social and Sustainable Innovation" [attr.aria-invalid]="attempted && (!draft.name.trim() || className.invalid)" aria-describedby="class-name-error"><small id="class-name-error" *ngIf="attempted && (!draft.name.trim() || className.invalid)" class="field-error">Give your class a name.</small></div>
-              <div class="field" *ngIf="!draft.independentEducator"><label for="institution">School / university name</label><input id="institution" name="institutionName" [(ngModel)]="draft.institutionName" (ngModelChange)="saveDraft()" #institution="ngModel" required maxlength="180" autocomplete="organization" placeholder="e.g., Drexel University" [attr.aria-invalid]="attempted && (!draft.institutionName.trim() || institution.invalid)" aria-describedby="institution-error"><small id="institution-error" *ngIf="attempted && (!draft.institutionName.trim() || institution.invalid)" class="field-error">Enter your institution, or select independent educator below.</small></div>
-              <label class="checkbox-row independent"><input type="checkbox" name="independent" [(ngModel)]="draft.independentEducator" (ngModelChange)="saveDraft()"><span>I’m an independent educator</span></label>
-              <details class="optional-details"><summary>Add course details <span>Optional</span></summary>
-                <div class="field-pair"><div class="field"><label for="course-code">Course code <span>Optional</span></label><input id="course-code" name="courseCode" [(ngModel)]="draft.courseCode" (ngModelChange)="saveDraft()" maxlength="40" placeholder="e.g., ENTP 601"></div><div class="field"><label for="term">Term / semester <span>Optional</span></label><input id="term" name="term" [(ngModel)]="draft.term" (ngModelChange)="saveDraft()" maxlength="80" placeholder="e.g., Fall 2026"></div></div>
-                <div class="field"><label for="class-description">About this class <span>Optional</span></label><textarea id="class-description" name="description" [(ngModel)]="draft.description" (ngModelChange)="saveDraft()" maxlength="3000" rows="4" placeholder="What will your students explore or work toward?"></textarea></div>
-              </details>
-              <div class="privacy-note"><span aria-hidden="true">◈</span><p><strong>Your class starts private.</strong><br>Only you and people you add can view it. You can change visibility in class settings.</p></div>
-              <button type="submit" class="primary-button">{{ submitting ? 'Creating your class space…' : 'Create class space' }} <span aria-hidden="true">→</span></button>
-              <p class="form-note">Add your syllabus, students, and images once your space is ready.</p>
+              <div class="field" *ngIf="!draft.independentEducator"><label for="institution">School / university</label><input id="institution" name="institutionName" [(ngModel)]="draft.institutionName" (ngModelChange)="saveDraft()" #institution="ngModel" required maxlength="180" autocomplete="organization" placeholder="e.g., Drexel University" [attr.aria-invalid]="attempted && (!draft.institutionName.trim() || institution.invalid)" aria-describedby="institution-error"><small id="institution-error" *ngIf="attempted && (!draft.institutionName.trim() || institution.invalid)" class="field-error">Enter your school, or select independent educator below.</small></div>
+              <label class="checkbox-row independent"><input type="checkbox" name="independent" [(ngModel)]="draft.independentEducator" (ngModelChange)="saveDraft()"><span>I teach independently, not through a school</span></label>
+              <div class="field-pair"><div class="field"><label for="course-code">Course code <span>Optional</span></label><input id="course-code" name="courseCode" [(ngModel)]="draft.courseCode" (ngModelChange)="saveDraft()" maxlength="40" placeholder="e.g., ENTP 601"></div><div class="field"><label for="term">Term <span>Optional</span></label><input id="term" name="term" [(ngModel)]="draft.term" (ngModelChange)="saveDraft()" maxlength="80" placeholder="e.g., Fall 2026"></div></div>
+              <div class="field"><label for="class-description">About this class <span>Optional</span></label><textarea id="class-description" name="description" [(ngModel)]="draft.description" (ngModelChange)="saveDraft()" maxlength="3000" rows="3" placeholder="What will your students explore or work toward?"></textarea></div>
+
+              <h3 class="form-section">Make it look like your class <span>Optional</span></h3>
+              <p class="section-hint">Add your school’s logo and a cover image. Skip this and we’ll use a clean default — you can change both later.</p>
+              <div class="upload-grid">
+                <div class="upload-tile" [class.has-image]="draft.logoImage" [class.busy]="uploading.logo">
+                  <span class="upload-label" id="logo-label">Logo</span>
+                  <div class="upload-preview logo" aria-hidden="true"><img *ngIf="draft.logoImage" [src]="draft.logoImage" alt=""><span *ngIf="!draft.logoImage">{{ previewInitials }}</span></div>
+                  <div class="upload-actions">
+                    <label class="upload-button" for="logo-file">{{ uploading.logo ? 'Uploading…' : draft.logoImage ? 'Replace' : 'Upload logo' }}</label>
+                    <input id="logo-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" aria-labelledby="logo-label" aria-describedby="logo-help logo-error" [disabled]="uploading.logo || submitting" (change)="uploadImage('logo', logoInput)" #logoInput>
+                    <button *ngIf="draft.logoImage && !uploading.logo" type="button" class="text-button" (click)="removeImage('logo')">Remove</button>
+                  </div>
+                  <small id="logo-help" class="upload-help">Square, PNG or JPG · under 5 MB</small>
+                  <small id="logo-error" *ngIf="uploadError.logo" class="field-error" role="alert">{{ uploadError.logo }}</small>
+                </div>
+                <div class="upload-tile" [class.has-image]="draft.coverImage" [class.busy]="uploading.cover">
+                  <span class="upload-label" id="cover-label">Cover image</span>
+                  <div class="upload-preview cover" aria-hidden="true" [style.background-image]="coverBackground"></div>
+                  <div class="upload-actions">
+                    <label class="upload-button" for="cover-file">{{ uploading.cover ? 'Uploading…' : draft.coverImage ? 'Replace' : 'Upload cover' }}</label>
+                    <input id="cover-file" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" aria-labelledby="cover-label" aria-describedby="cover-help cover-error" [disabled]="uploading.cover || submitting" (change)="uploadImage('cover', coverInput)" #coverInput>
+                    <button *ngIf="draft.coverImage && !uploading.cover" type="button" class="text-button" (click)="removeImage('cover')">Remove</button>
+                  </div>
+                  <small id="cover-help" class="upload-help">Wide, at least 1600 × 500 · under 5 MB</small>
+                  <small id="cover-error" *ngIf="uploadError.cover" class="field-error" role="alert">{{ uploadError.cover }}</small>
+                </div>
+              </div>
+
+              <div class="privacy-note"><span aria-hidden="true">◈</span><p><strong>Your class starts private.</strong><br>Only you and the students you invite can see it.</p></div>
+              <button type="submit" class="primary-button" [disabled]="isUploading">{{ submitting ? 'Creating your class space…' : isUploading ? 'Finishing your upload…' : 'Create class space' }} <span aria-hidden="true">→</span></button>
+              <p class="form-note">Next: add your syllabus, pick a first challenge, and invite students.</p>
             </fieldset>
           </form>
         </ng-container>
       </section>
       <aside class="preview-panel" aria-label="Class space preview">
         <p class="eyebrow">{{ verified ? 'YOUR CLASS, TAKING SHAPE' : 'A SPACE BUILT FOR YOUR CLASS' }}</p>
-        <div class="preview-card"><div class="preview-cover"><span>CLASS SPACE</span><span class="private-badge">Private</span></div><div class="preview-body"><p class="preview-institution">{{ previewSubtitle }}</p><h3>{{ draft.name.trim() || 'Your next great class' }}</h3><p *ngIf="draft.description.trim()" class="preview-description">{{ draft.description }}</p><div class="preview-tags"><span>Syllabus</span><span>Discussion</span><span>Meeting room</span></div><div class="preview-project"><span class="project-icon" aria-hidden="true">↗</span><div><strong>Real problems. Shared progress.</strong><p>Your teams’ projects come together here.</p></div></div></div></div>
+        <div class="preview-card"><div class="preview-cover" [class.custom]="draft.coverImage" [style.background-image]="coverBackground"><span class="cover-label">CLASS SPACE</span><span class="private-badge">Private</span></div><div class="preview-body"><div class="preview-logo" aria-hidden="true"><img *ngIf="draft.logoImage" [src]="draft.logoImage" alt=""><span *ngIf="!draft.logoImage">{{ previewInitials }}</span></div><p class="preview-institution">{{ previewSubtitle }}</p><h3>{{ draft.name.trim() || 'Your next great class' }}</h3><p *ngIf="draft.description.trim()" class="preview-description">{{ draft.description }}</p><div class="preview-tags"><span>Syllabus</span><span>Discussion</span><span>Meeting room</span></div><div class="preview-project"><span class="project-icon" aria-hidden="true">↗</span><div><strong>Real problems. Shared progress.</strong><p>Your teams’ projects come together here.</p></div></div></div></div>
         <p class="preview-caption">Preview · You can customize this after setup.</p>
-        <div class="included"><h3>Ready for your first class</h3><ul><li>One home for students and team projects</li><li>Your syllabus and learning materials</li><li>Discussion and a class meeting room</li><li>AI colleagues to coach each team</li></ul><p><strong>Free through the 2026–27 academic year.</strong><br>No credit card required.</p></div>
+        <div class="journey-card"><p class="eyebrow">YOUR PATH TO THE FIRST CLASS</p><ol><li [class.done]="!!user"><span>{{ user ? '✓' : '1' }}</span><div><strong>Create your account</strong><small>One sign-in for all your classes.</small></div></li><li [class.current]="verified"><span>2</span><div><strong>Build your class space</strong><small>Course name, institution, and a private home.</small></div></li><li><span>3</span><div><strong>Welcome your students</strong><small>Add your syllabus, a challenge, and students.</small></div></li></ol></div>
+        <div class="included"><h3>Built into your class space</h3><ul><li>One home for students and team projects</li><li>Your syllabus and learning materials</li><li>Discussion and a class meeting room</li><li>AI colleagues to coach each team</li></ul><p><strong>Free through the 2026–27 academic year.</strong><br>No credit card required.</p></div>
       </aside>
     </div>
   </main>

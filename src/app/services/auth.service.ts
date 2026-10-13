@@ -27,6 +27,7 @@ import { DemoBooking, GslPrepEmailTemplate } from '../models/tournament';
 import { serverTimestamp } from 'firebase/firestore';
 import firebase from 'firebase/compat/app';
 import { PresenceService } from './presence.service';
+import { hasPendingClassSetup, rememberClassSetup } from '../components/create-class/class-setup-intent';
 // Add this where you keep shared types (optional)
 
 interface RegisterSchoolMeta {
@@ -191,6 +192,7 @@ export class AuthService {
       if (!credential.user) {
         throw new Error('Firebase did not return the newly created account.');
       }
+      if (captureAuthReturn() === '/create-class') rememberClassSetup(credential.user.uid);
 
       // Create the profile before sending the user away. Awaiting this write is
       // important: the previous fire-and-forget flow reported success even when
@@ -243,6 +245,7 @@ export class AuthService {
     if (!user) {
       throw new Error('Unable to open the existing account for recovery.');
     }
+    if (captureAuthReturn() === '/create-class') rememberClassSetup(user.uid);
 
     await user.reload();
     const profileRepaired = await this.registrationProfile(this.repairRegistrationProfile(
@@ -1474,6 +1477,7 @@ export class AuthService {
 
     // sanitize + clear
     target = safeAuthReturn(target) || '';
+    if (!target && hasPendingClassSetup(this.currentUser?.uid || this.currentAuthUid || '')) target = '/create-class';
     if (!target) {
       // Check if user is school admin and redirect accordingly
       if (this.currentUser?.role === 'schoolAdmin') {
