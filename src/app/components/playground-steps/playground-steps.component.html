@@ -1790,8 +1790,19 @@
       </div>
 
       <section *ngIf="selectedReportTypeId === 'policy-brief'" class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50/60 p-5 dark:border-emerald-800 dark:bg-emerald-950/30" aria-labelledby="policy-context-heading">
-        <h3 id="policy-context-heading" class="text-sm font-semibold text-slate-900 dark:text-white">Who needs to act?</h3>
-        <p class="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">Optional details help tailor the brief. Otherwise, we’ll use your strategy and clearly identify anything that needs confirmation.</p>
+        <h3 id="policy-context-heading" class="text-sm font-semibold text-slate-900 dark:text-white">Turn your strategy into policy action</h3>
+        <p class="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">Your brief covers the whole strategy by default, connecting its major parts to policy decisions, responsibilities, funding, and implementation. Unconfirmed details remain clearly identified.</p>
+        <label class="mt-4 block text-xs font-medium text-slate-700 dark:text-slate-200">
+          Scope of the brief
+          <select [(ngModel)]="policyBriefScope" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-white">
+            <option value="whole-strategy">Whole strategy — coordinated policy package</option>
+            <option value="selected-component">Focus on a selected component</option>
+          </select>
+        </label>
+        <label *ngIf="policyBriefScope === 'selected-component'" class="mt-4 block text-xs font-medium text-slate-700 dark:text-slate-200">
+          Component to focus on
+          <input [(ngModel)]="policyBriefFocus" maxlength="500" required placeholder="Name the part of your strategy this brief should address" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
+        </label>
         <div class="mt-4 grid gap-4 sm:grid-cols-2">
           <label class="block text-xs font-medium text-slate-700 dark:text-slate-200">
             Target decision-maker or institution
@@ -1802,11 +1813,11 @@
             <input [(ngModel)]="policyBriefContext.jurisdiction" maxlength="300" placeholder="City, region, or country" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
           </label>
           <label class="block text-xs font-medium text-slate-700 dark:text-slate-200 sm:col-span-2">
-            Decision you want the brief to support
-            <input [(ngModel)]="policyBriefContext.decision" maxlength="650" placeholder="For example, authorize a pilot or adopt a procurement standard" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
+            Decision or coordinated actions you want the brief to support (optional)
+            <input [(ngModel)]="policyBriefContext.decision" maxlength="650" placeholder="For example, develop a funded programme with standards, delivery partners, and phased implementation" class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 dark:border-slate-600 dark:bg-slate-900 dark:text-white" />
           </label>
         </div>
-        <p class="mt-4 text-xs leading-5 text-emerald-800 dark:text-emerald-200">Includes current evidence, three policy options, practical recommendations, and linked references. Research and writing can take a few minutes.</p>
+        <p class="mt-4 text-xs leading-5 text-emerald-800 dark:text-emerald-200">Includes a strategy coverage review, current evidence, comparable policy options, and practical next steps. Research, writing, and review can take several minutes.</p>
       </section>
 
       <!-- Custom Instructions -->

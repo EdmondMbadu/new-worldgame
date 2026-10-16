@@ -81,7 +81,9 @@ export async function preparePolicyResearchSources(
 ): Promise<PolicyResearchResponse> {
   const metadata = response.candidates?.[0]?.groundingMetadata;
   if (!metadata) return response;
-  const chunks = await Promise.all((metadata.groundingChunks || []).slice(0, 32).map(async (chunk) => {
+  // Search can attach many candidates before its final citations. Keep later policy families
+  // instead of clipping everything after the first topics; requests remain bounded to 96.
+  const chunks = await Promise.all((metadata.groundingChunks || []).slice(0, 96).map(async (chunk) => {
     const originalUrl = policyBriefPublicUrl(chunk.web?.uri);
     if (!originalUrl) return {};
     try {
@@ -90,7 +92,9 @@ export async function preparePolicyResearchSources(
       const url = new URL(resolved.url);
       if (url.hostname === 'vertexaisearch.cloud.google.com') return {};
       const fileLabel = decodeURIComponent(url.pathname.split('/').filter(Boolean).pop() || '').replace(/[-_]/g, ' ');
-      return { web: { uri: resolved.url, title: resolved.title || (fileLabel.length > 12 ? `${fileLabel} — ${url.hostname}` : chunk.web?.title || url.hostname) } };
+      const groundedTitle = chunk.web?.title?.trim() || '';
+      const descriptiveTitle = groundedTitle.length > 12 && !/^[\w.-]+\.[a-z]{2,}$/i.test(groundedTitle) ? groundedTitle : '';
+      return { web: { uri: resolved.url, title: resolved.title || descriptiveTitle || (fileLabel.length > 12 ? `${fileLabel} — ${url.hostname}` : groundedTitle || url.hostname) } };
     } catch { return {}; }
   }));
   return { candidates: [{ groundingMetadata: { ...metadata, groundingChunks: chunks } }] };

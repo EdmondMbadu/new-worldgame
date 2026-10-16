@@ -1,6 +1,7 @@
 import { of, Subject } from 'rxjs';
 import { PlaygroundStepsComponent } from './playground-steps.component';
 import fixture from '../../../../functions/test/fixtures/policy-brief.json';
+import packageFixture from '../../../../functions/test/fixtures/policy-package.json';
 
 describe('Policy brief report integration', () => {
   let component: PlaygroundStepsComponent;
@@ -47,8 +48,37 @@ describe('Policy brief report integration', () => {
     expect(payload.policyBriefRequest.context).toEqual(component.policyBriefContext);
     expect(payload.policyBriefRequest.source).toContain(component.currentDraftText);
     expect(payload.policyBriefRequest.authors).toBe('Clinic team');
+    expect(payload.policyBriefRequest.scope).toEqual({ mode: 'whole-strategy', focus: '' });
     updates.next({ status: { state: 'PROCESSING', message: 'Researching policy context…' } });
     expect(component.reportStatus).toBe('Researching policy context…');
+  });
+
+  it('requires a component description before sending a focused request', async () => {
+    component.selectReportType(component.getPrimaryReports()[2]);
+    component.policyBriefScope = 'selected-component';
+    await component.generateReport();
+    expect(set).not.toHaveBeenCalled();
+    expect(component.reportError).toContain('Enter the component');
+    component.policyBriefFocus = '  Clinic maintenance  ';
+    await component.generateReport();
+    expect(set.calls.mostRecent().args[0].policyBriefRequest.scope).toEqual({ mode: 'selected-component', focus: 'Clinic maintenance' });
+  });
+
+  it('retains policy and partner question IDs without duplicating the strategy review', async () => {
+    component.selectReportType(component.getPrimaryReports()[2]);
+    component.currentSolution!.status = { 'S3-B': '<p>Fund maintenance.</p>', 'S4-D': '<p>Local energy team.</p>', S5: 'DUPLICATE REVIEW' };
+    await component.generateReport();
+    const source = set.calls.mostRecent().args[0].policyBriefRequest.source;
+    expect(source).toContain('S3-B'); expect(source).toContain('Fund maintenance.');
+    expect(source).toContain('S4-D'); expect(source).not.toContain('DUPLICATE REVIEW');
+  });
+
+  it('shows oversized source errors without starting a request', async () => {
+    component.selectReportType(component.getPrimaryReports()[2]);
+    component.currentDraftText = 'x'.repeat(120001);
+    await component.generateReport();
+    expect(set).not.toHaveBeenCalled(); expect(component.reportLoading).toBeFalse();
+    expect(component.reportError).toContain('Nothing has been omitted automatically');
   });
 
   it('pins the completed export format even after another format is selected', async () => {
@@ -69,6 +99,16 @@ describe('Policy brief report integration', () => {
     expect(component.reportText).toBe('');
     expect(component.reportError).toContain('incomplete');
     expect(component.reportLoading).toBeFalse();
+  });
+
+  it('keeps the generated whole-strategy scope attached to its result after the form changes', async () => {
+    component.selectReportType(component.getPrimaryReports()[2]);
+    await component.generateReport();
+    updates.next({ status: { state: 'COMPLETED' }, policyBrief: packageFixture });
+    component.policyBriefScope = 'selected-component'; component.policyBriefFocus = 'Maintenance';
+    expect(component.policyBrief?.strategy?.scope.mode).toBe('whole-strategy');
+    expect(component.reportText).toContain('How the strategy is advanced');
+    expect(component.policyBrief?.strategy?.components.length).toBe(6);
   });
 
   it('keeps existing non-policy report requests on their original response path', async () => {

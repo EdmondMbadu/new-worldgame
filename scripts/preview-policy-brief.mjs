@@ -19,9 +19,11 @@ const { parsePolicyBrief } = require('../functions/lib/shared/policy-brief.js');
 const { Packer } = require('docx');
 const source = process.argv[2] || path.join(root, 'functions/test/fixtures/policy-brief.json');
 const brief = parsePolicyBrief(JSON.parse(await readFile(source, 'utf8')));
-const output = path.join(root, 'output/pdf');
+// An optional output directory keeps evaluation artifacts separate from the checked-in example.
+const output = process.argv[3] ? path.resolve(process.argv[3]) : path.join(root, 'output/pdf');
 await mkdir(output, { recursive: true });
 const pdf = createPolicyBriefPdf(brief);
 await writeFile(path.join(output, 'policy-brief-example.pdf'), new Uint8Array(pdf.output('arraybuffer')));
-await writeFile(path.join(scratch, 'policy-brief-example.docx'), await Packer.toBuffer(buildPolicyBriefDocx(brief)));
-console.log(`Policy brief exported: ${pdf.getNumberOfPages()} PDF pages. Word QA copy written to tmp/policy-brief.`);
+const wordOutput = process.argv[3] ? output : scratch;
+await writeFile(path.join(wordOutput, 'policy-brief-example.docx'), await Packer.toBuffer(buildPolicyBriefDocx(brief)));
+console.log(`Policy brief exported: ${pdf.getNumberOfPages()} PDF pages. Word QA copy written to ${wordOutput}.`);

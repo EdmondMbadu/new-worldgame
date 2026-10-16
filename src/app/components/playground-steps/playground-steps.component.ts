@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, NgZone, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
 import jsPDF from 'jspdf';
-import { PolicyBrief, PolicyBriefContext, POLICY_BRIEF_REPORT, parsePolicyBrief, policyBriefToText } from '../../../../functions/src/shared/policy-brief';
+import { PolicyBrief, PolicyBriefContext, PolicyBriefScope, POLICY_BRIEF_REPORT, parsePolicyBrief, policyBriefToText } from '../../../../functions/src/shared/policy-brief';
 import { buildPolicyBriefSource } from 'src/app/utils/policy-brief-source';
 import { buildPolicyBriefPdf, buildPolicyBriefDocx } from 'src/app/utils/policy-brief-export';
 import { AuthService } from 'src/app/services/auth.service';
@@ -388,6 +388,8 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   reportInstruction = '';
   selectedReportTypeId = 'funding-sources';
   policyBriefContext: PolicyBriefContext = { audience: '', jurisdiction: '', decision: '' };
+  policyBriefScope: PolicyBriefScope['mode'] = 'whole-strategy';
+  policyBriefFocus = '';
   policyBrief: PolicyBrief | null = null;
   private reportResultTypeId = '';
   private reportDocSub?: Subscription;
@@ -4108,15 +4110,24 @@ Infographic requirements:
   }
 
   private buildPolicyBriefRequest() {
+    if (this.policyBriefScope === 'selected-component' && !this.policyBriefFocus.trim()) {
+      throw new Error('Enter the component you want this brief to focus on, or choose Whole strategy.');
+    }
+    const questionMap = this.buildQuestionPromptMap();
     return {
       source: this.currentSolution ? buildPolicyBriefSource({
         title: this.currentSolution.title || '',
         draft: this.currentDraftText || this.toPlainTextWithBreaks(this.currentSolution.strategyReview),
         description: this.toPlainTextWithBreaks(this.currentSolution.description),
-        supportingSteps: this.toPlainTextWithBreaks(this.extractStatusResponses()),
+        supportingSteps: '',
+        stepAnswers: Object.entries(this.currentSolution.status || {})
+          .filter(([id]) => /^S[1-4]-[A-Z]$/.test(id))
+          .map(([id, answer]) => ({ id, question: questionMap[id] || id, answer: this.toPlainTextWithBreaks(answer) }))
+          .filter((entry) => entry.answer.trim()),
       }) : '',
       authors: this.getReportPeopleMetadata().value,
       context: { ...this.policyBriefContext },
+      scope: { mode: this.policyBriefScope, focus: this.policyBriefScope === 'selected-component' ? this.policyBriefFocus.trim() : '' },
       instruction: this.reportInstruction || POLICY_BRIEF_REPORT.instruction,
     };
   }
@@ -4127,7 +4138,13 @@ Infographic requirements:
       return;
     }
 
-    const prompt = this.buildReportPrompt();
+    let prompt: string;
+    try {
+      prompt = this.buildReportPrompt();
+    } catch (error) {
+      this.reportError = error instanceof Error ? error.message : 'Please check the policy brief source and scope.';
+      return;
+    }
     if (!prompt) {
       this.reportError = 'We need more solution details before we can generate a report.';
       return;
@@ -4157,7 +4174,7 @@ Infographic requirements:
       this.reportError =
         'Report generation took too long. Please retry.';
       this.reportDocSub?.unsubscribe();
-    }, isPolicyBrief ? 250000 : 125000);
+    }, isPolicyBrief ? 490000 : 125000);
 
     this.reportDocSub = docRef.valueChanges().subscribe((snapshot) => {
       if (!snapshot?.status) {

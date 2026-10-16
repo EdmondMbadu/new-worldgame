@@ -3,7 +3,7 @@ import {
   AlignmentType, BorderStyle, Document, ExternalHyperlink, Footer, Header, HeadingLevel,
   PageNumber, Paragraph, ShadingType, Table, TableCell, TableRow, TextRun, WidthType,
 } from 'docx';
-import { PolicyBrief } from '../../../functions/src/shared/policy-brief';
+import { PolicyBrief, policyBriefScopeLabel, policyBriefComponentText } from '../../../functions/src/shared/policy-brief';
 
 const GREEN = '145A4A';
 const INK = '203530';
@@ -122,6 +122,10 @@ export function createPolicyBriefPdf(brief: PolicyBrief): jsPDF {
   paragraph(`For: ${brief.audience}`, { size: 9.5, bold: true, gap: 1 });
   paragraph(`Jurisdiction: ${brief.jurisdiction}`, { size: 9.5, color: MUTED, gap: 4 });
   if (brief.statusNote) paragraph(brief.statusNote, { size: 9.5, color: MUTED, gap: 4 });
+  if (brief.strategy) {
+    paragraph(`Scope: ${policyBriefScopeLabel(brief.strategy.scope)}`, { size: 9.5, bold: true });
+    paragraph(brief.strategy.objective, { size: 10, gap: 4 });
+  }
   panel('Decision requested', [brief.decision]);
   panel('Key messages', brief.keyMessages.map((m, i) => `${i + 1}. ${m}`));
   heading('Why this decision matters'); paragraph(brief.introduction); paragraph(brief.context);
@@ -166,13 +170,32 @@ export function createPolicyBriefPdf(brief: PolicyBrief): jsPDF {
   y += boxHeight + 6;
   heading('Decision and immediate next steps'); paragraph(brief.nextSteps);
   heading('Evidence gaps and conditions'); brief.uncertainties.forEach((u) => paragraph(`- ${u}`, { size: 10 }));
+  if (brief.strategy) {
+    heading('How the strategy is advanced');
+    brief.strategy.components.forEach((component) => {
+      const [title, ...body] = policyBriefComponentText(component).split('\n');
+      ensure(textHeight(title, 10.5, true) + 12);
+      paragraph(title, { bold: true, gap: 1 });
+      body.forEach((line) => paragraph(line, { size: 10 }));
+      y += 2;
+    });
+    heading('Implementation dependencies');
+    brief.strategy.dependencies.forEach((dependency) => paragraph(`- ${dependency}`, { size: 10 }));
+    if (brief.strategy.conflicts.length) {
+      heading('Source differences to resolve');
+      brief.strategy.conflicts.forEach((conflict) => paragraph(`- ${conflict}`, { size: 10 }));
+    }
+  }
   heading('About the authors', textHeight(brief.aboutAuthors, 9.5)); paragraph(brief.aboutAuthors, { size: 9.5, color: MUTED });
   const referenceHeight = (r: PolicyBrief['references'][number]) =>
-    textHeight(`[${r.id}] ${r.title}`, 9, true, 1) + textHeight(r.url, 8.5, false, 3);
+    textHeight(`[${r.id}] ${r.title}`, 8.5, true, 0.5) + textHeight(r.url, 8, false, 2);
+  const bibliographyHeight = 12 + brief.references.reduce((height, reference) => height + referenceHeight(reference), 0);
+  // Keep a short bibliography together instead of orphaning a single source on a new page.
+  if (bibliographyHeight <= 230) ensure(bibliographyHeight);
   heading('References', referenceHeight(brief.references[0]));
   brief.references.forEach((r) => {
-    ensure(referenceHeight(r)); paragraph(`[${r.id}] ${r.title}`, { size: 9, bold: true, gap: 1 });
-    paragraph(r.url, { size: 8.5, color: GREEN, url: r.url, gap: 3 });
+    ensure(referenceHeight(r)); paragraph(`[${r.id}] ${r.title}`, { size: 8.5, bold: true, gap: 0.5 });
+    paragraph(r.url, { size: 8, color: GREEN, url: r.url, gap: 2 });
   });
   const total = pdf.getNumberOfPages();
   for (let i = 1; i <= total; i++) {
@@ -210,6 +233,7 @@ export function buildPolicyBriefDocx(brief: PolicyBrief): Document {
     p(`Prepared by: ${brief.authors}`, true, true),
     p(`For: ${brief.audience} | ${brief.generatedOn}`, true), p(`Jurisdiction: ${brief.jurisdiction}`),
     ...(brief.statusNote ? [p(brief.statusNote)] : []),
+    ...(brief.strategy ? [p(`Scope: ${policyBriefScopeLabel(brief.strategy.scope)}`, true), p(brief.strategy.objective)] : []),
     h('Decision requested'), p(brief.decision, true),
     h('Key messages'), ...brief.keyMessages.map((m) => new Paragraph({
       children: inline(m), bullet: { level: 0 }, spacing: { after: 100 },
@@ -237,17 +261,23 @@ export function buildPolicyBriefDocx(brief: PolicyBrief): Document {
     ] }),
     h('Decision and immediate next steps'), p(brief.nextSteps),
     h('Evidence gaps and conditions'), ...brief.uncertainties.map((u) => p(`- ${u}`)),
+    ...(brief.strategy ? [h('How the strategy is advanced'), ...brief.strategy.components.flatMap((component) => {
+      const [title, ...body] = policyBriefComponentText(component).split('\n');
+      return [p(title, true, true), ...body.map((line) => p(line))];
+    }), h('Implementation dependencies'), ...brief.strategy.dependencies.map((dependency) => p(`- ${dependency}`)),
+    ...(brief.strategy.conflicts.length ? [h('Source differences to resolve'), ...brief.strategy.conflicts.map((conflict) => p(`- ${conflict}`))] : [])] : []),
     h('About the authors'), p(brief.aboutAuthors), h('References'),
-    ...brief.references.flatMap((r) => [p(`[${r.id}] ${r.title}`, true, true), new Paragraph({
+    ...brief.references.flatMap((r, i) => [p(`[${r.id}] ${r.title}`, true, true), new Paragraph({
       children: [new ExternalHyperlink({ link: r.url, children: [new TextRun({ text: r.url, color: GREEN, size: 18, underline: {} })] })],
       spacing: { after: 140 },
+      keepNext: i < brief.references.length - 1,
     })]),
     p(`Sources accessed ${brief.generatedOn}.`),
   ];
   return new Document({
     title: brief.title, subject: 'Policy Brief', creator: brief.authors,
     styles: {
-      default: { document: { run: { font: 'Calibri', size: 22, color: INK }, paragraph: { spacing: { line: 276, after: 100 } } } },
+      default: { document: { run: { font: 'Calibri', size: 21, color: INK }, paragraph: { spacing: { line: 252, after: 90 } } } },
       paragraphStyles: [
         { id: 'Title', name: 'Title', basedOn: 'Normal', run: { size: 44, bold: true, color: GREEN }, paragraph: { spacing: { after: 220 } } },
         { id: 'Heading1', name: 'Heading 1', basedOn: 'Normal', next: 'Normal', run: { size: 27, bold: true, color: GREEN }, paragraph: { spacing: { before: 220, after: 120 }, keepNext: true } },
