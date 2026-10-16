@@ -7573,7 +7573,7 @@ export const onAvatarChatPrompt = functions
  */
 export const onReportRequest = functions
   .region('us-central1')
-  .runWith({ timeoutSeconds: 480, memory: '1GB' })
+  .runWith({ timeoutSeconds: 540, memory: '1GB' })
   .firestore.document('users/{uid}/report-requests/{docId}')
   .onCreate(async (snap) => {
     const data = snap.data() || {};

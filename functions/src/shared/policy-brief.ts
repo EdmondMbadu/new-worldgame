@@ -11,7 +11,16 @@ export interface PolicyBriefReference {
   url: string;
 }
 
-export const POLICY_BRIEF_SOURCE_LIMIT = 120000;
+// Support full saved strategies plus their step answers. The byte ceiling leaves
+// space for request metadata and the completed brief within Firestore's document limit.
+export const POLICY_BRIEF_SOURCE_LIMIT = 500000;
+export const POLICY_BRIEF_SOURCE_BYTE_LIMIT = 750000;
+
+export function assertPolicyBriefSourceSize(source: string): void {
+  if (source.length > POLICY_BRIEF_SOURCE_LIMIT || new TextEncoder().encode(source).byteLength > POLICY_BRIEF_SOURCE_BYTE_LIMIT) {
+    throw new Error('The strategy and supporting answers exceed the policy-brief input limit (500,000 characters or 750 KB of text). Shorten repeated material while preserving the major components, then try again. Nothing has been omitted automatically.');
+  }
+}
 export type PolicyBriefScope = { mode: 'whole-strategy' | 'selected-component'; focus: string };
 export interface PolicyBriefStepAnswer { id: string; question: string; answer: string }
 export interface PolicyBriefComponent {

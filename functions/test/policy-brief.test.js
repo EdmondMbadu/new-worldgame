@@ -1,8 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fixture = require('./fixtures/policy-brief.json');
-const { parsePolicyBrief, policyBriefToText, policyBriefPublicUrl } = require('../lib/shared/policy-brief');
+const { parsePolicyBrief, policyBriefToText, policyBriefPublicUrl, POLICY_BRIEF_SOURCE_LIMIT } = require('../lib/shared/policy-brief');
 const { extractPolicyResearch, generatePolicyBrief } = require('../lib/policy-brief-generation');
+const { createPolicyBriefModels } = require('../lib/policy-brief-models');
 const clone = () => JSON.parse(JSON.stringify(fixture));
 const researchResponse = () => ({ candidates: [{ groundingMetadata: {
   groundingChunks: fixture.references.map((r) => ({ web: { uri: r.url, title: r.title } })),
@@ -240,9 +241,29 @@ test('rejects missing components, unexplained deferrals and invalid action links
 });
 
 test('rejects empty and oversized sources before invoking any model', async () => {
-  for (const source of ['', 'x'.repeat(120001)]) {
-    await assert.rejects(() => generatePolicyBrief({ ...request, source }, aiFor({ plan: async () => { throw new Error('should not run'); } })), /120,000/);
+  for (const source of ['', 'x'.repeat(POLICY_BRIEF_SOURCE_LIMIT + 1), '民'.repeat(260000)]) {
+    await assert.rejects(() => generatePolicyBrief({ ...request, source }, aiFor({ plan: async () => { throw new Error('should not run'); } })), /non-empty strategy|500,000 characters or 750 KB/);
   }
+});
+
+test('processes long saved strategy and supporting answers intact through review', async () => {
+  const source = request.source + '\n' + 'x'.repeat(170000) + '\nFINAL STRATEGY MEASURE\n' + 'y'.repeat(167000) + '\nFINAL PARTNER';
+  const result = await generatePolicyBrief({ ...request, source }, aiFor({
+    plan: async input => { assert.ok(input.includes(source.replaceAll('\n', '\\n'))); return JSON.stringify(plan); },
+    review: async input => { assert.ok(input.includes('FINAL STRATEGY MEASURE')); assert.ok(input.includes('FINAL PARTNER')); return envelope(draft()); },
+  }));
+  assert.equal(result.sourceSnapshot.characters, source.length);
+});
+
+test('allows extra review time for long saved solutions while keeping calls bounded', async () => {
+  const calls = [];
+  const models = createPolicyBriefModels({ getGenerativeModel: () => ({ generateContent: async (input, options) => {
+    calls.push({ length: input.length, timeout: options.timeout });
+    return { response: { text: () => 'reviewed' } };
+  } }) });
+  await models.review('Short strategy');
+  await models.review('x'.repeat(342000));
+  assert.deepEqual(calls.map(c => c.timeout), [65000, 100000]);
 });
 
 const democracyRequest = require('./fixtures/democracy-policy-request.json');

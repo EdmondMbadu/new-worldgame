@@ -29,6 +29,6 @@ export function createPolicyBriefModels(genAI: GoogleGenerativeAI) {
     plan: async (input: string) => (await planning.generateContent(input, { timeout: 45000 })).response.text(),
     research: async (input: string, retry = false) => preparePolicyResearchSources((await (retry ? researchRetry : research).generateContent(input, { timeout: retry ? 90000 : 65000 })).response),
     write: async (input: string) => (await writing.generateContent(input, { timeout: 65000 })).response.text(),
-    review: async (input: string) => (await review.generateContent(input, { timeout: 65000 })).response.text(),
+    review: async (input: string) => (await review.generateContent(input, { timeout: input.length > 120000 ? 100000 : 65000 })).response.text(),
   };
 }

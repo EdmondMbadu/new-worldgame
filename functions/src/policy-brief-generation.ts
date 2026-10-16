@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { PolicyBrief, PolicyBriefContext, PolicyBriefReference, PolicyBriefScope, POLICY_BRIEF_SOURCE_LIMIT, parsePolicyBrief, policyBriefPublicUrl, policyBriefToText, policyBriefComponentText } from './shared/policy-brief';
+import { PolicyBrief, PolicyBriefContext, PolicyBriefReference, PolicyBriefScope, assertPolicyBriefSourceSize, parsePolicyBrief, policyBriefPublicUrl, policyBriefToText, policyBriefComponentText } from './shared/policy-brief';
 import { PolicyStrategyPlan, normalizePolicyScope, parsePolicyStrategyPlan, policyBriefJson } from './policy-brief-strategy';
 
 export const POLICY_BRIEF_RESEARCH_SYSTEM = `You research an entire policy package from a Global Solutions Lab strategy.
@@ -114,9 +114,10 @@ export async function generatePolicyBrief(
   now = new Date(),
   progress: (message: string) => Promise<void> = async () => {}
 ): Promise<PolicyBrief> {
-  if (!request || typeof request.source !== 'string' || !request.source.trim() || request.source.length > POLICY_BRIEF_SOURCE_LIMIT) {
-    throw new Error('The policy brief needs a strategy of at most 120,000 characters. No source material is omitted automatically.');
+  if (!request || typeof request.source !== 'string' || !request.source.trim()) {
+    throw new Error('The policy brief needs a non-empty strategy.');
   }
+  assertPolicyBriefSourceSize(request.source);
   const scope = normalizePolicyScope(request.scope);
   const context = {
     audience: String(request.context?.audience || '').trim().slice(0, 300),

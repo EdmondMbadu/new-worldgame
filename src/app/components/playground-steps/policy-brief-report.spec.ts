@@ -2,6 +2,7 @@ import { of, Subject } from 'rxjs';
 import { PlaygroundStepsComponent } from './playground-steps.component';
 import fixture from '../../../../functions/test/fixtures/policy-brief.json';
 import packageFixture from '../../../../functions/test/fixtures/policy-package.json';
+import { POLICY_BRIEF_SOURCE_LIMIT } from '../../../../functions/src/shared/policy-brief';
 
 describe('Policy brief report integration', () => {
   let component: PlaygroundStepsComponent;
@@ -75,10 +76,30 @@ describe('Policy brief report integration', () => {
 
   it('shows oversized source errors without starting a request', async () => {
     component.selectReportType(component.getPrimaryReports()[2]);
-    component.currentDraftText = 'x'.repeat(120001);
+    component.currentDraftText = 'x'.repeat(POLICY_BRIEF_SOURCE_LIMIT + 1);
     await component.generateReport();
     expect(set).not.toHaveBeenCalled(); expect(component.reportLoading).toBeFalse();
     expect(component.reportError).toContain('Nothing has been omitted automatically');
+  });
+
+  it('builds a large policy request once and sends all saved strategy material', async () => {
+    component.selectReportType(component.getPrimaryReports()[2]);
+    component.currentDraftText = 'd'.repeat(170000) + ' FINAL STRATEGY MEASURE';
+    component.currentSolution!.status = { 'S4-D': 'a'.repeat(167000) + ' FINAL IMPLEMENTATION PARTNER' };
+    const build = spyOn(component as any, 'buildPolicyBriefRequest').and.callThrough();
+    await component.generateReport();
+    expect(build).toHaveBeenCalledTimes(1);
+    expect(set).toHaveBeenCalledTimes(1);
+    const source = set.calls.mostRecent().args[0].policyBriefRequest.source;
+    expect(source).toContain('FINAL STRATEGY MEASURE');
+    expect(source).toContain('FINAL IMPLEMENTATION PARTNER');
+  });
+
+  it('does not request saved feedback for anonymous solution visitors', async () => {
+    (component.auth as any).currentUser = null;
+    const doc = spyOn((component as any).afs, 'doc').and.callThrough();
+    await (component as any).loadSavedFeedback();
+    expect(doc).not.toHaveBeenCalled();
   });
 
   it('pins the completed export format even after another format is selected', async () => {

@@ -3,6 +3,7 @@ import fixture from '../../../functions/test/fixtures/policy-brief.json';
 import packageFixture from '../../../functions/test/fixtures/policy-package.json';
 import { parsePolicyBrief } from '../../../functions/src/shared/policy-brief';
 import { buildPolicyBriefSource } from './policy-brief-source';
+import { POLICY_BRIEF_SOURCE_LIMIT } from '../../../functions/src/shared/policy-brief';
 import { createPolicyBriefPdf, buildPolicyBriefDocx } from './policy-brief-export';
 
 describe('Policy brief source and exports', () => {
@@ -20,11 +21,25 @@ describe('Policy brief source and exports', () => {
     expect(source).toContain(draft);
     expect(source).toContain('CENTRAL INSTITUTIONAL REFORMS');
     expect(source).not.toContain('omitted');
-    expect(source.length).toBeLessThanOrEqual(120000);
+    expect(source.length).toBeLessThanOrEqual(POLICY_BRIEF_SOURCE_LIMIT);
+  });
+
+  it('accepts full saved strategies plus long supporting answers without truncation', () => {
+    const draft = 'START ' + 'd'.repeat(170000) + ' LAST STRATEGY COMPONENT';
+    const answer = 'a'.repeat(167000) + ' LAST PARTNER AND FUNDING REQUIREMENTS';
+    const source = buildPolicyBriefSource({ title: 'Democracy strategy', draft, description: '', supportingSteps: '', stepAnswers: [
+      { id: 'S4-D', question: 'Who will implement it?', answer },
+    ] });
+    expect(source).toContain(draft); expect(source).toContain(answer);
+    expect(source.length).toBeGreaterThan(337000);
   });
 
   it('rejects oversized input instead of silently discarding components', () => {
-    expect(() => buildPolicyBriefSource({ title: 'A solution', draft: 'x'.repeat(120001), description: '', supportingSteps: '' })).toThrowError(/Nothing has been omitted automatically/);
+    expect(() => buildPolicyBriefSource({ title: 'A solution', draft: 'x'.repeat(POLICY_BRIEF_SOURCE_LIMIT + 1), description: '', supportingSteps: '' })).toThrowError(/Nothing has been omitted automatically/);
+  });
+
+  it('checks UTF-8 bytes as well as characters before writing to Firestore', () => {
+    expect(() => buildPolicyBriefSource({ title: 'A solution', draft: '民'.repeat(260000), description: '', supportingSteps: '' })).toThrowError(/750 KB/);
   });
 
   it('preserves stable question IDs, policy answers and implementation partners', () => {

@@ -1395,7 +1395,7 @@ STYLE REQUIREMENTS:
   }
 
   private async loadSavedFeedback() {
-    if (!this.id) return;
+    if (!this.id || !this.auth.currentUser?.uid) return;
 
     try {
       const feedbackDoc = await this.afs
@@ -4138,9 +4138,13 @@ Infographic requirements:
       return;
     }
 
+    const reportType = this.getSelectedReportType();
+    const isPolicyBrief = reportType?.id === 'policy-brief';
+    let policyBriefRequest: ReturnType<PlaygroundStepsComponent['buildPolicyBriefRequest']> | undefined;
     let prompt: string;
     try {
-      prompt = this.buildReportPrompt();
+      policyBriefRequest = isPolicyBrief ? this.buildPolicyBriefRequest() : undefined;
+      prompt = isPolicyBrief ? (policyBriefRequest?.source ? 'Report Type: Policy Brief' : '') : this.buildReportPrompt();
     } catch (error) {
       this.reportError = error instanceof Error ? error.message : 'Please check the policy brief source and scope.';
       return;
@@ -4152,9 +4156,6 @@ Infographic requirements:
 
     this.resetReportState();
     this.reportLoading = true;
-    const reportType = this.getSelectedReportType();
-    const isPolicyBrief = reportType?.id === 'policy-brief';
-    const policyBriefRequest = isPolicyBrief ? this.buildPolicyBriefRequest() : undefined;
     this.reportResultTypeId = reportType?.id || '';
     this.reportStatus = reportType
       ? `Generating ${reportType.title}...`
@@ -4174,7 +4175,7 @@ Infographic requirements:
       this.reportError =
         'Report generation took too long. Please retry.';
       this.reportDocSub?.unsubscribe();
-    }, isPolicyBrief ? 490000 : 125000);
+    }, isPolicyBrief ? 550000 : 125000);
 
     this.reportDocSub = docRef.valueChanges().subscribe((snapshot) => {
       if (!snapshot?.status) {

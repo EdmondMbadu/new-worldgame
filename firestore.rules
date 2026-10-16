@@ -231,6 +231,40 @@ service cloud.firestore {
         );
     }
 
+    // Saved evaluator feedback is readable/writable by authenticated solution
+    // readers, including private team members, using the same parent privacy check.
+    match /solutions/{solutionId}/aiFeedback/{feedbackId} {
+      function canAccessFeedback() {
+        return isSignedIn()
+          && canReadSolution(
+            get(/databases/$(database)/documents/solutions/$(solutionId)).data
+          );
+      }
+      function validSavedFeedback(data) {
+        return data.keys().hasAll([
+            'evaluatorName', 'evaluatorKey', 'evaluatorAvatar',
+            'feedbackText', 'feedbackParsed', 'timestamp'
+          ])
+          && data.keys().hasOnly([
+            'evaluatorName', 'evaluatorKey', 'evaluatorAvatar',
+            'feedbackText', 'feedbackParsed', 'timestamp'
+          ])
+          && data.evaluatorName is string && data.evaluatorName.size() <= 160
+          && data.evaluatorKey is string && data.evaluatorKey.size() <= 160
+          && data.evaluatorAvatar is string && data.evaluatorAvatar.size() <= 500
+          && data.feedbackText is string && data.feedbackText.size() > 0
+          && data.feedbackText.size() <= 100000
+          && data.feedbackParsed is map
+          && data.feedbackParsed.get('scores', null) is list
+          && data.feedbackParsed.get('improvements', null) is list
+          && data.timestamp is number && data.timestamp > 0;
+      }
+      allow get: if feedbackId == 'latest' && canAccessFeedback();
+      allow create, update: if feedbackId == 'latest'
+        && canAccessFeedback() && validSavedFeedback(request.resource.data);
+      allow list, delete: if false;
+    }
+
     match /solutions/{solutionId}/communityComments/{commentId} {
       allow read: if canReadSolution(
         get(/databases/$(database)/documents/solutions/$(solutionId)).data
