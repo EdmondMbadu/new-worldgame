@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fixture = require('./fixtures/policy-brief.json');
 const { parsePolicyBrief, policyBriefToText, policyBriefPublicUrl, POLICY_BRIEF_SOURCE_LIMIT } = require('../lib/shared/policy-brief');
-const { extractPolicyResearch, generatePolicyBrief } = require('../lib/policy-brief-generation');
+const { extractPolicyResearch, generatePolicyBrief, policyBriefFailureMessage } = require('../lib/policy-brief-generation');
 const { createPolicyBriefModels } = require('../lib/policy-brief-models');
 const clone = () => JSON.parse(JSON.stringify(fixture));
 const researchResponse = () => ({ candidates: [{ groundingMetadata: {
@@ -76,7 +76,7 @@ test('deduplicates grounding URLs and excludes unsupported metadata-only links',
   assert.equal(extractPolicyResearch(response).references.length, 2);
 });
 
-const { parsePolicyStrategyPlan, normalizePolicyScope } = require('../lib/policy-brief-strategy');
+const { parsePolicyStrategyPlan, normalizePolicyScope, policyStrategySourceAnchors } = require('../lib/policy-brief-strategy');
 const plan = {
   objective: 'Provide reliable electricity to underserved clinics.', audience: 'Health planning team', jurisdiction: 'Example jurisdiction',
   authorityNeedsConfirmation: true, focusMatchesSource: true,
@@ -199,10 +199,60 @@ test('repairs an invalid inventory once before researching the complete strategy
   const result = await generatePolicyBrief(request, aiFor({ plan: async input => {
     attempts++;
     if (attempts === 1) return '{}';
-    assert.ok(input.includes(request.source)); assert.match(input, /Copy short original section headings/);
+    assert.ok(input.includes(request.source)); assert.match(input, /sourceAnchorId selected from the catalog/);
     return JSON.stringify(plan);
   } }));
   assert.equal(attempts, 2); assert.equal(result.strategy.components.length, 1);
+});
+
+test('repairs paraphrased source locators using exact server anchors without losing components', async () => {
+  let attempts = 0;
+  const invalid = { ...plan, components: [{ ...plan.components[0], sourceQuote: 'Paraphrased text not in the strategy.' }] };
+  const result = await generatePolicyBrief(request, aiFor({ plan: async input => {
+    if (++attempts === 1) return JSON.stringify(invalid);
+    const repair = JSON.parse(input);
+    assert.equal(repair.sourceAnchors[0].sourceQuote, request.source);
+    assert.match(repair.validationError, /POLICY_SOURCE_PROVENANCE/);
+    return JSON.stringify({ ...plan, components: [{ ...plan.components[0], sourceQuote: undefined, sourceAnchorId: 'A1' }] });
+  } }));
+  assert.equal(attempts, 2);
+  assert.equal(result.strategy.components[0].title, plan.components[0].title);
+  assert.equal(result.strategy.components[0].sourceQuote, request.source);
+});
+
+test('rejects invented or forged source anchors instead of fabricating provenance', () => {
+  const anchored = { ...plan, components: [{ ...plan.components[0], sourceQuote: undefined, sourceAnchorId: 'A1' }] };
+  assert.throws(() => parsePolicyStrategyPlan(JSON.stringify(anchored), request.source), /unknown source anchor/);
+  assert.throws(() => parsePolicyStrategyPlan(JSON.stringify(anchored), request.source, [{ id: 'A1', sourceQuote: 'Invented source material.' }]), /traced to the source/);
+});
+
+test('source anchors cover the beginning, middle and end, including serialized answers and Unicode', () => {
+  const source = 'FIRST POLICY\n' + 'A complete intervention. '.repeat(220) + '\nMIDDLE POLICY\n'
+    + JSON.stringify([{ id: 'S4-D', answer: 'Learners’ questions — “ask why.” 😀 '.repeat(250) }]) + '\nFINAL POLICY';
+  const anchors = policyStrategySourceAnchors(source);
+  for (const anchor of anchors) {
+    assert.ok(source.includes(anchor.sourceQuote)); assert.ok(anchor.sourceQuote.length <= 700);
+    assert.doesNotMatch(anchor.sourceQuote, /^[\uDC00-\uDFFF]|[\uD800-\uDBFF]$/u);
+  }
+  const joined = anchors.map(a => a.sourceQuote).join('');
+  assert.ok(joined.includes('FIRST POLICY')); assert.ok(joined.includes('MIDDLE POLICY')); assert.ok(joined.includes('FINAL POLICY'));
+  assert.equal(joined.replace(/\s/g, ''), source.replace(/\s/g, ''));
+});
+
+test('accepts exact locators for very short sources and preserves unconfirmed authority', async () => {
+  const source = 'Tutor';
+  const sparsePlan = { ...plan, audience: 'To confirm', jurisdiction: 'To confirm', components: [{ ...plan.components[0], sourceQuote: source }] };
+  const result = await generatePolicyBrief({ ...request, source, context: { audience: '', jurisdiction: '', decision: '' } }, aiFor({ plan: async () => JSON.stringify(sparsePlan) }));
+  assert.equal(result.strategy.components.length, 1); assert.equal(result.strategy.components[0].sourceQuote, source);
+  assert.match(result.statusNote, /^Working draft/); assert.equal(result.audience, 'To confirm');
+});
+
+test('reports mapping, timeout and quota failures without exposing provider details', () => {
+  assert.match(policyBriefFailureMessage(new Error('POLICY_INVENTORY_UNAVAILABLE: untraceable')), /incomplete answers are allowed/);
+  assert.match(policyBriefFailureMessage(new Error('Request aborted: https://provider.example/?key=secret')), /did not finish/);
+  assert.match(policyBriefFailureMessage(new Error('429 quota https://provider.example/?key=secret')), /temporarily busy/);
+  assert.doesNotMatch(policyBriefFailureMessage(new Error('429 quota https://provider.example/?key=secret')), /secret|https:/);
+  assert.match(policyBriefFailureMessage(new Error('POLICY_REVIEW_FAILED')), /did not pass/);
 });
 
 test('rejects an inventory still invalid after its bounded repair', async () => {

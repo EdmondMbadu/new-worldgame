@@ -31,7 +31,7 @@ import {
 // At the top, with your other imports
 import Stripe from 'stripe';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { generatePolicyBrief } from './policy-brief-generation';
+import { generatePolicyBrief, policyBriefFailureMessage } from './policy-brief-generation';
 import { createPolicyBriefModels } from './policy-brief-models';
 import { policyBriefToText } from './shared/policy-brief';
 import { GoogleGenAI } from '@google/genai';
@@ -7797,13 +7797,7 @@ If live web-search grounding is temporarily unavailable, still produce the Fundi
       const errorMsg = err instanceof Error ? err.message : String(err);
       let userFriendlyError = 'An unexpected error occurred. Please try again.';
       if (data.reportTypeId === 'policy-brief') {
-        userFriendlyError = errorMsg.includes('POLICY_EVIDENCE_UNAVAILABLE')
-          ? 'We could not find enough source-linked policy evidence. Try again with a more specific issue or jurisdiction.'
-          : errorMsg.includes('POLICY_REVIEW_FAILED')
-          ? 'The brief did not pass strategy coverage and evidence review. Please retry or clarify the scope in the Policy Brief options.'
-          : errorMsg.includes('POLICY_FOCUS_NOT_FOUND')
-          ? 'The selected component could not be found in your strategy. Name a component from the strategy or choose Whole strategy.'
-          : 'The policy brief could not be completed and checked. Please try again.';
+        userFriendlyError = policyBriefFailureMessage(err);
       } else if (errorMsg.includes('SAFETY') || errorMsg.includes('blocked')) {
         userFriendlyError =
           'Your request was blocked due to content safety guidelines. Please try a different prompt.';
