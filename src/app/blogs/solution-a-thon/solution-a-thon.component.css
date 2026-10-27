@@ -146,6 +146,8 @@
   font-weight: 850;
   line-height: 1.1;
   text-decoration: none;
+  cursor: pointer;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
 }
 
 .sat-btn--primary {
@@ -153,10 +155,24 @@
   color: var(--sat-navy-deep);
 }
 
+.sat-btn--primary:hover {
+  background: #ff805f;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+}
+
+.sat-btn:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 4px;
+}
+
 .sat-btn--secondary {
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: transparent;
   color: white;
+}
+
+.sat-btn--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .sat-meta {
