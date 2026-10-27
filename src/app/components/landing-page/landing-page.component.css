@@ -2,6 +2,28 @@
   scroll-behavior: smooth;
 }
 
+.hero-copy {
+  display: contents;
+}
+
+.hero-title {
+  order: 0;
+}
+
+.hero-video {
+  order: 1;
+}
+
+.hero-details {
+  order: 2;
+}
+
+@media (min-width: 1024px) {
+  .hero-copy {
+    display: block;
+  }
+}
+
 .typed-container {
   display: inline-flex;
   min-height: 1.2em;

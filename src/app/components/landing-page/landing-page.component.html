@@ -12,11 +12,11 @@
     ></div>
 
     <div
-      class="relative container mx-auto grid max-w-7xl items-center gap-12 px-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-16"
+      class="hero-layout relative container mx-auto grid max-w-7xl items-center gap-7 px-4 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:gap-12"
     >
-      <div class="max-w-2xl text-center lg:text-left">
+      <div class="hero-copy max-w-2xl text-center lg:text-left">
         <h1
-          class="text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-6xl"
+          class="hero-title text-center text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-950 dark:text-white sm:text-5xl lg:text-left lg:text-6xl"
         >
           <span class="sr-only">{{ 'landingHome.hero.title' | translate }}</span>
           <span aria-hidden="true">
@@ -29,61 +29,63 @@
           </span>
         </h1>
 
-        <p
-          class="mx-auto mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-slate-300 lg:mx-0"
-        >
-          {{ 'landingHome.hero.description' | translate }}
-        </p>
-
-        <blockquote
-          class="mx-auto mt-7 max-w-xl border-l-2 border-teal-600 pl-4 text-left text-base italic leading-7 text-slate-500 dark:border-teal-400 dark:text-slate-400 lg:mx-0"
-        >
-          &ldquo;{{ 'landingHome.hero.quote' | translate }}&rdquo;
-          <cite class="ml-1 not-italic font-semibold text-slate-700 dark:text-slate-200">
-            {{ 'landingHome.hero.quoteAuthor' | translate }}
-          </cite>
-        </blockquote>
-
-        <div
-          class="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start"
-        >
-          <button
-            type="button"
-            (click)="playIntroVideo()"
-            aria-controls="intro-video-player"
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-teal-700 px-6 py-3 text-base font-bold text-white shadow-lg shadow-teal-950/15 transition hover:-translate-y-0.5 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:bg-teal-600 dark:hover:bg-teal-500 dark:focus:ring-teal-800"
+        <div class="hero-details text-center lg:text-left">
+          <p
+            class="mx-auto mt-6 max-w-xl text-lg leading-8 text-slate-600 dark:text-slate-300 lg:mx-0"
           >
-            <svg
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            {{ 'landingHome.hero.watchCta' | translate }}
-          </button>
+            {{ 'landingHome.hero.description' | translate }}
+          </p>
 
-          <a
-            href="#how-it-works"
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-base font-bold text-slate-800 transition hover:-translate-y-0.5 hover:border-teal-500 hover:text-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-teal-500 dark:hover:text-teal-200"
+          <blockquote
+            class="mx-auto mt-7 max-w-xl border-l-2 border-teal-600 pl-4 text-left text-base italic leading-7 text-slate-500 dark:border-teal-400 dark:text-slate-400 lg:mx-0"
           >
-            {{ 'landingHome.hero.howCta' | translate }}
-            <svg
-              class="h-5 w-5"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
+            &ldquo;{{ 'landingHome.hero.quote' | translate }}&rdquo;
+            <cite class="ml-1 not-italic font-semibold text-slate-700 dark:text-slate-200">
+              {{ 'landingHome.hero.quoteAuthor' | translate }}
+            </cite>
+          </blockquote>
+
+          <div
+            class="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start"
+          >
+            <button
+              type="button"
+              (click)="playIntroVideo()"
+              aria-controls="intro-video-player"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-teal-700 px-6 py-3 text-base font-bold text-white shadow-lg shadow-teal-950/15 transition hover:-translate-y-0.5 hover:bg-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/60 dark:bg-teal-600 dark:hover:bg-teal-500 dark:focus:ring-teal-800"
             >
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </a>
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              {{ 'landingHome.hero.watchCta' | translate }}
+            </button>
+
+            <a
+              href="#how-it-works"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-6 py-3 text-base font-bold text-slate-800 transition hover:-translate-y-0.5 hover:border-teal-500 hover:text-teal-800 focus:outline-none focus:ring-4 focus:ring-teal-300/50 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:border-teal-500 dark:hover:text-teal-200"
+            >
+              {{ 'landingHome.hero.howCta' | translate }}
+              <svg
+                class="h-5 w-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12l7 7 7-7" />
+              </svg>
+            </a>
+          </div>
         </div>
       </div>
 
-      <div id="intro-video" class="relative mx-auto w-full max-w-2xl">
+      <div id="intro-video" class="hero-video relative mx-auto w-full scroll-mt-24">
         <div
           class="absolute -inset-5 -z-10 rounded-[2.5rem] bg-gradient-to-br from-teal-400/20 via-sky-400/10 to-transparent blur-2xl"
           aria-hidden="true"
@@ -95,18 +97,33 @@
             <video
               #introVideo
               id="intro-video-player"
-              class="h-full w-full object-cover"
-              src="https://firebasestorage.googleapis.com/v0/b/new-worldgame.appspot.com/o/nwgNewsVideos%2Fvideos%2F2026%2FZ4YNQaJJX6pYYkqcoxzZ-global_solutions_lab_-_welcome_2.mp4?alt=media&amp;token=989def31-0b73-434d-9ef0-3a977c6725a0"
-              poster="assets/img/landing-intro-sofia-thumbnail.jpg"
-              title="Global Solutions Lab - Player Wanted"
+              class="h-full w-full object-contain"
+              src="assets/videos/global-solutions-lab-film-v3.mp4"
+              poster="assets/img/global-solutions-lab-film-poster.jpg"
+              title="Global Solutions Lab film"
+              (play)="introVideoStarted = true"
+              (ended)="introVideoStarted = false"
               controls
               playsinline
               preload="metadata"
             >
               Your browser does not support the video element.
             </video>
+            <button
+              *ngIf="!introVideoStarted"
+              type="button"
+              (click)="playIntroVideo()"
+              aria-controls="intro-video-player"
+              [attr.aria-label]="'landingHome.hero.watchCta' | translate"
+              class="film-play absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-[50%] bg-white/95 text-teal-800 shadow-xl ring-4 ring-white/25 transition hover:scale-110 hover:bg-white focus:outline-none focus-visible:ring-teal-400 sm:h-20 sm:w-20"
+            >
+              <svg class="ml-1 h-8 w-8 sm:h-10 sm:w-10" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </button>
             <span
-              class="pointer-events-none absolute left-4 top-4 rounded-full bg-slate-950/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur"
+              *ngIf="!introVideoStarted"
+              class="pointer-events-none absolute right-3 top-3 rounded-full bg-slate-950/75 px-3 py-1.5 text-xs font-bold text-white backdrop-blur"
             >
               {{ 'landingHome.hero.videoLabel' | translate }}
             </span>

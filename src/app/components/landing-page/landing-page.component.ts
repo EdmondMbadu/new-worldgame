@@ -28,6 +28,7 @@ export class LandingPageComponent implements OnInit, OnDestroy {
   aiOptions: AIOption[] = [];
   showAllAssistants = false;
   typedWord = 'Develop';
+  introVideoStarted = false;
   readonly impactSdgs = [
     'landingHome.sdgs.badges.noPoverty',
     'landingHome.sdgs.badges.goodHealth',
