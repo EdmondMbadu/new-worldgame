@@ -3,6 +3,7 @@ import * as functions from 'firebase-functions/v1';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as mail from '@sendgrid/mail';
 import { createHash, randomBytes } from 'node:crypto';
+import { generateValidStarterBrief, STARTER_BRIEF_SCHEMA } from './starter-brief-generation';
 import { StarterBrief, assertBriefClaims, STARTER_BRIEF_SYSTEM, normalizeBriefAnswers, parseStarterBrief, briefPageHtml, escapeBriefHtml } from './shared/starter-brief';
 
 // Existing rules deny client access to unlisted subcollections of solutions.
@@ -209,8 +210,8 @@ function backend() {
     const key=functions.config()['gemini']?.key;
     if(!key) throw new Error('Brief generation is not configured.');
     const model=new GoogleGenerativeAI(key).getGenerativeModel({model:'gemini-2.5-flash',systemInstruction:STARTER_BRIEF_SYSTEM,
-      generationConfig:{temperature:0.3,maxOutputTokens:2500,responseMimeType:'application/json',thinkingConfig:{thinkingBudget:0}} as any});
-    return (await model.generateContent(JSON.stringify(notes),{timeout:20000})).response.text();
+      generationConfig:{temperature:0.3,maxOutputTokens:2500,responseMimeType:'application/json',responseSchema:STARTER_BRIEF_SCHEMA,thinkingConfig:{thinkingBudget:0}} as any});
+    return generateValidStarterBrief(notes,async(prompt,timeout)=>(await model.generateContent(prompt,{timeout})).response.text());
   },async(email,subject,text,html)=>{
     const key=functions.config()['sendgrid']?.key;
     if(!key) throw new Error('Invitations are not configured.');

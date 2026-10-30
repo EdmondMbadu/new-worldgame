@@ -130,6 +130,13 @@ bounded plain-text sections in both client and server. Generation uses an isolat
 session/IP/global quotas. Cache entries are scoped to the authenticated user or
 individual guest draft and exact normalized notes. No raw IP is stored.
 
+Gemini receives a response schema with concise section targets. Every result is
+validated for structure, length, and unsupported factual numbers. A draft that
+fails validation receives at most one revision within a shared 19-second
+provider deadline; provider/payment failures are not retried. Author notes are
+never truncated to fit model output. `npm --prefix functions run test:starter-brief`
+checks the generation and repair behavior.
+
 AI output is tied to its source notes. A response for earlier notes becomes a
 candidate, never an overwrite. Regeneration always requires preview and explicit
 replacement; incomplete manual edits survive refresh. The `accepted` map records
