@@ -23,7 +23,7 @@
     "test:last-light": "npm run build && node --test test/last-light.unit.test.js"
   },
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "main": "lib/index.js",
   "dependencies": {

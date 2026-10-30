@@ -2,7 +2,7 @@
 
 Public, lazy-loaded route: `/start-a-solution`. The existing `/solution-a-thon`,
 creation forms, question schema, route guards, and playground components are
-unchanged. No Functions deployment or new API credentials are needed.
+unchanged. AI briefs and sharing use the five dedicated starter Cloud Functions. Existing provider configuration is reused; no API keys are exposed to the browser.
 
 ## Mapping heuristic
 
@@ -55,10 +55,7 @@ field-level provenance in `starterOrigin.evidence`; `unansweredKeys` records gap
 
 ## Performance and draft recovery
 
-The guide is deterministic and local. Sofia is labeled "Your guide", not a live AI
-conversation. No generated answers, typing delays, server requests, rich-text
-editors, or AI processing are required to move between prompts. Existing AI research
-tools remain available in the full workspace after saving.
+Core prompts remain deterministic and local. Bucky is the consistent guide. AI brief generation is explicit, optional, bounded, and runs alongside the guide. No provider request is required to move between prompts. Generated ideas stay outside working answers until explicitly adopted. Existing AI research tools remain available in the full workspace.
 
 The standalone route avoids loading the public-page module. Firestore workspace
 creation is dynamically imported only when saving. Draft writes are debounced
@@ -88,12 +85,27 @@ step, notes, and skipped prompts survive a refresh.
    immediately so existing private-read rules work before feed metadata triggers run. Escape all author text before constructing HTML. No
    meeting links, invitations, evaluator assignment, publication, or emails are
    triggered by the starter service.
-6. Return to the corresponding existing playground step (zero-based `step=0..3`).
-   The starter becomes a read-only snapshot; further editing happens there.
+6. Show a post-save invitation panel, with optional email invitations and a clear action to go deeper. Continue into the corresponding existing playground step (zero-based `step=0..3`). The original notes become a read-only snapshot; the separate brief can still be edited and shared.
 7. A 15-second UI deadline allows a safe retry. The transaction may commit after
    the deadline; the atomic handoff marker makes that retry recover rather than duplicate.
 
 ## Checks
+
+### Functions runtime and deployment
+
+The Functions codebase targets Node.js 22 in `firebase.json` (`runtime: nodejs22`)
+and `functions/package.json` (`engines.node: 22`), with the lockfile kept in sync.
+Firebase uses the explicit `firebase.json` runtime for deployment. From the
+repository root, validate with
+`firebase deploy --only functions --dry-run --project new-worldgame` and deploy
+with `firebase deploy --only functions --project new-worldgame`. A full Functions
+deployment upgrades the older deployed functions as well; the five starter
+functions already run on Node.js 22. Hosting deployment is separate.
+
+The configured Gemini key is reused. A provider HTTP 402 indicates that key's
+prepay balance is depleted; the Firebase project's linked Cloud Billing account
+alone does not identify the account backing a Gemini key. Do not change billing
+accounts or providers based on that assumption.
 
 `CI=1 npm run test:community-starter` runs mapping, sanitization, persistence,
 skip/back navigation, storage failure/conflict, auth return, and create-only
@@ -108,3 +120,60 @@ and hosted-event page still work. Test at desktop and mobile widths.
 `node scripts/test-community-starter-rules.mjs` also verifies an atomic handoff
 and immediate owner-only private reads against the unchanged Firestore rules in
 a disposable local emulator. No production data is used.
+
+
+## Bucky briefs, sharing, and invitations
+
+The shared contract lives in `functions/src/shared/starter-brief.ts`; it validates
+bounded plain-text sections in both client and server. Generation uses an isolated
+`generateStarterBrief` callable, an existing Gemini provider configuration, and
+session/IP/global quotas. Cache entries are scoped to the authenticated user or
+individual guest draft and exact normalized notes. No raw IP is stored.
+
+AI output is tied to its source notes. A response for earlier notes becomes a
+candidate, never an overwrite. Regeneration always requires preview and explicit
+replacement; incomplete manual edits survive refresh. The `accepted` map records
+only ideas explicitly added to working answers. Unaccepted text never fills
+playground status keys. Only the owner’s original/accepted notes are handed off.
+
+`starter-pdf.ts` dynamically loads jsPDF for a vector-text A4 export; no screenshot,
+canvas, external font, or model request is required at download time. `starter-brief-view`
+is the editable, responsive presentation. A visitor can export or copy a message
+without creating an account.
+
+All new server records live beneath the phantom `solutions/_communityStarter`
+document, in `briefCache`, `limits`, `links`, `owners`, `invites`, and `requests`.
+The existing rules deny direct client access to these unlisted subcollections;
+no database rule or existing access path is broadened. Callables enforce ownership,
+verified identity, field limits, expiry, and capability-token validation. The
+phantom parent is never created and is not a community solution.
+
+`manageStarterBrief` publishes/revokes a reviewed brief snapshot. The public URL
+is served by `serveStarterBrief` as standalone HTML, so reading and social previews
+work without sign-in or exposing the private workspace. A share link expires in
+90 days and can be turned off. Downloaded copies cannot be revoked. `getStarterBrief`
+returns only the brief and invitation kind; it never returns private solution data,
+recipient email, owner identity, or workspace ID to a public reader.
+
+Email invitations use `manageStarterTeam` and contain an expiring, email-bound link.
+They do not add a participant until accepted with the intended verified email.
+Generic share links create membership requests requiring owner approval. The
+`/community-brief/:token` route preserves the destination through Google or email
+registration/login and offers verification in place. The owner can refresh requests
+from the starter. Joining/approval uses transactions and preserves existing answers.
+Mail state is `sending`, `sent`, or `failed`; retries reuse invitation identity and
+successful sends are not resent. Transport/provider ambiguity can never guarantee
+exactly-once email delivery, but a failed or unconfirmed operation is not presented
+as a successful send.
+
+Deploy only the five new functions:
+`firebase deploy --only functions:generateStarterBrief,functions:manageStarterBrief,functions:getStarterBrief,functions:manageStarterTeam,functions:serveStarterBrief`.
+Node.js 22 is declared because Node.js 20 deployments were rejected by Firebase.
+This scoped command does not redeploy existing functions. No frontend hosting
+publication is included; friends’ join actions require a running app containing
+the new `/community-brief/:token` route. Locally created links return to the local
+app for joining; production-created links return to the production app.
+
+The emulator test suite uses fake AI and mail. It checks scoped caches, limits,
+owner-only sharing, revocation, generic membership approval, bound invitation
+acceptance, retry behavior, and preservation of private solution answers.

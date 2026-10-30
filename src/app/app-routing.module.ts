@@ -8,6 +8,7 @@ import { dynamicCampaignCanMatch } from './campaign-public/campaign-public-can-m
 import { protectedPathsCanMatch } from './protected/protected-paths.can-match';
 
 const routes: Routes = [
+  { path: 'community-brief/:token', loadComponent: () => import('./community-starter/shared-starter-brief.component').then(m => m.SharedStarterBriefComponent) },
   {
     path: 'start-a-solution',
     loadComponent: () => import('./community-starter/community-starter.component').then(m => m.CommunityStarterComponent),

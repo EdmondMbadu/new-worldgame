@@ -1,3 +1,4 @@
+import { StarterBriefState, parseStarterBrief } from '../../../functions/src/shared/starter-brief';
 import { PLAYGROUND_QUESTION_KEYS } from '../config/playground-question-schema';
 
 export interface StarterField {
@@ -86,13 +87,15 @@ export interface StarterDraft {
   answers: Record<string, string>;
   skipped: string[];
   updatedAt: number;
+  brief?: StarterBriefState;
+  invitePromptDismissed?: boolean;
   exported?: { solutionId: string; ownerUid: string };
 }
 
 export function newStarterDraft(): StarterDraft {
   return {
     version: 1, id: crypto.randomUUID(), started: false, step: 0,
-    activeField: 'context', answers: {}, skipped: [], updatedAt: Date.now(),
+    invitePromptDismissed: false, activeField: 'context', answers: {}, skipped: [], updatedAt: Date.now(),
   };
 }
 
@@ -104,7 +107,7 @@ export function hasAnswer(raw: unknown): raw is string {
 }
 
 export function readStarterDraft(raw: string | null): StarterDraft | null {
-  if (!raw || raw.length > 150000) return null;
+  if (!raw || raw.length > 700000) return null;
   try {
     const value = JSON.parse(raw);
     if (!value || value.version !== 1 || typeof value.id !== 'string' || !/^[a-zA-Z0-9_-]{16,64}$/.test(value.id) ||
@@ -125,6 +128,10 @@ export function readStarterDraft(raw: string | null): StarterDraft | null {
     };
     if (typeof value.exported?.solutionId === 'string' && /^[a-zA-Z0-9_-]{1,128}$/.test(value.exported.solutionId) &&
       typeof value.exported.ownerUid === 'string' && value.exported.ownerUid.length <= 128) draft.exported = value.exported;
+    if (value.brief && typeof value.brief.sourceKey === 'string' && value.brief.sourceKey.length <= 150000) {
+      try { draft.brief = { document: parseStarterBrief(value.brief.document, true), sourceKey: value.brief.sourceKey, generatedAt: Number(value.brief.generatedAt) || 0, edited: value.brief.edited === true, accepted: Object.fromEntries(Object.entries(value.brief.accepted || {}).filter(([key,text]) => key.length < 5000 && typeof text === 'string' && text.length <= 4000)) as Record<string,string> }; } catch { /* Keep author notes if an old AI draft cannot be read. */ }
+    }
+    draft.invitePromptDismissed = value.invitePromptDismissed === true;
     return draft;
   } catch { return null; }
 }

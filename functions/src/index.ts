@@ -1,3 +1,4 @@
+export { generateStarterBrief, manageStarterBrief, getStarterBrief, manageStarterTeam, serveStarterBrief } from './community-starter';
 export { createClassSpace, listAccessibleChallengeSpaces, resolveAccessibleChallengeSpace, checkChallengeSpaceSlug } from './class-spaces';
 import { lastLightReturn } from './last-light-return';
 /**

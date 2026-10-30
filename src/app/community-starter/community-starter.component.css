@@ -68,11 +68,11 @@ button {
   letter-spacing:-.6px;
   flex-shrink:0;
 }
-.wordmark svg {
-  width:35px;
-  height:35px;
-  stroke:var(--ink);
-  stroke-width:1.7;
+.wordmark img {
+  width:44px;
+  height:44px;
+  object-fit:contain;
+  flex-shrink:0;
 }
 .site-header nav {
   display:flex;
@@ -1081,9 +1081,9 @@ textarea[aria-invalid=true] {
     gap:8px;
     letter-spacing:-.5px;
   }
-  .wordmark svg {
-    width:28px;
-    height:28px;
+  .wordmark img {
+    width:34px;
+    height:34px;
   }
   .site-header nav {
     gap:15px;

@@ -144,3 +144,38 @@ describe('Community starter flow and recovery', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 });
+
+describe('Bucky asynchronous brief lifecycle',()=>{
+  let component:CommunityStarterComponent;
+  const brief={version:1 as const,title:'A local idea',summary:'A community starting point.',challenge:'A problem described by residents.',success:'A possible preferred outcome.',approaches:[{title:'A small test',text:'Explore a community partnership.'}],firstTest:'Ask residents what would help.',questions:['Who can help test this?'],invitation:'Bring your local knowledge.'};
+  beforeEach(()=>{
+    spyOn(Storage.prototype,'getItem').and.returnValue(null);spyOn(Storage.prototype,'setItem');spyOn(Storage.prototype,'removeItem');
+    component=new CommunityStarterComponent({user$:new BehaviorSubject(null),getRedirectUrl:()=>''} as any,{} as any,{snapshot:{queryParamMap:{get:()=>null}}} as any,{} as any);
+    component.ngOnInit();component.setAnswer('problem','Food is difficult to reach.');
+  });
+  afterEach(()=>component.ngOnDestroy());
+  it('does not overwrite edits when notes change while Bucky is writing',async()=>{
+    let resolve!:(value:any)=>void;
+    spyOn<any>(component,'api').and.resolveTo({generate:()=>new Promise(done=>resolve=done)});
+    const generation=component.generateBrief();await Promise.resolve();await Promise.resolve();
+    component.setAnswer('context','Older residents.');resolve(brief);await generation;
+    expect(component.draft.brief).toBeUndefined();expect(component.pendingBrief?.document.title).toBe('A local idea');
+    expect(component.draft.answers['context']).toBe('Older residents.');
+  });
+  it('keeps the existing brief on a failed generation',async()=>{
+    component.draft.brief={document:brief,sourceKey:'old',generatedAt:1,edited:true,accepted:{}};
+    spyOn<any>(component,'api').and.resolveTo({generate:()=>Promise.reject(new Error('offline'))});
+    await component.generateBrief();expect(component.draft.brief.document).toBe(brief);expect(component.briefError).toContain('previous brief is safe');
+  });
+  it('preserves the current manual edit until a replacement is chosen',async()=>{
+    component.draft.brief={document:{...brief,title:'My edited title'},sourceKey:component.currentBriefKey,generatedAt:1,edited:true,accepted:{}};
+    spyOn<any>(component,'api').and.resolveTo({generate:async()=>brief});await component.generateBrief();
+    expect(component.draft.brief.document.title).toBe('My edited title');component.usePendingBrief();expect(component.draft.brief.document.title).toBe('A local idea');
+  });
+  it('adopts a suggestion explicitly, appends to existing notes, and avoids duplicates',()=>{
+    component.draft.brief={document:brief,sourceKey:'old',generatedAt:1,edited:false,accepted:{}};
+    component.setAnswer('approach','An idea I already had.');
+    component.adoptSuggestion({field:'approach',text:'Explore a pickup partnership.'});component.adoptSuggestion({field:'approach',text:'Explore a pickup partnership.'});
+    expect(component.draft.answers['approach']).toBe('An idea I already had.\n\nExplore a pickup partnership.');expect(component.draft.brief.accepted['approach']).toBe('Explore a pickup partnership.');
+  });
+});

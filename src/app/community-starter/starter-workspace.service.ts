@@ -51,10 +51,12 @@ export class StarterWorkspaceService {
         feedStatus: 'in-development', feedUpdatedAt: now,
         creationDate: new Date().toLocaleDateString('en-US'),
         createdAt: now, updatedAt: now, stepsUpdatedAt: now, lastSubstantiveEditAt: now,
+        ...(draft.brief ? {starterBrief: draft.brief.document} : {}),
         starterOrigin: {
           version: 1, draftId: draft.id, mappingVersion: 1,
           evidence: mapping.evidence, unansweredKeys: mapping.missingKeys,
           source: 'author-input', isFirstPass: true,
+          acceptedAiFields: Object.entries(draft.brief?.accepted || {}).filter(([field,text]) => draft.answers[field]?.includes(text)).map(([field]) => field),
         },
       });
       tx.set(marker, { ownerUid: uid, draftId: draft.id, solutionId, createdAt: now });

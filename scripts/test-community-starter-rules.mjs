@@ -22,7 +22,7 @@ if (process.platform === 'darwin') {
 }
 const quote = value => `'${value.replaceAll("'", "'\\''")}'`;
 const result = spawnSync('firebase', ['emulators:exec', '--config', path.join(directory, 'firebase.json'), '--project', 'demo-community-starter', '--only', 'firestore',
-  `${quote(process.execPath)} --test ${quote(path.join(root, 'functions/test/community-starter.rules.test.js'))}`,
+  `${quote(process.execPath)} --test ${quote(path.join(root, 'functions/test/community-starter.rules.test.js'))} ${quote(path.join(root, 'functions/test/community-starter.integration.test.js'))}`,
 ], { cwd: directory, stdio: 'inherit', env: environment });
 if (result.error) throw result.error;
 process.exitCode = result.status || (result.signal ? 1 : 0);

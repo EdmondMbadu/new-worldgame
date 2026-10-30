@@ -1,3 +1,5 @@
+import { StarterBrief, StarterBriefState, briefSourceKey, parseStarterBrief } from '../../../functions/src/shared/starter-brief';
+import { StarterBriefViewComponent } from './starter-brief-view.component';
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostListener, Injector, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -13,8 +15,8 @@ import {
 
 @Component({
   selector: 'app-community-starter', standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './community-starter.component.html', styleUrls: ['./community-starter.component.css'],
+  imports: [CommonModule, FormsModule, RouterModule, StarterBriefViewComponent],
+  templateUrl: './community-starter.component.html', styleUrls: ['./community-starter.component.css', './starter-brief-flow.css'],
 })
 export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly steps = STARTER_STEPS;
@@ -43,6 +45,23 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
   showPassword = false;
   account = { firstName: '', lastName: '', email: '', password: '', agreed: false };
   accountNotice = '';
+  briefOpen = false;
+  generatingBrief = false;
+  briefError = '';
+  briefNotice = '';
+  pendingBrief: StarterBriefState | null = null;
+  reviewingPending = false;
+  pdfBusy = false;
+  shareBusy = false;
+  shareUrl = '';
+  shareReviewed = false;
+  invitePanel = false;
+  inviteEmails = '';
+  inviteBusy = false;
+  inviteError = '';
+  inviteResults: {email:string;state:string}[] = [];
+  joinRequests: {id:string;email:string}[] = [];
+  private briefRequest = 0;
   overview = false;
   mobileBriefOpen = false;
   showNewConfirmation = false;
@@ -73,7 +92,9 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
       if (this.draft.activeField && !this.step.fields.some(f => f.id === this.draft.activeField)) this.draft.activeField = this.nextCoreField();
     } else if (raw) this.storageMessage = 'We couldn’t restore the previous draft. You can start a new one here.';
     this.authSubscription = this.auth.user$.subscribe({
-      next: user => { this.user = user; this.sessionReady = true; },
+      next: user => { this.user = user; this.sessionReady = true;
+        if (user && this.savedForCurrentUser && !this.draft.invitePromptDismissed) this.invitePanel = true;
+      },
       error: () => { this.sessionReady = true; this.accountError = 'We couldn’t check your account. You can keep working as a guest.'; },
     });
   }
@@ -86,6 +107,7 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
 
   ngOnDestroy() {
     this.destroyed = true;
+    ++this.briefRequest;
     this.flushDraft();
     clearTimeout(this.focusTimer);
     this.authSubscription?.unsubscribe();
@@ -167,12 +189,14 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
     this.draft.step = this.steps.findIndex(step => step.fields.some(f => f.id === field.id));
     this.draft.activeField = field.id;
     this.overview = false;
+    this.briefOpen = false;
     this.error = '';
     this.scheduleSave();
     this.focusPanel();
   }
 
   chooseStep(index: number) {
+    this.briefOpen = false;
     this.draft.step = index;
     this.draft.activeField = this.nextCoreField();
     this.overview = false;
@@ -355,7 +379,10 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
       ]);
       this.draft.exported = { solutionId, ownerUid: user.uid! };
       this.flushDraft();
-      this.openWorkspace();
+      this.saveDialog?.nativeElement.close();
+      this.invitePanel = !this.draft.invitePromptDismissed;
+      this.briefOpen = !!this.draft.brief;
+      void this.loadTeam();
     } catch {
       this.accountError = 'We couldn’t open your workspace yet. Your browser draft is safe. Check your connection and try again; retrying won’t create a duplicate.';
     } finally { clearTimeout(saveDeadline); if (!this.destroyed) this.saving = false; }
@@ -378,8 +405,140 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
     this.downloadNotice = 'Your brief has been downloaded.';
   }
 
+  get hasFutureNote() { return hasAnswer(this.draft.answers['future']); }
+  get hasFirstActionNote() { return hasAnswer(this.draft.answers['firstAction']); }
+  get briefStale() { return !!this.draft.brief && this.draft.brief.sourceKey !== this.currentBriefKey; }
+  get currentBriefKey() { try { return briefSourceKey(this.draft.answers); } catch { return ''; } }
+  get briefValid() { try { return !!this.draft.brief && !!parseStarterBrief(this.draft.brief.document); } catch { return false; } }
+  private async api() { const {StarterApiService} = await import('./starter-api.service'); return this.injector.get(StarterApiService); }
+
+  async generateBrief() {
+    if (this.generatingBrief || !this.hasProblem || this.externalDraft) return;
+    const answers = {...this.draft.answers};
+    const sourceKey = this.currentBriefKey;
+    const draftId = this.draft.id;
+    const request = ++this.briefRequest;
+    this.flushDraft();
+    this.generatingBrief = true;
+    this.briefError = '';
+    try {
+      const document = await (await this.api()).generate(answers, draftId);
+      if (this.destroyed || request !== this.briefRequest || this.draft.id !== draftId || this.externalDraft) return;
+      const next: StarterBriefState = {document,sourceKey,generatedAt:Date.now(),edited:false,accepted:{...this.draft.brief?.accepted}};
+      if (this.draft.brief || this.currentBriefKey !== sourceKey) {
+        this.pendingBrief = next;
+        this.briefNotice = 'Bucky’s new draft is ready. Review it before replacing your current brief.';
+      } else { this.draft.brief = next; this.briefOpen = true; this.shareReviewed = false; this.briefNotice = 'Your starting brief is ready. Review Bucky’s suggestions and shape it in your own words.'; }
+      this.flushDraft();
+    } catch(error: any) {
+      console.warn('Starter brief request failed: '+JSON.stringify({code:error?.code,message:String(error?.message||error).slice(0,300)}));
+      if (!this.destroyed && request === this.briefRequest) this.briefError = /resource-exhausted/.test(String(error?.code)) ? 'The brief limit has been reached for now. Your notes are safe; please try later.' : 'Bucky couldn’t finish just yet. Keep working, download your notes, or try again. Your previous brief is safe.';
+    } finally { if (!this.destroyed && request === this.briefRequest) this.generatingBrief = false; }
+  }
+
+  usePendingBrief() {
+    if (!this.pendingBrief) return;
+    this.draft.brief = this.pendingBrief;
+    this.reviewingPending = false;
+    this.pendingBrief = null;
+    this.briefOpen = true;
+    this.shareReviewed = false;
+    this.briefNotice = '';
+    this.flushDraft();
+  }
+  updateBrief(document: StarterBrief) {
+    if (!this.draft.brief) return;
+    this.draft.brief = {...this.draft.brief,document,edited:true};
+    this.shareReviewed = false;
+    this.scheduleSave();
+  }
+  adoptSuggestion(suggestion: {field:string;text:string}) {
+    if (this.saved || !this.draft.brief || !['future','approach','firstAction'].includes(suggestion.field)) return;
+    const existing = this.draft.answers[suggestion.field] || '';
+    if (existing.includes(suggestion.text)) {this.briefNotice = 'This idea is already in your working notes.';return;}
+    const combined = [existing,suggestion.text].filter(Boolean).join('\n\n');
+    if (combined.length > MAX_ANSWER_LENGTH) {this.briefNotice = 'This note is full. Edit your working notes before adding more.';return;}
+    this.setAnswer(suggestion.field,combined);
+    this.draft.brief.accepted[suggestion.field] = suggestion.text;
+    this.briefNotice = 'Added to your working notes. You can develop the details with Bucky in the full workspace.';
+    this.flushDraft();
+  }
+  async downloadPdf() {
+    if (this.pdfBusy || !this.draft.brief || !this.briefValid) return;
+    this.pdfBusy = true;
+    try {
+      const {starterBriefPdf} = await import('./starter-pdf');
+      const bytes = await starterBriefPdf(parseStarterBrief(this.draft.brief.document));
+      const url = URL.createObjectURL(new Blob([bytes as BlobPart],{type:'application/pdf'}));
+      const link = document.createElement('a');link.href=url;link.download='community-starting-brief.pdf';link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      this.briefNotice='Your PDF brief has been downloaded.';
+    }catch {this.briefError='The PDF could not be prepared. Your brief is safe; try again or download your notes.';}
+    finally {if(!this.destroyed)this.pdfBusy=false;}
+  }
+  async copyMessage() {
+    if (!this.draft.brief) return;
+    try {await navigator.clipboard.writeText(`I’m working on an idea for our community: ${this.draft.brief.document.title}.\n\n${this.draft.brief.document.summary}\n\n${this.shareUrl || this.draft.brief.document.invitation}`);this.briefNotice='Message copied. Paste it into your group chat or email.';}
+    catch {this.briefError='Copying is unavailable in this browser. You can download the brief instead.';}
+  }
+  async publishBrief() {
+    if (this.shareBusy || !this.shareReviewed || !this.draft.brief || !this.briefValid) return;
+    if (!this.savedForCurrentUser) {this.openSave();return;}
+    this.shareBusy=true;this.briefError='';
+    try {const result=await (await this.api()).manage('publish',this.draft.exported!.solutionId,parseStarterBrief(this.draft.brief.document));this.shareUrl=result.url||'';this.briefNotice='Your read-only brief link is ready. It shares this version of the brief, not your private workspace.';}
+    catch {this.briefError='The share link could not be created. Your private workspace is unchanged. Please retry.';}
+    finally {if(!this.destroyed)this.shareBusy=false;}
+  }
+  async revokeShare() {
+    if(this.shareBusy||!this.savedForCurrentUser)return;
+    this.shareBusy=true;
+    try {await (await this.api()).manage('revoke',this.draft.exported!.solutionId);this.shareUrl='';this.briefNotice='The share link has been turned off.';}
+    catch {this.briefError='We couldn’t turn off the link yet. Please retry.';}
+    finally {if(!this.destroyed)this.shareBusy=false;}
+  }
+  async copyShareLink() {
+    try {await navigator.clipboard.writeText(this.shareUrl);this.briefNotice='Brief link copied.';}catch {this.briefNotice='Select and copy the link shown below.';}
+  }
+  async loadTeam() {
+    if(!this.savedForCurrentUser)return;
+    try {
+      const api=await this.api();
+      const [team,sharing]=await Promise.all([api.team({action:'list',solutionId:this.draft.exported!.solutionId}),api.manage('status',this.draft.exported!.solutionId)]);
+      if(this.destroyed)return;
+      this.joinRequests=team.requests||[];this.inviteResults=team.invites||[];this.shareUrl=sharing.url||'';
+    }catch {this.inviteError='Team updates are unavailable for the moment. You can still continue into your workspace.';}
+  }
+  async sendInvites() {
+    if(this.inviteBusy||!this.savedForCurrentUser||!this.draft.brief||!this.briefValid)return;
+    const emails=[...new Set(this.inviteEmails.split(/[,;\s]+/).map(email=>email.trim().toLowerCase()).filter(Boolean))];
+    if(!emails.length||emails.length>5||emails.some(email=>!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {this.inviteError='Enter up to five valid email addresses, separated by commas.';return;}
+    this.inviteBusy=true;this.inviteError='';
+    try {const result=await (await this.api()).team({action:'invite',solutionId:this.draft.exported!.solutionId,emails,brief:parseStarterBrief(this.draft.brief.document)});this.inviteResults=result.invites||[];if(this.inviteResults.every(invite=>['sent','already-member'].includes(invite.state)))this.inviteEmails='';}
+    catch {this.inviteError='The invitations could not be completed. Your workspace is ready; retry here when your connection is available.';}
+    finally {if(!this.destroyed)this.inviteBusy=false;}
+  }
+  async approveJoin(id:string) {
+    if(this.inviteBusy||!this.savedForCurrentUser)return;
+    this.inviteBusy=true;this.inviteError='';
+    try {await (await this.api()).team({action:'approve',solutionId:this.draft.exported!.solutionId,requestId:id});this.joinRequests=this.joinRequests.filter(request=>request.id!==id);}
+    catch {this.inviteError='This person could not be added yet. Please try again.';}
+    finally {if(!this.destroyed)this.inviteBusy=false;}
+  }
+  continueAlone() {this.draft.invitePromptDismissed=true;this.flushDraft();this.invitePanel=false;this.openWorkspace();}
+
   startAnother() {
     this.flushDraft();
+    ++this.briefRequest;
+    this.generatingBrief = false;
+    this.briefOpen = false;
+    this.pendingBrief = null;
+    this.briefError = '';
+    this.briefNotice = '';
+    this.shareUrl = '';
+    this.shareReviewed = false;
+    this.invitePanel = false;
+    this.inviteResults = [];
+    this.joinRequests = [];
     this.draft = newStarterDraft();
     this.overview = false;
     this.showNewConfirmation = false;
