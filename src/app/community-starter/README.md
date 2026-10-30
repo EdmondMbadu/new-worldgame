@@ -55,6 +55,14 @@ field-level provenance in `starterOrigin.evidence`; `unansweredKeys` records gap
 
 ## Performance and draft recovery
 
+The questions and working notes lead the page. The optional AI brief action follows
+the working area and notes review; answering every question is not required.
+Once a brief exists, viewing it is the primary action. Updating is secondary and
+appears when working notes have changed. The brief view offers export/sharing and
+one clear handoff to the full workspace. Saving then brings the invitation prompt
+into focus. A background result does not pull visitors away from a different
+question or step they have moved on to.
+
 Core prompts remain deterministic and local. Bucky is the consistent guide. AI brief generation is explicit, optional, bounded, and runs alongside the guide. No provider request is required to move between prompts. Generated ideas stay outside working answers until explicitly adopted. Existing AI research tools remain available in the full workspace.
 
 The standalone route avoids loading the public-page module. Firestore workspace

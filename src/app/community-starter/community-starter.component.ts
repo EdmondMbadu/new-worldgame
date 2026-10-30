@@ -73,6 +73,8 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
   @ViewChild('problemInput') problemInput?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('answerInput') answerInput?: ElementRef<HTMLTextAreaElement>;
   @ViewChild('panelHeading') panelHeading?: ElementRef<HTMLElement>;
+  @ViewChild('briefHeading') briefHeading?: ElementRef<HTMLElement>;
+  @ViewChild('teamHeading') teamHeading?: ElementRef<HTMLElement>;
   @ViewChild('saveDialog') saveDialog?: ElementRef<HTMLDialogElement>;
 
   constructor(public auth: AuthService, private router: Router, private route: ActivatedRoute, private injector: Injector) {}
@@ -129,7 +131,7 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
     if (this.saved) return 'Saved as a workspace';
     return this.storageMode === 'device' ? 'Draft on this device' : this.storageMode === 'tab' ? 'Draft in this tab' : 'Draft in memory only';
   }
-  get buttonLabel() { return this.draft.step < 3 ? `Next: ${this.steps[this.draft.step + 1].title.toLowerCase()}` : 'Review my starting brief'; }
+  get buttonLabel() { return this.draft.step < 3 ? `Next: ${this.steps[this.draft.step + 1].title.toLowerCase()}` : 'Review my notes'; }
   countStep(index: number) { return this.steps[index].fields.filter(f => hasAnswer(this.draft.answers[f.id])).length; }
   stepCountLabel(index: number) { const count = this.countStep(index); return count ? `${count} ${count === 1 ? 'note' : 'notes'} added` : 'Open to explore'; }
   fieldAnswered(field: StarterField) { return hasAnswer(this.draft.answers[field.id]); }
@@ -382,6 +384,7 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
       this.saveDialog?.nativeElement.close();
       this.invitePanel = !this.draft.invitePromptDismissed;
       this.briefOpen = !!this.draft.brief;
+      if (this.invitePanel) this.focusTeamPrompt();
       void this.loadTeam();
     } catch {
       this.accountError = 'We couldn’t open your workspace yet. Your browser draft is safe. Check your connection and try again; retrying won’t create a duplicate.';
@@ -402,7 +405,7 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
     link.download = 'my-community-solution.txt';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    this.downloadNotice = 'Your brief has been downloaded.';
+    this.downloadNotice = 'Your working notes have been downloaded.';
   }
 
   get hasFutureNote() { return hasAnswer(this.draft.answers['future']); }
@@ -412,11 +415,24 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
   get briefValid() { try { return !!this.draft.brief && !!parseStarterBrief(this.draft.brief.document); } catch { return false; } }
   private async api() { const {StarterApiService} = await import('./starter-api.service'); return this.injector.get(StarterApiService); }
 
+  viewBrief() {
+    this.briefOpen = true;
+    this.reviewingPending = false;
+    clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
+      this.briefHeading?.nativeElement.focus({preventScroll:true});
+      this.briefHeading?.nativeElement.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
+    });
+  }
+
   async generateBrief() {
     if (this.generatingBrief || !this.hasProblem || this.externalDraft) return;
     const answers = {...this.draft.answers};
     const sourceKey = this.currentBriefKey;
     const draftId = this.draft.id;
+    const startingStep = this.draft.step;
+    const startingField = this.draft.activeField;
+    const startingOverview = this.overview;
     const request = ++this.briefRequest;
     this.flushDraft();
     this.generatingBrief = true;
@@ -428,7 +444,13 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
       if (this.draft.brief || this.currentBriefKey !== sourceKey) {
         this.pendingBrief = next;
         this.briefNotice = 'Bucky’s new draft is ready. Review it before replacing your current brief.';
-      } else { this.draft.brief = next; this.briefOpen = true; this.shareReviewed = false; this.briefNotice = 'Your starting brief is ready. Review Bucky’s suggestions and shape it in your own words.'; }
+      } else {
+        this.draft.brief = next;
+        this.shareReviewed = false;
+        this.briefNotice = 'Your starting brief is ready. Review Bucky’s suggestions and shape it in your own words.';
+        // Open the requested result, unless the visitor has moved on in the guide.
+        if (this.draft.step === startingStep && this.draft.activeField === startingField && this.overview === startingOverview) this.viewBrief();
+      }
       this.flushDraft();
     } catch(error: any) {
       console.warn('Starter brief request failed: '+JSON.stringify({code:error?.code,message:String(error?.message||error).slice(0,300)}));
@@ -441,7 +463,7 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
     this.draft.brief = this.pendingBrief;
     this.reviewingPending = false;
     this.pendingBrief = null;
-    this.briefOpen = true;
+    this.viewBrief();
     this.shareReviewed = false;
     this.briefNotice = '';
     this.flushDraft();
@@ -507,6 +529,18 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
       if(this.destroyed)return;
       this.joinRequests=team.requests||[];this.inviteResults=team.invites||[];this.shareUrl=sharing.url||'';
     }catch {this.inviteError='Team updates are unavailable for the moment. You can still continue into your workspace.';}
+  }
+  openTeam() {
+    this.invitePanel = true;
+    this.focusTeamPrompt();
+    void this.loadTeam();
+  }
+  private focusTeamPrompt() {
+    clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
+      this.teamHeading?.nativeElement.focus({preventScroll:true});
+      this.teamHeading?.nativeElement.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
+    });
   }
   async sendInvites() {
     if(this.inviteBusy||!this.savedForCurrentUser||!this.draft.brief||!this.briefValid)return;

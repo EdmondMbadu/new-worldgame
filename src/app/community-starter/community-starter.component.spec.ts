@@ -167,6 +167,21 @@ describe('Bucky asynchronous brief lifecycle',()=>{
     spyOn<any>(component,'api').and.resolveTo({generate:()=>Promise.reject(new Error('offline'))});
     await component.generateBrief();expect(component.draft.brief.document).toBe(brief);expect(component.briefError).toContain('previous brief is safe');
   });
+  it('keeps the visitor in their next question when a background brief arrives',async()=>{
+    let resolve!:(value:any)=>void;
+    spyOn<any>(component,'api').and.resolveTo({generate:()=>new Promise(done=>resolve=done)});
+    const generation=component.generateBrief();await Promise.resolve();await Promise.resolve();
+    component.chooseStep(2);resolve(brief);await generation;
+    expect(component.draft.brief?.document).toBe(brief);
+    expect(component.draft.step).toBe(2);expect(component.briefOpen).toBeFalse();
+    component.viewBrief();expect(component.briefOpen).toBeTrue();
+  });
+  it('opens the requested first brief when the visitor has stayed on the same question',async()=>{
+    spyOn<any>(component,'api').and.resolveTo({generate:async()=>brief});
+    await component.generateBrief();
+    expect(component.briefOpen).toBeTrue();expect(component.draft.brief?.document).toBe(brief);
+    expect(component.draft.answers['problem']).toBe('Food is difficult to reach.');
+  });
   it('preserves the current manual edit until a replacement is chosen',async()=>{
     component.draft.brief={document:{...brief,title:'My edited title'},sourceKey:component.currentBriefKey,generatedAt:1,edited:true,accepted:{}};
     spyOn<any>(component,'api').and.resolveTo({generate:async()=>brief});await component.generateBrief();
