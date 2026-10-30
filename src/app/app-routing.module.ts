@@ -9,6 +9,10 @@ import { protectedPathsCanMatch } from './protected/protected-paths.can-match';
 
 const routes: Routes = [
   {
+    path: 'start-a-solution',
+    loadComponent: () => import('./community-starter/community-starter.component').then(m => m.CommunityStarterComponent),
+  },
+  {
     path: 'create-class',
     loadComponent: () => import('./components/create-class/create-class.component').then(m => m.CreateClassComponent),
   },

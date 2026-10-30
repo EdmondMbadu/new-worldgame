@@ -127,6 +127,11 @@ export class SeoService {
     const normalizedRoute = this.normalizeRoute(route);
     const baseUrl = this.primaryDomain;
     const configs: { [key: string]: SeoConfig } = {
+      '/start-a-solution': {
+        title: 'Start a Community Solution | Global Solutions Lab',
+        description: 'Bring a community problem. Build a starting brief, imagine success, explore a solution, and plan a first step. No account needed to begin.',
+        url: `${baseUrl}/start-a-solution`,
+      },
       '/': {
         title: 'Global Solutions Lab - Developing solutions for global and local problems.',
         description: 'Global Solutions Lab develops solutions for global and local problems through AI guidance, design science, tournaments, and solution-building programs.',

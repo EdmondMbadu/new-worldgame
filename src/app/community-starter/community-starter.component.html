@@ -1,0 +1,141 @@
+<div class="starter-page">
+  <a class="skip-link" href="/start-a-solution#main-content" (click)="scrollTo('main-content', $event)">Skip to content</a>
+  <header class="site-header">
+    <a class="wordmark" routerLink="/" aria-label="Global Solutions Lab home">
+      <svg viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="17"/><ellipse cx="20" cy="20" rx="8" ry="17"/><path d="M3 20h34M6 10h28M6 30h28"/></svg>
+      <span>Global Solutions Lab</span>
+    </a>
+    <nav aria-label="Starter navigation">
+      <a *ngIf="!draft.started" href="/start-a-solution#how-it-works" (click)="scrollTo('how-it-works', $event)">How it works</a>
+      <span *ngIf="draft.started" class="draft-status"><span class="status-dot"></span>{{ storageLabel }}</span>
+      <a *ngIf="!draft.started" routerLink="/login" [queryParams]="{redirectTo: '/start-a-solution'}">Log in</a>
+      <button *ngIf="draft.started" type="button" class="button secondary compact" (click)="openSave()" [disabled]="!hasProblem || !!externalDraft">
+        {{ savedForCurrentUser ? 'Open my workspace' : 'Save my progress' }}
+      </button>
+    </nav>
+  </header>
+
+  <div *ngIf="externalDraft" class="notice conflict" role="alert">
+    <div><strong>This draft changed in another tab.</strong><p>Choose which version to keep before saving more changes. You can download this tab’s version first.</p></div>
+    <div class="notice-actions"><button type="button" (click)="download()">Download this version</button><button type="button" (click)="resolveOtherTab(true)">Use other tab’s version</button><button type="button" (click)="resolveOtherTab(false)">Keep this version</button></div>
+  </div>
+  <p *ngIf="storageMessage" class="notice" role="status">{{ storageMessage }}</p>
+  <p *ngIf="storageMode !== 'device'" class="notice" role="status">{{ storageMode === 'tab' ? 'This browser can keep your draft only in this tab. Download a copy before closing it.' : 'Browser storage is unavailable. Keep this page open and download a copy of your work.' }}</p>
+
+  <main id="main-content" tabindex="-1">
+    <ng-container *ngIf="!draft.started; else workspace">
+      <section class="landing-hero">
+        <p class="eyebrow">Your community. Your next step.</p>
+        <h1>What would you change<br><em>in your community?</em></h1>
+        <p class="hero-subtitle">Start with a problem. We’ll help you shape a way forward.</p>
+        <form class="entry-card" (ngSubmit)="start()">
+          <div class="guide-intro"><img src="/assets/img/sofia-agent-thumb.png" width="48" height="48" alt="Sofia, your guided coach"><div><strong>Sofia <span>· Your guide</span></strong><p>A rough idea is enough. Start in your own words.</p></div></div>
+          <label for="starting-problem">What problem would you like to work on?</label>
+          <textarea #problemInput id="starting-problem" name="problem" rows="3" [maxlength]="maxLength" [ngModel]="draft.answers['problem'] || ''" (ngModelChange)="setAnswer('problem', $event)" placeholder="For example: Families in our neighborhood struggle to find affordable fresh food." [attr.aria-invalid]="attempted && !hasProblem" aria-describedby="problem-hint problem-error"></textarea>
+          <p id="problem-error" *ngIf="attempted && !hasProblem" class="error" role="alert">Tell us a little about the problem you have in mind. One sentence is enough.</p>
+          <div class="entry-actions"><span id="problem-hint">One sentence is enough.</span><button type="submit" class="button primary">Start my solution <span aria-hidden="true">→</span></button></div>
+        </form>
+        <p class="reassurance"><span aria-hidden="true">◌</span> No account needed to begin <span>·</span> No team required</p>
+        <div class="examples"><p>Need a starting point?</p><div><button *ngFor="let example of examples" type="button" (click)="useExample(example.text)">{{ example.label }} <span aria-hidden="true">↗</span></button></div></div>
+      </section>
+      <section id="how-it-works" class="how-it-works" tabindex="-1" aria-label="Your four-step journey">
+        <ol><li *ngFor="let step of steps; let i = index"><span class="step-number" [class.first]="i === 0">{{ i + 1 }}</span><span>{{ step.title }}</span></li></ol>
+        <div class="below-journey"><p>Start on your own. Bring your community in when you’re ready.</p><a routerLink="/solution-a-thon">Organizing a Solution-a-thon? Explore the hosted sprint <span aria-hidden="true">→</span></a></div>
+      </section>
+    </ng-container>
+
+    <ng-template #workspace>
+      <section class="workspace-shell">
+        <div class="workspace-heading"><div><p class="eyebrow">From a first thought to a first step</p><h1>Your solution <em>starts here.</em></h1><p>You bring the local knowledge. We’ll help you put it into a plan.</p></div><button type="button" class="text-button new-button" (click)="showNewConfirmation = true">Start another solution <span aria-hidden="true">↗</span></button></div>
+        <div *ngIf="showNewConfirmation" class="notice restart-notice" role="alert"><div><strong>Start a fresh browser draft?</strong><p>Download this brief first if you want to keep a local copy. Any saved workspace stays intact.</p></div><div class="notice-actions"><button type="button" (click)="download()">Download brief</button><button type="button" (click)="showNewConfirmation = false">Keep working</button><button type="button" (click)="startAnother()">Start fresh</button></div></div>
+        <div *ngIf="saved" class="notice saved-notice" role="status"><div><strong>Your starter has been saved as a private workspace.</strong><p>Continue editing there. This starting snapshot stays here for reference.</p></div><button *ngIf="savedForCurrentUser" class="button secondary compact" type="button" (click)="openWorkspace()">Open my workspace →</button><button *ngIf="!savedForCurrentUser" class="button secondary compact" type="button" (click)="openSave()">Sign in to the owning account</button></div>
+
+        <nav class="journey" aria-label="Solution development steps"><ol><li *ngFor="let step of steps; let i = index"><button type="button" (click)="chooseStep(i)" [class.active]="draft.step === i && !overview" [attr.aria-current]="draft.step === i && !overview ? 'step' : null"><span class="step-number">{{ i + 1 }}</span><span><span class="step-full-title">{{ step.title }}</span><span class="step-short-title">{{ step.shortTitle }}</span><small>{{ stepCountLabel(i) }}</small></span></button></li></ol></nav>
+
+        <ng-container *ngIf="!overview; else fullBrief">
+          <div class="workspace-grid">
+            <section class="coach-card card" aria-label="Guided questions">
+              <div class="guide-intro"><img src="/assets/img/sofia-agent-thumb.png" width="44" height="44" alt=""><div><strong>Sofia <span>· Your guide</span></strong><p>One question at a time. Your words, your direction.</p></div><span class="step-tag">Step {{ draft.step + 1 }} of 4</span></div>
+              <p class="step-introduction">{{ step.introduction }}</p>
+              <div class="current-challenge" *ngIf="draft.step > 0"><span>Your challenge</span><p>{{ draft.answers['problem'] }}</p></div>
+              <form *ngIf="field && !saved; else stepSummary" (ngSubmit)="continueAnswer()" class="question-form">
+                <p class="eyebrow question-eyebrow">{{ field.label }}</p>
+                <h2 #panelHeading tabindex="-1"><label for="guided-answer">{{ field.question }}</label></h2>
+                <p id="answer-hint" class="answer-hint">{{ field.hint }}</p>
+                <textarea #answerInput id="guided-answer" [name]="field.id" rows="5" [maxlength]="maxLength" [ngModel]="draft.answers[field.id] || ''" (ngModelChange)="setAnswer(field!.id, $event)" [placeholder]="field.placeholder" aria-describedby="answer-hint answer-error" [attr.aria-invalid]="!!error"></textarea>
+                <div class="input-meta"><span>Saved as you write</span><span>{{ (draft.answers[field.id] || '').length }} / {{ maxLength }}</span></div>
+                <p *ngIf="error" id="answer-error" class="error" role="alert">{{ error }}</p>
+                <div class="question-actions"><button type="button" class="text-button" *ngIf="field.id !== 'problem'" (click)="continueAnswer(true)">I’ll come back to this</button><button type="submit" class="button primary">Continue <span aria-hidden="true">→</span></button></div>
+              </form>
+              <ng-template #stepSummary>
+                <div class="step-summary"><span class="summary-icon" aria-hidden="true">↗</span><h2 #panelHeading tabindex="-1">{{ answeredFields.length ? 'A useful starting point.' : 'Room to explore.' }}</h2><p>{{ answeredFields.length ? 'Your notes are taking shape. You can add detail below, or move to the next step and come back later.' : 'You can move ahead and return to these questions whenever you’re ready.' }}</p><button type="button" class="button primary" (click)="nextStep()">{{ buttonLabel }} <span aria-hidden="true">→</span></button></div>
+              </ng-template>
+              <div class="step-notes" *ngIf="!saved"><p class="small-label">Your starting questions</p><div class="question-list"><button type="button" *ngFor="let item of coreFields" (click)="editField(item)" [class.current-question]="draft.activeField === item.id"><span class="note-marker" [class.filled]="fieldAnswered(item)" aria-hidden="true">{{ fieldAnswered(item) ? '✓' : '·' }}</span><span>{{ item.label }}</span><span class="note-state">{{ fieldAnswered(item) ? 'Edit' : 'Explore' }}</span></button></div></div>
+              <details class="deeper-questions" *ngIf="extraFields.length && !saved"><summary>Add more detail <span>Optional · {{ extraFields.length }} prompts</span></summary><p>Keep unknowns open. These prompts help you deepen the plan when you have more information.</p><div class="question-list"><button *ngFor="let item of extraFields" type="button" (click)="editField(item)"><span class="note-marker" [class.filled]="fieldAnswered(item)" aria-hidden="true">{{ fieldAnswered(item) ? '✓' : '·' }}</span><span>{{ item.label }}</span><span class="note-state">{{ fieldAnswered(item) ? 'Edit' : 'Explore' }}</span></button></div></details>
+              <div class="stage-nav" *ngIf="field && !saved"><button class="text-button" type="button" *ngIf="draft.step > 0" (click)="chooseStep(draft.step - 1)">← Previous step</button><button class="text-button" type="button" (click)="nextStep()">{{ buttonLabel }} →</button></div>
+            </section>
+
+            <button type="button" class="mobile-brief-toggle button secondary" [attr.aria-expanded]="mobileBriefOpen" aria-controls="live-brief" (click)="mobileBriefOpen = !mobileBriefOpen">{{ mobileBriefOpen ? 'Hide' : 'View' }} your brief · {{ answeredFields.length }} {{ answeredFields.length === 1 ? 'note' : 'notes' }} <span aria-hidden="true">{{ mobileBriefOpen ? '−' : '+' }}</span></button>
+            <aside id="live-brief" class="brief-card card" [class.mobile-open]="mobileBriefOpen" aria-label="Your live starting brief">
+              <div class="brief-heading"><div><p class="eyebrow">Your words, taking shape</p><h2>Your starting brief <span class="draft-badge">Draft</span></h2></div><span class="paper-icon" aria-hidden="true">↗</span></div>
+              <p class="brief-caption">{{ step.title }} · Based on what you’ve shared</p>
+              <div class="brief-entries"><div class="brief-entry" *ngFor="let item of answeredFields"><div><h3>{{ item.label }}</h3><button *ngIf="!saved" type="button" (click)="editField(item)" [attr.aria-label]="'Edit ' + item.label">Edit</button></div><p>{{ draft.answers[item.id] }}</p></div></div>
+              <div *ngIf="!answeredFields.length" class="empty-brief"><span aria-hidden="true">✳</span><h3>A little clarity, one answer at a time.</h3><p>Your notes will appear here as you write. You can change anything.</p></div>
+              <div class="open-questions" *ngIf="remainingFields.length"><h3>Still to explore</h3><p>These stay open until you add your own information.</p><div><button *ngFor="let item of remainingFields | slice:0:3" type="button" (click)="editField(item)" [disabled]="saved">{{ item.label }} <span aria-hidden="true">↗</span></button></div><small *ngIf="remainingFields.length > 3">+ {{ remainingFields.length - 3 }} more {{ remainingFields.length - 3 === 1 ? 'prompt' : 'prompts' }}</small></div>
+              <p class="draft-footnote">A starting draft, not verified research. Observations, assumptions, and estimates can be checked as you go.</p>
+              <button class="button secondary full-width" type="button" (click)="overview = true">View my whole brief <span aria-hidden="true">↗</span></button>
+            </aside>
+          </div>
+        </ng-container>
+
+        <ng-template #fullBrief>
+          <section class="whole-brief"><div class="whole-brief-heading"><div><p class="eyebrow">Something to build on</p><h2 #panelHeading tabindex="-1">Your idea has a starting point.</h2><p>{{ answerCount }} of 25 detailed questions have starting notes. Open questions are part of the work ahead.</p></div><button type="button" class="button secondary" (click)="download()">Download my brief ↓</button></div><div class="overview-grid"><article class="card overview-card" *ngFor="let step of steps; let i = index"><div class="overview-title"><span class="step-number">{{ i + 1 }}</span><h3>{{ step.title }}</h3><button *ngIf="!saved" type="button" class="text-button" (click)="chooseStep(i)">Edit ↗</button></div><ng-container *ngFor="let item of step.fields"><div *ngIf="fieldAnswered(item)" class="overview-entry"><h4>{{ item.label }}</h4><p>{{ draft.answers[item.id] }}</p></div></ng-container><p *ngIf="!countStep(i)" class="empty-step">Still open. You can return whenever you’re ready.</p></article></div><div class="review-actions"><button type="button" class="text-button" (click)="chooseStep(draft.step)">← Back to the guide</button><button type="button" class="button primary" (click)="openSave()" [disabled]="!hasProblem || !!externalDraft">{{ savedForCurrentUser ? 'Open my workspace' : 'Save & open my workspace' }} →</button></div></section>
+        </ng-template>
+
+        <section class="save-banner" *ngIf="!saved"><div class="save-symbol" aria-hidden="true">↗</div><div><h2>Keep what you’ve started.</h2><p>Save a private workspace to continue across devices and invite your community.</p></div><div class="save-banner-actions"><button type="button" class="button secondary" (click)="openSave()" [disabled]="!hasProblem || !!externalDraft">Save my progress</button><span>You can keep working as a guest.</span></div></section>
+        <p class="storage-footnote">{{ storageMode === 'device' ? 'Guest drafts stay in this browser until its data is cleared. Save a workspace or download a copy to keep your work.' : storageMode === 'tab' ? 'This draft stays in this tab only. Download a copy before closing it.' : 'This draft is in memory only. Download it before leaving this page.' }}</p>
+        <div class="workspace-footer"><button type="button" class="text-button" (click)="download()">Download a copy ↓</button><a routerLink="/solution-a-thon">Bring your community together in a Solution-a-thon →</a></div>
+      </section>
+    </ng-template>
+  </main>
+  <p *ngIf="downloadNotice" class="sr-only" role="status">{{ downloadNotice }}</p>
+  <footer class="site-footer">Global Solutions Lab <span>·</span> An EarthGame program <a routerLink="/privacy">Privacy</a></footer>
+
+  <dialog #saveDialog class="save-dialog" aria-labelledby="save-title" aria-describedby="save-description" (cancel)="closeSave($event)">
+    <button type="button" class="dialog-close" aria-label="Close save dialog" (click)="closeSave()" [disabled]="saving || signingIn || creatingAccount">×</button>
+    <p class="eyebrow">Your next step, when you’re ready</p>
+    <h2 id="save-title">Keep your momentum.</h2>
+    <p id="save-description">Your notes become a new, private solution in the full four-step workspace. You can deepen the research and invite your community there.</p>
+    <div class="transfer-summary"><span>{{ answerCount }} detailed questions have starting notes</span><small>Unanswered questions stay open. This creates a new workspace and never overwrites an existing one.</small></div>
+    <p *ngIf="accountError" class="error" role="alert">{{ accountError }}</p>
+    <p *ngIf="accountNotice" class="account-status" role="status">{{ accountNotice }}</p>
+    <p *ngIf="creatingAccount" class="account-status" role="status">Creating your account… Your draft stays here.</p>
+    <p *ngIf="!sessionReady" role="status" class="account-status">Checking your account… You can keep working while we check.</p>
+    <ng-container *ngIf="sessionReady && !user && !creatingAccount">
+      <ng-container *ngIf="!emailMode; else emailRegistration">
+        <button type="button" class="button google full-width" (click)="googleSignIn()" [disabled]="signingIn"><span aria-hidden="true">G</span>{{ signingIn ? 'Finishing sign-in…' : 'Continue with Google' }}</button>
+        <button type="button" class="button secondary full-width" (click)="emailAuth(true)" [disabled]="signingIn">Create account with email</button>
+      </ng-container>
+      <ng-template #emailRegistration>
+        <form #registration="ngForm" class="registration-form" (ngSubmit)="createAccount(registration)">
+          <div class="name-fields"><div><label for="starter-first-name">First name</label><input id="starter-first-name" name="firstName" [(ngModel)]="account.firstName" required maxlength="50" autocomplete="given-name"></div><div><label for="starter-last-name">Last name</label><input id="starter-last-name" name="lastName" [(ngModel)]="account.lastName" required maxlength="50" autocomplete="family-name"></div></div>
+          <label for="starter-email">Email</label><input id="starter-email" name="email" type="email" [(ngModel)]="account.email" required email maxlength="254" autocomplete="email">
+          <label for="starter-password">Password <span>At least 8 characters</span></label><div class="password-input"><input id="starter-password" name="password" [type]="showPassword ? 'text' : 'password'" [(ngModel)]="account.password" required minlength="8" autocomplete="new-password"><button type="button" (click)="showPassword = !showPassword" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'">{{ showPassword ? 'Hide' : 'Show' }}</button></div>
+          <label class="terms-checkbox"><input name="agreed" type="checkbox" [(ngModel)]="account.agreed" required><span>I agree to the <a routerLink="/privacy" target="_blank" rel="noopener">terms and privacy policy</a>.</span></label>
+          <p *ngIf="accountAttempted && registration.invalid" class="error" role="alert">Complete the fields above, use a password of at least 8 characters, and agree to the terms.</p>
+          <button type="submit" class="button primary full-width">Create my account →</button>
+          <button type="button" class="text-button registration-back" (click)="emailMode = false; account.password = ''">← Use Google instead</button>
+        </form>
+      </ng-template>
+      <p class="existing-account">Already have an account? <button type="button" class="text-button" (click)="emailAuth(false)" [disabled]="signingIn">Log in</button></p>
+    </ng-container>
+    <ng-container *ngIf="sessionReady && user && !creatingAccount">
+      <p class="account-status">Signed in as <strong>{{ user.email }}</strong></p>
+      <p *ngIf="saved && !savedForCurrentUser" class="error">This snapshot was saved under another account. Start another solution to create a separate draft, or sign in with its owner to open it.</p>
+      <ng-container *ngIf="user.verified !== true"><p class="verification-instructions">Open the verification link in your inbox, then return to this tab. Your draft stays here.</p><button type="button" class="button secondary full-width" (click)="checkEmailVerification()" [disabled]="checkingEmail">{{ checkingEmail ? 'Checking verification…' : 'I’ve verified my email' }}</button><button type="button" class="text-button resend-email" (click)="resendVerification()" [disabled]="resendingEmail">{{ resendingEmail ? 'Sending…' : 'Resend verification email' }}</button></ng-container>
+      <button *ngIf="user.verified === true" type="button" class="button primary full-width" (click)="savedForCurrentUser ? openWorkspace() : saveWorkspace()" [disabled]="saving || !!externalDraft || (saved && !savedForCurrentUser)">{{ saving ? 'Saving your workspace…' : savedForCurrentUser ? 'Open my workspace →' : 'Save & open my workspace →' }}</button>
+    </ng-container>
+    <button type="button" class="text-button continue-guest" (click)="closeSave()" [disabled]="saving || signingIn || creatingAccount">Keep working here</button>
+    <button type="button" class="text-button download-in-dialog" (click)="download()">Download my brief instead ↓</button>
+  </dialog>
+</div>
