@@ -141,9 +141,11 @@ button {
   align-items:center;
   gap:12px;
 }
-.guide-intro img {
+.guide-intro img,.go-deeper-panel img {
   border-radius:50%;
+  aspect-ratio:1;
   object-fit:cover;
+  object-position:center top;
   flex-shrink:0;
 }
 .guide-intro strong {
