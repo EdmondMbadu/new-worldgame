@@ -127,6 +127,12 @@ export class SeoService {
     const normalizedRoute = this.normalizeRoute(route);
     const baseUrl = this.primaryDomain;
     const configs: { [key: string]: SeoConfig } = {
+      '/landing-alternative': {
+        title: 'Envision Bold Solutions | Global Solutions Lab',
+        description: 'Turn ideas for global and local challenges into actionable solutions. Start in five minutes, bring your community together, or make the Lab your own.',
+        url: `${baseUrl}/landing-alternative`,
+        robots: 'noindex, follow',
+      },
       '/start-a-solution': {
         title: 'Start a Community Solution | Global Solutions Lab',
         description: 'Bring a community problem. Build a starting brief, imagine success, explore a solution, and plan a first step. No account needed to begin.',

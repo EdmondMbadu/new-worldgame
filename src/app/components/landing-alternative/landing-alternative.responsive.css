@@ -1,0 +1,504 @@
+@media (min-width: 1500px) {
+  .hero {
+    gap: 72px;
+    padding-top: 48px;
+  }
+}
+
+@media (max-width: 1230px) {
+  .shell {
+    width: calc(100% - 48px);
+  }
+  .site-header {
+    gap: 20px;
+  }
+  .brand strong {
+    font-size: 22px;
+  }
+  .brand small {
+    font-size: 11px;
+  }
+  .brand {
+    gap: 10px;
+  }
+  .desktop-nav {
+    gap: 20px;
+    font-size: 14px;
+  }
+  .header-actions {
+    gap: 10px;
+  }
+  .header-actions .button {
+    padding-inline: 19px;
+    font-size: 13px;
+  }
+  .hero {
+    gap: 36px;
+  }
+  .hero h1 {
+    letter-spacing: -2px;
+  }
+  .hero-copy > p {
+    font-size: 18px;
+  }
+  .hero-actions {
+    gap: 10px;
+  }
+  .hero-actions .button {
+    font-size: 14px;
+    min-height: 54px;
+    padding-inline: 18px;
+  }
+  .path-card {
+    padding-inline: 24px;
+  }
+  .card-eyebrow {
+    font-size: 10px;
+    gap: 12px;
+    letter-spacing: 1.3px;
+  }
+  .path-description h3 {
+    font-size: 27px;
+  }
+  .custom-card {
+    padding: 28px;
+  }
+  .semester-timeline {
+    gap: 6px;
+  }
+  .semester-timeline li {
+    padding-inline: 8px;
+  }
+  .semester-actions .button {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 1020px) {
+  .desktop-nav {
+    display: none;
+  }
+  .header-actions .menu-toggle {
+    display: inline-flex;
+  }
+  .site-header {
+    min-height: 88px;
+  }
+  .mobile-nav {
+    display: flex;
+    position: absolute;
+    right: 0;
+    top: calc(100% - 5px);
+    min-width: 260px;
+    padding: 13px;
+    flex-direction: column;
+    border: 1px solid #dce3d9;
+    border-radius: 18px;
+    background: var(--cream);
+    box-shadow: 0 15px 40px #11282015;
+  }
+  .mobile-nav a {
+    padding: 10px 15px;
+    border-radius: 8px;
+  }
+  .mobile-nav a:hover {
+    background: #e7eee4;
+  }
+  .hero {
+    gap: 27px;
+    padding-top: 24px;
+  }
+  .hero h1 {
+    font-size: 48px;
+  }
+  .hero-actions {
+    flex-direction: row;
+    align-items: center;
+  }
+  .hero-actions .button {
+    min-height: 49px;
+  }
+  .carousel-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 12px;
+    gap: 2px;
+  }
+  .carousel-bar p {
+    width: 100%;
+    text-align: center;
+  }
+  .photo-stage {
+    aspect-ratio: 1.25;
+  }
+  .photo-slide img {
+    object-position: center;
+  }
+  .film-preview {
+    width: 60%;
+    bottom: 16px;
+    right: 16px;
+  }
+  .path-grid {
+    gap: 18px;
+  }
+  .path-card {
+    padding: 22px 20px;
+  }
+  .card-eyebrow {
+    flex-wrap: wrap;
+  }
+  .path-card .card-eyebrow {
+    min-height: 97px;
+    align-content: start;
+  }
+  .path-card .card-eyebrow > span:last-child {
+    width: 100%;
+  }
+  .duration {
+    font-size: 48px;
+  }
+  .path-description {
+    min-height: 220px;
+  }
+  .path-description p {
+    font-size: 16px;
+  }
+  .path-card .button {
+    font-size: 14px;
+  }
+  .custom-card > p {
+    font-size: 16px;
+  }
+  .semester-timeline {
+    grid-template-columns: 1fr 1fr;
+  }
+  .semester-timeline li {
+    padding-inline: 13px;
+  }
+  .semester-features {
+    grid-template-columns: 1fr;
+    font-size: 14px;
+  }
+  .semester-card > h3 {
+    font-size: 55px;
+  }
+  .semester-card > h4 {
+    font-size: 25px;
+  }
+  .custom-cta {
+    font-size: 15px;
+    padding-inline: 18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    width: calc(100% - 40px);
+  }
+  .site-header {
+    min-height: 84px;
+    gap: 10px;
+  }
+  .brand strong {
+    font-size: 21px;
+  }
+  .brand small {
+    display: none;
+  }
+  .brand img {
+    width: 42px;
+    height: 42px;
+  }
+  .header-actions .login, .header-start {
+    display: none;
+  }
+  .header-actions {
+    margin-left: auto;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    padding-top: 24px;
+    padding-bottom: 40px;
+    gap: 28px;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 54px);
+    letter-spacing: -1.6px;
+    line-height: 1.08;
+    max-width: 590px;
+  }
+  .headline-resolution {
+    margin-top: 12px;
+    letter-spacing: -.7px;
+  }
+  .wide-break {
+    display: none;
+  }
+  .hero-copy > p {
+    margin-top: 20px;
+    font-size: 17px;
+    max-width: 500px;
+  }
+  .hero-actions {
+    flex-direction: row;
+    margin-top: 22px;
+    gap: 12px;
+  }
+  .hero-actions .button {
+    min-height: 50px;
+    flex: 1 1 auto;
+    padding-inline: 19px;
+    font-size: 14px;
+  }
+  .hero-visual {
+    padding-top: 0;
+  }
+  .photo-stage {
+    aspect-ratio: 1.42;
+    border-radius: 21px;
+  }
+  .film-preview {
+    width: 42%;
+    right: 14px;
+    bottom: 14px;
+    border-width: 2px;
+    border-radius: 11px;
+  }
+  .film-play {
+    width: 40px;
+    height: 40px;
+  }
+  .film-caption {
+    font-size: 10px;
+    bottom: 7px;
+  }
+  .carousel-bar {
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    gap: 10px;
+    padding-top: 5px;
+  }
+  .carousel-bar p {
+    width: auto;
+    text-align: left;
+    font-size: 10px;
+  }
+  .carousel-controls {
+    flex-shrink: 0;
+  }
+  .carousel-arrow {
+    width: 26px;
+  }
+  .carousel-dots button {
+    width: 19px;
+  }
+  .start-section {
+    padding-top: 6px;
+  }
+  .section-heading {
+    margin-bottom: 27px;
+  }
+  .section-heading h2 {
+    font-size: 37px;
+    letter-spacing: -1.5px;
+  }
+  .section-heading > p, .start-section .section-heading > p {
+    font-size: 18px;
+    margin-top: 14px;
+  }
+  .path-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .path-card {
+    padding: 25px;
+    border-top-width: 6px;
+  }
+  .path-card .card-eyebrow {
+    flex-wrap: nowrap;
+    min-height: 0;
+    font-size: 11px;
+  }
+  .path-card .card-eyebrow > span:last-child {
+    width: auto;
+  }
+  .duration {
+    font-size: 55px;
+    margin-top: 14px;
+  }
+  .path-description {
+    min-height: 0;
+  }
+  .path-description h3 {
+    font-size: 29px;
+  }
+  .path-description p {
+    font-size: 17px;
+  }
+  .path-card .button {
+    font-size: 16px;
+    margin-top: 28px;
+  }
+  .custom-section {
+    padding-top: 62px;
+    padding-bottom: 48px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    margin-bottom: 13px;
+  }
+  .custom-section .section-heading {
+    margin-bottom: 28px;
+  }
+  .custom-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+  .custom-card {
+    padding: 27px 25px;
+  }
+  .custom-card .card-eyebrow {
+    font-size: 10px;
+    flex-wrap: nowrap;
+  }
+  .custom-card > h3 {
+    font-size: 34px;
+    margin-top: 23px;
+  }
+  .custom-card > p {
+    font-size: 17px;
+  }
+  .sdg-chips {
+    gap: 7px;
+  }
+  .sdg-chips button {
+    font-size: 12px;
+    padding-inline: 11px;
+    min-height: 40px;
+  }
+  .sdg-preview {
+    padding: 17px 15px;
+    gap: 10px;
+  }
+  .sdg-preview h4 {
+    font-size: 22px;
+  }
+  .sdg-preview p {
+    font-size: 13px;
+  }
+  .custom-cta {
+    margin-top: 26px;
+    font-size: 15px;
+  }
+  .semester-card > h3 {
+    font-size: 57px;
+  }
+  .semester-card > h4 {
+    font-size: 27px;
+  }
+  .semester-timeline {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .semester-timeline li {
+    padding: 10px 8px 12px;
+  }
+  .semester-timeline span {
+    font-size: 9px;
+    letter-spacing: .1px;
+  }
+  .semester-timeline strong {
+    font-size: 11px;
+  }
+  .semester-features {
+    grid-template-columns: 1fr 1fr;
+    font-size: 13px;
+    column-gap: 12px;
+    margin-bottom: 33px;
+  }
+  .semester-features li {
+    padding-left: 23px;
+  }
+  .semester-actions {
+    gap: 11px;
+  }
+  .semester-actions .button {
+    font-size: 15px;
+    min-height: 54px;
+  }
+  .site-footer {
+    justify-content: center;
+    text-align: center;
+    padding-block: 25px;
+    gap: 15px;
+  }
+  .site-footer > p {
+    width: 100%;
+    font-size: 11px;
+  }
+  .site-footer > div {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 380px) {
+  .shell {
+    width: calc(100% - 32px);
+  }
+  .brand strong {
+    font-size: 18px;
+  }
+  .brand {
+    gap: 8px;
+  }
+  .hero h1 {
+    font-size: 38px;
+  }
+  .hero-actions .button {
+    flex-basis: 100%;
+  }
+  .carousel-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .carousel-bar p {
+    width: 100%;
+    text-align: center;
+  }
+  .film-play {
+    width: 32px;
+    height: 32px;
+  }
+  .film-caption {
+    font-size: 9px;
+  }
+  .semester-timeline {
+    grid-template-columns: 1fr 1fr;
+  }
+  .semester-timeline span {
+    font-size: 10px;
+  }
+  .semester-timeline strong {
+    font-size: 13px;
+  }
+  .semester-features {
+    grid-template-columns: 1fr;
+    font-size: 14px;
+  }
+  .custom-card, .path-card {
+    padding-inline: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gsl-page *, .gsl-page *::before {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+  .button:hover, .film-preview:hover {
+    transform: none;
+  }
+}
+

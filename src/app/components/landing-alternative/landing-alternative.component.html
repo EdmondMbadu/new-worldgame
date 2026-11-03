@@ -1,0 +1,128 @@
+<div class="gsl-page" id="top">
+  <a class="skip-link" routerLink="/landing-alternative" fragment="main">Skip to content</a>
+  <header class="site-header shell">
+    <a routerLink="/landing-alternative" class="brand" aria-label="Global Solutions Lab home">
+      <img src="assets/img/gsl-logo.png" width="54" height="54" alt="" />
+      <span><strong>Global Solutions Lab</strong><small>Developing solutions for global and local problems.</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a routerLink="/about">About</a>
+      <a routerLink="/blogs/nwg-steps">How It Works</a>
+      <a routerLink="/landing-alternative" fragment="custom-labs">Custom Labs</a>
+      <a routerLink="/chester-report">Impact</a>
+    </nav>
+    <div class="header-actions">
+      <a class="button button-outline login" routerLink="/login">Log in</a>
+      <a class="button button-green header-start" routerLink="/start-a-solution">Start in 5 Minutes</a>
+      <button class="menu-toggle icon-button" type="button" (click)="menuOpen = !menuOpen" [attr.aria-expanded]="menuOpen" aria-controls="mobile-nav" [attr.aria-label]="menuOpen ? 'Close navigation' : 'Open navigation'">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="menuOpen ? 'm6 6 12 12M6 18 18 6' : 'M4 7h16M4 12h16M4 17h16'" /></svg>
+      </button>
+    </div>
+    <nav *ngIf="menuOpen" id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
+      <a routerLink="/about">About</a><a routerLink="/blogs/nwg-steps">How It Works</a>
+      <a routerLink="/landing-alternative" fragment="custom-labs" (click)="menuOpen = false">Custom Labs</a><a routerLink="/chester-report">Impact</a>
+      <a routerLink="/login">Log in</a><a routerLink="/start-a-solution">Start in 5 Minutes →</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 id="hero-title" aria-label="Envision bold solutions. Start making them real.">
+          <span aria-hidden="true">
+            <span class="headline-line"><span class="typing-slot"><span *ngFor="let word of typingWords" class="typing-size">{{ word }}</span><span class="typing-word">{{ typedWord }}</span></span></span>
+            <span class="headline-line">bold solutions.</span>
+            <span class="headline-resolution">Start making them real.</span>
+          </span>
+        </h1>
+        <p>Turn ideas for global and local challenges into actionable solutions with AI Lab Assistants and a guided Design Science process.</p>
+        <div class="hero-actions">
+          <a class="button button-green" routerLink="/start-a-solution">Start in 5 Minutes <span aria-hidden="true">→</span></a>
+          <button class="button button-outline" type="button" (click)="openFilm()" aria-haspopup="dialog"><span class="play-small" aria-hidden="true">▶</span> Watch the Film<span *ngIf="filmDuration"> · {{ filmDuration }}</span></button>
+        </div>
+      </div>
+
+      <div class="hero-visual" role="region" aria-roledescription="carousel" aria-label="There is a place for you in the Lab" (mouseenter)="carouselHovered = true" (mouseleave)="carouselHovered = false" (focusin)="carouselFocused = true" (focusout)="carouselFocusOut($event)">
+        <div class="photo-stage">
+          <div *ngFor="let slide of slides; let i = index" class="photo-slide" [class.is-active]="activeSlide === i" [attr.aria-hidden]="activeSlide !== i" role="group" aria-roledescription="slide" [attr.aria-label]="(i + 1) + ' of ' + slides.length">
+            <img [src]="slide.src" [attr.srcset]="slide.src.replace('.jpg', '-768.jpg') + ' 768w, ' + slide.src + ' 1536w'" sizes="(max-width: 900px) calc(100vw - 40px), (max-width: 1440px) 50vw, 714px" [alt]="slide.alt" width="1536" height="1024" [attr.loading]="i === 0 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : 'auto'" />
+          </div>
+          <button class="film-preview" type="button" (click)="openFilm()" aria-label="Watch the Global Solutions Lab film" aria-haspopup="dialog">
+            <img src="assets/img/global-solutions-lab-film-poster-v2.jpg" alt="" width="480" height="270" />
+            <span class="film-preview-shade"></span>
+            <span class="film-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z" /></svg></span>
+            <span class="film-caption">Watch the Film<span *ngIf="filmDuration"> · {{ filmDuration }}</span><span aria-hidden="true"> ↗</span></span>
+          </button>
+        </div>
+        <div class="carousel-bar">
+          <p [attr.aria-live]="rotationEnabled ? 'off' : 'polite'">{{ slides[activeSlide].label }}</p>
+          <div class="carousel-controls">
+            <button type="button" class="icon-button carousel-arrow" (click)="selectSlide(activeSlide - 1)" aria-label="Previous photo">←</button>
+            <div class="carousel-dots" aria-label="Choose a photo">
+              <button *ngFor="let slide of slides; let i = index" type="button" (click)="selectSlide(i)" [class.is-active]="activeSlide === i" [attr.aria-current]="activeSlide === i ? 'true' : null" [attr.aria-label]="'Show photo ' + (i + 1) + ': ' + slide.label"><span></span></button>
+            </div>
+            <button type="button" class="icon-button carousel-arrow" (click)="selectSlide(activeSlide + 1)" aria-label="Next photo">→</button>
+            <button type="button" class="icon-button rotation-toggle" (click)="rotationEnabled = !rotationEnabled" [attr.aria-label]="rotationEnabled ? 'Pause photo rotation' : 'Start photo rotation'"><svg viewBox="0 0 24 24" aria-hidden="true"><path *ngIf="rotationEnabled" d="M9 6v12M15 6v12" /><path *ngIf="!rotationEnabled" d="m9 5 11 7-11 7Z" /></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="start-section shell" id="ways-to-start" aria-labelledby="start-title">
+      <div class="section-heading">
+        <h2 id="start-title">Three ways to start changing the world.</h2>
+        <p>5 minutes. 5 hours. 5 days. Choose how you begin.</p>
+      </div>
+      <div class="path-grid">
+        <article class="path-card quick-card">
+          <div class="card-eyebrow"><span class="icon-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M16 5a3 3 0 0 1 0 6M17 14a5 5 0 0 1 4 5v1"/></svg></span><span>Individuals & small teams</span></div>
+          <p class="duration">5 minutes</p>
+          <div class="path-description"><h3>Quick Start</h3><p>Choose a challenge and explore your first solution.</p></div>
+          <a class="button button-green" routerLink="/start-a-solution">Start in 5 Minutes <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="path-card group-card">
+          <div class="card-eyebrow"><span class="icon-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"/><path d="M6 20v-2a6 6 0 0 1 12 0v2M4 5a3 3 0 0 0 0 6M20 5a3 3 0 0 1 0 6M3 14a5 5 0 0 0-2 4M21 14a5 5 0 0 1 2 4"/></svg></span><span>Schools & community groups</span></div>
+          <p class="duration">5 hours</p>
+          <div class="path-description"><h3>Solution-a-thon</h3><p>Bring your group together to turn ideas into a solution.</p></div>
+          <a class="button button-coral" routerLink="/solution-a-thon">Plan a Solution-a-thon <span aria-hidden="true">→</span></a>
+        </article>
+        <article class="path-card lab-card">
+          <div class="card-eyebrow"><span class="icon-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m2 8 10-5 10 5-10 5L2 8Zm4 3v6c4 3 8 3 12 0v-6M22 8v8"/></svg></span><span>Students & professionals</span></div>
+          <p class="duration">5 days</p>
+          <div class="path-description"><h3>Annual Global Solutions Lab</h3><span class="date-badge">June 2027</span><p>Collaborate, develop your ideas, and plan for action.</p></div>
+          <a class="button button-gold" routerLink="/global-labs">Explore the 2027 Lab <span aria-hidden="true">→</span></a>
+        </article>
+      </div>
+    </section>
+
+    <section class="custom-section shell" id="custom-labs" aria-labelledby="custom-title">
+      <div class="section-heading"><span class="eyebrow">Custom Labs</span><h2 id="custom-title">Make the Lab your own.</h2><p>Focus a Lab on one Sustainable Development Goal, or run it as the<br class="wide-break" /> backbone of your course — all semester long.</p></div>
+      <div class="custom-grid">
+        <article class="custom-card sdg-card">
+          <div class="card-eyebrow"><span class="icon-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg></span><span>Organizations, funders & educators</span></div>
+          <h3>Topic-specific SDG Labs</h3>
+          <p>Center a Lab on the goal you care about. Challenges, AI Lab Assistants and solution briefs are all tuned to your topic.</p>
+          <fieldset class="sdg-picker"><legend>Pick a focus</legend><div class="sdg-chips"><button *ngFor="let sdg of sdgs; let i = index" type="button" (click)="selectedSdg = i + 1" [attr.aria-pressed]="selectedSdg === i + 1" [class.selected]="selectedSdg === i + 1"><b>{{ i + 1 }}</b> {{ sdg }}</button></div></fieldset>
+          <div class="sdg-preview" aria-live="polite" aria-atomic="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg><div><h4>{{ sdgs[selectedSdg - 1] }} Lab</h4><p>Your own landing page, challenge library and team space for SDG {{ selectedSdg }}. Run it as a Quick Start, a Solution-a-thon or a full Lab.</p></div></div>
+          <a class="button button-green custom-cta" [href]="sdgInquiryHref">Customize an SDG Lab <span aria-hidden="true">→</span></a>
+        </article>
+
+        <article class="custom-card semester-card">
+          <div class="card-eyebrow"><span class="icon-disc"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v5M17 3v5M3 11h18"/></svg></span><span>Professors & courses</span></div>
+          <h3>1 semester</h3><h4>A Lab that runs all term</h4>
+          <p>Build your course around the Lab. Student teams take one problem from first framing to a finished solution brief, week by week.</p>
+          <ol class="semester-timeline"><li *ngFor="let term of terms"><span>{{ term.weeks }}</span><strong>{{ term.title }}</strong></li></ol>
+          <ul class="semester-features"><li>Syllabus-ready modules</li><li>Class roster & student teams</li><li>Progress view for every team</li><li>Pairs with any SDG topic</li></ul>
+          <div class="semester-actions"><a class="button button-yellow" routerLink="/for-professors">Bring GSL to your course <span aria-hidden="true">→</span></a><a class="button button-light-outline" href="mailto:newworld@newworld-game.org?subject=Global%20Solutions%20Lab%20syllabus%20kit&body=Hello%2C%20I%20would%20like%20a%20syllabus%20kit%20for%20bringing%20the%20Global%20Solutions%20Lab%20to%20my%20course.">Request a syllabus kit</a></div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer shell"><a class="footer-brand" routerLink="/landing-alternative" fragment="top">Global Solutions Lab <span aria-hidden="true">↗</span></a><p>A world that works for everyone starts with all of us.</p><div><a routerLink="/contact">Get in touch</a><a routerLink="/privacy">Privacy</a><span>© {{ year }} GSL</span></div></footer>
+
+  <dialog #filmDialog class="film-dialog" aria-labelledby="film-title" (click)="closeOnBackdrop($event)" (close)="onFilmClosed()">
+    <div class="film-dialog-header"><h2 id="film-title">The Global Solutions Lab film</h2><button class="icon-button" type="button" (click)="closeFilm()" aria-label="Close film" autofocus>✕</button></div>
+    <video #film src="assets/videos/global-solutions-lab-film-v3.mp4" poster="assets/img/global-solutions-lab-film-poster-v2.jpg" title="Global Solutions Lab film" controls playsinline preload="metadata" (loadedmetadata)="setFilmDuration()">Your browser does not support embedded video. <a href="assets/videos/global-solutions-lab-film-v3.mp4">Watch the film</a>.</video>
+  </dialog>
+</div>
