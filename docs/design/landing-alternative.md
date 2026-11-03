@@ -10,6 +10,8 @@ The hero typography is scaled to 48–64 px on desktop and 38–54 px on smaller
 
 The film is the existing `assets/videos/global-solutions-lab-film-v3.mp4`, with its existing poster. Its 2:39 duration is read from video metadata. The native modal supports Escape, focus restoration, and playback pause when closed.
 
+A clickable portrait card beside the three starting options opens the supplied 27.76-second avatar introduction. Its "Start here" label and the player heading "Start with a problem in your community" establish context before playback. English captions are enabled by default and clarify "great solutions" (around six seconds in this supplied shorter cut). The audio is copied unchanged; no replacement speech or lip-sync generation was performed. The original H.264 4:4:4 picture is converted to browser-compatible H.264 4:2:0, with original resolution, framing, frame rate, duration, and AAC audio preserved. See `landing-avatar-media.json` for provenance, and run `scripts/prepare-landing-avatar.py --source /path/to/original.mp4` in a Python environment with imageio-ffmpeg and Pillow to rebuild the optimized clip and posters.
+
 Four AI-generated illustrative scenes form the photo carousel: a small team, an individual, an intergenerational community workshop, and a university group. These are illustrative imagery, not photographs of actual participants. Photos are saved in `src/assets/img/landing-alternative/` as JPEGs with 768 px responsive variants. The carousel has manual previous/next and direct selection, a pause control, pauses on hover and keyboard focus, and defaults to paused for reduced motion.
 
 ## Image generation

@@ -1,0 +1,416 @@
+[
+  {
+    "start": 0.0,
+    "end": 3.46,
+    "text": " Hey there! Got something in your community you wish worked better?",
+    "words": [
+      {
+        "start": 0.0,
+        "end": 0.18,
+        "text": " Hey"
+      },
+      {
+        "start": 0.18,
+        "end": 0.44,
+        "text": " there!"
+      },
+      {
+        "start": 1.0,
+        "end": 1.18,
+        "text": " Got"
+      },
+      {
+        "start": 1.18,
+        "end": 1.46,
+        "text": " something"
+      },
+      {
+        "start": 1.46,
+        "end": 1.72,
+        "text": " in"
+      },
+      {
+        "start": 1.72,
+        "end": 1.86,
+        "text": " your"
+      },
+      {
+        "start": 1.86,
+        "end": 2.36,
+        "text": " community"
+      },
+      {
+        "start": 2.36,
+        "end": 2.64,
+        "text": " you"
+      },
+      {
+        "start": 2.64,
+        "end": 2.86,
+        "text": " wish"
+      },
+      {
+        "start": 2.86,
+        "end": 3.14,
+        "text": " worked"
+      },
+      {
+        "start": 3.14,
+        "end": 3.46,
+        "text": " better?"
+      }
+    ]
+  },
+  {
+    "start": 4.12,
+    "end": 8.46,
+    "text": " Good! That's exactly where great solutions start! Just type it in!",
+    "words": [
+      {
+        "start": 4.12,
+        "end": 4.28,
+        "text": " Good!"
+      },
+      {
+        "start": 4.88,
+        "end": 5.1,
+        "text": " That's"
+      },
+      {
+        "start": 5.1,
+        "end": 5.3,
+        "text": " exactly"
+      },
+      {
+        "start": 5.3,
+        "end": 6.0,
+        "text": " where"
+      },
+      {
+        "start": 6.0,
+        "end": 6.3,
+        "text": " great"
+      },
+      {
+        "start": 6.3,
+        "end": 6.6,
+        "text": " solutions"
+      },
+      {
+        "start": 6.6,
+        "end": 7.16,
+        "text": " start!"
+      },
+      {
+        "start": 7.82,
+        "end": 7.94,
+        "text": " Just"
+      },
+      {
+        "start": 7.94,
+        "end": 8.16,
+        "text": " type"
+      },
+      {
+        "start": 8.16,
+        "end": 8.3,
+        "text": " it"
+      },
+      {
+        "start": 8.3,
+        "end": 8.46,
+        "text": " in!"
+      }
+    ]
+  },
+  {
+    "start": 9.0,
+    "end": 12.42,
+    "text": " One sentence. No account, no team, no perfect wording.",
+    "words": [
+      {
+        "start": 9.0,
+        "end": 9.04,
+        "text": " One"
+      },
+      {
+        "start": 9.04,
+        "end": 9.34,
+        "text": " sentence."
+      },
+      {
+        "start": 10.0,
+        "end": 10.06,
+        "text": " No"
+      },
+      {
+        "start": 10.06,
+        "end": 10.24,
+        "text": " account,"
+      },
+      {
+        "start": 10.76,
+        "end": 10.84,
+        "text": " no"
+      },
+      {
+        "start": 10.84,
+        "end": 11.14,
+        "text": " team,"
+      },
+      {
+        "start": 11.6,
+        "end": 11.78,
+        "text": " no"
+      },
+      {
+        "start": 11.78,
+        "end": 12.1,
+        "text": " perfect"
+      },
+      {
+        "start": 12.1,
+        "end": 12.42,
+        "text": " wording."
+      }
+    ]
+  },
+  {
+    "start": 13.28,
+    "end": 15.5,
+    "text": " Bucky will help you shape it into a clear brief,",
+    "words": [
+      {
+        "start": 13.28,
+        "end": 13.42,
+        "text": " Bucky"
+      },
+      {
+        "start": 13.42,
+        "end": 13.64,
+        "text": " will"
+      },
+      {
+        "start": 13.64,
+        "end": 13.82,
+        "text": " help"
+      },
+      {
+        "start": 13.82,
+        "end": 13.96,
+        "text": " you"
+      },
+      {
+        "start": 13.96,
+        "end": 14.22,
+        "text": " shape"
+      },
+      {
+        "start": 14.22,
+        "end": 14.38,
+        "text": " it"
+      },
+      {
+        "start": 14.38,
+        "end": 14.64,
+        "text": " into"
+      },
+      {
+        "start": 14.64,
+        "end": 14.76,
+        "text": " a"
+      },
+      {
+        "start": 14.76,
+        "end": 15.08,
+        "text": " clear"
+      },
+      {
+        "start": 15.08,
+        "end": 15.5,
+        "text": " brief,"
+      }
+    ]
+  },
+  {
+    "start": 16.0,
+    "end": 18.64,
+    "text": " who's affected, why it matters, and what could change.",
+    "words": [
+      {
+        "start": 16.0,
+        "end": 16.22,
+        "text": " who's"
+      },
+      {
+        "start": 16.22,
+        "end": 16.48,
+        "text": " affected,"
+      },
+      {
+        "start": 17.02,
+        "end": 17.14,
+        "text": " why"
+      },
+      {
+        "start": 17.14,
+        "end": 17.3,
+        "text": " it"
+      },
+      {
+        "start": 17.3,
+        "end": 17.62,
+        "text": " matters,"
+      },
+      {
+        "start": 17.96,
+        "end": 18.12,
+        "text": " and"
+      },
+      {
+        "start": 18.12,
+        "end": 18.34,
+        "text": " what"
+      },
+      {
+        "start": 18.34,
+        "end": 18.48,
+        "text": " could"
+      },
+      {
+        "start": 18.48,
+        "end": 18.64,
+        "text": " change."
+      }
+    ]
+  },
+  {
+    "start": 19.44,
+    "end": 24.18,
+    "text": " Then, when you're ready, take it all the way into a full global solutions lab project.",
+    "words": [
+      {
+        "start": 19.44,
+        "end": 19.64,
+        "text": " Then,"
+      },
+      {
+        "start": 19.82,
+        "end": 20.0,
+        "text": " when"
+      },
+      {
+        "start": 20.0,
+        "end": 20.12,
+        "text": " you're"
+      },
+      {
+        "start": 20.12,
+        "end": 20.4,
+        "text": " ready,"
+      },
+      {
+        "start": 20.86,
+        "end": 20.96,
+        "text": " take"
+      },
+      {
+        "start": 20.96,
+        "end": 21.12,
+        "text": " it"
+      },
+      {
+        "start": 21.12,
+        "end": 21.44,
+        "text": " all"
+      },
+      {
+        "start": 21.44,
+        "end": 21.6,
+        "text": " the"
+      },
+      {
+        "start": 21.6,
+        "end": 21.78,
+        "text": " way"
+      },
+      {
+        "start": 21.78,
+        "end": 22.08,
+        "text": " into"
+      },
+      {
+        "start": 22.08,
+        "end": 22.24,
+        "text": " a"
+      },
+      {
+        "start": 22.24,
+        "end": 22.56,
+        "text": " full"
+      },
+      {
+        "start": 22.56,
+        "end": 22.96,
+        "text": " global"
+      },
+      {
+        "start": 22.96,
+        "end": 23.5,
+        "text": " solutions"
+      },
+      {
+        "start": 23.5,
+        "end": 23.88,
+        "text": " lab"
+      },
+      {
+        "start": 23.88,
+        "end": 24.18,
+        "text": " project."
+      }
+    ]
+  },
+  {
+    "start": 24.86,
+    "end": 27.26,
+    "text": " So, what would you change? Start now!",
+    "words": [
+      {
+        "start": 24.86,
+        "end": 25.08,
+        "text": " So,"
+      },
+      {
+        "start": 25.42,
+        "end": 25.66,
+        "text": " what"
+      },
+      {
+        "start": 25.66,
+        "end": 25.78,
+        "text": " would"
+      },
+      {
+        "start": 25.78,
+        "end": 25.9,
+        "text": " you"
+      },
+      {
+        "start": 25.9,
+        "end": 26.12,
+        "text": " change?"
+      },
+      {
+        "start": 26.68,
+        "end": 26.96,
+        "text": " Start"
+      },
+      {
+        "start": 26.96,
+        "end": 27.26,
+        "text": " now!"
+      }
+    ]
+  }
+]

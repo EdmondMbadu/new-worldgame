@@ -38,7 +38,7 @@
         <p>Turn ideas for global and local challenges into actionable solutions with AI Lab Assistants and a guided Design Science process.</p>
         <div class="hero-actions">
           <a class="button button-green" routerLink="/start-a-solution">Start in 5 Minutes <span aria-hidden="true">→</span></a>
-          <button class="button button-outline" type="button" (click)="openFilm()" aria-haspopup="dialog"><span class="play-small" aria-hidden="true">▶</span> Watch the Film<span *ngIf="filmDuration"> · {{ filmDuration }}</span></button>
+          <button class="button button-outline" type="button" (click)="openFilm($event)" aria-haspopup="dialog"><span class="play-small" aria-hidden="true">▶</span> Watch the Film<span *ngIf="filmDuration"> · {{ filmDuration }}</span></button>
         </div>
       </div>
 
@@ -47,7 +47,7 @@
           <div *ngFor="let slide of slides; let i = index" class="photo-slide" [class.is-active]="activeSlide === i" [attr.aria-hidden]="activeSlide !== i" role="group" aria-roledescription="slide" [attr.aria-label]="(i + 1) + ' of ' + slides.length">
             <img [src]="slide.src" [attr.srcset]="slide.src.replace('.jpg', '-768.jpg') + ' 768w, ' + slide.src + ' 1536w'" sizes="(max-width: 900px) calc(100vw - 40px), (max-width: 1440px) 50vw, 714px" [alt]="slide.alt" width="1536" height="1024" [attr.loading]="i === 0 ? 'eager' : 'lazy'" [attr.fetchpriority]="i === 0 ? 'high' : 'auto'" />
           </div>
-          <button class="film-preview" type="button" (click)="openFilm()" aria-label="Watch the Global Solutions Lab film" aria-haspopup="dialog">
+          <button class="film-preview" type="button" (click)="openFilm($event)" aria-label="Watch the Global Solutions Lab film" aria-haspopup="dialog">
             <img src="assets/img/global-solutions-lab-film-poster-v2.jpg" alt="" width="480" height="270" />
             <span class="film-preview-shade"></span>
             <span class="film-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z" /></svg></span>
@@ -69,9 +69,18 @@
     </section>
 
     <section class="start-section shell" id="ways-to-start" aria-labelledby="start-title">
-      <div class="section-heading">
-        <h2 id="start-title">Three ways to start changing the world.</h2>
-        <p>5 minutes. 5 hours. 5 days. Choose how you begin.</p>
+      <div class="start-heading-layout">
+        <div class="section-heading">
+          <h2 id="start-title">Three ways to start changing the world.</h2>
+          <p>5 minutes. 5 hours. 5 days. Choose how you begin.</p>
+        </div>
+        <button class="introduction-guide" type="button" (click)="openIntroduction($event)" aria-haspopup="dialog" aria-label="Start here: watch a 28-second introduction to the Global Solutions Lab">
+          <span class="guide-portrait">
+            <img src="assets/img/landing-alternative/start-here-avatar-small.jpg" alt="Your video guide, smiling in a rust-colored sweater." width="640" height="352" loading="lazy" />
+            <span class="guide-play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z" /></svg></span>
+          </span>
+          <span class="guide-copy"><span class="guide-eyebrow">Video introduction</span><strong>Start here</strong><span class="guide-description">Turn a community concern into a starting brief.</span><span class="guide-watch">Watch · {{ introductionDuration }} <span aria-hidden="true">↗</span></span></span>
+        </button>
       </div>
       <div class="path-grid">
         <article class="path-card quick-card">
@@ -121,8 +130,13 @@
 
   <footer class="site-footer shell"><a class="footer-brand" routerLink="/landing-alternative" fragment="top">Global Solutions Lab <span aria-hidden="true">↗</span></a><p>A world that works for everyone starts with all of us.</p><div><a routerLink="/contact">Get in touch</a><a routerLink="/privacy">Privacy</a><span>© {{ year }} GSL</span></div></footer>
 
-  <dialog #filmDialog class="film-dialog" aria-labelledby="film-title" (click)="closeOnBackdrop($event)" (close)="onFilmClosed()">
-    <div class="film-dialog-header"><h2 id="film-title">The Global Solutions Lab film</h2><button class="icon-button" type="button" (click)="closeFilm()" aria-label="Close film" autofocus>✕</button></div>
-    <video #film src="assets/videos/global-solutions-lab-film-v3.mp4" poster="assets/img/global-solutions-lab-film-poster-v2.jpg" title="Global Solutions Lab film" controls playsinline preload="metadata" (loadedmetadata)="setFilmDuration()">Your browser does not support embedded video. <a href="assets/videos/global-solutions-lab-film-v3.mp4">Watch the film</a>.</video>
+  <dialog #filmDialog class="film-dialog" aria-labelledby="film-title" [attr.aria-describedby]="activeVideo === 'introduction' ? 'introduction-context' : null" (click)="closeOnBackdrop($event)" (close)="onFilmClosed()">
+    <div class="film-dialog-header"><h2 id="film-title">{{ videos[activeVideo].title }}</h2><button class="icon-button" type="button" (click)="closeFilm()" aria-label="Close video" autofocus>✕</button></div>
+    <div *ngIf="activeVideo === 'introduction'" class="introduction-context" id="introduction-context"><span>Quick Start · AI video introduction</span><h3>Start with a problem in your community.</h3><p>See how one sentence can become a starting brief, with Bucky’s help.</p></div>
+    <video #film src="assets/videos/global-solutions-lab-film-v3.mp4" poster="assets/img/global-solutions-lab-film-poster-v2.jpg" [title]="videos[activeVideo].title" controls playsinline preload="metadata" (loadedmetadata)="setFilmDuration()">
+      <track *ngIf="activeVideo === 'introduction'" kind="captions" src="assets/videos/landing-alternative/start-here-avatar.en.vtt" srclang="en" label="English" default />
+      Your browser does not support embedded video. <a [href]="videos[activeVideo].src">Watch the video</a>.
+    </video>
+    <div *ngIf="activeVideo === 'introduction'" class="introduction-next"><p>Ready to explore your own idea?</p><a class="button button-yellow" routerLink="/start-a-solution" (click)="closeFilm()">Start in 5 Minutes <span aria-hidden="true">→</span></a></div>
   </dialog>
 </div>

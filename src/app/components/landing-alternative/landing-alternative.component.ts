@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
     './landing-alternative.component.css',
     './landing-alternative.sections.css',
     './landing-alternative.responsive.css',
+    './landing-alternative.introduction.css',
   ],
 })
 export class LandingAlternativeComponent implements OnInit, OnDestroy {
@@ -24,6 +25,20 @@ export class LandingAlternativeComponent implements OnInit, OnDestroy {
   filmOpen = false;
   selectedSdg = 13;
   filmDuration = '';
+  introductionDuration = '0:28';
+  activeVideo: 'film' | 'introduction' = 'film';
+  readonly videos = {
+    film: {
+      title: 'The Global Solutions Lab film',
+      src: 'assets/videos/global-solutions-lab-film-v3.mp4',
+      poster: 'assets/img/global-solutions-lab-film-poster-v2.jpg',
+    },
+    introduction: {
+      title: 'Start here: your first community solution',
+      src: 'assets/videos/landing-alternative/start-here-avatar.mp4',
+      poster: 'assets/img/landing-alternative/start-here-avatar.jpg',
+    },
+  };
   readonly typingWords = ['Envision', 'Build', 'Share', 'Develop', 'Design'];
   typedWord = this.typingWords[0];
   readonly year = new Date().getFullYear();
@@ -114,15 +129,31 @@ export class LandingAlternativeComponent implements OnInit, OnDestroy {
     this.carouselFocused = !!event.relatedTarget && (event.currentTarget as HTMLElement).contains(event.relatedTarget as Node);
   }
 
-  openFilm(): void {
+  openFilm(event?: MouseEvent): void {
+    this.openVideo('film', event?.currentTarget as HTMLElement | undefined);
+  }
+
+  openIntroduction(event?: MouseEvent): void {
+    this.openVideo('introduction', event?.currentTarget as HTMLElement | undefined);
+  }
+
+  private openVideo(kind: 'film' | 'introduction', trigger?: HTMLElement): void {
     const dialog = this.filmDialog?.nativeElement;
-    if (!dialog) return;
-    this.returnFocus = document.activeElement as HTMLElement;
+    const video = this.film?.nativeElement;
+    if (!dialog || !video) return;
+    this.returnFocus = trigger ?? document.activeElement as HTMLElement;
+    this.activeVideo = kind;
+    const media = this.videos[kind];
+    if (video.getAttribute('src') !== media.src) {
+      video.src = media.src;
+      video.poster = media.poster;
+      video.load();
+    }
     this.filmOpen = true;
     this.previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     dialog.showModal();
-    void this.film?.nativeElement.play().catch(() => { /* Native play controls remain available. */ });
+    void video.play().catch(() => { /* Native play controls remain available. */ });
   }
 
   closeFilm(): void {
@@ -146,7 +177,13 @@ export class LandingAlternativeComponent implements OnInit, OnDestroy {
 
   setFilmDuration(): void {
     const seconds = Math.floor(this.film?.nativeElement.duration || 0);
-    if (Number.isFinite(seconds) && seconds > 0) this.filmDuration = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+    if (!Number.isFinite(seconds) || seconds <= 0) return;
+    if (this.activeVideo === 'film') {
+      this.filmDuration = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+    } else {
+      const duration = Math.ceil(this.film?.nativeElement.duration || 0);
+      this.introductionDuration = `${Math.floor(duration / 60)}:${String(duration % 60).padStart(2, '0')}`;
+    }
   }
 
   @HostListener('document:keydown.escape')
