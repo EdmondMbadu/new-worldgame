@@ -57,6 +57,23 @@
               {{ config.introText }}
             </p>
 
+            <aside
+              aria-labelledby="alternative-time-heading"
+              class="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-700 dark:bg-blue-950"
+            >
+              <h3 id="alternative-time-heading" class="text-lg font-bold text-blue-900 dark:text-blue-100">
+                Can’t find a time that works for you?
+              </h3>
+              <p class="mt-2 text-base leading-relaxed text-slate-700 dark:text-slate-200">
+                Email us at
+                <a
+                  href="mailto:newworld@newworld-game.org"
+                  class="break-words rounded font-bold text-blue-700 underline underline-offset-4 hover:text-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 dark:text-blue-300 dark:hover:text-blue-100"
+                >newworld&#64;newworld-game.org</a>
+                with your preferred dates, times, and time zone. We’ll be happy to find a time that works for you.
+              </p>
+            </aside>
+
           </div>
 
           <!-- Show selected time on Step 2 and 3 -->
@@ -86,26 +103,26 @@
           <!-- STEP 1: Date and Time Selection -->
           <div *ngIf="step === 1">
             <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Select a Date & Time</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-4">
               
               <!-- Calendar -->
               <div>
                 <div class="flex items-center justify-between mb-4">
-                  <button (click)="changeMonth(-1)" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <button (click)="changeMonth(-1)" aria-label="Previous month" class="shrink-0 p-1.5 sm:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
                   </button>
-                  <h3 class="font-semibold text-lg text-slate-800 dark:text-slate-100">{{ currentMonthDate | date:'MMMM yyyy' }}</h3>
-                  <button (click)="changeMonth(1)" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                  <h3 class="whitespace-nowrap font-semibold text-base sm:text-lg text-slate-800 dark:text-slate-100">{{ currentMonthDate | date:'MMMM yyyy' }}</h3>
+                  <button (click)="changeMonth(1)" aria-label="Next month" class="shrink-0 p-1.5 sm:p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                   </button>
                 </div>
                 <div class="grid grid-cols-7 gap-1 text-center text-sm text-slate-500 dark:text-slate-400 mb-2">
                   <div *ngFor="let day of weekDays">{{ day }}</div>
                 </div>
-                <div class="grid grid-cols-7 gap-2">
+                <div class="grid grid-cols-7 gap-1 sm:gap-2">
         <div *ngFor="let day of monthDays" 
             (click)="day.isCurrentMonth && !day.isPast && day.isValidBookingDay ? selectDate(day.date) : null"
-            class="w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200"
+            class="w-full max-w-10 h-10 mx-auto flex items-center justify-center rounded-full transition-all duration-200"
             [class.cursor-pointer]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay"
             [class.text-slate-700]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay && !isDateSelected(day.date)"
             [class.dark:text-slate-200]="day.isCurrentMonth && !day.isPast && day.isValidBookingDay && !isDateSelected(day.date)"
@@ -176,23 +193,6 @@
                     Next
                   </button>
             </div>
-
-            <aside
-              aria-labelledby="alternative-time-heading"
-              class="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-700 dark:bg-blue-950"
-            >
-              <h3 id="alternative-time-heading" class="text-lg font-bold text-blue-900 dark:text-blue-100">
-                Can’t find a time that works for you?
-              </h3>
-              <p class="mt-2 text-base leading-relaxed text-slate-700 dark:text-slate-200">
-                Email us at
-                <a
-                  href="mailto:newworld@newworld-game.org"
-                  class="break-words rounded font-bold text-blue-700 underline underline-offset-4 hover:text-blue-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 dark:text-blue-300 dark:hover:text-blue-100"
-                >newworld&#64;newworld-game.org</a>
-                with your preferred dates, times, and time zone. We’ll be happy to find a time that works for you.
-              </p>
-            </aside>
           </div>
 
           <!-- STEP 2: User Details -->
