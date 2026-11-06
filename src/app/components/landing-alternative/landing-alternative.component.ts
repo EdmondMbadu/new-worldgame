@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GSL_2027_DATES } from 'src/app/utils/gsl-workshop-dates';
 
 @Component({
   selector: 'app-landing-alternative',
@@ -15,6 +16,7 @@ import { RouterLink } from '@angular/router';
   ],
 })
 export class LandingAlternativeComponent implements OnInit, OnDestroy {
+  readonly workshopDates = GSL_2027_DATES;
   @ViewChild('filmDialog') filmDialog?: ElementRef<HTMLDialogElement>;
   @ViewChild('film') film?: ElementRef<HTMLVideoElement>;
   menuOpen = false;

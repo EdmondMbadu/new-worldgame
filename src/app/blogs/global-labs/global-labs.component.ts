@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DataService } from 'src/app/services/data.service';
+import { GSL_2027_DATES } from 'src/app/utils/gsl-workshop-dates';
 
 interface ConversionCard {
   icon: string;
@@ -25,6 +26,7 @@ interface LabVideo {
     standalone: false
 })
 export class GlobalLabsComponent implements OnInit {
+  readonly workshopDates = GSL_2027_DATES;
   loadedVideoIds: Record<string, boolean> = {};
   announcementEmail = '';
   announcementSubmitting = false;

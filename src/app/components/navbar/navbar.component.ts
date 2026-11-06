@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { FormControl } from '@angular/forms';
+import { GSL_2027_DATES } from 'src/app/utils/gsl-workshop-dates';
 import {
   combineLatest,
   catchError,
@@ -48,6 +49,7 @@ interface NavbarSearchItem {
     standalone: false
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  readonly workshopDates = GSL_2027_DATES;
   @Input() loggedOn: boolean = false;
   dark: boolean = false;
 

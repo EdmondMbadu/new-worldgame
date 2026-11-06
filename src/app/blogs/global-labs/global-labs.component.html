@@ -14,7 +14,7 @@
         <div class="max-w-3xl">
           <p class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-emerald-100">
             <span class="material-symbols-outlined text-base" aria-hidden="true">campaign</span>
-            Coming in 2027
+            {{ workshopDates }}
           </p>
           <h1 class="max-w-4xl text-4xl font-extrabold leading-[1.05] tracking-normal sm:text-5xl lg:text-6xl">
             GSL Workshop 2027
@@ -43,7 +43,7 @@
             </button>
           </div>
           <p class="mt-4 text-sm font-medium text-slate-200">
-            Dates, location, format, and registration details will be announced when they are confirmed.
+            Location, format, and registration details will be announced when they are confirmed.
           </p>
         </div>
 
@@ -52,7 +52,7 @@
           <p class="mt-4 text-xs font-extrabold uppercase tracking-widest text-teal-700 dark:text-emerald-300">Be the first to know</p>
           <h2 class="mt-2 text-2xl font-extrabold">Join the announcement list</h2>
           <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Get an email when GSL Workshop 2027 dates, participation options, and registration details are ready.
+            Get participation and registration updates for the {{ workshopDates }} workshop.
           </p>
 
           <div *ngIf="announcementSuccess" class="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-900 dark:border-emerald-300/30 dark:bg-emerald-300/10 dark:text-emerald-100" role="status" aria-live="polite">
@@ -221,10 +221,10 @@
 
     <section class="bg-slate-950 py-14 text-white">
       <div class="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <p class="text-sm font-extrabold uppercase tracking-widest text-emerald-300">GSL Workshop 2027</p>
+        <p class="text-sm font-extrabold uppercase tracking-widest text-emerald-300">GSL Workshop 2027 · {{ workshopDates }}</p>
         <h2 class="mt-3 text-3xl font-extrabold tracking-normal md:text-4xl">Details are coming soon.</h2>
         <p class="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-300">
-          Join the announcement list now and we'll let you know when dates, participation options, and registration open.
+          Join the announcement list for participation details and a notification when registration opens.
         </p>
         <button
           type="button"
@@ -244,7 +244,7 @@
       (click)="scrollToSection('announcement-signup')"
       class="inline-flex w-full items-center justify-center gap-2 rounded-md bg-teal-700 px-5 py-3 text-sm font-extrabold text-white"
     >
-      Get 2027 announcements
+      Get workshop updates
       <span class="material-symbols-outlined text-lg" aria-hidden="true">arrow_upward</span>
     </button>
   </div>

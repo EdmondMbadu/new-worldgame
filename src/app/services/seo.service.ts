@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { GSL_2027_DATES } from '../utils/gsl-workshop-dates';
 
 export interface SeoConfig {
   title?: string;
@@ -238,7 +239,7 @@ export class SeoService {
       },
       '/global-labs': {
         title: 'GSL Workshop 2027 | Global Solutions Lab',
-        description: 'GSL Workshop 2027 is coming soon. Join the announcement list for dates, participation options, and registration details for the Global Solutions Lab Solutions-a-thon.',
+        description: `GSL Workshop 2027 takes place ${GSL_2027_DATES}. Join the announcement list for participation options and registration details.`,
         keywords: 'GSL Workshop 2027, Global Solutions Lab workshop, Solutions-a-thon, design science workshop, global problem solving',
         url: `${baseUrl}/global-labs`
       },

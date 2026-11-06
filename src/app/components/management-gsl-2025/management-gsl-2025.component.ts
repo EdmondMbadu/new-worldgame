@@ -89,7 +89,7 @@ export class ManagementGsl2025Component implements OnInit {
         this.gsl2026BannerLoading = false;
       },
       error: (error) => {
-        console.error('Unable to load GSL 2026 banner setting', error);
+        console.error('Unable to load GSL workshop banner setting', error);
         this.gsl2026BannerLoading = false;
         this.gsl2026BannerSaveError =
           'Unable to load the Global Solutions Lab banner setting.';
@@ -118,10 +118,10 @@ export class ManagementGsl2025Component implements OnInit {
       });
 
       this.gsl2026BannerSaveMessage = enabled
-        ? 'Global Solutions Lab 2026 banner is visible.'
-        : 'Global Solutions Lab 2026 banner is hidden.';
+        ? 'The Global Solutions Lab workshop banner is visible.'
+        : 'The Global Solutions Lab workshop banner is hidden.';
     } catch (error) {
-      console.error('Unable to save GSL 2026 banner setting', error);
+      console.error('Unable to save GSL workshop banner setting', error);
       this.gsl2026BannerEnabled = !enabled;
       this.gsl2026BannerSaveError =
         'Unable to save the Global Solutions Lab banner setting right now.';

@@ -2,7 +2,7 @@
   class="w-full px-3 py-3 sm:p-4 fixed top-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur z-50 shadow-sm shadow-slate-900/5"
   *ngIf="!email"
 >
-  <!-- ── Global Solutions Lab 2026 — Top Announcement Bar ── -->
+  <!-- Global Solutions Lab workshop announcement -->
   <div
     *ngIf="currenPageLabBanner && showGsl2026Banner"
     class="relative -mx-3 -mt-3 mb-3 hidden overflow-hidden sm:-mx-4 sm:-mt-4 sm:block
@@ -32,12 +32,12 @@
                      border border-white/30 dark:border-emerald-400/30
                      px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest
                      text-white dark:text-emerald-300">
-          2026 Event
+          {{ workshopDates }}
         </span>
 
         <!-- headline -->
         <span class="min-w-0 text-center text-xs font-semibold leading-snug text-white sm:text-sm">
-          Global Solutions Lab 2026
+          Global Solutions Lab 2027
           <span class="hidden md:inline font-normal opacity-80"> — Collaborate. Innovate. Transform.</span>
         </span>
 
@@ -961,7 +961,7 @@
 
       </ul>
 
-      <!-- ── Global Solutions Lab 2026 Sidebar Banner ── -->
+      <!-- Global Solutions Lab workshop sidebar banner -->
       <div
         *ngIf="showGsl2026Banner"
         class="relative mt-6 rounded-xl overflow-hidden
@@ -991,7 +991,7 @@
                            border border-white/30 dark:border-emerald-400/30
                            px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest
                            text-white dark:text-emerald-300">
-                2026 Event
+                {{ workshopDates }}
               </span>
             </div>
             <!-- Close button -->
@@ -1012,7 +1012,7 @@
 
           <!-- Title -->
           <p class="text-white font-bold text-sm leading-snug mb-1">
-            Global Solutions Lab 2026
+            Global Solutions Lab 2027
           </p>
           <!-- Subtitle -->
           <p class="text-white/75 dark:text-emerald-200/80 text-xs leading-relaxed mb-3">
