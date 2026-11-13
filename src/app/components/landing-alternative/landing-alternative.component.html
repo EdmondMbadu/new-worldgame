@@ -9,6 +9,7 @@
       <a routerLink="/about">About</a>
       <a routerLink="/blogs/nwg-steps">How It Works</a>
       <a routerLink="/landing-alternative" fragment="custom-labs">Custom Labs</a>
+      <a routerLink="/landing-alternative" fragment="community-solutions">Solutions</a>
       <a routerLink="/chester-report">Impact</a>
     </nav>
     <div class="header-actions">
@@ -20,7 +21,8 @@
     </div>
     <nav *ngIf="menuOpen" id="mobile-nav" class="mobile-nav" aria-label="Mobile navigation">
       <a routerLink="/about">About</a><a routerLink="/blogs/nwg-steps">How It Works</a>
-      <a routerLink="/landing-alternative" fragment="custom-labs" (click)="menuOpen = false">Custom Labs</a><a routerLink="/chester-report">Impact</a>
+      <a routerLink="/landing-alternative" fragment="custom-labs" (click)="menuOpen = false">Custom Labs</a>
+      <a routerLink="/landing-alternative" fragment="community-solutions" (click)="menuOpen = false">Solutions</a><a routerLink="/chester-report">Impact</a>
       <a routerLink="/login">Log in</a><a routerLink="/start-a-solution">Start in 5 Minutes →</a>
     </nav>
   </header>
@@ -126,6 +128,7 @@
         </article>
       </div>
     </section>
+    <app-landing-community-solutions id="community-solutions"></app-landing-community-solutions>
   </main>
 
   <footer class="site-footer shell"><a class="footer-brand" routerLink="/landing-alternative" fragment="top">Global Solutions Lab <span aria-hidden="true">↗</span></a><p>A world that works for everyone starts with all of us.</p><div><a routerLink="/contact">Get in touch</a><a routerLink="/privacy">Privacy</a><span>© {{ year }} GSL</span></div></footer>

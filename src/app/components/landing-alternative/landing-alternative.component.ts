@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { GSL_2027_DATES } from 'src/app/utils/gsl-workshop-dates';
+import { LandingCommunitySolutionsComponent } from './landing-community-solutions.component';
 
 @Component({
   selector: 'app-landing-alternative',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, LandingCommunitySolutionsComponent],
   templateUrl: './landing-alternative.component.html',
   styleUrls: [
     './landing-alternative.component.css',

@@ -705,45 +705,41 @@ export class SolutionService {
       | { publicUpdatedAtMs: number }
       | null = null
   ): Promise<CommunitySolutionPage> {
-    try {
-      let query: firebase.firestore.Query = this.afs.collection<Solution>(
-        'publicCommunitySolutions'
-      ).ref;
-      if (filter !== 'all') {
-        query = query.where('feedStatus', '==', filter);
-      }
-      query = query.orderBy('feedUpdatedAtMs', 'desc');
-      if (cursor && typeof (cursor as any).data === 'function') {
-        query = query.startAfter(
-          cursor as firebase.firestore.QueryDocumentSnapshot
+    if (!cursor || !('publicUpdatedAtMs' in cursor)) {
+      try {
+        let query: firebase.firestore.Query = this.afs.collection<Solution>(
+          'publicCommunitySolutions'
+        ).ref;
+        if (filter !== 'all') {
+          query = query.where('feedStatus', '==', filter);
+        }
+        query = query.orderBy('feedUpdatedAtMs', 'desc');
+        if (cursor && 'data' in cursor) {
+          query = query.startAfter(cursor);
+        }
+
+        const snapshot = await query.limit(pageSize + 1).get();
+        const visibleDocuments = snapshot.docs.slice(0, pageSize);
+        return {
+          solutions: visibleDocuments.map((document) => {
+            const solution = document.data() as Solution;
+            return {
+              ...solution,
+              solutionId: solution.solutionId || document.id,
+              feedUpdatedAt: Number((solution as any).feedUpdatedAtMs || 0),
+            };
+          }),
+          cursor: visibleDocuments.at(-1) ?? null,
+          hasMore: snapshot.docs.length > pageSize,
+        };
+      } catch (error) {
+        // A projection cursor can't safely continue in the fallback's sort order.
+        if (cursor) throw error;
+        console.warn(
+          'Public community projection unavailable; using server fallback.',
+          error
         );
       }
-
-      const snapshot = await query.limit(pageSize + 1).get();
-      const visibleDocuments = snapshot.docs.slice(0, pageSize);
-      return {
-        solutions: visibleDocuments.map((document) => {
-          const solution = document.data() as Solution;
-          return {
-            ...solution,
-            solutionId: solution.solutionId || document.id,
-            feedUpdatedAt: Number((solution as any).feedUpdatedAtMs || 0),
-          };
-        }),
-        cursor:
-          visibleDocuments.length > 0
-            ? visibleDocuments[visibleDocuments.length - 1]
-            : null,
-        hasMore: snapshot.docs.length > pageSize,
-      };
-    } catch (error) {
-      // Keep a server-sanitized fallback for transient Firestore/index errors.
-      // It is not the normal hot path and therefore does not slow successful
-      // home loads.
-      console.warn(
-        'Public community projection unavailable; using server fallback.',
-        error
-      );
     }
 
     const callable = this.fns.httpsCallable('getPublicCommunitySolutions');
@@ -771,7 +767,7 @@ export class SolutionService {
       cursor: cursorUpdatedAtMs
         ? { publicUpdatedAtMs: cursorUpdatedAtMs }
         : null,
-      hasMore: response?.hasMore === true,
+      hasMore: response?.hasMore === true && cursorUpdatedAtMs > 0,
     };
   }
 

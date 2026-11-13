@@ -1,0 +1,68 @@
+<section class="solutions-section" aria-labelledby="community-solutions-title">
+  <div class="solutions-shell">
+    <header class="solutions-heading">
+      <h2 id="community-solutions-title">Explore community solutions.</h2>
+      <p>See what teams around the world are working on, from early ideas to published solutions.</p>
+    </header>
+
+    <div class="solution-grid" [attr.aria-busy]="loading()">
+      @for (solution of solutions(); track solution.solutionId) {
+        <article class="solution-card">
+          <a class="solution-link" [routerLink]="solutionLink(solution)"
+            [queryParams]="{ returnTo: returnTo, from: 'community' }"
+            [attr.aria-labelledby]="'landing-solution-' + solution.solutionId">
+            <div class="solution-cover" aria-hidden="true">
+              <div class="solution-cover-fallback"></div>
+              @if (solution.image) {
+                <img [src]="solution.image" alt="" width="640" height="400" loading="lazy" decoding="async"
+                  (error)="hideBrokenImage($event)" />
+              }
+            </div>
+            <div class="solution-copy">
+              <span class="solution-status" [class.solution-status--submitted]="solution.finished === 'true'">
+                {{ solution.finished === 'true' ? 'Submitted' : 'In development' }}
+              </span>
+              <h3 [id]="'landing-solution-' + solution.solutionId">{{ solution.title || 'Untitled solution' }}</h3>
+              <p class="solution-author">{{ solution.authorName || 'Solution team' }}</p>
+              @if (solution.description) {
+                <p class="solution-description">{{ solution.description }}</p>
+              }
+              <div class="solution-card-footer">
+                <span>Read solution</span>
+                <span class="solution-arrow" aria-hidden="true">↗</span>
+              </div>
+            </div>
+          </a>
+        </article>
+      } @empty {
+        @if (!loaded() && !loadError()) {
+          @for (placeholder of placeholders; track $index) {
+            <div class="solution-placeholder" aria-hidden="true"><span></span><i></i><i></i></div>
+          }
+        }
+      }
+    </div>
+
+    <div class="solutions-pagination">
+      <p role="status" class="solutions-status">
+        @if (loadError()) {
+          {{ solutions().length ? 'Could not load more solutions. Please try again.' : 'Could not load community solutions. Please try again.' }}
+        } @else if (loading()) {
+          Loading {{ solutions().length ? 'more ' : '' }}solutions…
+        } @else if (loaded() && !solutions().length) {
+          There are no community solutions to show yet.
+        } @else if (loaded() && !hasMore()) {
+          You’ve reached the end of the solutions feed.
+        }
+      </p>
+      @if (hasMore() || loadError()) {
+        <button class="solutions-more" type="button" [attr.aria-disabled]="loading()" (click)="loadNextBatch(true)">
+          {{ loadError() ? 'Try again' : 'Load more solutions' }} <span aria-hidden="true">↓</span>
+        </button>
+      }
+      @if (hasMore() && !loading() && !loadError()) {
+        <span #nextBatch class="solutions-scroll-trigger" aria-hidden="true"></span>
+      }
+    </div>
+  </div>
+</section>
