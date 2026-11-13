@@ -5,8 +5,7 @@
 
 const GOLDEN = (137.50776405003785 * Math.PI) / 180;
 const PAPER = [233, 229, 219];
-const EMBER = [255, 110, 48];
-const SHADES = 9; // colour steps from met (paper) to furthest from met (ember)
+const SHADES = 9; // colour steps from met (paper) to furthest from met (gold)
 const NEUTRAL = SHADES; // before any data has arrived
 const NODATA = SHADES + 1; // not measured / no country
 const TILT = (-16 * Math.PI) / 180;
@@ -15,6 +14,11 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   const ctx = canvas.getContext('2d', { alpha: false });
+  // The accent colour comes from the page's CSS, so the map can never drift
+  // from the rest of the design.
+  const css = getComputedStyle(document.documentElement);
+  const GOLD = (css.getPropertyValue('--accent-rgb') || '245, 184, 62').split(',').map((v) => +v);
+  const ACCENT = `${GOLD[0]},${GOLD[1]},${GOLD[2]}`;
   let dpr = 1, width = 0, height = 0;
   let geo = null; // map.json
   let n = 0, spacing = 2;
@@ -39,7 +43,7 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   const colors = [];
   for (let i = 0; i < SHADES; i++) {
     const t = Math.pow(i / (SHADES - 1), 0.85);
-    colors.push(PAPER.map((p, c) => Math.round(p + (EMBER[c] - p) * t)));
+    colors.push(PAPER.map((p, c) => Math.round(p + (GOLD[c] - p) * t)));
   }
   colors[NEUTRAL] = PAPER;
   colors[NODATA] = [120, 122, 128];
@@ -312,8 +316,8 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
       ctx.translate(tx, ty); ctx.scale(k, k);
       ctx.globalAlpha = ease(glowT);
       ctx.lineJoin = 'round';
-      ctx.fillStyle = 'rgba(255,110,48,0.07)'; ctx.fill(outline, 'evenodd');
-      ctx.lineWidth = 1.15 / k; ctx.strokeStyle = 'rgba(255,110,48,0.95)'; ctx.stroke(outline);
+      ctx.fillStyle = `rgba(${ACCENT},0.07)`; ctx.fill(outline, 'evenodd');
+      ctx.lineWidth = 1.15 / k; ctx.strokeStyle = `rgba(${ACCENT},0.95)`; ctx.stroke(outline);
       ctx.restore();
     }
     if (busy) {

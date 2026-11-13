@@ -79,12 +79,12 @@ function chart({ t, lang, a, need, thisYear }) {
   let ahead = '';
   if (landing) {
     const ex = Math.min(landing, x1);
-    ahead = `<path d="M${f(X(ly))} ${f(Y(lv))}L${f(X(ex))} ${f(Y(lv + perYear * (ex - ly)))}" stroke="#ff6e30" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>
-      <circle cx="${f(X(ex))}" cy="${f(Y(goal))}" r="3.4" fill="none" stroke="#ff6e30" stroke-width="1.4"/>
+    ahead = `<path d="M${f(X(ly))} ${f(Y(lv))}L${f(X(ex))} ${f(Y(lv + perYear * (ex - ly)))}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>
+      <circle cx="${f(X(ex))}" cy="${f(Y(goal))}" r="3.4" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/>
       <text class="hot" x="${f(X(ex))}" y="${f(Y(goal) - 9)}" text-anchor="${ex > x1 - 6 ? 'end' : 'middle'}">${a.due ? esc(t.now.toUpperCase()) : a.arrival}</text>`;
   } else if (perYear != null && a.state === 'stuck') {
     const ex = x1;
-    ahead = `<path d="M${f(X(ly))} ${f(Y(lv))}L${f(X(ex))} ${f(Y(lv + perYear * (ex - ly)))}" stroke="#ff6e30" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>`;
+    ahead = `<path d="M${f(X(ly))} ${f(Y(lv))}L${f(X(ex))} ${f(Y(lv + perYear * (ex - ly)))}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>`;
   }
   const years = [x0, SDG_YEAR, x1].filter((y, i, all) => all.indexOf(y) === i);
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t.needs[need.id].name)}: ${percent(lv, lang)}, ${ly}">

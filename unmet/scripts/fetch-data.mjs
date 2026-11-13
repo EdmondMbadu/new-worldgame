@@ -18,11 +18,13 @@ const target = process.env.UNMET_DATA_OUT || fileURLToPath(new URL('../data/unme
 const POP_FROM = 2008;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-async function get(url, tries = 4) {
+// The World Bank API sometimes stalls on a request and answers at once when
+// asked again, so give up on a slow one quickly, say so, and retry.
+async function get(url, tries = 3) {
   let lastError;
   for (let attempt = 1; attempt <= tries; attempt++) {
     try {
-      const res = await fetch(url, { signal: AbortSignal.timeout(60_000), headers: { accept: 'application/json' } });
+      const res = await fetch(url, { signal: AbortSignal.timeout(25_000), headers: { accept: 'application/json' } });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const body = await res.json();
       if (!Array.isArray(body) || body[0]?.message) {
@@ -33,10 +35,12 @@ async function get(url, tries = 4) {
     } catch (error) {
       lastError = error;
       if (error.permanent) break;
-      await sleep(800 * attempt);
+      const why = error.name === 'TimeoutError' ? 'no answer after 25 s' : error.message;
+      if (attempt < tries) console.log(`    … ${new URL(url).pathname.split('/').pop()}: ${why}; trying again (${attempt + 1} of ${tries})`);
+      await sleep(600 * attempt);
     }
   }
-  throw new Error(`${url}\n  ${lastError?.message || lastError}`);
+  throw new Error(`${new URL(url).pathname}: ${lastError?.name === 'TimeoutError' ? 'the World Bank API did not answer' : lastError?.message || lastError}`);
 }
 
 /** Every row of one indicator, for every country and year, across all pages. */
@@ -100,6 +104,7 @@ async function main() {
       // One retired or renamed indicator must not sink the other eleven.
       console.warn(`  ${need.id.padEnd(12)} SKIPPED — ${error.message}`);
     }
+    await sleep(250); // be a polite client
   }
   const got = Object.keys(series).length;
   if (got < 8 || !series.electricity) throw new Error(`Only ${got} of ${NEEDS.length} indicators loaded; keeping the existing snapshot.`);
@@ -124,7 +129,7 @@ async function main() {
   writeFileSync(target + '.tmp', JSON.stringify(snapshot));
   renameSync(target + '.tmp', target);
   console.log(`Wrote ${path.relative(process.cwd(), target)} · ${got} needs · ${Object.keys(countries).length} countries · World Bank data last updated ${updated || 'unknown'}.`);
-  if (got < NEEDS.length) console.log('Some indicators were skipped (see above). The page adapts to the needs that loaded.');
+  if (got < NEEDS.length) console.log('Some indicators were skipped (see above). The page shows the needs that loaded; run this again later to pick up the rest.');
 }
 
 main().catch((error) => {

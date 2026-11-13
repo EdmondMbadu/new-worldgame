@@ -286,7 +286,7 @@ function mountSearch(host, inPanel) {
   host.innerHTML = `<div class="search" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="${id}">
     <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="6.3" cy="6.3" r="4.8"/><path d="m10 10 4 4"/></svg>
     <input type="text" inputmode="search" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false" aria-autocomplete="list" aria-controls="${id}" aria-label="${esc(t.search)}" placeholder="${esc(t.searchShort)}" value="${inPanel && state.country ? esc(nameOf(state.country)) : ''}">
-    ${inPanel ? `<button class="locate mono" data-act="change" style="color:var(--ember)">${t.change}</button>` : `<kbd>/</kbd>&nbsp;&nbsp;<button class="locate mono" data-act="locate" aria-label="${esc(t.locate)}"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor"><circle cx="6.5" cy="6.5" r="3"/><path d="M6.5 0v3M6.5 10v3M0 6.5h3M10 6.5h3"/></svg><span>${t.locate}</span></button>`}
+    ${inPanel ? `<button class="locate mono" data-act="change" style="color:var(--accent)">${t.change}</button>` : `<kbd>/</kbd>&nbsp;&nbsp;<button class="locate mono" data-act="locate" aria-label="${esc(t.locate)}"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor"><circle cx="6.5" cy="6.5" r="3"/><path d="M6.5 0v3M6.5 10v3M0 6.5h3M10 6.5h3"/></svg><span>${t.locate}</span></button>`}
     <ul class="suggest" id="${id}" role="listbox" hidden></ul>
   </div>`;
   const box = host.firstElementChild, input = box.querySelector('input'), list = box.querySelector('ul');
