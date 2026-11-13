@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unmet · Does the world work where you live?</title>
+<meta name="description" content="Pick any country. See which of twelve basic needs are met for everyone, which are closing, and the year the rest arrive at today's pace. Public data on Buckminster Fuller's Dymaxion map.">
+<!-- Hidden from search engines until you are ready to launch: delete the next line. -->
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#08090b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Unmet · Does the world work where you live?">
+<meta property="og:description" content="Twelve basic needs, every country, and the year each one is met at today's pace.">
+<meta property="og:site_name" content="Global Solutions Lab">
+<link rel="icon" href="/favicon.ico">
+<link rel="preload" href="%S%/fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="%S%/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="%S%/fonts/dm-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="%S%/geo/map.json" as="fetch" crossorigin>
+<link rel="preload" href="%S%/geo/dots-l.land.bin" as="fetch" crossorigin media="(min-width: 900px)">
+<link rel="preload" href="%S%/geo/dots-s.land.bin" as="fetch" crossorigin media="(max-width: 899px)">
+<link rel="modulepreload" href="%JS%">
+<style>%CSS%</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="map" aria-label="Dymaxion world map. Use the search field to choose a country." role="img"></canvas>
+  <div class="pin mono" id="pin" hidden><span></span></div>
+  <button class="back mono" id="back" hidden></button>
+</div>
+<div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+<header class="top">
+  <div>
+    <a class="brand" href="/unmet/" id="brand">Unmet<i>.</i></a>
+    <button class="how mono" id="how"><span>How this works</span> <kbd>?</kbd></button>
+  </div>
+  <nav>
+    <a class="mono" href="/" id="gsl">Global Solutions Lab ↗</a>
+    <div class="lang mono" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button><button data-lang="fr" aria-pressed="false">FR</button>
+    </div>
+  </nav>
+</header>
+
+<section class="hero" id="hero">
+  <div class="eyebrow mono" id="eyebrow">12 basic needs · public data</div>
+  <h1 id="h1">Does the world <em>work</em> where you live?</h1>
+  <p class="lede" id="lede">Pick any country. See which basic needs are met for everyone, which are closing, and the year the rest arrive at today’s pace.</p>
+  <div class="label mono"><span>01 / <b id="l-place">Place</b></span></div>
+  <div id="search-hero"></div>
+  <div class="try">
+    <div class="label mono"><span>02 / <b id="l-try">Or try</b></span><span id="l-click">Or click the map</span></div>
+    <div class="chips" id="chips"></div>
+  </div>
+  <a class="credit mono" href="/" id="credit">A Global Solutions Lab project</a>
+</section>
+
+<aside class="panel" id="panel" aria-live="polite" hidden></aside>
+<section class="pace" id="pace" hidden></section>
+
+<footer class="foot mono mut">
+  <div><span id="f-count">&nbsp;</span><br><span id="f-source">&nbsp;</span></div>
+  <div class="tick" id="f-world">&nbsp;</div>
+</footer>
+
+<div class="about" id="about" role="dialog" aria-modal="true" aria-labelledby="about-h" hidden></div>
+<div class="tip mono" id="tip" role="tooltip"></div>
+<div class="toast" id="toast" role="status"></div>
+<script>window.UNMET=%CONFIG%</script>
+<script type="module" src="%JS%"></script>
+</body>
+</html>

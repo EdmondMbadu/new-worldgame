@@ -1983,6 +1983,7 @@
       "placeholder": "Search spaces"
     },
     "loading": "Loading challenge spaces…",
+    "loadFailed": "We couldn’t load the full list of challenge spaces.",
     "featured": {
       "badge": "Featured space",
       "label": "Highlighted space"

@@ -99,4 +99,24 @@ for (const game of games) {
     `${game.name}: standalone entry verified; ${(code / 1024).toFixed(1)} KiB code gzip; ${(total / 1024 / 1024).toFixed(2)} MiB total assets.`,
   );
 }
-console.log("Hosting and isolation verified: Angular + both games.");
+// /unmet: a standalone document, with real data, that stays small.
+{
+  const page = path.join(dist, "unmet/index.html");
+  if (!existsSync(page))
+    fail("Missing unmet/index.html. Run npm run build before deploying Hosting.");
+  const html = readFileSync(page, "utf8");
+  if (html.includes("ng-version") || inputs.some((input) => /(?:^|\/)unmet\/src\//.test(input)))
+    fail("Unmet leaked into Angular. It must remain a standalone document.");
+  const config = JSON.parse(html.match(/window\.UNMET=(\{[^<]*\})</)?.[1] ?? "null");
+  const script = html.match(/src="(\/unmet\/assets\/[^"]+\.js)"/)?.[1];
+  const dataPath = config && path.join(dist, config.s, config.data);
+  if (!script || !existsSync(path.join(dist, script)) || !dataPath || !existsSync(dataPath))
+    fail("Unmet is missing its script or data.");
+  if (JSON.parse(readFileSync(dataPath, "utf8")).meta?.sample !== false)
+    fail("Unmet would ship invented sample data. Run npm run unmet:data, then build again.");
+  const code = gzipSync(readFileSync(path.join(dist, script))).byteLength + gzipSync(html).byteLength;
+  if (code > 60 * 1024)
+    fail(`Unmet code exceeds its 60 KiB compressed budget: ${(code / 1024).toFixed(1)} KiB.`);
+  console.log(`Unmet: standalone entry verified; real data; ${(code / 1024).toFixed(1)} KiB code gzip.`);
+}
+console.log("Hosting and isolation verified: Angular + both games + Unmet.");

@@ -93,6 +93,10 @@ export class CommunityStarterComponent implements OnInit, AfterViewInit, OnDestr
       // A stored field can only be opened in its own step.
       if (this.draft.activeField && !this.step.fields.some(f => f.id === this.draft.activeField)) this.draft.activeField = this.nextCoreField();
     } else if (raw) this.storageMessage = 'We couldn’t restore the previous draft. You can start a new one here.';
+    // Arriving from /unmet with a need already chosen: offer its headline fact as
+    // an editable first line. Never overwrites anything the visitor has written.
+    const seed = (this.route.snapshot.queryParamMap.get('problem') || '').trim().slice(0, 400);
+    if (seed && !this.draft.started && !hasAnswer(this.draft.answers['problem'])) this.draft.answers['problem'] = seed;
     this.authSubscription = this.auth.user$.subscribe({
       next: user => { this.user = user; this.sessionReady = true;
         if (user && this.savedForCurrentUser && !this.draft.invitePromptDismissed) this.invitePanel = true;

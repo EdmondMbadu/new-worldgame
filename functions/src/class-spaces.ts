@@ -48,18 +48,37 @@ export const createClassSpace = functions.https.onCall(async (input: unknown, co
   return { classId: setup.classId };
 });
 
-async function viewer(context: functions.https.CallableContext) {
+async function viewer(context: functions.https.CallableContext, readAdminRole = true) {
   const uid = context.auth?.uid || '';
-  const profile = uid ? (await admin.firestore().doc(`users/${uid}`).get()).data() : null;
+  const profile = uid && readAdminRole ? (await admin.firestore().doc(`users/${uid}`).get()).data() : null;
   return { uid, email: String(context.auth?.token.email || '').toLowerCase(), platformAdmin: profile?.admin === 'true' || profile?.role === 'admin' };
 }
 
 // Keep legacy spaces discoverable while withholding private class documents.
-export const listAccessibleChallengeSpaces = functions.https.onCall(async (_input, context) => {
+export const listAccessibleChallengeSpaces = functions.https.onCall(async (input, context) => {
   if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Sign in to view spaces.');
-  const current = await viewer(context);
-  const snapshot = await admin.firestore().collection('challengePages').get();
-  return { pages: snapshot.docs.filter(doc => canReadClassSpace(doc.data(), current.uid, current.email, current.platformAdmin)).map(doc => ({ ...doc.data(), challengePageId: doc.id })) };
+  const directoryOnly = input?.directoryOnly === true;
+  const pages = admin.firestore().collection('challengePages');
+  const query = directoryOnly ? pages.select(
+    'name', 'heading', 'subHeading', 'description', 'imageChallenge', 'logoImage',
+    'customUrl', 'isPrivate', 'classSetupVersion', 'authorId', 'adminUids',
+    'adminEmails', 'participants'
+  ) : pages;
+  const [current, snapshot] = await Promise.all([
+    viewer(context, !directoryOnly),
+    query.get(),
+  ]);
+  return {
+    pages: snapshot.docs.flatMap((doc) => {
+      const page = doc.data();
+      if (!canReadClassSpace(page, current.uid, current.email, current.platformAdmin)) return [];
+      // Legacy private spaces also need a membership check on the directory.
+      if (directoryOnly && page.isPrivate && !canReadClassSpace(
+        { ...page, classSetupVersion: 1, isPrivate: true }, current.uid, current.email
+      )) return [];
+      return [{ ...page, challengePageId: doc.id }];
+    }),
+  };
 });
 
 export const resolveAccessibleChallengeSpace = functions.https.onCall(async (input, context) => {

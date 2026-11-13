@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
 import { ChallengeJoinRequest, ChallengePage, User } from 'src/app/models/user';
 import { AuthService } from 'src/app/services/auth.service';
 import { ChallengesService } from 'src/app/services/challenges.service';
@@ -18,26 +18,41 @@ interface ChallengeSpaceMember {
     standalone: false
 })
 export class ChallengeSpacesComponent implements OnInit, OnDestroy {
-  searchTerm = '';
+  private search = '';
+  get searchTerm(): string { return this.search; }
+  set searchTerm(value: string) {
+    this.search = value;
+    this.updateSections();
+  }
+
   loading = true;
-  challengeSpaces: ChallengePage[] = [];
-  joinRequests: ChallengeJoinRequest[] = [];
-  myJoinRequests: ChallengeJoinRequest[] = [];
+  directoryLoading = true;
+  directoryError = false;
+  private challengeSpaces: ChallengePage[] = [];
+  private myJoinRequests = new Map<string, ChallengeJoinRequest>();
+  joinedSpaces: ChallengePage[] = [];
+  availableSpaces: ChallengePage[] = [];
+  featuredSpace: ChallengePage | null = null;
+  pendingRequests: ChallengeJoinRequest[] = [];
   featuredSpaceId = '';
   selectedRequestSpace: ChallengePage | null = null;
   requestMessage = '';
   requestError = '';
   submittingRequest = false;
   processingRequestIds = new Set<string>();
-  onlineUids = new Set<string>();
   private memberUsersByEmail = new Map<string, ChallengeSpaceMember | null>();
   private memberUidsBySpace = new Map<string, string[]>();
   private memberLastActiveByUid = new Map<string, string | undefined>();
+  private memberCounts = new Map<string, number>();
+  private onlineCounts = new Map<string, number>();
   private challengeSpacesSub?: Subscription;
+  private previewSub?: Subscription;
+  private auxiliaryLoad?: Subscription;
   private featuredSpaceSub?: Subscription;
   private joinRequestsSub?: Subscription;
   private myJoinRequestsSub?: Subscription;
   private presenceSub?: Subscription;
+  private destroyed = false;
 
   constructor(
     public auth: AuthService,
@@ -48,47 +63,39 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.challengeSpacesSub = this.challenges.getAllChallengePages().subscribe({
-      next: (pages) => {
-        this.challengeSpaces = (pages || [])
-          .filter((page) => this.isVisibleToCurrentUser(page))
-          .sort((a, b) =>
-            this.displayTitle(a).localeCompare(this.displayTitle(b))
-          );
-        void this.refreshPresenceForSpaces();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Unable to load challenge spaces', error);
-        this.loading = false;
-      },
-    });
+    this.loadDirectory();
+    this.previewSub = this.challenges.getChallengeSpacePreviews(
+      this.auth.currentUser?.uid, this.auth.currentUser?.email
+    )
+      .subscribe((pages) => {
+        if (!this.directoryLoading) return;
+        const previews = new Map(this.challengeSpaces.map((page) => [this.spaceKey(page), page]));
+        for (const page of pages) previews.set(this.spaceKey(page), page);
+        this.showSpaces([...previews.values()]);
+      });
 
     this.featuredSpaceSub = this.challenges
       .getFeaturedChallengeSpaceConfig()
       .subscribe({
         next: (config) => {
           this.featuredSpaceId = config?.featuredSpaceId || '';
+          this.updateSections();
         },
         error: (error) => {
           console.error('Unable to load featured challenge space', error);
         },
       });
 
-    this.joinRequestsSub = this.challenges.getChallengeJoinRequests().subscribe({
-      next: (requests) => {
-        this.joinRequests = requests || [];
-      },
-      error: (error) => {
-        console.error('Unable to load challenge join requests', error);
-      },
-    });
-
     this.myJoinRequestsSub = this.challenges
       .getMyChallengeJoinRequests()
       .subscribe({
         next: (requests) => {
-          this.myJoinRequests = requests || [];
+          this.myJoinRequests.clear();
+          for (const request of requests || []) {
+            if (!this.myJoinRequests.has(request.challengePageId)) {
+              this.myJoinRequests.set(request.challengePageId, request);
+            }
+          }
         },
         error: (error) => {
           console.error('Unable to load your challenge join requests', error);
@@ -96,55 +103,63 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
       });
   }
 
-  ngOnDestroy(): void {
+  loadDirectory(): void {
+    this.directoryLoading = true;
+    this.directoryError = false;
+    this.loading = !this.challengeSpaces.length;
     this.challengeSpacesSub?.unsubscribe();
+    this.challengeSpacesSub = this.challenges.getChallengeSpaceDirectory().subscribe({
+      next: (pages) => {
+        this.directoryLoading = false;
+        this.loading = false;
+        this.showSpaces(pages);
+        this.auxiliaryLoad = timer(0).subscribe(() => {
+          this.watchAdminRequests();
+          void this.refreshPresenceForSpaces();
+        });
+      },
+      error: (error) => {
+        console.error('Unable to load challenge spaces', error);
+        this.directoryLoading = false;
+        this.directoryError = true;
+        this.loading = false;
+      },
+    });
+  }
+
+  private showSpaces(pages: ChallengePage[]): void {
+    this.challengeSpaces = pages.filter((page) => this.isVisibleToCurrentUser(page))
+      .sort((a, b) => this.displayTitle(a).localeCompare(this.displayTitle(b)));
+    this.memberCounts = new Map(this.challengeSpaces.map((space) => [
+      this.spaceKey(space), this.memberCount(space),
+    ]));
+    if (this.challengeSpaces.length) this.loading = false;
+    this.updateSections();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    this.challengeSpacesSub?.unsubscribe();
+    this.previewSub?.unsubscribe();
+    this.auxiliaryLoad?.unsubscribe();
     this.featuredSpaceSub?.unsubscribe();
     this.joinRequestsSub?.unsubscribe();
     this.myJoinRequestsSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
   }
 
-  get joinedSpaces(): ChallengePage[] {
-    return this.filteredSpacesWithoutFeatured.filter((space) =>
-      this.isCurrentUserInSpace(space)
-    );
-  }
-
-  get availableSpaces(): ChallengePage[] {
-    return this.filteredSpacesWithoutFeatured.filter(
-      (space) => !this.isCurrentUserInSpace(space) && !space.isPrivate
-    );
-  }
-
-  get featuredSpace(): ChallengePage | null {
-    if (!this.featuredSpaceId) {
-      return null;
-    }
-
-    return (
-      this.filteredSpaces.find((space) => this.isFeaturedSpace(space)) || null
-    );
-  }
-
-  get filteredSpacesWithoutFeatured(): ChallengePage[] {
-    return this.filteredSpaces.filter((space) => !this.isFeaturedSpace(space));
-  }
-
-  get filteredSpaces(): ChallengePage[] {
+  private updateSections(): void {
     const query = this.searchTerm.trim().toLowerCase();
-    if (!query) return this.challengeSpaces;
-
-    return this.challengeSpaces.filter((space) =>
-      [
-        space.name,
-        space.heading,
-        space.subHeading,
-        space.description,
-        space.customUrl,
-      ]
-        .map((value) => String(value || '').toLowerCase())
-        .some((value) => value.includes(query))
-    );
+    this.joinedSpaces = [];
+    this.availableSpaces = [];
+    this.featuredSpace = null;
+    for (const space of this.challengeSpaces) {
+      if (query && ![space.name, space.heading, space.subHeading, space.description, space.customUrl]
+        .some((value) => String(value || '').toLowerCase().includes(query))) continue;
+      if (this.isFeaturedSpace(space)) this.featuredSpace = space;
+      else if (this.isCurrentUserInSpace(space)) this.joinedSpaces.push(space);
+      else if (!space.isPrivate) this.availableSpaces.push(space);
+    }
   }
 
   displayTitle(space: ChallengePage): string {
@@ -177,18 +192,20 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     return request.id || `${request.challengePageId}:${request.requesterEmail}`;
   }
 
-  adminPendingRequests(): ChallengeJoinRequest[] {
-    const adminSpaces = new Map(
+  private watchAdminRequests(): void {
+    const adminIds = new Set(
       this.challengeSpaces
         .filter((space) => this.isCurrentUserAdminForSpace(space))
-        .map((space) => [this.spaceKey(space), space])
+        .map((space) => this.spaceKey(space))
     );
-
-    return (this.joinRequests || [])
-      .filter((request) => adminSpaces.has(request.challengePageId))
-      .sort((a, b) =>
-        this.requestDateMs(b.createdAt) - this.requestDateMs(a.createdAt)
-      );
+    if (!adminIds.size || this.joinRequestsSub) return;
+    this.joinRequestsSub = this.challenges.getChallengeJoinRequests().subscribe({
+      next: (requests) => {
+        this.pendingRequests = (requests || []).filter((request) => adminIds.has(request.challengePageId))
+          .sort((a, b) => this.requestDateMs(b.createdAt) - this.requestDateMs(a.createdAt));
+      },
+      error: (error) => console.error('Unable to load challenge join requests', error),
+    });
   }
 
   requestSpaceTitle(request: ChallengeJoinRequest): string {
@@ -358,7 +375,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   }
 
   memberLabel(space: ChallengePage): string {
-    const count = this.memberCount(space);
+    const count = this.memberCounts.get(this.spaceKey(space)) ?? 0;
     return this.translate.instant(
       count === 1
         ? 'challengeSpaces.members.one'
@@ -368,9 +385,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   }
 
   onlineCount(space: ChallengePage): number {
-    return (this.memberUidsBySpace.get(this.spaceKey(space)) || []).filter((uid) =>
-      this.onlineUids.has(uid)
-    ).length;
+    return this.onlineCounts.get(this.spaceKey(space)) ?? 0;
   }
 
   onlineLabel(space: ChallengePage): string {
@@ -437,6 +452,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     );
 
     await this.resolveMembersByEmail(emails);
+    if (this.destroyed) return;
 
     const allUids = new Set<string>();
     this.memberUidsBySpace.clear();
@@ -467,7 +483,9 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
     this.presenceSub = this.presence
       .watchOnlineUids$(Array.from(allUids), this.memberLastActiveByUid)
       .subscribe((onlineUids) => {
-        this.onlineUids = onlineUids;
+        this.onlineCounts = new Map([...this.memberUidsBySpace].map(([key, uids]) => [
+          key, uids.filter((uid) => onlineUids.has(uid)).length,
+        ]));
       });
   }
 
@@ -535,11 +553,7 @@ export class ChallengeSpacesComponent implements OnInit, OnDestroy {
   private myRequestStatus(
     space: ChallengePage
   ): ChallengeJoinRequest['status'] | '' {
-    const challengePageId = this.spaceKey(space);
-    const request = (this.myJoinRequests || []).find(
-      (item) => item.challengePageId === challengePageId
-    );
-    return request?.status || '';
+    return this.myJoinRequests.get(this.spaceKey(space))?.status || '';
   }
 
   private requestDateMs(value: any): number {

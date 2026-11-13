@@ -4,7 +4,8 @@ import {
   AngularFirestoreDocument,
 } from '@angular/fire/compat/firestore';
 import { AngularFireFunctions } from '@angular/fire/compat/functions';
-import { BehaviorSubject, Observable, firstValueFrom, of } from 'rxjs';
+import { BehaviorSubject, Observable, firstValueFrom, merge, of } from 'rxjs';
+import { catchError, take } from 'rxjs/operators';
 import { map } from 'rxjs/operators';
 import { ChallengeJoinRequest, ChallengePage } from '../models/user';
 import { AuthService } from './auth.service';
@@ -347,6 +348,31 @@ export class ChallengesService {
 
   getAllChallengePages(): Observable<ChallengePage[]> {
     return this.fns.httpsCallable('listAccessibleChallengeSpaces')({}).pipe(map(result => result.pages || []));
+  }
+
+  getChallengeSpaceDirectory(): Observable<ChallengePage[]> {
+    return this.fns.httpsCallable('listAccessibleChallengeSpaces')({ directoryOnly: true }).pipe(
+      map((result) => result.pages || [])
+    );
+  }
+
+  getChallengeSpacePreviews(uid: string, email: string): Observable<ChallengePage[]> {
+    const spaces = this.afs.collection<ChallengePage>('challengePages').ref;
+    const queries = [spaces.where('isPrivate', '==', false).limit(12)];
+    if (uid) queries.push(spaces.where('authorId', '==', uid).limit(12));
+    const memberEmail = String(email || '').trim().toLowerCase();
+    if (memberEmail) queries.push(spaces.where('participants', 'array-contains', memberEmail).limit(12));
+
+    return merge(...queries.map((query) => this.afs.collection<ChallengePage>('challengePages', () => query)
+        .get({ source: 'server' })
+        .pipe(
+          take(1),
+          map((snapshot) => snapshot.docs.map((doc) => ({
+            ...doc.data(), challengePageId: doc.id,
+          }))),
+          catchError(() => of([]))
+        )
+    ));
   }
 
   getFeaturedChallengeSpaceConfig(): Observable<FeaturedChallengeSpaceConfig | null> {

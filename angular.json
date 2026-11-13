@@ -44,6 +44,11 @@
                 "glob": "**/*",
                 "input": "games/last-light/dist",
                 "output": "/games/last-light/"
+              },
+              {
+                "glob": "**/*",
+                "input": "unmet/dist",
+                "output": "/unmet/"
               }
             ],
             "styles": [
@@ -89,6 +94,11 @@
                   "glob": "**/*",
                   "input": "node_modules/tinymce",
                   "output": "/tinymce/"
+                },
+                {
+                  "glob": "**/*",
+                  "input": "unmet/dist",
+                  "output": "/unmet/"
                 }
               ]
             },

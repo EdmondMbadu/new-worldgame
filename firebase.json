@@ -126,6 +126,33 @@
         ]
       },
       {
+        "source": "/unmet{,/}",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/unmet/assets/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
+        "source": "/unmet/s-*/**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
+      },
+      {
         "source": "/games/lost-in-orbit/",
         "headers": [
           {
@@ -213,6 +240,10 @@
       {
         "source": "/games/last-light/",
         "destination": "/games/last-light/index.html"
+      },
+      {
+        "source": "/unmet/",
+        "destination": "/unmet/index.html"
       },
       {
         "source": "/campaigns/power-drc-clinics",

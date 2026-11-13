@@ -43,9 +43,18 @@ test('class creation, discovery, retries, ownership, and actual Firestore rules'
   await assert.rejects(() => api.createClassSpace.run({ ...input, classId: 'bcdefghijklmnopqrstu', schoolId: 'not-my-school' }, ctx('teacher')), { code: 'permission-denied' });
   assert.equal((await db.doc('challengePages/bcdefghijklmnopqrstu').get()).exists, false);
   await db.doc('challengePages/legacy').set({ name: 'Legacy community', customUrl: 'legacy-space' });
-  await db.doc(`challengePages/${id}`).update({ participants: ['teacher@example.test', 'student@example.test'], adminUids: ['teacher', 'assistant'], customUrl: 'climate-class' });
+  await db.doc('challengePages/legacy-private').set({ name: 'Legacy private', isPrivate: true, adminEmails: ['teacher@example.test'] });
+  await db.doc(`challengePages/${id}`).update({ participants: ['teacher@example.test', 'student@example.test'], adminUids: ['teacher', 'assistant'], customUrl: 'climate-class', discussion: [{ text: 'Full document only' }] });
   assert.equal((await api.listAccessibleChallengeSpaces.run({}, ctx('other'))).pages.some(p => p.challengePageId === id), false);
   assert.equal((await api.listAccessibleChallengeSpaces.run({}, ctx('teacher'))).pages.some(p => p.challengePageId === id), true);
+  const teacherDirectory = (await api.listAccessibleChallengeSpaces.run({ directoryOnly: true }, ctx('teacher'))).pages;
+  assert.equal(teacherDirectory.find(p => p.challengePageId === id).discussion, undefined);
+  assert.ok(teacherDirectory.some(p => p.challengePageId === 'legacy-private'));
+  const studentDirectory = (await api.listAccessibleChallengeSpaces.run({ directoryOnly: true }, ctx('student'))).pages;
+  assert.ok(studentDirectory.some(p => p.challengePageId === id));
+  const otherDirectory = (await api.listAccessibleChallengeSpaces.run({ directoryOnly: true }, ctx('other'))).pages;
+  assert.deepEqual(otherDirectory.map(p => p.challengePageId), ['legacy']);
+  assert.ok((await api.listAccessibleChallengeSpaces.run({}, ctx('other'))).pages.some(p => p.challengePageId === 'legacy-private'));
   assert.equal(await api.resolveAccessibleChallengeSpace.run({idOrSlug:'climate-class'}, ctx('other')), null);
   assert.equal((await api.resolveAccessibleChallengeSpace.run({idOrSlug:'climate-class'}, ctx('teacher'))).id, id);
   assert.equal((await api.resolveAccessibleChallengeSpace.run({idOrSlug:'legacy-space'}, ctx('other'))).id, 'legacy');
@@ -66,6 +75,8 @@ test('class creation, discovery, retries, ownership, and actual Firestore rules'
   assert.equal((await request(':runQuery', 'teacher', 'POST', ownQuery)).status, 200);
   const memberQuery = { structuredQuery: { from: [{ collectionId: 'challengePages' }], where: { fieldFilter: { field: {fieldPath:'participants'}, op:'ARRAY_CONTAINS', value:{stringValue:'student@example.test'} } } } };
   assert.equal((await request(':runQuery', 'student', 'POST', memberQuery)).status, 200);
+  const publicQuery = { structuredQuery: { from: [{ collectionId: 'challengePages' }], where: { fieldFilter: { field: {fieldPath:'isPrivate'}, op:'EQUAL', value:{booleanValue:false} } }, limit: 12 } };
+  assert.equal((await request(':runQuery', 'other', 'POST', publicQuery)).status, 200);
   assert.equal((await patch('isPrivate', {booleanValue:false}, 'teacher')).status, 200);
   assert.equal((await request(`/challengePages/${id}`, 'other')).status, 200);
   await db.doc('schools/owned-school').set({ ownerUid: 'teacher', name: 'University' });

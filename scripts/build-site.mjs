@@ -32,6 +32,8 @@ function run(command, args, cwd = root) {
 }
 // Build the standalone document first. Angular copies it as static files, never imports it.
 for (const game of gamePaths) run("npm", ["run", "build"], game);
+// /unmet is a standalone document as well. It ships real data or the build stops.
+run(process.execPath, ["unmet/scripts/build.mjs"]);
 run(process.execPath, [
   "node_modules/@angular/cli/bin/ng.js",
   "build",

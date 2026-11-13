@@ -24,6 +24,13 @@ const routes: Routes = [
     path: 'landing-alternative',
     loadComponent: () => import('./components/landing-alternative/landing-alternative.component').then(m => m.LandingAlternativeComponent),
   },
+  {
+    // /unmet is a standalone document that Hosting serves directly. This route
+    // only catches in-app links and ng serve, and hands over to that document.
+    path: 'unmet',
+    pathMatch: 'full',
+    loadComponent: () => import('./components/unmet-launcher/unmet-launcher.component').then(m => m.UnmetLauncherComponent),
+  },
   { path: 'community-brief/:token', loadComponent: () => import('./community-starter/shared-starter-brief.component').then(m => m.SharedStarterBriefComponent) },
   {
     path: 'start-a-solution',

@@ -1984,6 +1984,7 @@
       "placeholder": "Rechercher un espace"
     },
     "loading": "Chargement des espaces de défis…",
+    "loadFailed": "Impossible de charger la liste complète des espaces de défis.",
     "featured": {
       "badge": "Espace à la une",
       "label": "Espace mis en avant"

@@ -1,0 +1,6 @@
+{
+  "name": "unmet",
+  "private": true,
+  "type": "module",
+  "description": "Standalone page served at /unmet. Built by scripts/build.mjs with the esbuild Angular already installs; it has no dependencies of its own."
+}

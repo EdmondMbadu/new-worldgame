@@ -1,5 +1,5 @@
 import { games } from "./games.mjs";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
@@ -14,6 +14,18 @@ for (const game of games) {
     console.error("Run npm run setup:games before npm start.");
     process.exit(1);
   }
+}
+// /unmet is served as static files from unmet/dist. Build it once up front;
+// --dev falls back to sample data when there is no real snapshot yet.
+// (npm run unmet:dev gives a live-rebuilding preview of that page alone.)
+if (
+  spawnSync(process.execPath, ["unmet/scripts/build.mjs", "--dev"], {
+    cwd: root,
+    stdio: "inherit",
+  }).status !== 0
+) {
+  console.error("The /unmet page failed to build.");
+  process.exit(1);
 }
 const children = [
   ...games.map((game) =>
