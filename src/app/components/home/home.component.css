@@ -728,9 +728,20 @@
 .skeleton-line--medium { width: 58%; }
 
 .community-load-more {
+  position: relative;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
   padding: 2rem 0 0;
+}
+
+.community-scroll-trigger {
+  position: absolute;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
 }
 
 .community-load-more button:disabled {

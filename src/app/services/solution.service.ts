@@ -19,6 +19,7 @@ import {
   catchError,
   combineLatest,
   count,
+  filter,
   firstValueFrom,
   from,
   last,
@@ -26,6 +27,7 @@ import {
   Observable,
   of,
   shareReplay,
+  startWith,
   switchMap,
   take,
 } from 'rxjs';
@@ -408,7 +410,10 @@ export class SolutionService {
     return this.afs.doc<Solution>(`solutions/${solutionId}`).valueChanges();
   }
 
-  getAuthenticatedUserAllSolutions(email = this.auth.currentUser?.email) {
+  getAuthenticatedUserAllSolutions(
+    email = this.auth.currentUser?.email,
+    progressive = false
+  ): Observable<Solution[]> {
     if (!email) return of([] as Solution[]);
     const normalizedEmail = normalizeSolutionEmail(email);
     const participantSolutions$ = this.afs
@@ -441,15 +446,23 @@ export class SolutionService {
       )
       .valueChanges();
 
-    return combineLatest([
+    const streams = [
       participantSolutions$,
       ownerSolutions$,
       legacyAuthorSolutions$,
       adminSolutions$,
-    ]).pipe(
+    ];
+    const groups$ = progressive
+      ? combineLatest(streams.map((stream) => stream.pipe(startWith(null))))
+      : combineLatest(streams);
+
+    return groups$.pipe(
+      filter((groups) =>
+        groups.every((group) => group !== null) || groups.some((group) => !!group?.length)
+      ),
       map((groups) => {
         const unique = new Map<string, Solution>();
-        groups.flat().forEach((solution) => {
+        groups.flatMap((group) => group ?? []).forEach((solution) => {
           const key =
             solution.solutionId ||
             `${solution.title || ''}:${solution.creationDate || ''}`;

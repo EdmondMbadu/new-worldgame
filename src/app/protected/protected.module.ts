@@ -25,7 +25,6 @@ import { ChallengeStarterComponent } from '../components/challenge-starter/chall
 import { StartChallengeComponent } from '../components/start-challenge/start-challenge.component';
 import { GenerateChallengesComponent } from '../components/generate-challenges/generate-challenges.component';
 import { HomeChallengeComponent } from '../components/home-challenge/home-challenge.component';
-import { DashboardComponent } from '../components/dashboard/dashboard.component';
 import { FullDiscussionComponent } from '../components/full-discussion/full-discussion.component';
 import { SolutionDetailsComponent } from '../components/solution-details/solution-details.component';
 import { DocumentFilesComponent } from '../components/document-files/document-files.component';
@@ -80,7 +79,6 @@ import { ProblemListCardModule } from './problem-list-card.module';
     StartChallengeComponent,
     GenerateChallengesComponent,
     HomeChallengeComponent,
-    DashboardComponent,
     FullDiscussionComponent,
     SolutionDetailsComponent,
     DocumentFilesComponent,

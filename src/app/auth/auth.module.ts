@@ -6,7 +6,6 @@ import { RouterModule } from '@angular/router';
 import { AuthRoutingModule } from './auth-routing.module';
 import { SharedModule } from '../shared/shared.module';
 
-import { LoginComponent } from '../components/login/login.component';
 import { SignupComponent } from '../components/signup/signup.component';
 import { ForgotPasswordComponent } from '../components/forgot-password/forgot-password.component';
 import { VerifyEmailComponent } from '../components/verify-email/verify-email.component';
@@ -17,7 +16,6 @@ import { CommunitySignupComponent } from '../components/community-signup/communi
 
 @NgModule({
   declarations: [
-    LoginComponent,
     SignupComponent,
     ForgotPasswordComponent,
     VerifyEmailComponent,

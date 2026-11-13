@@ -8,7 +8,6 @@ const PROTECTED_PATHS = new Set<string>([
   'discover',
   'profile',
   'start-challenge',
-  'dashboard',
   'join',
   'whiteboard',
   'team-building',

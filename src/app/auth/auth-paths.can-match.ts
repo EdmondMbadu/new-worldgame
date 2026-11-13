@@ -1,7 +1,6 @@
 import { CanMatchFn, UrlSegment } from '@angular/router';
 
 const AUTH_SEGMENTS = new Set([
-  'login',
   'signup',
   'forgot-password',
   'verify-email',

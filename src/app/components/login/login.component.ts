@@ -2,22 +2,26 @@ import { t } from '../../../../content/last-light-locale';
 import { clearAuthReturn, captureAuthReturn, gameAuthReturn, navigateAuthReturn } from 'src/app/services/auth-return';
 import { Subscription } from 'rxjs';
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AuthService } from 'src/app/services/auth.service';
 import {
   FormGroup,
   FormBuilder,
   Validators,
   FormControl,
+  ReactiveFormsModule,
 } from '@angular/forms';
 import { of } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { NavbarModule } from '../../shared/navbar.module';
+import { FooterComponent } from '../footer/footer.component';
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css'],
-    standalone: false
+    imports: [CommonModule, ReactiveFormsModule, RouterLink, NavbarModule, FooterComponent]
 })
 export class LoginComponent implements OnInit, OnDestroy {
   readonly tr = t;

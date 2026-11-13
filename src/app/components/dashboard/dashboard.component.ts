@@ -99,6 +99,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private teamMembersByUid = new Map<string, OnlineTeamMember>();
   private teamPresenceSub?: Subscription;
   private solutionSub?: Subscription;
+  private inviteUsersSub?: Subscription;
+  private routeQuerySub?: Subscription;
+  private teamRosterKey = '';
+  private destroyed = false;
+  private presenceRequest = 0;
   ngOnInit(): void {
     window.scrollTo(0, 0);
     this.id = this.activatedRoute.snapshot.paramMap.get('id');
@@ -110,25 +115,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       void this.refreshTeamPresence();
     });
 
-    // Load all users for autocomplete
-    this.auth.getALlUsers().subscribe((users) => {
-      this.allUsers = users;
-    });
-
     // Check for openInvite query param to auto-open invite modal
-    this.activatedRoute.queryParams.subscribe((params) => {
+    this.routeQuerySub = this.activatedRoute.queryParams.subscribe((params) => {
       if (params['openInvite'] === 'true') {
-        // Small delay to ensure the page is loaded
-        setTimeout(() => {
-          this.showInviteTeamMemberModal = true;
-        }, 500);
+        this.showInviteTeamMemberModal = true;
+        this.loadInviteUsers();
       }
     });
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.solutionSub?.unsubscribe();
     this.teamPresenceSub?.unsubscribe();
+    this.routeQuerySub?.unsubscribe();
+    this.inviteUsersSub?.unsubscribe();
+    clearTimeout(this.userSearchTimeout);
   }
   toggleHover(event: boolean) {
     this.isHovering = event;
@@ -561,6 +563,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Invite team member methods
   toggleInviteTeamMemberModal() {
     this.showInviteTeamMemberModal = !this.showInviteTeamMemberModal;
+    if (this.showInviteTeamMemberModal) this.loadInviteUsers();
     if (!this.showInviteTeamMemberModal) {
       this.newTeamMember = '';
       this.showUserSuggestions = false;
@@ -573,6 +576,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         clearTimeout(this.userSearchTimeout);
       }
     }
+  }
+
+  private loadInviteUsers(): void {
+    if (this.inviteUsersSub) return;
+    this.inviteUsersSub = this.auth.getALlUsers().subscribe({
+      next: (users) => {
+        this.allUsers = users;
+        if (this.newTeamMember && !this.selectedUser) this.onTeamMemberInputChange();
+      },
+      error: (error) => console.warn('Unable to load invite autocomplete cache:', error),
+    });
   }
 
   /**
@@ -645,6 +659,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private searchUsersFromServer(searchTerm: string): void {
     this.auth.searchUsers(searchTerm, 15).subscribe({
       next: (serverUsers) => {
+        if (this.destroyed || this.newTeamMember.trim().toLowerCase() !== searchTerm) return;
         // Merge server results with client results, avoiding duplicates
         const existingEmails = new Set(this.filteredUsers.map(u => u.email?.toLowerCase()));
         
@@ -936,9 +951,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private async refreshTeamPresence(): Promise<void> {
     const emails = this.solutionMemberEmails(this.currentSolution);
-    this.teamMemberCount = emails.length || (this.currentSolution.authorAccountId ? 1 : 0);
+    const owner = solutionOwnerIdentity(this.currentSolution);
+    const rosterKey = JSON.stringify([emails.sort(), owner?.authorAccountId, owner?.authorName]);
+    if (this.teamRosterKey === rosterKey) return;
+    this.teamRosterKey = rosterKey;
+    const request = ++this.presenceRequest;
+    this.teamMemberCount = emails.length || (owner?.authorAccountId ? 1 : 0);
 
     await Promise.all(emails.map((email) => this.resolveTeamMemberByEmail(email)));
+    if (this.destroyed || request !== this.presenceRequest) return;
 
     const uids = new Set<string>();
     const fallbackLastActiveByUid = new Map<string, string | undefined>();
@@ -952,7 +973,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       fallbackLastActiveByUid.set(member.uid, member.lastActiveAt);
     });
 
-    const owner = solutionOwnerIdentity(this.currentSolution);
     if (owner?.authorAccountId) {
       const author = this.memberFromSolutionAuthor(this.currentSolution);
       if (author) {

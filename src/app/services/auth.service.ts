@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 import {
   Observable,
   combineLatest,
+  filter,
   firstValueFrom,
   map,
   of,
@@ -88,6 +89,7 @@ export class AuthService {
             map((profile) => ({
               ...(profile || {}),
               uid: profile?.uid || user.uid,
+              verified: profile?.verified === true || this.isAuthEmailVerified(user),
               email: profile?.email || user.email || '',
               emailLower:
                 profile?.emailLower || (profile?.email || user.email || '').toLowerCase(),
@@ -754,9 +756,6 @@ export class AuthService {
     provider.setCustomParameters({ prompt: 'select_account' });
     try {
       const cred = await this.fireauth.signInWithPopup(provider);
-      if (cred.user) {
-        await this.ensureUserProfileDocument(cred.user);
-      }
       await this.finishInteractiveSignIn(cred.user ?? null);
     } catch (err) {
       this.logingError = of(err);
@@ -770,9 +769,6 @@ export class AuthService {
     provider.addScope('email');
     try {
       const cred = await this.fireauth.signInWithPopup(provider);
-      if (cred.user) {
-        await this.ensureUserProfileDocument(cred.user);
-      }
       await this.finishInteractiveSignIn(cred.user ?? null);
     } catch (err) {
       this.logingError = of(err);
@@ -786,9 +782,6 @@ export class AuthService {
     provider.setCustomParameters({ include_email: 'true' });
     try {
       const cred = await this.fireauth.signInWithPopup(provider);
-      if (cred.user) {
-        await this.ensureUserProfileDocument(cred.user);
-      }
       await this.finishInteractiveSignIn(cred.user ?? null, {
         fallbackVerify: true,
       });
@@ -812,15 +805,9 @@ export class AuthService {
       const familyName =
         (cred.additionalUserInfo?.profile as { family_name?: string } | null)
           ?.family_name || '';
-      if (cred.user && !cred.user.displayName && (givenName || familyName)) {
-        await cred.user.updateProfile({
-          displayName: `${givenName} ${familyName}`.trim(),
-        });
-      }
-      if (cred.user) {
-        await this.ensureUserProfileDocument(cred.user);
-      }
-      await this.finishInteractiveSignIn(cred.user ?? null);
+      await this.finishInteractiveSignIn(cred.user ?? null, {
+        displayName: `${givenName} ${familyName}`.trim(),
+      });
     } catch (err) {
       this.logingError = of(err);
       throw err;
@@ -841,15 +828,9 @@ export class AuthService {
       const profile =
         (cred.additionalUserInfo?.profile as { displayName?: string } | null) ||
         null;
-      if (cred.user && !cred.user.displayName && profile?.displayName) {
-        await cred.user.updateProfile({
-          displayName: profile.displayName,
-        });
-      }
-      if (cred.user) {
-        await this.ensureUserProfileDocument(cred.user);
-      }
-      await this.finishInteractiveSignIn(cred.user ?? null);
+      await this.finishInteractiveSignIn(cred.user ?? null, {
+        displayName: profile?.displayName,
+      });
     } catch (err) {
       this.logingError = of(err);
       throw err;
@@ -1132,43 +1113,37 @@ export class AuthService {
   // Sign-in helpers
   private async finishInteractiveSignIn(
     user: firebase.User | null,
-    opts: { fallbackVerify?: boolean } = {}
+    opts: { fallbackVerify?: boolean; displayName?: string } = {}
   ): Promise<void> {
     if (!user) {
       return;
     }
 
-    await this.updateLastLogin(user);
-
-    // Repair profile documents for users whose Auth account was created while
-    // Firestore writes were unavailable. A login should never be reported as a
-    // bad password merely because this secondary profile sync fails.
-    try {
-      await this.ensureUserProfileDocument(user);
-    } catch (error) {
-      console.warn('Unable to ensure user profile during sign-in:', user.uid, error);
+    const authVerified = this.isAuthEmailVerified(user);
+    const consideredVerified = authVerified || opts.fallbackVerify === true;
+    const displayName = user.displayName || opts.displayName;
+    const profileSync = this.ensureUserProfileDocument(
+      user,
+      consideredVerified,
+      displayName
+    ).catch((error) => console.warn('Unable to sync sign-in profile:', user.uid, error));
+    if (!user.displayName && displayName) {
+      void user.updateProfile({ displayName }).catch((error) =>
+        console.warn('Unable to sync provider display name:', user.uid, error)
+      );
     }
-
-    const providerIds = user.providerData
-      .map((p) => p?.providerId)
-      .filter((id): id is string => !!id);
-    const isSocialProvider = providerIds.some((pid) => pid !== 'password');
-    const consideredVerified =
-      user.emailVerified || isSocialProvider || opts.fallbackVerify === true;
-
-    if (consideredVerified) {
-      try {
-        await this.markUserVerified(user.uid);
-      } catch (error) {
-        console.warn('Unable to sync verified profile flag:', user.uid, error);
-      }
-      const dest = this.popRedirect();
-      this.navigateToDestination(dest);
-    } else if (gameAuthReturn()) {
-      this.navigateToDestination(this.popRedirect());
+    if (consideredVerified || gameAuthReturn()) {
+      if (consideredVerified && !authVerified) await profileSync;
+      this.navigateToDestination(await this.popRedirect(user.uid));
     } else {
       this.router.navigate(['/verify-email'], {queryParams: {redirectTo: captureAuthReturn()}});
     }
+  }
+
+  private isAuthEmailVerified(user: firebase.User): boolean {
+    return user.emailVerified || user.providerData.some(
+      (provider) => !!provider?.providerId && provider.providerId !== 'password'
+    );
   }
 
   private navigateToDestination(target: string) { navigateAuthReturn(this.router, target); }
@@ -1184,21 +1159,21 @@ export class AuthService {
 
   private async updateLastLogin(user: firebase.User | null): Promise<void> {
     if (!user?.uid) return;
-    const lastSignInTime = user.metadata?.lastSignInTime;
-    const parsedMs = lastSignInTime ? Date.parse(lastSignInTime) : NaN;
-    const iso = Number.isFinite(parsedMs)
-      ? new Date(parsedMs).toISOString()
-      : new Date().toISOString();
     try {
       await this.afs.doc<User>(`users/${user.uid}`).set(
         {
-          lastLogin: iso,
+          lastLogin: this.lastLoginTimestamp(user),
         } as Partial<User>,
         { merge: true }
       );
     } catch (error) {
       console.warn('Unable to persist lastLogin for user:', user.uid, error);
     }
+  }
+
+  private lastLoginTimestamp(user: firebase.User): string {
+    const parsedMs = Date.parse(user.metadata?.lastSignInTime || '');
+    return new Date(Number.isFinite(parsedMs) ? parsedMs : Date.now()).toISOString();
   }
 
   private initLastActiveTracking() {
@@ -1265,14 +1240,20 @@ export class AuthService {
     }
   }
 
-  private async ensureUserProfileDocument(user: firebase.User): Promise<void> {
+  private async ensureUserProfileDocument(
+    user: firebase.User,
+    verified: boolean,
+    providerName?: string
+  ): Promise<void> {
     const userRef = this.afs.doc<User>(`users/${user.uid}`);
     const snap = await userRef.ref.get();
     const email =
       user.email ||
       user.providerData.find((p) => !!p?.email)?.email ||
       '';
-    const displayName = user.displayName?.trim() || '';
+    const displayName = providerName?.trim() || '';
+    const loginFields: Partial<User> = { lastLogin: this.lastLoginTimestamp(user) };
+    if (verified) loginFields.verified = true;
     const [firstRaw, ...rest] = displayName.split(' ').filter(Boolean);
     // Never invent a person's name from their email address. Social providers
     // normally supply displayName; password accounts can complete a real name
@@ -1283,6 +1264,7 @@ export class AuthService {
     if (!snap.exists) {
       await userRef.set(
         {
+          ...loginFields,
           uid: user.uid,
           email,
           emailLower: (email || '').toLowerCase(),
@@ -1311,7 +1293,7 @@ export class AuthService {
     }
 
     const current = snap.data() as User | undefined;
-    const updates: Partial<User> = {};
+    const updates: Partial<User> = { ...loginFields };
 
     if (email && !current?.email) {
       updates.email = email;
@@ -1332,9 +1314,7 @@ export class AuthService {
       updates.lastNameLower = lastName.toLowerCase();
     }
 
-    if (Object.keys(updates).length) {
-      await userRef.set(updates, { merge: true });
-    }
+    await userRef.set(updates, { merge: true });
   }
 
   private deriveNameFromEmail(email: string): string {
@@ -1445,7 +1425,7 @@ export class AuthService {
   }
 
   // AuthService
-  private popRedirect(): string {
+  private async popRedirect(uid: string): Promise<string> {
     // 1) in-memory (setRedirectUrl called by guards or components)
     let target = (this.redirectUrl || '').trim();
 
@@ -1477,14 +1457,12 @@ export class AuthService {
 
     // sanitize + clear
     target = safeAuthReturn(target) || '';
-    if (!target && hasPendingClassSetup(this.currentUser?.uid || this.currentAuthUid || '')) target = '/create-class';
+    if (!target && hasPendingClassSetup(uid)) target = '/create-class';
     if (!target) {
-      // Check if user is school admin and redirect accordingly
-      if (this.currentUser?.role === 'schoolAdmin') {
-        target = '/school-admin';
-      } else {
-        target = '/home';
-      }
+      const profile = await firstValueFrom(this.user$.pipe(
+        filter((user) => user?.uid === uid)
+      )).catch(() => null);
+      target = profile?.role === 'schoolAdmin' ? '/school-admin' : '/home';
     }
     this.redirectUrl = '';
     return target;

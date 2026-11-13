@@ -260,7 +260,14 @@
         </div>
       </div>
 
-      <div *ngIf="!filteredSolutions.length" class="mt-12 text-center">
+      <div *ngIf="loadingSolutions" role="status" class="mt-12 text-center text-slate-600 dark:text-slate-300">
+        {{ 'home.community.loadingMore' | translate }}
+      </div>
+      <div *ngIf="solutionsLoadFailed" role="status" class="mt-12 space-y-3 text-center text-slate-600 dark:text-slate-300">
+        <p>{{ 'home.community.error.message' | translate }}</p>
+        <button type="button" class="font-semibold underline" (click)="loadSolutions()">{{ 'home.community.error.retry' | translate }}</button>
+      </div>
+      <div *ngIf="!loadingSolutions && !solutionsLoadFailed && !filteredSolutions.length" class="mt-12 text-center">
         <div
           class="inline-flex flex-col items-center gap-3 px-8 py-12 rounded-2xl border border-dashed border-gray-300 dark:border-gray-700 bg-white/60 dark:bg-slate-800/60"
         >

@@ -7,8 +7,6 @@ import { SharedModule } from '../shared/shared.module';
 import { MaterialModule } from '../shared/material.module';
 
 import { CreatePlaygroundComponent } from '../components/create-playground/create-playground.component';
-import { PlaygroundStepsComponent } from '../components/playground-steps/playground-steps.component';
-import { PlaygroundStepComponent } from '../components/playground-step/playground-step.component';
 import { SliderComponent } from '../components/slider/slider.component';
 import { CreateSolutionComponent } from '../components/create-solution/create-solution.component';
 import { CreateSolutionStepsComponent } from '../components/create-solution-steps/create-solution-steps.component';
@@ -20,8 +18,6 @@ import { EditorModule } from '@tinymce/tinymce-angular';
 @NgModule({
   declarations: [
     CreatePlaygroundComponent,
-    PlaygroundStepsComponent,
-    PlaygroundStepComponent,
     SliderComponent,
     CreateSolutionComponent,
     CreateSolutionStepsComponent,

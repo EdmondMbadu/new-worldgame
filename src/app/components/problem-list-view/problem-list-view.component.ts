@@ -28,7 +28,7 @@ type SolutionFilter = 'all' | 'pending' | 'submitted';
     styleUrls: ['./problem-list-view.component.css'],
     standalone: false
 })
-export class ProblemListViewComponent implements OnInit {
+export class ProblemListViewComponent implements OnInit, OnDestroy {
   solutions: Solution[] = [];
   pendingSolutions: Solution[] = [];
   filteredSolutions: Solution[] = [];
@@ -75,6 +75,11 @@ export class ProblemListViewComponent implements OnInit {
   private memberLastActiveByUid = new Map<string, string | undefined>();
   private solutionsSub?: Subscription;
   private presenceSub?: Subscription;
+  private readonly pageSubscriptions = new Subscription();
+  private presenceRequest = 0;
+  private rosterKey = '';
+  loadingSolutions = true;
+  solutionsLoadFailed = false;
 
   constructor(
     public auth: AuthService,
@@ -83,30 +88,47 @@ export class ProblemListViewComponent implements OnInit {
     private afs: AngularFirestore,
     private route: ActivatedRoute,
     private presence: PresenceService
-  ) {
-    this.solutionsSub = solution.getAuthenticatedUserAllSolutions().subscribe((data) => {
-      this.solutions = data;
-      console.log('all solutions I am in', this.solutions);
-      this.findPendingSolutions();
-      this.applySolutionFilters();
-      void this.refreshPresenceForSolutions();
+  ) {}
+
+  loadSolutions(): void {
+    this.loadingSolutions = true;
+    this.solutionsLoadFailed = false;
+    this.solutionsSub?.unsubscribe();
+    this.solutionsSub = this.solution.getAuthenticatedUserAllSolutions(
+      this.auth.currentUser?.email,
+      true
+    ).subscribe({
+      next: (solutions) => {
+        this.solutions = solutions;
+        this.findPendingSolutions();
+        this.applySolutionFilters();
+        this.loadingSolutions = false;
+        void this.refreshPresenceForSolutions();
+      },
+      error: (error) => {
+        console.warn('Unable to load your solutions:', error);
+        this.loadingSolutions = false;
+        this.solutionsLoadFailed = true;
+      },
     });
   }
   ngOnInit(): void {
     window.scroll(0, 0);
-    this.route.queryParamMap.subscribe((params) => {
+    this.loadSolutions();
+    this.pageSubscriptions.add(this.route.queryParamMap.subscribe((params) => {
       this.weeklyBriefFromEmailLink = params.get('weeklyBrief') === '1';
       if (this.weeklyBriefFromEmailLink) {
         this.openWeeklyBriefModal();
       }
-    });
-    this.auth.getObservableUser().subscribe((user) => {
+    }));
+    this.pageSubscriptions.add(this.auth.getObservableUser().subscribe((user) => {
       if (!user) return;
       this.weeklyBriefSolutionId = user.weeklyBriefSolutionId || '';
-    });
+    }));
   }
 
   ngOnDestroy(): void {
+    this.pageSubscriptions.unsubscribe();
     this.solutionsSub?.unsubscribe();
     this.presenceSub?.unsubscribe();
   }
@@ -591,28 +613,35 @@ export class ProblemListViewComponent implements OnInit {
   }
 
   private async refreshPresenceForSolutions(): Promise<void> {
-    const emails = Array.from(
-      new Set(
-        this.solutions
-          .flatMap((solution) => this.solutionMemberEmails(solution))
-          .map((email) => this.normalizeEmail(email))
-          .filter(Boolean)
-      )
-    );
+    const roster = this.solutions.map((solution) => ({
+      solution,
+      key: this.solutionKey(solution),
+      emails: this.solutionMemberEmails(solution).sort(),
+      owner: solutionOwnerIdentity(solution),
+    }));
+    const rosterKey = JSON.stringify(roster.map(({ key, emails, owner }) => [
+      key, emails, owner?.authorAccountId, owner?.authorName,
+    ]));
+    if (this.rosterKey === rosterKey) return;
+    this.rosterKey = rosterKey;
+    const request = ++this.presenceRequest;
+    const emails = [...new Set(roster.flatMap((entry) => entry.emails))];
+    roster.forEach(({ key, emails, owner }) => {
+      this.memberCountBySolutionId.set(key, emails.length || Number(!!owner?.authorAccountId));
+    });
 
     await this.resolveMembersByEmail(emails);
+    if (this.pageSubscriptions.closed || request !== this.presenceRequest) return;
 
     const allUids = new Set<string>();
     this.solutionMemberUids.clear();
     this.memberLastActiveByUid.clear();
     this.memberByUid.clear();
 
-    this.solutions.forEach((solution) => {
-      const key = this.solutionKey(solution);
+    roster.forEach(({ solution, key, emails, owner }) => {
       const uids = new Set<string>();
-      const memberEmails = this.solutionMemberEmails(solution);
 
-      memberEmails.forEach((email) => {
+      emails.forEach((email) => {
         const member = this.memberByEmail.get(this.normalizeEmail(email));
         if (!member?.uid) return;
         uids.add(member.uid);
@@ -620,7 +649,6 @@ export class ProblemListViewComponent implements OnInit {
         this.memberLastActiveByUid.set(member.uid, member.lastActiveAt);
       });
 
-      const owner = solutionOwnerIdentity(solution);
       if (owner?.authorAccountId) {
         uids.add(owner.authorAccountId);
         const authorMember = this.memberFromSolutionAuthor(solution);
@@ -631,7 +659,6 @@ export class ProblemListViewComponent implements OnInit {
 
       const uidList = Array.from(uids);
       this.solutionMemberUids.set(key, uidList);
-      this.memberCountBySolutionId.set(key, memberEmails.length || uidList.length);
       uidList.forEach((uid) => allUids.add(uid));
     });
 

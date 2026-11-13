@@ -1,0 +1,16 @@
+.route-loading-bar {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: #15836c;
+  animation: route-progress 1.2s ease-in-out infinite;
+}
+
+@keyframes route-progress {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-loading-bar { animation: none; }
+}

@@ -161,7 +161,7 @@
           </div>
         </div>
 
-        <div *ngIf="communitySolutionsError && !isLoadingCommunitySolutions" class="community-state community-state--error">
+        <div *ngIf="communitySolutionsError && !communitySolutions.length && !isLoadingCommunitySolutions" class="community-state community-state--error">
           <span class="material-symbols-outlined" aria-hidden="true">cloud_off</span>
           <div>
             <h3>{{ 'home.community.error.title' | translate }}</h3>
@@ -260,14 +260,16 @@
         </div>
 
         <div *ngIf="hasMoreCommunitySolutions && communitySolutions.length" class="community-load-more">
+          <p *ngIf="communitySolutionsError" role="status">{{ communitySolutionsError | translate }}</p>
           <button
             type="button"
             (click)="loadCommunitySolutions(false)"
             [disabled]="isLoadingMoreCommunitySolutions"
           >
             <span *ngIf="isLoadingMoreCommunitySolutions" class="community-button-spinner"></span>
-            {{ (isLoadingMoreCommunitySolutions ? 'home.community.loadingMore' : 'home.community.showMore') | translate }}
+            {{ (isLoadingMoreCommunitySolutions ? 'home.community.loadingMore' : communitySolutionsError ? 'home.community.error.retry' : 'home.community.showMore') | translate }}
           </button>
+          <span *ngIf="!isLoadingMoreCommunitySolutions && !communitySolutionsError" #communityScrollTrigger class="community-scroll-trigger" aria-hidden="true"></span>
         </div>
       </section>
     </main>

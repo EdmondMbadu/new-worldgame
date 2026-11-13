@@ -1,4 +1,5 @@
 import { fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
+import { of } from 'rxjs';
 import { AuthService } from './auth.service';
 
 describe('Let There Be Light account creation and return', () => {
@@ -91,5 +92,24 @@ describe('Let There Be Light account creation and return', () => {
     await service.finishInteractiveSignIn(user);
     expect(service.navigateToDestination).not.toHaveBeenCalled();
     expect(service.router.navigate).toHaveBeenCalledWith(['/verify-email'],{queryParams:{redirectTo:'/home'}});
+  });
+
+  it('navigates a verified user while the profile write is still pending', async () => {
+    user.emailVerified = true;
+    service.ensureUserProfileDocument.and.returnValue(new Promise<void>(() => {}));
+    await service.finishInteractiveSignIn(user);
+    expect(service.ensureUserProfileDocument).toHaveBeenCalledTimes(1);
+    expect(service.navigateToDestination).toHaveBeenCalledWith(destination);
+  });
+
+  it('keeps the school-admin destination when no return route is specified', async () => {
+    history.replaceState(null, '', location.pathname);
+    sessionStorage.removeItem('redirectTo');
+    user.emailVerified = true;
+    service.user$ = of({ uid: user.uid, role: 'schoolAdmin' });
+    service.router.parseUrl = () => ({ queryParams: {} });
+    service.popRedirect.and.callThrough();
+    await service.finishInteractiveSignIn(user);
+    expect(service.navigateToDestination).toHaveBeenCalledWith('/school-admin');
   });
 });

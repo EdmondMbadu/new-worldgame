@@ -11,7 +11,7 @@ import { ChatbotModule } from './chatbot.module';
 import { NavbarModule } from './navbar.module';
 
 @NgModule({
-  declarations: [FooterComponent, ToastComponent],
+  declarations: [ToastComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -19,6 +19,7 @@ import { NavbarModule } from './navbar.module';
     ReactiveFormsModule,
     MaterialModule,
     TranslateModule,
+    FooterComponent,
     NavbarModule,
     ChatbotModule,
   ],

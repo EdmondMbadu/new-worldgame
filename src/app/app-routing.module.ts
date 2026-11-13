@@ -9,6 +9,18 @@ import { protectedPathsCanMatch } from './protected/protected-paths.can-match';
 
 const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () => import('./components/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'dashboard/:id',
+    loadChildren: () => import('./protected/dashboard-page.module').then((m) => m.DashboardPageModule),
+  },
+  {
+    path: 'playground-steps/:id',
+    loadChildren: () => import('./playground/playground-steps-page.module').then((m) => m.PlaygroundStepsPageModule),
+  },
+  {
     path: 'landing-alternative',
     loadComponent: () => import('./components/landing-alternative/landing-alternative.component').then(m => m.LandingAlternativeComponent),
   },

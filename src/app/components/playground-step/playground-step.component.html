@@ -582,25 +582,11 @@
                     : ''"
                 id="box-{{i}}">
 
-                <div class="hidden">
-                    <ckeditor
-                    class="boxing"
-            
-                    
-                    [editor]="Editor"
-                
-                
-                    
-                    (ready)="onReady($event, i)"
-                    placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
-                    [(ngModel)]="staticContentArray[i]"
-                
-                
-                    
-                    
-                    >
-                    </ckeditor>
-                    
+                <div *ngIf="!Editor" class="min-h-32 rounded-lg bg-slate-50 p-4 dark:bg-slate-800" role="status">
+                    <button *ngIf="editorLoadFailed; else editorLoading" type="button" class="font-semibold underline" (click)="loadEditor()">
+                        {{ 'home.community.error.retry' | translate }}
+                    </button>
+                    <ng-template #editorLoading>{{ 'app.loading.title' | translate }}</ng-template>
                 </div>
 
                     <div
@@ -625,7 +611,7 @@
                     [(ngModel)]="strategyReview"
                     [disabled]="resolvingStrategyConflict"
                     
-                    *ngIf="isStrategyReviewStep && strategyReviewSelected"
+                    *ngIf="Editor && isStrategyReviewStep && strategyReviewSelected"
                 
                     
                     
@@ -644,7 +630,7 @@
                     
                     (ready)="onReady($event, i)"
                     placeholder="Enter your text here. You can also enter images, but make sure that the image size is less thean 1mb, and the total of all images attahced in this solution is less than 2mb."
-                    *ngIf="!strategyReviewSelected"
+                    *ngIf="Editor && !strategyReviewSelected"
                     [disabled]="isStrategyReviewStep && !strategyReviewSelected"
                     [(ngModel)]="contentsArray[i]"
             

@@ -7,7 +7,6 @@ import { MiniGameComponent } from '../game/mini-game/mini-game.component';
 import { DiscoverComponent } from '../components/discover/discover.component';
 import { ProfileComponent } from '../components/profile/profile.component';
 import { StartChallengeComponent } from '../components/start-challenge/start-challenge.component';
-import { DashboardComponent } from '../components/dashboard/dashboard.component';
 import { JoinSolutionComponent } from '../components/join-solution/join-solution.component';
 import { WhiteboardComponent } from '../components/whiteboard/whiteboard.component';
 import { TeamBuildingComponent } from '../components/team-building/team-building.component';
@@ -51,12 +50,6 @@ const routes: Routes = [
     path: 'start-challenge',
     component: StartChallengeComponent,
     canActivate: [AuthGuard],
-  },
-  {
-    path: 'dashboard/:id',
-    component: DashboardComponent,
-    canActivate: [AuthGuard],
-    data: { requireParticipant: true },
   },
   { path: 'join/:id', component: JoinSolutionComponent },
   {

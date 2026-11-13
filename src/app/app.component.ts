@@ -21,10 +21,8 @@ export class AppComponent implements OnInit, OnDestroy {
   showRouteLoading = false;
 
   private routerEventsSub?: Subscription;
-  private routeLoadingStart = 0;
   private currentNavigationId?: number;
-  private hideLoaderTimeout?: ReturnType<typeof setTimeout>;
-  private readonly minRouteLoadingMs = 400;
+  private showLoaderTimeout?: ReturnType<typeof setTimeout>;
 
   constructor(
     languageService: LanguageService,
@@ -56,20 +54,15 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routerEventsSub?.unsubscribe();
-    if (this.hideLoaderTimeout) {
-      clearTimeout(this.hideLoaderTimeout);
-    }
+    clearTimeout(this.showLoaderTimeout);
   }
 
   private startRouteLoading(navigationId: number): void {
-    if (this.hideLoaderTimeout) {
-      clearTimeout(this.hideLoaderTimeout);
-      this.hideLoaderTimeout = undefined;
-    }
-
+    clearTimeout(this.showLoaderTimeout);
     this.currentNavigationId = navigationId;
-    this.routeLoadingStart = performance.now();
-    this.showRouteLoading = true;
+    this.showLoaderTimeout = setTimeout(() => {
+      this.showRouteLoading = true;
+    }, 180);
   }
 
   private finishRouteLoading(navigationId: number): void {
@@ -77,15 +70,8 @@ export class AppComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const elapsed = performance.now() - this.routeLoadingStart;
-    const remaining = Math.max(this.minRouteLoadingMs - elapsed, 0);
-
-    this.hideLoaderTimeout = setTimeout(() => {
-      if (this.currentNavigationId === navigationId) {
-        this.showRouteLoading = false;
-        this.currentNavigationId = undefined;
-      }
-      this.hideLoaderTimeout = undefined;
-    }, remaining);
+    clearTimeout(this.showLoaderTimeout);
+    this.showRouteLoading = false;
+    this.currentNavigationId = undefined;
   }
 }

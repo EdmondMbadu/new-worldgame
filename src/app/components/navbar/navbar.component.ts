@@ -326,8 +326,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     this.auth.user$
       .pipe(
-        switchMap((u) =>
-          u?.uid ? this.discussionNotifications.watchUnreadCount(u.uid) : of(0)
+        map((user) => user?.uid || ''),
+        distinctUntilChanged(),
+        switchMap((uid) =>
+          uid ? this.discussionNotifications.watchUnreadCount(uid) : of(0)
         ),
         takeUntil(this.destroy$)
       )
@@ -337,8 +339,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     this.auth.user$
       .pipe(
-        switchMap((u) =>
-          u?.uid ? this.directMessages.watchUnreadCount(u.uid) : of(0)
+        map((user) => user?.uid || ''),
+        distinctUntilChanged(),
+        switchMap((uid) =>
+          uid ? this.directMessages.watchUnreadCount(uid) : of(0)
         ),
         takeUntil(this.destroy$)
       )

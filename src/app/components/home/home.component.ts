@@ -1,5 +1,5 @@
 import { homeDesignerCount, solutionDesignerCount } from '../../../../functions/src/solution-designers';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/compat/firestore';
 import { TranslateService } from '@ngx-translate/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
@@ -15,6 +15,7 @@ import { ChallengesService } from 'src/app/services/challenges.service';
 import { DataService } from 'src/app/services/data.service';
 import {
   CommunitySolutionFilter,
+  CommunitySolutionPage,
   SolutionService,
 } from 'src/app/services/solution.service';
 import { TimeService } from 'src/app/services/time.service';
@@ -69,9 +70,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   isLoadingMoreCommunitySolutions = false;
   communitySolutionsError = '';
   hasMoreCommunitySolutions = false;
-  private communityCursor: any = null;
+  private communityCursor: CommunitySolutionPage['cursor'] = null;
+  private communityBuffer: Solution[] = [];
+  private communitySourceHasMore = true;
+  private communityRequest = 0;
+  private communityObserver?: IntersectionObserver;
+  private readonly subscriptions = new Subscription();
   private discoverSolutionIds = new Set<string>();
-  private readonly communityPageSize = 20;
+  private readonly communityPageSize = 10;
+
+  @ViewChild('communityScrollTrigger')
+  set communityScrollTrigger(trigger: ElementRef<HTMLElement> | undefined) {
+    this.communityObserver?.disconnect();
+    if (!trigger || typeof IntersectionObserver === 'undefined') return;
+    this.communityObserver = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) this.zone.run(() => void this.loadCommunitySolutions());
+    }, { rootMargin: '0px 0px 120px 0px' });
+    this.communityObserver.observe(trigger.nativeElement);
+  }
 
   // (optional) simple cache hit to prevent flashing loader if we already have data for that category
   private languageSub?: Subscription;
@@ -142,7 +158,8 @@ export class HomeComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private time: TimeService,
     private afs: AngularFirestore,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private zone: NgZone
   ) {
     this.user = this.auth.currentUser || null;
   }
@@ -169,7 +186,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       void this.loadCommunitySolutions(true);
     }
 
-    this.auth.user$
+    this.subscriptions.add(this.auth.user$
       .pipe(
         filter((user): user is User => Boolean(user)),
         take(1)
@@ -178,27 +195,18 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.user = user;
         this.displayPromptLocation = !user.location;
 
-        this.solution
+        this.subscriptions.add(this.solution
           .getAuthenticatedUserAllSolutions(user.email)
           .subscribe((data) => {
             this.currentUserSolutions = data;
             this.mergeAccessibleSolutionAttribution();
             this.findPendingSolutions();
-          });
-
-        this.solution
-          .getAuthenticatedUserPendingEvaluations(user.email)
-          .subscribe((data) => {
-            this.evaluationSolutions = data.filter(
-              (e) => e.finished !== undefined && e.finished === 'true'
-            );
-            this.evaluation = this.evaluationSolutions.length;
-          });
+          }));
 
         if (user.profilePicture?.path) {
           this.profilePicturePath = user.profilePicture.downloadURL;
         }
-      });
+      }));
   }
 
   fetchChallenges(category: string, opts?: { isInitial?: boolean }) {
@@ -244,6 +252,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.languageSub?.unsubscribe();
+    this.subscriptions.unsubscribe();
+    this.communityObserver?.disconnect();
+    this.communityRequest++;
   }
 
   private finishInitialOverlay() {
@@ -291,64 +302,76 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   async loadCommunitySolutions(reset = false): Promise<void> {
-    if (
-      this.isLoadingCommunitySolutions ||
-      this.isLoadingMoreCommunitySolutions
-    ) {
+    if (!reset && (
+      this.isLoadingCommunitySolutions || this.isLoadingMoreCommunitySolutions || !this.hasMoreCommunitySolutions
+    )) {
       return;
     }
 
+    const request = ++this.communityRequest;
+    const filter = this.communityFilter;
+    if (reset) this.communityObserver?.disconnect();
+    this.communitySolutionsError = '';
     if (reset) {
       this.isLoadingCommunitySolutions = true;
+      this.isLoadingMoreCommunitySolutions = false;
       this.communityCursor = null;
+      this.communityBuffer = [];
+      this.communitySourceHasMore = true;
       this.communitySolutions = [];
-      this.communitySolutionsError = '';
+      this.hasMoreCommunitySolutions = false;
     } else {
       this.isLoadingMoreCommunitySolutions = true;
     }
 
     try {
-      const [page, discoverSolutions] = await Promise.all([
-        this.solution.getCommunitySolutionsPage(
-          this.communityFilter,
-          this.communityPageSize,
-          this.communityCursor
-        ),
-        reset && this.communityFilter !== 'in-development'
-          ? firstValueFrom(this.solution.getHomePageSolutions().pipe(take(1)))
-          : Promise.resolve([] as Solution[]),
-      ]);
-      this.communityCursor = page.cursor;
-      if (reset) {
+      const current = this.communitySolutions;
+      let buffer = this.communityBuffer;
+      let cursor = this.communityCursor;
+      let hasMore = this.communitySourceHasMore;
+      if (reset && filter !== 'in-development') {
+        const [page, discoverSolutions] = await Promise.all([
+          this.solution.getCommunitySolutionsPage(filter, this.communityPageSize),
+          firstValueFrom(this.solution.getHomePageSolutions()),
+        ]);
+        if (request !== this.communityRequest) return;
         const featured = discoverSolutions.map((solution) =>
           this.prepareDiscoverSolutionCard(solution)
         );
-        this.discoverSolutionIds = new Set(
-          featured
-            .map((solution) => solution.solutionId)
-            .filter((id): id is string => Boolean(id))
-        );
-        this.communitySolutions = mergeDiscoverSolutionsFirst(
-          featured,
-          page.solutions
-        );
-      } else {
-        this.communitySolutions = appendUniqueCommunitySolutions(
-          this.communitySolutions,
-          page.solutions
-        );
+        this.discoverSolutionIds = new Set(featured.flatMap(({ solutionId }) => solutionId ? [solutionId] : []));
+        buffer = mergeDiscoverSolutionsFirst(featured, page.solutions);
+        cursor = page.cursor;
+        hasMore = page.hasMore && cursor !== null;
+      } else if (reset) {
+        this.discoverSolutionIds.clear();
       }
+
+      while (buffer.length < this.communityPageSize && hasMore) {
+        const page = await this.solution.getCommunitySolutionsPage(filter, this.communityPageSize, cursor);
+        if (request !== this.communityRequest) return;
+        buffer = appendUniqueCommunitySolutions([...current, ...buffer], page.solutions).slice(current.length);
+        cursor = page.cursor;
+        hasMore = page.hasMore && cursor !== null;
+      }
+
+      this.communitySolutions = [...current, ...buffer.slice(0, this.communityPageSize)];
+      this.communityBuffer = buffer.slice(this.communityPageSize);
+      this.communityCursor = cursor;
+      this.communitySourceHasMore = hasMore;
       this.mergeAccessibleSolutionAttribution();
-      this.hasMoreCommunitySolutions = page.hasMore;
-      if (reset) this.restoreCommunityScroll();
+      this.hasMoreCommunitySolutions = hasMore || this.communityBuffer.length > 0;
+      this.restoreCommunityScroll();
     } catch (error) {
+      if (request !== this.communityRequest) return;
       console.error('Unable to load community solutions', error);
       this.communitySolutionsError =
         'home.community.error.message';
     } finally {
-      this.isLoadingCommunitySolutions = false;
-      this.isLoadingMoreCommunitySolutions = false;
-      if (this.isInitialLoad) this.finishInitialOverlay();
+      if (request === this.communityRequest) {
+        this.isLoadingCommunitySolutions = false;
+        this.isLoadingMoreCommunitySolutions = false;
+        if (this.isInitialLoad) this.finishInitialOverlay();
+      }
     }
   }
 
@@ -530,8 +553,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       sessionStorage.getItem('communitySolutionsScroll') || 0
     );
     if (!value) return;
-    sessionStorage.removeItem('communitySolutionsScroll');
-    setTimeout(() => window.scrollTo({ top: value, behavior: 'auto' }), 0);
+    requestAnimationFrame(() => {
+      if (this.subscriptions.closed || this.homeView !== 'solutions') return;
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      window.scrollTo({ top: Math.min(value, maxScroll), behavior: 'instant' });
+      if (value <= maxScroll || !this.hasMoreCommunitySolutions) {
+        sessionStorage.removeItem('communitySolutionsScroll');
+      }
+    });
   }
   extractNumber(filename: string, prefix: string): number {
     const match = filename.match(new RegExp(`${prefix}-(\\d+)`)); // Extract number based on the prefix

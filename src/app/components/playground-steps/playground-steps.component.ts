@@ -1,9 +1,8 @@
 import { AfterViewInit, Component, ElementRef, HostListener, Input, NgZone, OnDestroy, OnInit, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { Router, NavigationEnd, Route } from '@angular/router';
-import jsPDF from 'jspdf';
+import type jsPDF from 'jspdf';
 import { PolicyBrief, PolicyBriefContext, PolicyBriefScope, POLICY_BRIEF_REPORT, parsePolicyBrief, policyBriefToText } from '../../../../functions/src/shared/policy-brief';
 import { buildPolicyBriefSource } from 'src/app/utils/policy-brief-source';
-import { buildPolicyBriefPdf, buildPolicyBriefDocx } from 'src/app/utils/policy-brief-export';
 import { AuthService } from 'src/app/services/auth.service';
 import { ActivatedRoute } from '@angular/router';
 import { Comment, Evaluator, Roles, Solution } from 'src/app/models/solution';
@@ -35,27 +34,9 @@ import {
 } from 'src/app/services/presence.service';
 import { solutionOwnerIdentity } from 'src/app/utils/solution-ownership';
 import { PlaygroundStepComponent } from '../playground-step/playground-step.component';
-import {
-  Document,
-  ExternalHyperlink,
-  Footer,
-  HeadingLevel,
-  ImageRun,
-  AlignmentType,
-  LevelFormat,
-  PageBreak,
-  PageNumber,
-  Packer,
-  Paragraph,
-  Table,
-  TableCell,
-  TableRow,
-  TextRun,
-  WidthType,
-  ShadingType,
-  BorderStyle,
-  VerticalAlign,
-} from 'docx';
+import type { AlignmentType, Document, ExternalHyperlink, Footer, ImageRun, Paragraph, Table, TextRun } from 'docx';
+
+type DocxModule = typeof import('docx');
 
 type SupportedLanguage = 'en' | 'fr';
 
@@ -394,6 +375,12 @@ export class PlaygroundStepsComponent implements OnInit, AfterViewInit, OnDestro
   private reportResultTypeId = '';
   private reportDocSub?: Subscription;
   private reportTimeoutHandle?: ReturnType<typeof setTimeout>;
+  private docx?: DocxModule;
+
+  private async loadDocx(): Promise<DocxModule> {
+    return this.docx ??= await import('docx');
+  }
+
   private reportPdfCache: ReportPdfCacheEntry | null = null;
   private reportPdfBuildPromise: Promise<ReportPdfCacheEntry> | null = null;
   private reportPdfBuildKey = '';
@@ -3011,14 +2998,14 @@ Infographic requirements:
     }
   }
 
-  downloadSolutionPdf() {
+  async downloadSolutionPdf() {
     if (this.downloadingFeedbackPdf) {
       return;
     }
     this.downloadingFeedbackPdf = true;
 
     try {
-      this.downloadSolutionPdfInternal();
+      await this.downloadSolutionPdfInternal();
     } finally {
       // Small delay to show loading state
       setTimeout(() => {
@@ -3027,7 +3014,8 @@ Infographic requirements:
     }
   }
 
-  private downloadSolutionPdfInternal() {
+  private async downloadSolutionPdfInternal() {
+    const { default: jsPDF } = await import('jspdf');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -3397,6 +3385,7 @@ Infographic requirements:
       const title = this.currentSolution?.title || 'Untitled Solution';
       const completeHtml = this.buildCompleteWorkHtml();
       if (format === 'docx') {
+        const { Packer } = await this.loadDocx();
         const blocks = await this.buildDocxParagraphsFromHtml(completeHtml);
         const doc = this.buildBeautifulDraftDocument(
           title,
@@ -3435,7 +3424,7 @@ Infographic requirements:
       await this.downloadCurrentDraftPdfWithImages();
     } catch (error) {
       console.error('Failed to export draft with images, falling back to text-only PDF.', error);
-      this.downloadCurrentDraftPdfTextOnly();
+      await this.downloadCurrentDraftPdfTextOnly();
     } finally {
       this.downloadingDraftPdf = false;
     }
@@ -3448,6 +3437,7 @@ Infographic requirements:
 
     this.downloadingDraftDocx = true;
     try {
+      const { Packer } = await this.loadDocx();
       const title = this.currentSolution?.title || 'Untitled Solution';
       const contentBlocks = await this.buildDocxParagraphsFromHtml(this.currentDraftHtml);
       const doc = this.buildBeautifulDraftDocument(title, contentBlocks);
@@ -3469,7 +3459,7 @@ Infographic requirements:
       ? contentBlocks
       : [this.draftBodyParagraph('No draft content is available yet.', { italic: true, color: '6B7280' })];
 
-    return new Document({
+    return new this.docx!.Document({
       numbering: {
         config: [
           {
@@ -3477,9 +3467,9 @@ Infographic requirements:
             levels: [
               {
                 level: 0,
-                format: LevelFormat.BULLET,
+                format: this.docx!.LevelFormat.BULLET,
                 text: '\u2022',
-                alignment: AlignmentType.LEFT,
+                alignment: this.docx!.AlignmentType.LEFT,
                 style: { paragraph: { indent: { left: 720, hanging: 360 } } },
               },
             ],
@@ -3489,9 +3479,9 @@ Infographic requirements:
             levels: [
               {
                 level: 0,
-                format: LevelFormat.DECIMAL,
+                format: this.docx!.LevelFormat.DECIMAL,
                 text: '%1.',
-                alignment: AlignmentType.LEFT,
+                alignment: this.docx!.AlignmentType.LEFT,
                 style: { paragraph: { indent: { left: 720, hanging: 360 } } },
               },
             ],
@@ -3516,7 +3506,7 @@ Infographic requirements:
             paragraph: {
               spacing: { before: 360, after: 140 },
               outlineLevel: 0,
-              border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CFE0D8', space: 4 } },
+              border: { bottom: { style: this.docx!.BorderStyle.SINGLE, size: 6, color: 'CFE0D8', space: 4 } },
             },
           },
           {
@@ -3550,7 +3540,7 @@ Infographic requirements:
           footers: { default: this.buildDraftFooter() },
           children: [
             ...this.buildDraftCoverBlocks(title, documentHeading),
-            new Paragraph({ children: [new PageBreak()] }),
+            new this.docx!.Paragraph({ children: [new this.docx!.PageBreak()] }),
             this.draftSectionLabel(sectionLabel, '0F766E'),
             this.draftHeading(documentHeading, 1),
             ...blocks,
@@ -3561,20 +3551,20 @@ Infographic requirements:
   }
 
   private buildDraftFooter(): Footer {
-    return new Footer({
+    return new this.docx!.Footer({
       children: [
-        new Paragraph({
+        new this.docx!.Paragraph({
           border: {
-            top: { style: BorderStyle.SINGLE, size: 2, color: 'D8DEE4' },
+            top: { style: this.docx!.BorderStyle.SINGLE, size: 2, color: 'D8DEE4' },
           },
           spacing: { before: 120 },
           children: [
-            new TextRun({ text: 'Global Solutions Lab  ', size: 16, color: '6B7280', font: 'Arial' }),
-            new TextRun({ text: '|  ', size: 16, color: 'CBD5E1', font: 'Arial' }),
-            new ExternalHyperlink({
+            new this.docx!.TextRun({ text: 'Global Solutions Lab  ', size: 16, color: '6B7280', font: 'Arial' }),
+            new this.docx!.TextRun({ text: '|  ', size: 16, color: 'CBD5E1', font: 'Arial' }),
+            new this.docx!.ExternalHyperlink({
               link: 'https://newworld-game.org/',
               children: [
-                new TextRun({
+                new this.docx!.TextRun({
                   text: 'Global Solutions Lab',
                   size: 16,
                   color: '0F766E',
@@ -3582,8 +3572,8 @@ Infographic requirements:
                 }),
               ],
             }),
-            new TextRun({ text: '  |  Page ', size: 16, color: '6B7280', font: 'Arial' }),
-            new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '6B7280', font: 'Arial' }),
+            new this.docx!.TextRun({ text: '  |  Page ', size: 16, color: '6B7280', font: 'Arial' }),
+            new this.docx!.TextRun({ children: [this.docx!.PageNumber.CURRENT], size: 16, color: '6B7280', font: 'Arial' }),
           ],
         }),
       ],
@@ -3605,11 +3595,11 @@ Infographic requirements:
 
     return [
       this.draftSpacer(420),
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
+      new this.docx!.Paragraph({
+        alignment: this.docx!.AlignmentType.CENTER,
         spacing: { after: 140 },
         children: [
-          new TextRun({
+          new this.docx!.TextRun({
             text: 'GLOBAL SOLUTIONS LAB DRAFT',
             font: 'Arial',
             size: 18,
@@ -3620,11 +3610,11 @@ Infographic requirements:
           }),
         ],
       }),
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
+      new this.docx!.Paragraph({
+        alignment: this.docx!.AlignmentType.CENTER,
         spacing: { before: 80, after: 80 },
         children: [
-          new TextRun({
+          new this.docx!.TextRun({
             text: title,
             font: 'Arial',
             size: 48,
@@ -3633,11 +3623,11 @@ Infographic requirements:
           }),
         ],
       }),
-      new Paragraph({
-        alignment: AlignmentType.CENTER,
-        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: '1D9E75' } },
+      new this.docx!.Paragraph({
+        alignment: this.docx!.AlignmentType.CENTER,
+        border: { bottom: { style: this.docx!.BorderStyle.SINGLE, size: 8, color: '1D9E75' } },
         spacing: { before: 80, after: 220 },
-        children: [new TextRun({ text: '', font: 'Arial', size: 4 })],
+        children: [new this.docx!.TextRun({ text: '', font: 'Arial', size: 4 })],
       }),
       this.draftMetadataTable([
         { label: 'Author', value: author || 'Unknown' },
@@ -3666,24 +3656,24 @@ Infographic requirements:
 
   private draftMetadataTable(items: { label: string; value: string }[]): Table {
     const widths = this.equalColumnWidths(9360, items.length);
-    return new Table({
-      width: { size: 9360, type: WidthType.DXA },
+    return new this.docx!.Table({
+      width: { size: 9360, type: this.docx!.WidthType.DXA },
       columnWidths: widths,
       rows: [
-        new TableRow({
+        new this.docx!.TableRow({
           children: items.map((item, index) =>
-            new TableCell({
-              width: { size: widths[index], type: WidthType.DXA },
+            new this.docx!.TableCell({
+              width: { size: widths[index], type: this.docx!.WidthType.DXA },
               borders: this.draftBorders('D8DEE4'),
-              shading: { fill: index === 1 ? 'E6F1FB' : 'F8FAFC', type: ShadingType.CLEAR },
-              verticalAlign: VerticalAlign.CENTER,
+              shading: { fill: index === 1 ? 'E6F1FB' : 'F8FAFC', type: this.docx!.ShadingType.CLEAR },
+              verticalAlign: this.docx!.VerticalAlign.CENTER,
               margins: { top: 140, bottom: 140, left: 160, right: 160 },
               children: [
-                new Paragraph({
-                  alignment: AlignmentType.CENTER,
+                new this.docx!.Paragraph({
+                  alignment: this.docx!.AlignmentType.CENTER,
                   spacing: { after: 40 },
                   children: [
-                    new TextRun({
+                    new this.docx!.TextRun({
                       text: item.label.toUpperCase(),
                       font: 'Arial',
                       size: 16,
@@ -3693,10 +3683,10 @@ Infographic requirements:
                     }),
                   ],
                 }),
-                new Paragraph({
-                  alignment: AlignmentType.CENTER,
+                new this.docx!.Paragraph({
+                  alignment: this.docx!.AlignmentType.CENTER,
                   children: [
-                    new TextRun({
+                    new this.docx!.TextRun({
                       text: item.value,
                       font: 'Arial',
                       size: 20,
@@ -3714,29 +3704,29 @@ Infographic requirements:
   }
 
   private draftCallout(label: string, body: string, fillColor: string, borderColor: string, textColor: string): Table {
-    return new Table({
-      width: { size: 9360, type: WidthType.DXA },
+    return new this.docx!.Table({
+      width: { size: 9360, type: this.docx!.WidthType.DXA },
       columnWidths: [180, 9180],
       rows: [
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
-            new TableCell({
-              width: { size: 180, type: WidthType.DXA },
-              borders: { ...this.draftNoBorders(), left: { style: BorderStyle.SINGLE, size: 14, color: borderColor } },
-              shading: { fill: fillColor, type: ShadingType.CLEAR },
+            new this.docx!.TableCell({
+              width: { size: 180, type: this.docx!.WidthType.DXA },
+              borders: { ...this.draftNoBorders(), left: { style: this.docx!.BorderStyle.SINGLE, size: 14, color: borderColor } },
+              shading: { fill: fillColor, type: this.docx!.ShadingType.CLEAR },
               margins: { top: 100, bottom: 100, left: 80, right: 0 },
-              children: [new Paragraph({ children: [] })],
+              children: [new this.docx!.Paragraph({ children: [] })],
             }),
-            new TableCell({
-              width: { size: 9180, type: WidthType.DXA },
+            new this.docx!.TableCell({
+              width: { size: 9180, type: this.docx!.WidthType.DXA },
               borders: this.draftNoBorders(),
-              shading: { fill: fillColor, type: ShadingType.CLEAR },
+              shading: { fill: fillColor, type: this.docx!.ShadingType.CLEAR },
               margins: { top: 150, bottom: 150, left: 220, right: 240 },
               children: [
-                new Paragraph({
+                new this.docx!.Paragraph({
                   spacing: { after: 70 },
                   children: [
-                    new TextRun({
+                    new this.docx!.TextRun({
                       text: label.toUpperCase(),
                       font: 'Arial',
                       size: 17,
@@ -3747,10 +3737,10 @@ Infographic requirements:
                     }),
                   ],
                 }),
-                new Paragraph({
+                new this.docx!.Paragraph({
                   spacing: { line: 300 },
                   children: [
-                    new TextRun({
+                    new this.docx!.TextRun({
                       text: body,
                       font: 'Arial',
                       size: 21,
@@ -3767,10 +3757,10 @@ Infographic requirements:
   }
 
   private draftSectionLabel(text: string, color: string): Paragraph {
-    return new Paragraph({
+    return new this.docx!.Paragraph({
       spacing: { before: 80, after: 90 },
       children: [
-        new TextRun({
+        new this.docx!.TextRun({
           text: text.toUpperCase(),
           font: 'Arial',
           size: 17,
@@ -3784,10 +3774,10 @@ Infographic requirements:
   }
 
   private draftHeading(text: string, level: 1 | 2 | 3): Paragraph {
-    return new Paragraph({
-      heading: level === 1 ? HeadingLevel.HEADING_1 : level === 2 ? HeadingLevel.HEADING_2 : HeadingLevel.HEADING_3,
+    return new this.docx!.Paragraph({
+      heading: level === 1 ? this.docx!.HeadingLevel.HEADING_1 : level === 2 ? this.docx!.HeadingLevel.HEADING_2 : this.docx!.HeadingLevel.HEADING_3,
       children: [
-        new TextRun({
+        new this.docx!.TextRun({
           text,
           font: 'Arial',
           size: level === 1 ? 32 : level === 2 ? 28 : 23,
@@ -3802,7 +3792,7 @@ Infographic requirements:
     text: string,
     opts: { bold?: boolean; italic?: boolean; color?: string; alignment?: (typeof AlignmentType)[keyof typeof AlignmentType] } = {}
   ): Paragraph {
-    return new Paragraph({
+    return new this.docx!.Paragraph({
       alignment: opts.alignment,
       spacing: { before: 40, after: 130, line: 300 },
       children: this.buildDocxLinkedRuns(text, {
@@ -3816,7 +3806,7 @@ Infographic requirements:
   }
 
   private draftListParagraph(text: string, ordered = false): Paragraph {
-    return new Paragraph({
+    return new this.docx!.Paragraph({
       numbering: { reference: ordered ? 'draft-numbers' : 'draft-bullets', level: 0 },
       spacing: { before: 40, after: 90, line: 300 },
       children: this.buildDocxLinkedRuns(text, { font: 'Arial', size: 21, color: '444441' }),
@@ -3824,24 +3814,24 @@ Infographic requirements:
   }
 
   private draftCaption(text: string): Paragraph {
-    return new Paragraph({
-      alignment: AlignmentType.CENTER,
+    return new this.docx!.Paragraph({
+      alignment: this.docx!.AlignmentType.CENTER,
       spacing: { before: 60, after: 140 },
-      children: [new TextRun({ text, font: 'Arial', size: 18, italics: true, color: '64748B' })],
+      children: [new this.docx!.TextRun({ text, font: 'Arial', size: 18, italics: true, color: '64748B' })],
     });
   }
 
   private draftSpacer(before = 120): Paragraph {
-    return new Paragraph({ spacing: { before, after: 0 }, children: [new TextRun({ text: '' })] });
+    return new this.docx!.Paragraph({ spacing: { before, after: 0 }, children: [new this.docx!.TextRun({ text: '' })] });
   }
 
   private draftBorders(color = 'E2E8F0') {
-    const border = { style: BorderStyle.SINGLE, size: 1, color };
+    const border = { style: this.docx!.BorderStyle.SINGLE, size: 1, color };
     return { top: border, bottom: border, left: border, right: border };
   }
 
   private draftNoBorders() {
-    const border = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    const border = { style: this.docx!.BorderStyle.NONE, size: 0, color: 'FFFFFF' };
     return { top: border, bottom: border, left: border, right: border };
   }
 
@@ -3891,7 +3881,7 @@ Infographic requirements:
       ? contentBlocks
       : [this.draftBodyParagraph('No report content is available yet.', { italic: true, color: '6B7280' })];
 
-    return new Document({
+    return new this.docx!.Document({
       numbering: {
         config: [
           {
@@ -3899,9 +3889,9 @@ Infographic requirements:
             levels: [
               {
                 level: 0,
-                format: LevelFormat.BULLET,
+                format: this.docx!.LevelFormat.BULLET,
                 text: '\u2022',
-                alignment: AlignmentType.LEFT,
+                alignment: this.docx!.AlignmentType.LEFT,
                 style: { paragraph: { indent: { left: 720, hanging: 360 } } },
               },
             ],
@@ -3911,9 +3901,9 @@ Infographic requirements:
             levels: [
               {
                 level: 0,
-                format: LevelFormat.DECIMAL,
+                format: this.docx!.LevelFormat.DECIMAL,
                 text: '%1.',
-                alignment: AlignmentType.LEFT,
+                alignment: this.docx!.AlignmentType.LEFT,
                 style: { paragraph: { indent: { left: 720, hanging: 360 } } },
               },
             ],
@@ -3968,7 +3958,7 @@ Infographic requirements:
           footers: { default: this.buildDraftFooter() },
           children: [
             ...this.buildReportCoverBlocks(title),
-            new Paragraph({ children: [new PageBreak()] }),
+            new this.docx!.Paragraph({ children: [new this.docx!.PageBreak()] }),
             this.draftSectionLabel('Generated Report', '0F766E'),
             this.draftHeading(this.getReportTypeForExport()?.title || 'Report', 1),
             ...blocks,
@@ -3995,10 +3985,10 @@ Infographic requirements:
 
     return [
       this.draftSpacer(980),
-      new Paragraph({
+      new this.docx!.Paragraph({
         spacing: { after: 80 },
         children: [
-          new TextRun({
+          new this.docx!.TextRun({
             text: 'NEWWORLD GAME REPORT',
             font: 'Arial',
             size: 20,
@@ -4009,10 +3999,10 @@ Infographic requirements:
           }),
         ],
       }),
-      new Paragraph({
+      new this.docx!.Paragraph({
         spacing: { before: 40, after: 80 },
         children: [
-          new TextRun({
+          new this.docx!.TextRun({
             text: title,
             font: 'Arial',
             size: 58,
@@ -4021,10 +4011,10 @@ Infographic requirements:
           }),
         ],
       }),
-      new Paragraph({
+      new this.docx!.Paragraph({
         spacing: { after: 180 },
         children: [
-          new TextRun({
+          new this.docx!.TextRun({
             text: reportType,
             font: 'Arial',
             size: 28,
@@ -4032,10 +4022,10 @@ Infographic requirements:
           }),
         ],
       }),
-      new Paragraph({
-        border: { bottom: { style: BorderStyle.SINGLE, size: 14, color: '1F6B4C', space: 6 } },
+      new this.docx!.Paragraph({
+        border: { bottom: { style: this.docx!.BorderStyle.SINGLE, size: 14, color: '1F6B4C', space: 6 } },
         spacing: { after: 240 },
-        children: [new TextRun({ text: '', font: 'Arial', size: 4 })],
+        children: [new this.docx!.TextRun({ text: '', font: 'Arial', size: 4 })],
       }),
       this.draftMetadataTable([
         { label: 'Solution', value: this.currentSolution?.title || 'Untitled Solution' },
@@ -4272,10 +4262,12 @@ Infographic requirements:
     let success = false;
     try {
       await this.waitForUiPaint();
+      const { Packer } = await this.loadDocx();
       const isImpactBmcReport = this.getReportTypeForExport()?.id === 'business-model-canvas';
       let doc: Document;
 
       if (this.getReportTypeForExport()?.id === 'policy-brief' && this.policyBrief) {
+        const { buildPolicyBriefDocx } = await import('src/app/utils/policy-brief-export');
         doc = buildPolicyBriefDocx(this.policyBrief);
       } else if (isImpactBmcReport) {
         this.reportDownloadStatus = 'Formatting Business Model Canvas...';
@@ -4395,6 +4387,7 @@ Infographic requirements:
     showProgress: boolean
   ): Promise<ReportPdfCacheEntry> {
     if (input.reportTypeId === 'policy-brief' && this.policyBrief) {
+      const { buildPolicyBriefPdf } = await import('src/app/utils/policy-brief-export');
       return { key: input.key, filename: input.filename, blob: buildPolicyBriefPdf(this.policyBrief) };
     }
     const html =
@@ -4686,7 +4679,7 @@ Infographic requirements:
 
     return this.splitTextByUrls(text).map((part) => {
       if (!part.url) {
-        return new TextRun({
+        return new this.docx!.TextRun({
           text: part.text,
           font,
           size,
@@ -4696,10 +4689,10 @@ Infographic requirements:
         });
       }
 
-      return new ExternalHyperlink({
+      return new this.docx!.ExternalHyperlink({
         link: part.url,
         children: [
-          new TextRun({
+          new this.docx!.TextRun({
             text: part.text,
             font,
             size,
@@ -5311,7 +5304,8 @@ INTEGRITY RULES:
     return projectTitle || reportTitle;
   }
 
-  private downloadTextPdf(text: string, title: string, filename: string): void {
+  private async downloadTextPdf(text: string, title: string, filename: string): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -5789,11 +5783,11 @@ INTEGRITY RULES:
           blocks.push(this.draftListParagraph(numberedMatch[2], true));
         } else {
           blocks.push(
-            new Paragraph({
+            new this.docx!.Paragraph({
               spacing: { before: 40, after: 90, line: 300 },
               indent: { left: 360 },
               children: [
-                new TextRun({
+                new this.docx!.TextRun({
                   text: `${numberedMatch[1]}  `,
                   font: 'Arial',
                   size: 21,
@@ -5961,7 +5955,8 @@ INTEGRITY RULES:
     return blocks;
   }
 
-  private downloadImpactBmcPdf(text: string, filename: string): void {
+  private async downloadImpactBmcPdf(text: string, filename: string): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -6037,18 +6032,18 @@ INTEGRITY RULES:
   }
 
   private buildReportFooter(): Footer {
-    return new Footer({
+    return new this.docx!.Footer({
       children: [
-        new Paragraph({
+        new this.docx!.Paragraph({
           border: {
-            top: { style: BorderStyle.SINGLE, size: 2, color: 'BEBEBE' },
+            top: { style: this.docx!.BorderStyle.SINGLE, size: 2, color: 'BEBEBE' },
           },
           children: [
-            new TextRun({ text: 'Global Solutions Lab  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
-            new ExternalHyperlink({
+            new this.docx!.TextRun({ text: 'Global Solutions Lab  \u00B7  ', size: 15, color: '999999', font: 'Calibri' }),
+            new this.docx!.ExternalHyperlink({
               link: 'https://newworld-game.org/',
               children: [
-                new TextRun({
+                new this.docx!.TextRun({
                   text: 'Global Solutions Lab',
                   size: 15,
                   color: '787878',
@@ -6233,7 +6228,7 @@ INTEGRITY RULES:
     const totalWidth = 9360;
     const columnWidths = this.equalColumnWidths(totalWidth, 5);
     const border = {
-      style: BorderStyle.SINGLE,
+      style: this.docx!.BorderStyle.SINGLE,
       size: 1,
       color: 'CBD5E1',
     };
@@ -6244,19 +6239,19 @@ INTEGRITY RULES:
       options?: { shaded?: boolean; columnSpan?: number; rowSpan?: number; lines?: number }
     ) => {
       const columnSpan = options?.columnSpan || 1;
-      return new TableCell({
+      return new this.docx!.TableCell({
         columnSpan: options?.columnSpan,
         rowSpan: options?.rowSpan,
-        width: { size: columnWidths.slice(0, columnSpan).reduce((sum, width) => sum + width, 0), type: WidthType.DXA },
-        shading: { type: ShadingType.CLEAR, fill: options?.shaded ? 'E1F5EE' : 'FFFFFF' },
+        width: { size: columnWidths.slice(0, columnSpan).reduce((sum, width) => sum + width, 0), type: this.docx!.WidthType.DXA },
+        shading: { type: this.docx!.ShadingType.CLEAR, fill: options?.shaded ? 'E1F5EE' : 'FFFFFF' },
         borders: { top: border, bottom: border, left: border, right: border },
-        verticalAlign: VerticalAlign.TOP,
+        verticalAlign: this.docx!.VerticalAlign.TOP,
         margins: { top: 130, bottom: 130, left: 140, right: 140 },
         children: [
-          new Paragraph({
+          new this.docx!.Paragraph({
             spacing: { after: 70 },
             children: [
-              new TextRun({
+              new this.docx!.TextRun({
                 text: label.toUpperCase(),
                 bold: true,
                 font: 'Arial',
@@ -6271,33 +6266,33 @@ INTEGRITY RULES:
                 .split(/\r?\n/)
                 .filter((line) => line.trim())
                 .map((line) =>
-                  new Paragraph({
+                  new this.docx!.Paragraph({
                     spacing: { after: 60, line: 250 },
-                    children: [new TextRun({ text: line.trim(), font: 'Arial', size: 18, color: '334155' })],
+                    children: [new this.docx!.TextRun({ text: line.trim(), font: 'Arial', size: 18, color: '334155' })],
                   })
                 )
             : Array.from({ length: options?.lines ?? 2 }).map(
-                () => new Paragraph({ children: [new TextRun({ text: '', font: 'Arial', size: 18 })] })
+                () => new this.docx!.Paragraph({ children: [new this.docx!.TextRun({ text: '', font: 'Arial', size: 18 })] })
               )),
         ],
       });
     };
 
-    return new Table({
-      width: { size: totalWidth, type: WidthType.DXA },
+    return new this.docx!.Table({
+      width: { size: totalWidth, type: this.docx!.WidthType.DXA },
       columnWidths,
       rows: [
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
             makeCell('Problem Statement', data?.problemStatement, { shaded: true, columnSpan: 5, lines: 2 }),
           ],
         }),
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
             makeCell('Mission Statement', data?.missionStatement, { shaded: true, columnSpan: 5, lines: 2 }),
           ],
         }),
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
             makeCell('Key Partners', data?.keyPartners, { rowSpan: 2, lines: 5 }),
             makeCell('Key Activities', data?.keyActivities, { lines: 4 }),
@@ -6306,19 +6301,19 @@ INTEGRITY RULES:
             makeCell('Stakeholder Segments', data?.stakeholderSegments, { rowSpan: 2, lines: 6 }),
           ],
         }),
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
             makeCell('Key Resources', data?.keyResources, { lines: 4 }),
             makeCell('Channels', data?.channels, { lines: 4 }),
           ],
         }),
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
             makeCell('Cost Structure', data?.costStructure, { columnSpan: 3, lines: 4 }),
             makeCell('Revenue Streams', data?.revenueStreams, { columnSpan: 2, lines: 4 }),
           ],
         }),
-        new TableRow({
+        new this.docx!.TableRow({
           children: [
             makeCell('Intended Impact', data?.intendedImpact, { shaded: true, columnSpan: 5, lines: 3 }),
           ],
@@ -6459,7 +6454,7 @@ INTEGRITY RULES:
 
   private async downloadCurrentDraftPdfWithImages(): Promise<void> {
     if (typeof document === 'undefined') {
-      this.downloadCurrentDraftPdfTextOnly();
+      await this.downloadCurrentDraftPdfTextOnly();
       return;
     }
 
@@ -6510,6 +6505,7 @@ INTEGRITY RULES:
       const pageElements = this.paginateStyledDraftPrint(container);
       await this.waitForImages(container);
 
+      const { default: jsPDF } = await import('jspdf');
       const pdf = new jsPDF('p', 'mm', 'letter');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -7127,7 +7123,8 @@ INTEGRITY RULES:
     `;
   }
 
-  private downloadCurrentDraftPdfTextOnly(): void {
+  private async downloadCurrentDraftPdfTextOnly(): Promise<void> {
+    const { default: jsPDF } = await import('jspdf');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
@@ -7323,27 +7320,27 @@ INTEGRITY RULES:
     const columnCount = Math.min(5, Math.max(...rows.map((row) => row.length), 1));
     const widths = this.equalColumnWidths(9360, columnCount);
 
-    return new Table({
-      width: { size: 9360, type: WidthType.DXA },
+    return new this.docx!.Table({
+      width: { size: 9360, type: this.docx!.WidthType.DXA },
       columnWidths: widths,
       rows: rows.map((cells, rowIndex) =>
-        new TableRow({
+        new this.docx!.TableRow({
           children: widths.map((width, cellIndex) => {
             const value = cells[cellIndex] || '';
             const isHeader =
               rowIndex === 0 &&
               Array.from(rowElements[0].children).some((cell) => cell.tagName.toLowerCase() === 'th');
-            return new TableCell({
-              width: { size: width, type: WidthType.DXA },
+            return new this.docx!.TableCell({
+              width: { size: width, type: this.docx!.WidthType.DXA },
               borders: this.draftBorders('CBD5E1'),
-              shading: { fill: isHeader ? '0F766E' : rowIndex % 2 === 0 ? 'F8FAFC' : 'FFFFFF', type: ShadingType.CLEAR },
-              verticalAlign: VerticalAlign.CENTER,
+              shading: { fill: isHeader ? '0F766E' : rowIndex % 2 === 0 ? 'F8FAFC' : 'FFFFFF', type: this.docx!.ShadingType.CLEAR },
+              verticalAlign: this.docx!.VerticalAlign.CENTER,
               margins: { top: 120, bottom: 120, left: 140, right: 140 },
               children: [
-                new Paragraph({
+                new this.docx!.Paragraph({
                   spacing: { before: 0, after: 0, line: 260 },
                   children: [
-                    new TextRun({
+                    new this.docx!.TextRun({
                       text: value,
                       font: 'Arial',
                       size: isHeader ? 18 : 20,
@@ -7369,14 +7366,14 @@ INTEGRITY RULES:
     try {
       const imageData = await this.fetchImageData(src);
       if (!imageData) {
-        return new Paragraph(`Image: ${src}`);
+        return new this.docx!.Paragraph(`Image: ${src}`);
       }
       const { data, width, height, type } = imageData;
-      return new Paragraph({
-        alignment: AlignmentType.CENTER,
+      return new this.docx!.Paragraph({
+        alignment: this.docx!.AlignmentType.CENTER,
         spacing: { before: 140, after: 140 },
         children: [
-          new ImageRun({
+          new this.docx!.ImageRun({
             data,
             type,
             transformation: { width, height },
@@ -7385,7 +7382,7 @@ INTEGRITY RULES:
       });
     } catch (error) {
       console.warn('Failed to embed image in docx:', error);
-      return new Paragraph(`Image: ${src}`);
+      return new this.docx!.Paragraph(`Image: ${src}`);
     }
   }
 

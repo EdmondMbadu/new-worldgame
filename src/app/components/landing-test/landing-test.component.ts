@@ -16,6 +16,34 @@ import { Solution } from 'src/app/models/solution';
 
 declare const L: any;
 
+let leafletLoad: Promise<void> | undefined;
+
+function loadLeaflet(): Promise<void> {
+  if (leafletLoad) return leafletLoad;
+
+  const baseUrl = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet';
+  const stylesheet = document.createElement('link');
+  stylesheet.rel = 'stylesheet';
+  stylesheet.href = `${baseUrl}.css`;
+  stylesheet.crossOrigin = 'anonymous';
+  document.head.appendChild(stylesheet);
+
+  const script = document.createElement('script');
+  script.src = `${baseUrl}.js`;
+  script.crossOrigin = 'anonymous';
+  leafletLoad = new Promise<void>((resolve, reject) => {
+    script.onload = () => resolve();
+    script.onerror = () => {
+      stylesheet.remove();
+      script.remove();
+      leafletLoad = undefined;
+      reject(new Error('Unable to load the map library.'));
+    };
+    document.head.appendChild(script);
+  });
+  return leafletLoad;
+}
+
 type Status = 'active' | 'paused' | 'stopped';
 
 interface BroadcastPreviewVM {
@@ -86,6 +114,7 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
   private csvSub?: Subscription;
   private mapInstance?: any;
   private markersLayer?: any;
+  private destroyed = false;
 
   broadcastsPreview$ = of<BroadcastPreviewVM[]>([]);
 
@@ -153,6 +182,7 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     if (this.rafId) cancelAnimationFrame(this.rafId);
     this.csvSub?.unsubscribe();
     if (this.mapInstance) {
@@ -277,14 +307,17 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
     return stats;
   }
 
-  private renderMap() {
+  private async renderMap() {
     if (!this.countryStats.length) return;
     const container = document.getElementById('demographicMap');
     if (!container) return;
-    if (typeof L === 'undefined') {
-      setTimeout(() => this.renderMap(), 250);
+    try {
+      await loadLeaflet();
+    } catch (error) {
+      console.warn(error);
       return;
     }
+    if (this.destroyed || !container.isConnected) return;
 
     if (!this.mapInstance) {
       this.mapInstance = L.map(container, {
@@ -333,6 +366,6 @@ export class LandingTestComponent implements OnInit, OnDestroy, AfterViewInit {
       this.mapInstance.fitBounds(bounds, { padding: [30, 30] });
     }
 
-    setTimeout(() => this.mapInstance.invalidateSize(), 150);
+    setTimeout(() => this.mapInstance?.invalidateSize(), 150);
   }
 }

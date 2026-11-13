@@ -8,10 +8,6 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-// The custom build is a default export. Importing it as a namespace produces an
-// object (instead of the editor constructor) with Angular's ESM application
-// builder, so CKEditor cannot call Editor.create() and renders nothing.
-import Editor from 'ckeditor5-custom-build/build/ckeditor';
 import { Element } from '@angular/compiler';
 import { Router } from '@angular/router';
 import { SolutionService } from 'src/app/services/solution.service';
@@ -271,6 +267,7 @@ complex social issues like poverty (SDG 1) and inequality (SDG
   private lastAnswerTypingLocation = '';
   ngOnInit() {
     window.scrollTo(0, 0);
+    void this.loadEditor();
     if (this.solutionId) {
       this.activity.startEditing(this.solutionId);
     }
@@ -409,7 +406,19 @@ complex social issues like poverty (SDG 1) and inequality (SDG
     this.isInitialized = true;
   }
   dataInitialized = false; // New flag for ensuring data is loaded
-  public Editor: any = Editor;
+  public Editor?: any;
+  editorLoadFailed = false;
+
+  async loadEditor(): Promise<void> {
+    this.editorLoadFailed = false;
+    try {
+      const { default: editor } = await import('ckeditor5-custom-build/build/ckeditor');
+      this.Editor = editor;
+    } catch (error) {
+      this.editorLoadFailed = true;
+      console.error('Unable to load the solution editor:', error);
+    }
+  }
   private saveTimeout: any;
   public onReady(editor: any, questionIndex = 0) {
     // e.g. solutionId comes from the route or @Input()
