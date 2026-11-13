@@ -689,7 +689,7 @@ function getDueAutomationRun(
     scheduled.minute
   ).padStart(2, '0')}`;
   const runKey = `${zonedNow.year}-${zonedNow.month}-${zonedNow.day}@${normalizedTime}`;
-  if (String(schedule.lastAttemptKey || '') === runKey) {
+  if (schedule.lastAttemptKey === runKey || schedule.lastSuccessKey === runKey) {
     return { due: false, runKey };
   }
 
@@ -1391,7 +1391,9 @@ export const weeklyReminder = functions.https.onCall(
   }
 );
 
-export const runWeeklyEmailAutomation = functions.pubsub
+export const runWeeklyEmailAutomation = functions
+  .runWith({ memory: '1GB' })
+  .pubsub
   .schedule('every 15 minutes')
   .timeZone('Etc/UTC')
   .onRun(async () => {
@@ -1422,19 +1424,24 @@ export const runWeeklyEmailAutomation = functions.pubsub
 
     if (!dueRuns.length) return null;
 
-    const usersSnap = await db.collection('users').get();
+    const briefOnly = dueRuns.length === 1 && dueRuns[0].key === 'aiInsightsBrief';
+    const usersQuery = db.collection('users');
+    const solutionsQuery = db.collection('solutions');
+    const usersSnap = await (briefOnly
+      ? usersQuery.select('email', 'firstName', 'lastName', 'displayName', 'location', 'weeklyBriefSolutionId')
+      : usersQuery).get();
     const users = usersSnap.docs
       .map((doc) => doc.data() || {})
       .filter((user) => normalizeEmailForAutomation(user?.email).length > 0);
-    const solutionsSnap = await db.collection('solutions').get();
+    const solutionsSnap = await (briefOnly
+      ? solutionsQuery.select(
+          'solutionId', 'title', 'description', 'strategyReview', 'content', 'solutionArea', 'sdgs',
+          'participants', 'ownerEmail', 'authorEmail', 'updatedAt', 'submissionDate', 'createdAt',
+          'targetLocation', 'launchLocation', 'location', 'city', 'locationCity', 'region',
+          'state', 'locationRegion', 'country', 'locationCountry', 'meetLink', 'meetingLink', 'meetURL', 'image'
+        )
+      : solutionsQuery).get();
     const solutions = solutionsSnap.docs.map((doc) => doc.data() || {});
-    const userDirectory = buildUserDirectoryForAutomation(users);
-    const usersByEmail = new Map<string, any>();
-    users.forEach((user) => {
-      const email = normalizeEmailForAutomation(user?.email);
-      if (email) usersByEmail.set(email, user);
-    });
-
     let unsubscribed = new Set<string>();
     if (
       dueRuns.some(
@@ -1455,11 +1462,13 @@ export const runWeeklyEmailAutomation = functions.pubsub
     }
 
     for (const run of dueRuns) {
-      const claimed = await claimAutomationAttempt(run.key, run.due.runKey);
-      if (!claimed) continue;
+      // The brief claims its slot in the same commit that queues delivery.
+      if (run.key !== 'aiInsightsBrief' && !(await claimAutomationAttempt(run.key, run.due.runKey))) continue;
 
       try {
         if (run.key === 'weeklyReminder') {
+          const userDirectory = buildUserDirectoryForAutomation(users);
+          const usersByEmail = new Map(users.map((user) => [normalizeEmailForAutomation(user.email), user]));
           const recipientEmails = normalizeRecipientEmailsForAutomation(
             run.schedule.recipientEmails
           );
@@ -1585,50 +1594,28 @@ export const runWeeklyEmailAutomation = functions.pubsub
           });
 
           if (!recipients.length) {
-            await automationRef.set(
-              {
-                aiInsightsBrief: {
-                  ...run.schedule,
-                  lastAttemptKey: run.due.runKey,
-                  lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
-                  lastRunStatus: 'failed',
-                  lastRunSummary: `No eligible intelligence brief recipients generated. Participants checked: ${stats.totalParticipants}. Skipped unsubscribed ${stats.unsubscribed}, excluded ${stats.excluded}, without solution ${stats.noSolutions}.`,
-                  lastError:
-                    'No eligible recipients generated for the weekly intelligence brief.',
-                },
-              },
-              { merge: true }
+            await recordBriefQueueFailure(run.due.runKey,
+              'No eligible recipients generated for the weekly intelligence brief.',
+              `Participants checked: ${stats.totalParticipants}. Skipped unsubscribed ${stats.unsubscribed}, excluded ${stats.excluded}, without solution ${stats.noSolutions}.`
             );
             continue;
           }
 
-          const queued = await enqueueAIInsightsBulkJob({
+          await enqueueAIInsightsBulkJob({
             recipients,
             concurrency: 4,
             createdBy: 'weekly-ai-insights-automation',
-            source: 'automation',
-            automationRunKey: run.due.runKey,
+          }, {
+            runKey: run.due.runKey,
+            summary: `Queued ${stats.finalRecipients} intelligence brief recipient(s). User-selected ${stats.userSelected}. Fallback ${stats.fallback}. Skipped unsubscribed ${stats.unsubscribed}, excluded ${stats.excluded}.`,
           });
-
-          await automationRef.set(
-            {
-              aiInsightsBrief: {
-                ...run.schedule,
-                lastAttemptKey: run.due.runKey,
-                lastSuccessKey: run.due.runKey,
-                lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
-                lastRunStatus: 'success',
-                lastRunSummary: `Queued ${stats.finalRecipients} intelligence brief recipient(s). User-selected ${stats.userSelected}. Fallback ${stats.fallback}. Skipped unsubscribed ${stats.unsubscribed}, excluded ${stats.excluded}.`,
-                lastError: '',
-                lastJobId: queued.jobId,
-                lastLogId: queued.logId,
-              },
-            },
-            { merge: true }
-          );
         }
       } catch (error: any) {
         console.error(`Weekly email automation failed for ${run.key}`, error);
+        if (run.key === 'aiInsightsBrief') {
+          await recordBriefQueueFailure(run.due.runKey, error?.message || 'Unknown automation error.');
+          continue;
+        }
         await automationRef.set(
           {
             [run.key]: {
@@ -4211,11 +4198,10 @@ async function enqueueAIInsightsBulkJob(data: {
   recipients: AIInsightsPayload[];
   concurrency?: number;
   createdBy: string;
-  source?: string;
-  automationRunKey?: string;
-}) {
+}, automation?: { runKey: string; summary: string }) {
+  const db = admin.firestore();
   const rawRecipients = Array.isArray(data.recipients) ? data.recipients : [];
-  const editionKey = briefEditionKeyForRun(data.automationRunKey);
+  const editionKey = briefEditionKeyForRun(automation?.runKey);
   const editionPlan = buildBriefEditionPlan(rawRecipients, editionKey);
   const recipients = editionPlan.recipients;
   const concurrency = Math.min(
@@ -4223,19 +4209,26 @@ async function enqueueAIInsightsBulkJob(data: {
     6
   );
   const subject = `Weekly Global Solutions Lab Intelligence Brief (bulk)`;
+  const source = automation ? 'automation' : 'manual';
+  const automationRunKey = automation?.runKey || '';
+  const totalBatches = Math.ceil(recipients.length / AI_INSIGHTS_BATCH_SIZE);
+  const logRef = db.collection('ai_insights_send_logs').doc();
+  const editionDocId = briefInternalDocId('edition', logRef.id);
+  const editionRef = db.collection('ai_insights_content_cache').doc(editionDocId);
+  const jobRef = db.collection('ai_insights_bulk_jobs').doc();
 
-  const logRef = await admin.firestore().collection('ai_insights_send_logs').add({
+  const log = {
     mode: 'bulk',
     subject,
     createdBy: data.createdBy,
-    source: data.source || 'manual',
-    automationRunKey: data.automationRunKey || '',
-    recipients: recipients.map((r: AIInsightsPayload) => ({
+    source,
+    automationRunKey,
+    recipients: recipients.map((r) => ({
       email: r.userEmail,
       solutionId: r.solutionId,
       solutionTitle: r.solutionTitle,
       briefPackId: r.briefPackId,
-      profileConfidence: r.briefProfile?.confidence,
+      profileConfidence: r.briefProfile.confidence,
     })),
     total: recipients.length,
     successCount: 0,
@@ -4245,16 +4238,15 @@ async function enqueueAIInsightsBulkJob(data: {
     status: 'processing',
     sentAt: admin.firestore.FieldValue.serverTimestamp(),
     batchInfo: {
-      totalBatches: Math.ceil(recipients.length / AI_INSIGHTS_BATCH_SIZE),
+      totalBatches,
       completedBatches: 0,
     },
-  });
+  };
 
-  const editionDocId = briefInternalDocId('edition', logRef.id);
-  await admin.firestore().collection('ai_insights_content_cache').doc(editionDocId).set({
+  const edition = {
     editionKey,
     logId: logRef.id,
-    source: data.source || 'manual',
+    source,
     status: 'preparing',
     packs: editionPlan.packs,
     packCount: Object.keys(editionPlan.packs).length,
@@ -4274,27 +4266,79 @@ async function enqueueAIInsightsBulkJob(data: {
       failedPacks: 0,
     },
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  };
 
-  const jobRef = await admin.firestore().collection('ai_insights_bulk_jobs').add({
+  const firstJob = {
     status: 'queued',
     createdBy: data.createdBy,
-    source: data.source || 'manual',
-    automationRunKey: data.automationRunKey || '',
-    recipients,
+    source,
+    automationRunKey,
     concurrency,
     logId: logRef.id,
     editionDocId,
     batchIndex: 0,
+    totalBatches,
     totalRecipients: recipients.length,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
-  });
+  };
 
-  return { jobId: jobRef.id, logId: logRef.id, editionDocId };
+  const automationRef = db.doc(WEEKLY_EMAIL_AUTOMATION_DOC_PATH);
+  return db.runTransaction(async (transaction) => {
+    if (automation) {
+      const config = (await transaction.get(automationRef)).data() as WeeklyEmailAutomationDocument | undefined;
+      const due = getDueAutomationRun(config?.aiInsightsBrief, getAutomationTimezone(config?.timezone));
+      if (!due.due || due.runKey !== automation.runKey) return null;
+
+      transaction.set(automationRef, {
+        aiInsightsBrief: {
+          lastAttemptKey: automation.runKey,
+          lastSuccessKey: automation.runKey,
+          lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+          lastRunStatus: 'success',
+          lastRunSummary: automation.summary,
+          lastError: '',
+          lastJobId: jobRef.id,
+          lastLogId: logRef.id,
+        },
+      }, { merge: true });
+    }
+
+    transaction.create(logRef, log);
+    transaction.create(editionRef, edition);
+    for (let index = 0; index < totalBatches; index += 1) {
+      const start = index * AI_INSIGHTS_BATCH_SIZE;
+      transaction.create(editionRef.collection('recipient_batches').doc(String(index)), {
+        recipients: recipients.slice(start, start + AI_INSIGHTS_BATCH_SIZE),
+      });
+    }
+    transaction.create(jobRef, firstJob);
+    return { jobId: jobRef.id, logId: logRef.id, editionDocId };
+  });
+}
+
+async function recordBriefQueueFailure(runKey: string, error: string, summary = '') {
+  const db = admin.firestore();
+  const ref = db.doc(WEEKLY_EMAIL_AUTOMATION_DOC_PATH);
+  await db.runTransaction(async (transaction) => {
+    const config = (await transaction.get(ref)).data() as WeeklyEmailAutomationDocument | undefined;
+    const due = getDueAutomationRun(config?.aiInsightsBrief, getAutomationTimezone(config?.timezone));
+    if (!due.due || due.runKey !== runKey) return;
+
+    transaction.set(ref, {
+      aiInsightsBrief: {
+        // An empty list is a completed check. Infrastructure failures can retry on the next tick.
+        ...(summary ? { lastAttemptKey: runKey } : {}),
+        lastRunAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastRunStatus: 'failed',
+        lastRunSummary: summary,
+        lastError: error,
+      },
+    }, { merge: true });
+  });
 }
 
 export const startAIInsightsBulkJob = functions
-  .runWith({ timeoutSeconds: 60, memory: '256MB' })
+  .runWith({ timeoutSeconds: 60, memory: '512MB' })
   .https.onCall(
     async (
       data: { recipients: AIInsightsPayload[]; concurrency?: number },
@@ -4320,7 +4364,6 @@ export const startAIInsightsBulkJob = functions
         recipients,
         concurrency: data.concurrency,
         createdBy,
-        source: 'manual',
       });
 
       return { success: true, ...result };
@@ -4332,12 +4375,18 @@ export const processAIInsightsBulkJob = functions
   .firestore.document('ai_insights_bulk_jobs/{jobId}')
   .onCreate(async (snap) => {
     const data = snap.data() || {};
-    const allRecipients = Array.isArray(data.recipients) ? data.recipients : [];
+    const db = admin.firestore();
     const concurrency = Math.min(Math.max(Number(data.concurrency) || 4, 1), 6);
     const createdBy = data.createdBy || 'unknown';
     const logId = data.logId as string | undefined;
     const editionDocId = String(data.editionDocId || '').trim();
     const batchIndex = Number(data.batchIndex) || 0;
+    const totalBatches = Number(data.totalBatches) || 0;
+    const editionRef = editionDocId ? db.collection('ai_insights_content_cache').doc(editionDocId) : null;
+    const recipientBatch = totalBatches && editionRef
+      ? (await editionRef.collection('recipient_batches').doc(String(batchIndex)).get()).data()
+      : data;
+    const allRecipients = Array.isArray(recipientBatch?.recipients) ? recipientBatch.recipients : [];
     const totalRecipients = Number(data.totalRecipients) || allRecipients.length;
 
     if (!allRecipients.length) {
@@ -4348,6 +4397,17 @@ export const processAIInsightsBulkJob = functions
       });
       return;
     }
+
+    // A Firestore create event can be delivered more than once.
+    const claimed = await db.runTransaction(async (transaction) => {
+      if ((await transaction.get(snap.ref)).data()?.status !== 'queued') return false;
+      transaction.update(snap.ref, {
+        status: 'processing',
+        startedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      return true;
+    });
+    if (!claimed) return;
 
     // Get or create log reference
     let logRef: admin.firestore.DocumentReference;
@@ -4379,42 +4439,21 @@ export const processAIInsightsBulkJob = functions
     // Take only the batch we're processing
     const batchRecipients = allRecipients.slice(0, AI_INSIGHTS_BATCH_SIZE);
     const remainingRecipients = allRecipients.slice(AI_INSIGHTS_BATCH_SIZE);
-    const hasMoreBatches = remainingRecipients.length > 0;
+    const hasMoreBatches = totalBatches ? batchIndex + 1 < totalBatches : remainingRecipients.length > 0;
 
     console.log(`Processing batch ${batchIndex + 1}: ${batchRecipients.length} recipients (${remainingRecipients.length} remaining)`);
 
     await snap.ref.update({
-      status: 'processing',
       logId: logRef.id,
       batchIndex,
       batchSize: batchRecipients.length,
-      startedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
     const failures: string[] = [];
     const successfulEmails: string[] = [];
     let successCount = 0;
 
-    // Helper to update progress in the shared log (uses atomic increment)
-    const updateLogProgress = async () => {
-      const updateData: Record<string, any> = {
-        successCount: admin.firestore.FieldValue.increment(successCount),
-        failureCount: admin.firestore.FieldValue.increment(failures.length),
-      };
-      // arrayUnion requires at least 1 argument, so only add if arrays have items
-      if (failures.length > 0) {
-        updateData.failures = admin.firestore.FieldValue.arrayUnion(...failures.slice(-20));
-      }
-      if (successfulEmails.length > 0) {
-        updateData.successfulEmails = admin.firestore.FieldValue.arrayUnion(...successfulEmails);
-      }
-      await logRef.update(updateData);
-    };
-
     const contentCache = new Map<string, BriefContent>();
-    const editionRef = editionDocId
-      ? admin.firestore().collection('ai_insights_content_cache').doc(editionDocId)
-      : null;
     const editionData = editionRef ? (await editionRef.get()).data() || {} : {};
     const editionPacks = (editionData.packs || {}) as Record<string, BriefPackDefinition>;
     const uniquePacks = new Map<string, BriefPackDefinition>();
@@ -4583,12 +4622,20 @@ export const processAIInsightsBulkJob = functions
       }
     });
 
-    // Update shared log with this batch's results
-    await updateLogProgress();
-    if (Object.keys(batchQuality).length) await logRef.set({ qualityBySolution: batchQuality }, { merge: true });
-
-    // Update this job's status
-    await snap.ref.update({
+    const writes = db.batch();
+    const progress = {
+      successCount: admin.firestore.FieldValue.increment(successCount),
+      failureCount: admin.firestore.FieldValue.increment(failures.length),
+      ...(failures.length ? { failures: admin.firestore.FieldValue.arrayUnion(...failures) } : {}),
+      ...(successfulEmails.length ? { successfulEmails: admin.firestore.FieldValue.arrayUnion(...successfulEmails) } : {}),
+      ...(Object.keys(batchQuality).length ? { qualityBySolution: batchQuality } : {}),
+      batchInfo: {
+        totalBatches: totalBatches || batchIndex + 1 + Math.ceil(remainingRecipients.length / AI_INSIGHTS_BATCH_SIZE),
+        completedBatches: batchIndex + 1,
+      },
+    };
+    writes.set(logRef, progress, { merge: true });
+    writes.update(snap.ref, {
       status: 'batch_completed',
       quality: batchQuality,
       batchSuccessCount: successCount,
@@ -4596,15 +4643,13 @@ export const processAIInsightsBulkJob = functions
       completedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-    console.log(`Batch ${batchIndex + 1} completed: ${successCount} sent, ${failures.length} failed`);
-
     // ===== PHASE 3: Create continuation job for remaining recipients =====
     if (hasMoreBatches) {
-      console.log(`Creating continuation job for ${remainingRecipients.length} remaining recipients...`);
-      await admin.firestore().collection('ai_insights_bulk_jobs').add({
+      console.log(`Creating continuation job for batch ${batchIndex + 2}...`);
+      writes.create(db.collection('ai_insights_bulk_jobs').doc(), {
         status: 'queued',
         createdBy,
-        recipients: remainingRecipients,
+        ...(totalBatches ? { totalBatches } : { recipients: remainingRecipients }),
         concurrency,
         logId: logRef.id,
         editionDocId,
@@ -4615,13 +4660,14 @@ export const processAIInsightsBulkJob = functions
         continuationOf: snap.id,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });
+      await writes.commit();
     } else {
       // All batches complete - finalize the log
       console.log(`All batches completed. Finalizing log...`);
       const logSnap = await logRef.get();
       const logData = logSnap.data() || {};
-      const finalSuccessCount = logData.successCount || 0;
-      const finalFailureCount = logData.failureCount || 0;
+      const finalSuccessCount = (logData.successCount || 0) + successCount;
+      const finalFailureCount = (logData.failureCount || 0) + failures.length;
       const total = logData.total || totalRecipients;
 
       const finalStatus = finalSuccessCount === total
@@ -4630,31 +4676,29 @@ export const processAIInsightsBulkJob = functions
           ? 'completed_with_errors'
           : 'failed';
 
-      await logRef.update({
+      const finalEdition = editionRef ? (await editionRef.get()).data() || {} : undefined;
+      writes.update(logRef, {
         status: finalStatus,
         unsent: total - finalSuccessCount - finalFailureCount,
         completedAt: admin.firestore.FieldValue.serverTimestamp(),
-        batchInfo: {
-          totalBatches: batchIndex + 1,
-          completedBatches: batchIndex + 1,
-        },
-      });
-      if (editionRef) {
-        const finalEdition = (await editionRef.get()).data() || {};
-        await editionRef.set({
-          status: finalStatus,
-          completedAt: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
-        await logRef.set({
+        ...(finalEdition ? {
           briefEdition: {
             editionKey: finalEdition.editionKey || '',
             packCount: Number(finalEdition.packCount || 0),
             usage: finalEdition.usage || {},
           },
+        } : {}),
+      });
+      if (editionRef) {
+        writes.set(editionRef, {
+          status: finalStatus,
+          completedAt: admin.firestore.FieldValue.serverTimestamp(),
         }, { merge: true });
       }
+      await writes.commit();
       console.log(`Bulk job finalized: ${finalSuccessCount}/${total} emails sent successfully`);
     }
+    console.log(`Batch ${batchIndex + 1} completed: ${successCount} sent, ${failures.length} failed`);
   });
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

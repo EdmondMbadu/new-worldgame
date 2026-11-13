@@ -18,6 +18,14 @@ interface TimeSlot {
   startsAt: string;
 }
 
+const demoSlots: TimeSlot[] = Array.from({ length: (17 - 9) * 2 }, (_, index) => {
+  const hour = 9 + Math.floor(index / 2);
+  const displayHour = String(hour % 12 || 12).padStart(2, '0');
+  const minutes = index % 2 === 0 ? '00' : '30';
+  const startsAt = `${displayHour}:${minutes} ${hour < 12 ? 'AM' : 'PM'}`;
+  return { label: startsAt, startsAt };
+});
+
 interface SchedulerConfig {
   bookingType: 'demo' | 'gsl2026Prep';
   eventSlug?: string;
@@ -78,6 +86,7 @@ export class SchedulerComponent implements OnInit, OnDestroy {
     meetingDescription:
       'Live Global Solutions Lab demonstration with the Global Solutions Lab team.',
     durationText: '20–30 min',
+    availabilityText: 'Available Monday through Saturday, 9 AM to 5 PM Eastern time.',
     introText:
       'Join a live Global Solutions Lab demo with our team. We will walk through the platform, its underlying process, and how you can use it to organize knowledge and design practical solutions.',
     scheduledLabel: 'Your Scheduled Demo',
@@ -144,9 +153,9 @@ export class SchedulerComponent implements OnInit, OnDestroy {
       this.route.snapshot.data['scheduleType'] === 'gsl2026Prep'
         ? this.gslPrepConfig
         : this.defaultConfig;
-    if (this.config.initialMonth) {
-      this.currentMonthDate = new Date(this.config.initialMonth);
-    }
+    this.currentMonthDate = this.config.initialMonth
+      ? new Date(this.config.initialMonth)
+      : this.getBookingDate(new Date());
     if (this.config.bookingType === 'gsl2026Prep') {
       this.gslPrepBookingsSub = this.auth.listGsl2026PrepBookings().subscribe({
         next: (bookings) => {
@@ -187,8 +196,8 @@ export class SchedulerComponent implements OnInit, OnDestroy {
     this.monthDays = [];
     const year = this.currentMonthDate.getFullYear();
     const month = this.currentMonthDate.getMonth();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today's date for accurate past-day checking
+    const now = new Date();
+    const today = this.getBookingDate(now);
 
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
@@ -212,21 +221,19 @@ export class SchedulerComponent implements OnInit, OnDestroy {
     }
 
     // 2. Add days for the current month
-    // 2. Add only Fridays (5) and Saturdays (6) for the current month
     for (let i = 1; i <= totalDaysInMonth; i++) {
       const date = new Date(year, month, i);
-      const dayOfWeek = date.getDay(); // 5 = Friday, 6 = Saturday
-      const dateKey = this.toDateKey(date);
-      const hasFixedSlots = !!this.config.fixedSlots?.[dateKey]?.length;
+      const slots = this.getSlotsForDate(date);
+      const hasAvailableSlot = date.getTime() === today.getTime()
+        ? slots.some((slot) => this.getBookingTimestamp(date, slot.startsAt) > now.getTime())
+        : slots.length > 0;
 
       this.monthDays.push({
         day: i,
         date: date,
         isCurrentMonth: true,
         isPast: date < today,
-        isValidBookingDay: this.config.fixedSlots
-          ? hasFixedSlots
-          : dayOfWeek === 5 || dayOfWeek === 6,
+        isValidBookingDay: hasAvailableSlot,
       });
     }
 
@@ -250,10 +257,11 @@ export class SchedulerComponent implements OnInit, OnDestroy {
    * @param direction -1 for previous, 1 for next.
    */
   changeMonth(direction: number): void {
-    this.currentMonthDate.setMonth(
-      this.currentMonthDate.getMonth() + direction
+    this.currentMonthDate = new Date(
+      this.currentMonthDate.getFullYear(),
+      this.currentMonthDate.getMonth() + direction,
+      1
     );
-    this.currentMonthDate = new Date(this.currentMonthDate); // Create a new object to trigger change detection
     this.generateCalendar();
     this.selectedDate = null; // Reset selection when changing month
     this.selectedTime = null;
@@ -270,24 +278,10 @@ export class SchedulerComponent implements OnInit, OnDestroy {
     this.selectedDate = date;
     this.selectedTime = null; // Reset time when a new date is selected
     this.selectedStartTime = null;
-    const fixedSlots = this.config.fixedSlots?.[this.toDateKey(date)];
-    if (fixedSlots) {
-      this.availableTimes = fixedSlots;
-      return;
-    }
-    // In a real app, you would fetch available times for the selected date from a backend.
-    // Here, we generate dummy times for demonstration.
-    this.availableTimes = [
-      // '09:00 AM',
-      // '09:30 AM',
-      // '10:00 AM',
-      // '10:30 AM',
-      { label: '02:00 PM', startsAt: '02:00 PM' },
-      { label: '02:30 PM', startsAt: '02:30 PM' },
-      { label: '03:00 PM', startsAt: '03:00 PM' },
-      { label: '03:30 PM', startsAt: '03:30 PM' },
-      { label: '04:00 PM', startsAt: '04:00 PM' },
-    ];
+    const now = Date.now();
+    this.availableTimes = this.getSlotsForDate(date).filter(
+      (slot) => this.getBookingTimestamp(date, slot.startsAt) > now
+    );
   }
 
   /**
@@ -401,20 +395,19 @@ export class SchedulerComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Combine date + time into a single UTC millisecond value for sorting
-    const [time, meridian] = this.selectedStartTime.split(' ');
-    let [hours, minutes] = time.split(':').map(Number);
-    if (meridian === 'PM' && hours < 12) hours += 12;
-    if (meridian === 'AM' && hours === 12) hours = 0;
-
-    const fullDateTime = new Date(this.selectedDate);
-    fullDateTime.setHours(hours, minutes, 0, 0);
+    const bookingTimestamp = this.getBookingTimestamp(this.selectedDate, this.selectedStartTime);
+    if (bookingTimestamp <= Date.now()) {
+      this.selectDate(this.selectedDate);
+      this.step = 1;
+      alert('This time has passed. Please choose another slot.');
+      return;
+    }
 
     await this.auth.addDemoScheduled({
       demoDate: this.toDateKey(this.selectedDate),
       demoTime: this.selectedTime,
       demoStartTime: this.selectedStartTime,
-      demoDateTime: fullDateTime.getTime(),
+      demoDateTime: bookingTimestamp,
       name: this.userName,
       email: this.userEmail,
       teamName: this.teamName.trim(),
@@ -431,6 +424,38 @@ export class SchedulerComponent implements OnInit, OnDestroy {
 
     this.step = 3; // Confirmation view
     // setTimeout(() => (this.step = 4), 1600); // 1.6-second pop to step 4
+  }
+
+  private getSlotsForDate(date: Date): TimeSlot[] {
+    if (this.config.fixedSlots) {
+      return this.config.fixedSlots[this.toDateKey(date)] ?? [];
+    }
+    return date.getDay() === 0 ? [] : demoSlots;
+  }
+
+  private getBookingDate(now: Date): Date {
+    const [month, day, year] = new Intl.DateTimeFormat('en-US', {
+      timeZone: this.config.bookingTimeZone,
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+    }).format(now).split('/').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  private getBookingTimestamp(date: Date, startsAt: string): number {
+    const [time, meridian] = startsAt.split(' ');
+    const [hour, minute] = time.split(':').map(Number);
+    const hour24 = hour % 12 + (meridian === 'PM' ? 12 : 0);
+    const utcGuess = new Date(Date.UTC(
+      date.getFullYear(), date.getMonth(), date.getDate(), hour24, minute
+    ));
+    // The daytime booking hours fall after any Eastern daylight-saving transition.
+    const offset = new Intl.DateTimeFormat('en-US', {
+      timeZone: this.config.bookingTimeZone,
+      timeZoneName: 'longOffset',
+    }).formatToParts(utcGuess).find((part) => part.type === 'timeZoneName');
+    return Date.parse(utcGuess.toISOString().replace('Z', offset?.value.slice(3) || '+00:00'));
   }
 
   private toDateKey(date: Date): string {

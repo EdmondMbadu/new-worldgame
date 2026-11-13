@@ -85,7 +85,7 @@
               </div>
               <div class="flex items-center text-blue-600 dark:text-blue-400 mt-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <span>{{ selectedTime }} (EST)</span>
+                  <span>{{ selectedTime }} Eastern time</span>
               </div>
           </div>
 
@@ -144,6 +144,9 @@
               <!-- Time Slots (appears after date selection) -->
               <div *ngIf="selectedDate" class="transition-opacity duration-300 ease-in-out">
                 <h3 class="font-semibold text-center mb-4 text-slate-700 dark:text-slate-300">{{ selectedDate | date:'EEEE, MMM d' }}</h3>
+                <p *ngIf="!availableTimes.length" class="text-center text-sm text-slate-600 dark:text-slate-300">
+                  No times are available. Please choose another day.
+                </p>
                 <div class="flex flex-col space-y-2 max-h-60 overflow-y-auto pr-2">
                   <button *ngFor="let time of availableTimes" 
                         (click)="selectTime(time)"
