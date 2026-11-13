@@ -16,6 +16,12 @@
   --accent: #f5b83e;
   --accent-rgb: 245, 184, 62; /* the same colour, for the canvas and for tints */
   --on-accent: #1a1100;
+  /* The map's natural colours. Land is green where needs are met and turns gold where they are not. */
+  --land: #74ba8c;
+  --land-rgb: 116, 186, 140;
+  --ground-rgb: 16, 34, 28;
+  --sea-rgb: 13, 50, 102;
+  --sea-lit-rgb: 46, 112, 190;
   --glass: rgba(11, 12, 15, 0.84);
   --serif: 'Instrument Serif', 'Iowan Old Style', 'Times New Roman', serif;
   --sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -134,7 +140,7 @@ h1 em { letter-spacing: -0.02em; }
 .ladder div[data-zero] strong { color: var(--mut); }
 
 .g { width: 11px; height: 11px; flex: none; display: inline-block; }
-.g-met { border-radius: 50%; background: var(--ink); }
+.g-met { border-radius: 50%; background: var(--land); }
 .g-closing { border-radius: 50%; border: 1.5px solid var(--accent); background: linear-gradient(90deg, var(--accent) 50%, transparent 50%); }
 .g-stuck { background: var(--accent); transform: rotate(45deg) scale(0.86); }
 .g-none { height: 1.5px; background: var(--mut); align-self: center; }

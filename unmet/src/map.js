@@ -4,8 +4,7 @@
 // drawing with no map library behind it.
 
 const GOLDEN = (137.50776405003785 * Math.PI) / 180;
-const PAPER = [233, 229, 219];
-const SHADES = 9; // colour steps from met (paper) to furthest from met (gold)
+const SHADES = 9; // colour steps from met (the land's own green) to furthest from met (gold)
 const NEUTRAL = SHADES; // before any data has arrived
 const NODATA = SHADES + 1; // not measured / no country
 const TILT = (-16 * Math.PI) / 180;
@@ -17,7 +16,15 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   // The accent colour comes from the page's CSS, so the map can never drift
   // from the rest of the design.
   const css = getComputedStyle(document.documentElement);
-  const GOLD = (css.getPropertyValue('--accent-rgb') || '245, 184, 62').split(',').map((v) => +v);
+  const rgb = (name, fallback) => (css.getPropertyValue(name).trim() || fallback).split(',').map((v) => +v);
+  const GOLD = rgb('--accent-rgb', '245, 184, 62');
+  const LAND = rgb('--land-rgb', '116, 186, 140'); // where needs are met: the green of living land
+  const GROUND = rgb('--ground-rgb', '16, 34, 28'); // the dark earth the dots sit on
+  const SEA = rgb('--sea-rgb', '13, 50, 102');
+  const SEA_LIT = rgb('--sea-lit-rgb', '46, 112, 190');
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const str = (c, alpha = 1) => `rgba(${c[0]},${c[1]},${c[2]},${alpha})`;
+  const SEA_DEEP = mix(SEA, [3, 8, 20], 0.55);
   const ACCENT = `${GOLD[0]},${GOLD[1]},${GOLD[2]}`;
   let dpr = 1, width = 0, height = 0;
   let geo = null; // map.json
@@ -25,6 +32,7 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   let ux, uy, uz, mx, my, owner, shade;
   let hasXY = false;
   let net = null, folds = null;
+  let seaLayer = null, groundLayer = null, globeLayer = null;
   let grid = null;
 
   let mode = 'globe'; // globe -> morph -> map
@@ -43,10 +51,10 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   const colors = [];
   for (let i = 0; i < SHADES; i++) {
     const t = Math.pow(i / (SHADES - 1), 0.85);
-    colors.push(PAPER.map((p, c) => Math.round(p + (GOLD[c] - p) * t)));
+    colors.push(mix(LAND, GOLD, t));
   }
-  colors[NEUTRAL] = PAPER;
-  colors[NODATA] = [120, 122, 128];
+  colors[NEUTRAL] = LAND;
+  colors[NODATA] = [126, 136, 150];
 
   // ---------- data ----------
   function setGeo(json) {
@@ -54,6 +62,46 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
     net = new Path2D(json.net);
     folds = new Path2D(json.folds);
     view.cy = json.h / 2;
+    // The ocean's colour, painted once: brightest mid-map, deepening towards
+    // the edges of the sheet. Each frame only stretches this small picture.
+    seaLayer = layer(256, Math.round((256 * json.h) / json.w), (g, w, h) => {
+      const sea = g.createRadialGradient(w * 0.52, h * 0.5, w * 0.03, w * 0.52, h * 0.5, w * 0.6);
+      sea.addColorStop(0, str(mix(SEA, SEA_LIT, 0.34))); sea.addColorStop(0.55, str(SEA)); sea.addColorStop(1, str(mix(SEA, SEA_DEEP, 0.7)));
+      g.fillStyle = sea; g.fillRect(0, 0, w, h);
+    });
+  }
+  function layer(w, h, paint) {
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h));
+    paint(c.getContext('2d'), c.width, c.height);
+    return c;
+  }
+  /** Dark earth under the dots, so land reads as land and the sea never shows
+   *  through it. Painted once from the dot positions, then reused every frame. */
+  function paintGround() {
+    const scale = Math.min(2400, geo.w * (n > 15000 ? 2.4 : 1.5)) / geo.w, r = 0.62 * spacing * scale;
+    groundLayer = layer(geo.w * scale, geo.h * scale, (g) => {
+      g.fillStyle = str(GROUND);
+      g.beginPath();
+      for (let i = 0; i < n; i++) { const x = mx[i] * scale, y = my[i] * scale; g.moveTo(x + r, y); g.arc(x, y, r, 0, 6.2832); }
+      g.fill();
+    });
+  }
+  /** The globe's ocean and its thin blue atmosphere, lit from the upper left. */
+  function globeSprite(R) {
+    if (globeLayer && globeLayer.R === R && globeLayer.dpr === dpr) return globeLayer;
+    const half = R * 1.18;
+    const canvas = layer(half * 2 * dpr, half * 2 * dpr, (g) => {
+      g.scale(dpr, dpr); g.translate(half, half);
+      const air = g.createRadialGradient(0, 0, R * 0.96, 0, 0, R * 1.16);
+      air.addColorStop(0, str(SEA_LIT, 0.42)); air.addColorStop(1, str(SEA_LIT, 0));
+      g.fillStyle = air; g.beginPath(); g.arc(0, 0, R * 1.16, 0, 6.2832); g.fill();
+      const sea = g.createRadialGradient(-R * 0.38, -R * 0.42, R * 0.06, -R * 0.1, -R * 0.1, R * 1.12);
+      sea.addColorStop(0, str(SEA_LIT)); sea.addColorStop(0.5, str(SEA)); sea.addColorStop(1, str(SEA_DEEP));
+      g.fillStyle = sea; g.beginPath(); g.arc(0, 0, R, 0, 6.2832); g.fill();
+      g.strokeStyle = str(mix(SEA_LIT, [255, 255, 255], 0.35), 0.55); g.lineWidth = 1; g.stroke();
+    });
+    return (globeLayer = { canvas, R, dpr, half });
   }
 
   /** land.bin = a bit per lattice point (is it land?) then one owner byte per land dot. */
@@ -97,6 +145,7 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
       next[i] = head[c]; head[c] = i;
     }
     grid = { cell, cols, rows, head, next };
+    paintGround();
     hasXY = true;
     start();
   }
@@ -239,9 +288,10 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
       ctx.save();
       ctx.translate(ox - cx * k, oy - cy * k); ctx.scale(k, k);
       ctx.globalAlpha = mapAlpha;
-      ctx.fillStyle = '#0c0e11'; ctx.fill(net);
-      ctx.lineWidth = 0.7 / k; ctx.strokeStyle = 'rgba(233,229,219,0.07)'; ctx.stroke(folds);
-      ctx.lineWidth = 0.9 / k; ctx.strokeStyle = 'rgba(233,229,219,0.2)'; ctx.stroke(net);
+      ctx.save(); ctx.clip(net); ctx.drawImage(seaLayer, 0, 0, geo.w, geo.h); ctx.restore();
+      if (groundLayer) ctx.drawImage(groundLayer, 0, 0, geo.w, geo.h);
+      ctx.lineWidth = 0.7 / k; ctx.strokeStyle = 'rgba(170,208,255,0.09)'; ctx.stroke(folds);
+      ctx.lineWidth = 1 / k; ctx.strokeStyle = 'rgba(150,198,255,0.4)'; ctx.stroke(net);
       ctx.restore();
     }
 
@@ -250,10 +300,10 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
     const R = Math.min(stage.w * 0.36, stage.h * 0.46, 330);
     if (mode !== 'map' && morph < 0.6) {
       const a = (1 - ease(Math.min(1, morph * 1.7))) * appear;
-      const g = ctx.createRadialGradient(gx - R * 0.35, gy - R * 0.4, R * 0.1, gx, gy, R);
-      g.addColorStop(0, `rgba(30,33,40,${0.85 * a})`); g.addColorStop(1, `rgba(12,14,17,${0.9 * a})`);
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(gx, gy, R, 0, 6.2832); ctx.fill();
-      ctx.strokeStyle = `rgba(233,229,219,${0.16 * a})`; ctx.lineWidth = 1; ctx.stroke();
+      const sprite = globeSprite(R);
+      ctx.globalAlpha = a;
+      ctx.drawImage(sprite.canvas, gx - sprite.half, gy - sprite.half, sprite.half * 2, sprite.half * 2);
+      ctx.globalAlpha = 1;
     }
 
     // Dots.
@@ -292,7 +342,8 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
     }
     const zoom = mode === 'map' ? k / k0 : 1;
     const mapR = clamp(spacing * k0 * 0.4 * Math.pow(zoom, 0.62), 0.55, 9);
-    const globeR = clamp(spacing * (R / 149) * 0.36, 0.7, 2.6); // 149 px is the globe radius at the map's own scale
+    // On the globe the dots nearly touch, so land looks solid without an earth layer.
+    const globeR = clamp(spacing * (R / 149) * 0.45, 0.7, 3.2); // 149 px is the globe radius at the map's own scale
     const baseR = mode === 'map' ? mapR : globeR + (mapR - globeR) * ease(morph);
     const ALPHA = [0.2, 0.32, 0.68, 0.94];
     let shown = 0;
