@@ -11,6 +11,11 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
   const eligibility='Registered nonprofit organizations may apply to this water treatment program.';
   class FakeAI {
     getGenerativeModel(params) {
+      assert.equal(params.generationConfig.thinkingConfig.thinkingBudget, 0);
+      if (params.tools) {
+        assert.deepEqual(params.tools, [{ googleSearch: {} }]);
+        assert.ok(params.generationConfig.maxOutputTokens >= 1000);
+      }
       return { generateContent: async prompt => {
         if(providerDown) throw new Error('Provider unavailable');
         if(params.tools) {
@@ -20,7 +25,7 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
         reviews++; const url=prompt.match(/Final URL: (https:\/\/[^ ]+)/)[1].replace(/\.$/,'');
         const news=prompt.includes('Category: news'); const date=new Date().toISOString().slice(0,10);
         return {response:{text:()=>JSON.stringify({accept:true,pageMatches:true,authoritative:true,title:url,publisher:'Institute',relevance:'Useful water treatment evidence',evidence,
-          date:news?date:'',dateEvidence:news?`Published on ${date}. This is the publication date of the water treatment study.`:'',eligibility:news?'':eligibility,eligibilityEvidence:news?'':eligibility,score:90})}};
+          date:news?date:'',dateEvidence:news?date:'',eligibility:news?'':eligibility,eligibilityEvidence:news?'':eligibility,score:90})}};
       }};
     }
   }
@@ -33,9 +38,12 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
     const first=await prepareBriefContent('test','solution','water');
     assert.equal(first.validNewsCount,3); assert.equal(first.validFundersCount,3); assert.equal(fetches,6);
     assert.equal(reviews,6); assert.ok(first.quality.snapshotId);
+    assert.equal(first.usage.groundedCalls, 2);
+    assert.equal(first.usage.estimatedUsd, 0.07);
     const immutable=structuredClone(docs.get(`ai_insights_content_snapshots/${first.quality.snapshotId}`));
     const second=await prepareBriefContent('test','solution','water');
     assert.equal(second.quality.snapshotId,first.quality.snapshotId); assert.equal(fetches,6); assert.equal(searches,2);
+    assert.equal(second.usage.calls, 0);
     const cachePath=`ai_insights_content_cache/${first.quality.cacheId}`;
     docs.get(cachePath).checkedAt=Date.now()-31*24*60*60*1000;
     await prepareBriefContent('test','solution','water'); assert.equal(fetches,12); assert.equal(searches,2);
@@ -44,6 +52,9 @@ test('research pipeline reuses fresh structured cache, revalidates stale pages, 
     const excluded=await prepareBriefContent('test','solution','water'); assert.equal(excluded.validNewsCount,2);
     assert.ok(!excluded.newsHtml.includes('https://news0.org/program'));
     providerDown=true;
+    const fallback=await prepareBriefContent('test','solution','water',true);
+    assert.equal(fallback.validNewsCount,2);
+    assert.equal(fallback.validFundersCount,3);
     const failed=await prepareBriefContent('test','solution','new context');
     assert.equal(failed.validNewsCount,0); assert.equal(failed.validFundersCount,0); assert.ok(failed.newsHtml.includes('No verified'));
   } finally {Module._load=original; sourceModule.fetchSourcePage=oldFetch;}

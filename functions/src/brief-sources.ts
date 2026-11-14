@@ -5,7 +5,7 @@ import { request as httpRequest } from 'node:http';
 import { createHash } from 'node:crypto';
 import sanitizeHtml = require('sanitize-html');
 
-export const BRIEF_PIPELINE_VERSION = 2;
+export const BRIEF_PIPELINE_VERSION = 4;
 export const DAY_MS = 24 * 60 * 60 * 1000;
 // Brief research is the dominant Gemini cost. Reuse a verified research set for
 // one month; edits to the solution still produce a different content hash.
@@ -104,7 +104,9 @@ export async function probePublicMedia(url: string, kind: 'video' | 'image'): Pr
 
 export function htmlPage(url: string, status: number, html: string): SourcePage {
   const title = sanitizeHtml(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '', { allowedTags: [], allowedAttributes: {} });
-  const text = sanitizeHtml(html.replace(/<(script|style|nav|footer)[\s\S]*?<\/\1>/gi, ' '), { allowedTags: [], allowedAttributes: {} })
+  const body = html.replace(/<(script|style|nav|footer)[\s\S]*?<\/\1>/gi, ' ')
+    .replace(/<\/?(?:p|div|h[1-6]|li|section|article|br|time|td|th)(?:\s[^>]*|\/?)>/gi, ' ');
+  const text = sanitizeHtml(body, { allowedTags: [], allowedAttributes: {} })
     .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, ' ').trim();
   return { url, status, title, text: text.slice(0, 45000) };
 }
@@ -134,9 +136,9 @@ export function pageProblem(page: SourcePage): string {
 export function parseJsonObject(text: string): any {
   try { return JSON.parse(text.replace(/^\s*```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '')); } catch { return {}; }
 }
-export function evidenceInPage(quote: string, text: string): boolean {
+export function evidenceInPage(quote: string, text: string, minimumLength = 30): boolean {
   const normalize = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
-  const q = normalize(quote); return q.length >= 30 && normalize(text).includes(q);
+  const q = normalize(quote); return q.length >= minimumLength && normalize(text).includes(q);
 }
 export function eligibleSource(source: BriefSource, now = Date.now()): boolean {
   if (source.status !== 'verified' || !source.checkedAt || now - source.checkedAt >= VALIDATION_TTL_MS || source.checkedAt > now + 60000) return false;

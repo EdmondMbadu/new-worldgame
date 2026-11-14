@@ -48,7 +48,13 @@ test('editorial gate requires real evidence, matching page and authority', () =>
   const input = source({kind:'funding',date:''}); const page = {url:input.url,status:200,title:input.title,text:`${input.evidence} ${eligibility}`};
   const review = { accept:true,pageMatches:true,authoritative:true,evidence:input.evidence,eligibility,eligibilityEvidence:eligibility,score:90,title:input.title };
   assert.equal(reviewedSource(input,page,review,now).status,'verified');
-  for (const patch of [{evidence:'Fabricated evidence that never appeared in the source.'},{pageMatches:false},{authoritative:false},{date:'2026-09-01',dateEvidence:'invented date proof'}, {eligibility:'Anyone may apply',eligibilityEvidence:'Not in the page'}]) assert.equal(reviewedSource(input,page,{...review,...patch},now).status,'rejected');
+  const closedPage = sources.htmlPage(input.url, 200, `<h2>Support for communities</h2><p>Applications are closed.</p><p>${page.text}</p>`);
+  const closed = reviewedSource(input,closedPage,review,now);
+  assert.equal(closed.status,'rejected');
+  assert.match(closed.reason,/closed/);
+  for (const patch of [{evidence:'Fabricated evidence that never appeared in the source.'},{pageMatches:false},{authoritative:false},{deadline:'2026-09-01',deadlineEvidence:'invented deadline proof'}, {eligibility:'Anyone may apply',eligibilityEvidence:'Not in the page'}]) assert.equal(reviewedSource(input,page,{...review,...patch},now).status,'rejected');
+  const future = new Date(now + day * 14).toISOString().slice(0, 10);
+  assert.equal(reviewedSource(input,{...page,text:`${page.text} Apply by ${future}.`},{...review,deadline:future,deadlineEvidence:future},now).status,'verified');
 });
 test('send-time gate rejects stale validation, old news, low scores and expired deadlines', () => {
   assert.equal(sources.eligibleSource(source(),now),true);
@@ -63,7 +69,7 @@ test('versioned cache key changes with context and monthly time period', () => {
   assert.notEqual(sources.briefContextKey('water',0),sources.briefContextKey('energy',0));
   assert.equal(sources.briefContextKey('water',0),sources.briefContextKey('water',29*day));
   assert.notEqual(sources.briefContextKey('water',0),sources.briefContextKey('water',30*day));
-  assert.match(sources.briefContextKey('water',0),/^v2_/);
+  assert.match(sources.briefContextKey('water',0),/^v4_/);
 });
 test('email source renderer escapes hostile text and does not fill empty results', () => {
   const html = sources.renderBriefSources([source({title:'<img src=x onerror=alert(1)>',relevance:'A & B'})],'news');

@@ -112,6 +112,9 @@ for (const game of games) {
   const dataPath = config && path.join(dist, config.s, config.data);
   if (!script || !existsSync(path.join(dist, script)) || !dataPath || !existsSync(dataPath))
     fail("Unmet is missing its script or data.");
+  const logo = `${config.s}/gsl-logo.png`;
+  if (!html.includes(`rel="icon" type="image/png" href="${logo}"`) || !existsSync(path.join(dist, logo)))
+    fail("Unmet is missing the Global Solutions Lab favicon.");
   if (JSON.parse(readFileSync(dataPath, "utf8")).meta?.sample !== false)
     fail("Unmet would ship invented sample data. Run npm run unmet:data, then build again.");
   const code = gzipSync(readFileSync(path.join(dist, script))).byteLength + gzipSync(html).byteLength;

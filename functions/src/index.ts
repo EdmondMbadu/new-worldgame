@@ -3211,6 +3211,7 @@ const buildAIInsightsEmailFromCache = (
           </tr>
 
           <!-- Funding Opportunities Section -->
+          ${validFundersCount ? `
           <tr>
             <td style="padding:32px 24px;">
               <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Funding Opportunities</h3>
@@ -3227,8 +3228,10 @@ const buildAIInsightsEmailFromCache = (
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
             </td>
           </tr>
+          ` : ''}
 
           <!-- News Section -->
+          ${validNewsCount ? `
           <tr>
             <td style="padding:32px 24px;">
               <h3 style="margin:0 0 8px;font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">In the News</h3>
@@ -3245,6 +3248,7 @@ const buildAIInsightsEmailFromCache = (
               <hr style="border:none;border-top:1px solid #e5e7eb;margin:0;" />
             </td>
           </tr>
+          ` : ''}
 
           ${teamSection}
 
@@ -3349,6 +3353,12 @@ const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
     data.solutionArea,
     data.sdgs
   );
+  if (!cachedContent.validFundersCount && !cachedContent.validNewsCount) {
+    throw new functions.https.HttpsError(
+      'failed-precondition',
+      'The brief was not sent because no sources passed verification. Use Preview email & review sources or Find fresh sources to try again.'
+    );
+  }
 
   // Build the email HTML using cached content
   return { ...buildAIInsightsEmailFromCache(enriched, cachedContent), quality: cachedContent.quality };
@@ -4091,7 +4101,6 @@ async function reserveBriefResearchBudget(
     const data = snapshot.data() || {};
     const usage = data.usage || {};
     const reservations = { ...(data.packReservations || {}) };
-    if (reservations[packId] === 'complete') return true;
     const actual = Number(usage.actualEstimatedUsd || 0);
     const reserved = Number(usage.reservedUsd || 0);
     if (actual + reserved + BRIEF_PACK_RESERVATION_USD > BRIEF_WEEKLY_AI_BUDGET_USD) {
@@ -4112,7 +4121,8 @@ async function finalizeBriefResearchBudget(
   editionRef: admin.firestore.DocumentReference,
   packId: string,
   usageDelta: NonNullable<BriefContent['usage']>,
-  succeeded: boolean
+  succeeded: boolean,
+  content: BriefContent
 ): Promise<void> {
   await admin.firestore().runTransaction(async transaction => {
     const snapshot = await transaction.get(editionRef);
@@ -4121,6 +4131,10 @@ async function finalizeBriefResearchBudget(
     const reservations = { ...(data.packReservations || {}) };
     const wasReserved = reservations[packId] === 'reserved';
     reservations[packId] = succeeded ? 'complete' : 'failed';
+    transaction.set(editionRef.collection('prepared_packs').doc(packId), {
+      sources: content.sources || [],
+      quality: content.quality || null,
+    });
     transaction.set(editionRef, {
       packReservations: reservations,
       usage: {
@@ -4130,6 +4144,7 @@ async function finalizeBriefResearchBudget(
         inputTokens: Number(usage.inputTokens || 0) + usageDelta.inputTokens,
         outputTokens: Number(usage.outputTokens || 0) + usageDelta.outputTokens,
         calls: Number(usage.calls || 0) + usageDelta.calls,
+        groundedCalls: Number(usage.groundedCalls || 0) + (usageDelta.groundedCalls || 0),
         coldPacks: Number(usage.coldPacks || 0) + (usageDelta.calls > 0 ? 1 : 0),
         cacheHits: Number(usage.cacheHits || 0) + (succeeded && usageDelta.calls === 0 ? 1 : 0),
         failedPacks: Number(usage.failedPacks || 0) + (succeeded ? 0 : 1),
@@ -4151,17 +4166,26 @@ async function prepareSharedBriefPack(
   pack: BriefPackDefinition,
   editionRef: admin.firestore.DocumentReference
 ): Promise<BriefContent> {
+  const preparedRef = editionRef.collection('prepared_packs').doc(pack.id);
+  const prepared = await preparedRef.get();
+  if (prepared.exists) return briefContentFromStoredSources(prepared.data());
   const reserved = await reserveBriefResearchBudget(editionRef, pack.id);
+  let content: BriefContent;
   if (!reserved) {
-    return (await loadLatestBriefPack(pack.id)) || briefContentFromStoredSources({ sources: [] });
+    content = (await loadLatestBriefPack(pack.id)) || briefContentFromStoredSources({ sources: [] });
+    await preparedRef.set({ sources: content.sources || [], quality: content.quality || null });
+    return content;
   }
+  let researchUsage: BriefContent['usage'];
+  let succeeded = false;
   try {
-    let content = await prepareBriefContent(
+    content = await prepareBriefContent(
       GEMINI_KEY,
       `cohort_${pack.id}`,
       pack.context
     );
-    const succeeded = !!(content.validFundersCount || content.validNewsCount);
+    researchUsage = content.usage;
+    succeeded = !!(content.validFundersCount || content.validNewsCount);
     if (succeeded && content.sources?.length) {
       await admin.firestore().collection('ai_insights_content_cache')
         .doc(briefInternalDocId('pack_latest', pack.id)).set({
@@ -4174,24 +4198,17 @@ async function prepareSharedBriefPack(
     } else {
       content = (await loadLatestBriefPack(pack.id)) || content;
     }
-    await finalizeBriefResearchBudget(
-      editionRef,
-      pack.id,
-      content.usage || { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
-      succeeded
-    );
-    return content;
   } catch (error) {
-    await finalizeBriefResearchBudget(
-      editionRef,
-      pack.id,
-      { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
-      false
-    );
     const latest = await loadLatestBriefPack(pack.id);
-    if (latest) return latest;
-    throw error;
+    if (!latest) console.warn(`Brief research failed for ${pack.id}:`, (error as Error)?.message);
+    content = latest || briefContentFromStoredSources({ sources: [] });
   }
+  await finalizeBriefResearchBudget(
+    editionRef, pack.id,
+    researchUsage || { inputTokens: 0, outputTokens: 0, calls: 0, estimatedUsd: 0 },
+    succeeded, content
+  );
+  return content;
 }
 
 async function loadBriefHistory(email: string): Promise<BriefHistoryItem[]> {
@@ -4597,6 +4614,10 @@ export const processAIInsightsBulkJob = functions
           renderedContent = personalized;
           selectedHistory = personalized.selectedUrls;
           personalizedQuality = personalized.quality;
+        }
+
+        if (!renderedContent.validFundersCount && !renderedContent.validNewsCount) {
+          throw new Error('No sources passed verification for this brief.');
         }
 
         const extrasKey = JSON.stringify([recipient.videoSummaryUrl || '', recipient.additionalLinks || []]);

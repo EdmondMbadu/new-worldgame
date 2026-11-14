@@ -17,6 +17,7 @@ import path from 'node:path';
 const here = fileURLToPath(new URL('../', import.meta.url));
 const at = (...p) => path.join(here, ...p);
 const BASE = '/unmet';
+const gslLogo = at('../src/assets/img/gsl-logo.png');
 
 function walk(dir) {
   return readdirSync(dir).sort().flatMap((name) => {
@@ -58,7 +59,7 @@ export async function buildUnmet({ sample = false, dev = false, quiet = false } 
 
   // Everything that is not code lives under one content-hashed folder, so it
   // can be cached forever and a data refresh simply gets a new folder name.
-  const statics = [...walk(at('data/geo')), ...walk(at('public')), data];
+  const statics = [...walk(at('data/geo')), ...walk(at('public')), data, gslLogo];
   const hash = createHash('sha256');
   for (const f of statics) hash.update(path.relative(here, f)).update(readFileSync(f));
   const S = `${BASE}/s-${hash.digest('hex').slice(0, 10)}`;
@@ -68,6 +69,7 @@ export async function buildUnmet({ sample = false, dev = false, quiet = false } 
   for (const [id, d] of Object.entries(JSON.parse(readFileSync(at('data/geo/outlines.json'), 'utf8')))) writeFileSync(path.join(sdir, 'geo/outlines', `${id}.txt`), d);
   cpSync(at('public'), sdir, { recursive: true });
   cpSync(data, path.join(sdir, 'data.json'));
+  cpSync(gslLogo, path.join(sdir, 'gsl-logo.png'));
 
   const result = await build({
     entryPoints: [at('src/main.js')],

@@ -12,7 +12,7 @@ import { buildUnmet } from './build.mjs';
 const here = fileURLToPath(new URL('../', import.meta.url));
 const sample = process.argv.includes('--sample');
 const port = Number(process.env.PORT) || 5176;
-const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.txt': 'text/plain', '.woff2': 'font/woff2', '.bin': 'application/octet-stream' };
+const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.txt': 'text/plain', '.woff2': 'font/woff2', '.bin': 'application/octet-stream', '.png': 'image/png' };
 
 await buildUnmet({ sample });
 let timer;

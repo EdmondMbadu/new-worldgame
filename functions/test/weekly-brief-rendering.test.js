@@ -33,6 +33,28 @@ test('briefs without a video retain all existing content without an empty video 
   const result=loadRenderer().render(payload,content);
   assert.ok(!result.html.includes('WEEKLY VIDEO BRIEFING'));assert.ok(result.html.includes('Verified funder'));assert.ok(result.html.includes('Clean Water'));
 });
+test('a brief with verified news leaves out the empty funding section', () => {
+  const result = loadRenderer().render(payload, {
+    ...content, fundersHtml: 'No verified funding links available today.', validFundersCount: 0,
+  });
+  assert.ok(result.html.includes('Verified article'));
+  assert.ok(!result.html.includes('>Funding Opportunities</h3>'));
+  assert.ok(!result.html.includes('No verified funding links'));
+});
+test('single-send preparation blocks delivery when both source sections are empty', async () => {
+  class HttpsError extends Error {
+    constructor(code, message) {
+      super(message);
+      this.code = code;
+    }
+  }
+  const renderer = loadRenderer({
+    functions: { https: { HttpsError } },
+    generateSolutionAIContent: async () => ({ ...content, validFundersCount: 0, validNewsCount: 0 }),
+    hydrateBriefExtras: async data => data,
+  });
+  await assert.rejects(renderer.build(payload), error => error.code === 'failed-precondition');
+});
 test('single-send preparation passes verified content and resolved video through the shared renderer',async()=>{
   const calls=[];
   const renderer=loadRenderer({generateSolutionAIContent:async(...args)=>{calls.push(args);return {...content,quality:{snapshotId:'snapshot-1'}};},hydrateBriefExtras:async data=>({...data,briefVideo:video})});
