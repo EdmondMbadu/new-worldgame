@@ -1,6 +1,7 @@
 import { UserManagementComponent } from './user-management.component';
 import { Solution } from 'src/app/models/solution';
 import { User } from 'src/app/models/user';
+import { of } from 'rxjs';
 
 describe('UserManagementComponent', () => {
   let component: UserManagementComponent;
@@ -177,6 +178,46 @@ describe('UserManagementComponent', () => {
     await component.previewBriefVideo();
     expect(component.aiInsightsSavedVideoSummaryUrl).toContain('v=saved');
     expect(component.hasUnsavedAIInsightsVideoUrl()).toBeTrue();
+  });
+
+  it('sends a test to the signed-in account using the draft video and saved additional links', async () => {
+    const youtubeUrl = 'https://www.youtube.com/watch?v=vLIhfgoP7-s';
+    component.auth.currentUser = { email: 'admin@example.com' } as User;
+    component.aiInsightsSelectedUserData = { user: { email: 'author@example.com' }, solutions: [] };
+    component.aiInsightsSelectedSolution = { solutionId: 'sample', title: 'Clean Water' } as Solution;
+    component.aiInsightsVideoSummaryUrl = youtubeUrl;
+    component.aiInsightsAdditionalLinks = [{ label: 'Unsaved', url: 'https://example.com/draft' }];
+    component.aiInsightsSavedAdditionalLinks = [{ label: 'Report', url: 'https://example.com/report' }];
+    const callable = jasmine.createSpy('sendAIInsightsEmail').and.returnValue(of({
+      success: true, recipientEmail: 'admin@example.com',
+    }));
+    (component as any).fns.httpsCallable = jasmine.createSpy().and.returnValue(callable);
+
+    await component.sendAIInsightsEmail(true);
+
+    expect(callable).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+      testToSelf: true, solutionId: 'sample', videoSummaryUrl: youtubeUrl,
+      additionalLinks: component.aiInsightsSavedAdditionalLinks,
+    }));
+    expect(callable.calls.mostRecent().args[0].userEmail).toBeUndefined();
+    expect(component.aiInsightsSentTo).toBe('admin@example.com');
+    expect(component.aiInsightsSavedVideoSummaryUrl).toBe('');
+  });
+
+  it('sends the entered video link in Single mode without saving the weekly video', async () => {
+    const videoUrl = 'https://vimeo.com/123456789';
+    component.aiInsightsSelectedUserData = { user: { email: 'author@example.com' }, solutions: [] };
+    component.aiInsightsSelectedSolution = { solutionId: 'sample', title: 'Clean Water' } as Solution;
+    component.aiInsightsVideoSummaryUrl = videoUrl;
+    const callable = jasmine.createSpy('sendAIInsightsEmail').and.returnValue(of({ success: true }));
+    (component as any).fns.httpsCallable = jasmine.createSpy().and.returnValue(callable);
+
+    await component.sendAIInsightsEmail();
+
+    expect(callable).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+      userEmail: 'author@example.com', solutionId: 'sample', videoSummaryUrl: videoUrl,
+    }));
+    expect(component.aiInsightsSavedVideoSummaryUrl).toBe('');
   });
 
 });

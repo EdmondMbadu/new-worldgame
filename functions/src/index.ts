@@ -3337,6 +3337,10 @@ const buildAIInsightsEmailFromCache = (
 
 // Wrapper function that uses caching - maintains same interface for backward compatibility
 const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
+  const enriched = await hydrateBriefExtras(data);
+  if (data.videoSummaryUrl?.trim() && enriched.briefVideo?.status !== 'ready') {
+    throw new functions.https.HttpsError('invalid-argument', enriched.briefVideo?.reason || 'Enter a valid video link.');
+  }
   // Generate or get cached AI content for this solution
   const cachedContent = await generateSolutionAIContent(
     data.solutionId,
@@ -3347,7 +3351,6 @@ const buildAIInsightsEmail = async (data: AIInsightsPayload) => {
   );
 
   // Build the email HTML using cached content
-  const enriched = await hydrateBriefExtras(data);
   return { ...buildAIInsightsEmailFromCache(enriched, cachedContent), quality: cachedContent.quality };
 };
 
@@ -3623,14 +3626,19 @@ const runWithConcurrency = async <T, R>(
   return results;
 };
 
-// Preview and quality review never send email. Restricted to the existing admin roles.
+async function requireBriefAdmin(context: functions.https.CallableContext) {
+  if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Sign in first.');
+  const user = (await admin.firestore().doc(`users/${context.auth.uid}`).get()).data();
+  if (!(user?.admin === 'true' || user?.admin === true || ['admin', 'schooladmin'].includes(String(user?.role || '').toLowerCase()))) {
+    throw new functions.https.HttpsError('permission-denied', 'Only administrators can manage intelligence briefs.');
+  }
+  return user;
+}
+
+// Preview and quality review never send email.
 export const previewAIInsightsBrief = functions.runWith({ timeoutSeconds: 540, memory: '1GB' }).https.onCall(
   async (data: any, context: functions.https.CallableContext) => {
-    if (!context.auth) throw new functions.https.HttpsError('unauthenticated', 'Sign in first.');
-    const user = (await admin.firestore().doc(`users/${context.auth.uid}`).get()).data();
-    if (!(user?.admin === 'true' || user?.admin === true || ['admin', 'schooladmin'].includes(String(user?.role || '').toLowerCase()))) {
-      throw new functions.https.HttpsError('permission-denied', 'Only administrators can preview briefs.');
-    }
+    const user = await requireBriefAdmin(context);
     if (data?.mode === 'video') {
       const video = await resolveBriefVideo(String(data.videoSummaryUrl || ''), loadNewsVideoWithThumbnail);
       return { video: video || null, html: renderBriefVideo(video) };
@@ -3649,7 +3657,7 @@ export const previewAIInsightsBrief = functions.runWith({ timeoutSeconds: 540, m
     }
     const content = await generateSolutionAIContent(solutionId, solution.title || 'Untitled Solution', solution.description || '', solution.solutionArea || '', solution.sdgs || [], data.force === true || !!data.restoreUrl);
     const enriched = await hydrateBriefExtras({ solutionId, solutionTitle: solution.title || 'Untitled Solution',
-      userEmail: String(context.auth.token.email || ''), userFirstName: user?.firstName || 'there',
+      userEmail: String(context.auth?.token.email || ''), userFirstName: user?.firstName || 'there',
       solutionImage: solution.image || '', videoSummaryUrl: String(data.videoSummaryUrl || ''), additionalLinks: data.additionalLinks || [],
     });
     const rendered = buildAIInsightsEmailFromCache(enriched, content);
@@ -3662,7 +3670,7 @@ export const previewAIInsightsBrief = functions.runWith({ timeoutSeconds: 540, m
 // ===== AI Insights Email Function =====
 // Sends personalized AI-generated insights (funders, news) to solution authors
 export const sendAIInsightsEmail = functions.runWith({ timeoutSeconds: 540, memory: '1GB' }).https.onCall(
-  async (data: AIInsightsPayload, context: functions.https.CallableContext) => {
+  async (data: AIInsightsPayload & { testToSelf?: boolean }, context: functions.https.CallableContext) => {
     // Validate authentication
     if (!context.auth) {
       throw new functions.https.HttpsError(
@@ -3671,8 +3679,17 @@ export const sendAIInsightsEmail = functions.runWith({ timeoutSeconds: 540, memo
       );
     }
 
-    // Validate required fields
-    const { userEmail, solutionId, solutionTitle } = data;
+    const testToSelf = data?.testToSelf === true;
+    const { solutionId, solutionTitle } = data || {};
+    let userEmail = data?.userEmail;
+    let userFirstName = data?.userFirstName;
+    if (testToSelf) {
+      const adminUser = await requireBriefAdmin(context);
+      userEmail = context.auth.token.email || '';
+      userFirstName = adminUser?.firstName || 'there';
+      if (!userEmail) throw new functions.https.HttpsError('failed-precondition', 'Your signed-in account needs an email address.');
+    }
+
     if (!userEmail || !solutionId || !solutionTitle) {
       throw new functions.https.HttpsError(
         'invalid-argument',
@@ -3694,10 +3711,13 @@ export const sendAIInsightsEmail = functions.runWith({ timeoutSeconds: 540, memo
       ]);
       const enrichedData: AIInsightsPayload = {
         ...data,
+        userEmail,
+        userFirstName,
         teamMembers,
         joinOpportunities,
       };
-      const { html, subject, quality } = await buildAIInsightsEmail(enrichedData);
+      const { html, subject: briefSubject, quality } = await buildAIInsightsEmail(enrichedData);
+      const subject = testToSelf ? `[Test] ${briefSubject}` : briefSubject;
 
       const msg = {
         to: userEmail,
@@ -3727,8 +3747,9 @@ export const sendAIInsightsEmail = functions.runWith({ timeoutSeconds: 540, memo
         failureCount: 0,
       });
 
-      return { success: true };
+      return { success: true, recipientEmail: userEmail };
     } catch (error: any) {
+      if (error instanceof functions.https.HttpsError) throw error;
       console.error('Error in sendAIInsightsEmail:', error);
       throw new functions.https.HttpsError(
         'internal',

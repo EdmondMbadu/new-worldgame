@@ -843,9 +843,10 @@
             <input
               id="ai-insights-video-summary-url"
               type="url"
+              [disabled]="aiInsightsVideoSummarySaving"
               [(ngModel)]="aiInsightsVideoSummaryUrl"
               (ngModelChange)="clearAIInsightsVideoSummaryStatus()"
-              placeholder="https://newworld-game.org/nwg-news?v=..."
+              placeholder="Paste a video share link"
               class="min-w-0 flex-1 rounded-lg border border-violet-200 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-violet-500 dark:border-violet-900/70 dark:bg-slate-800 dark:text-slate-100"
             />
             <a
@@ -875,7 +876,7 @@
             </button>
           </div>
           <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            Paste this week's NWG News link and save it. Only the saved link is included in Single, Bulk, and automated intelligence briefs.
+            Use an NWG News, YouTube, Vimeo, or other public video link. Save it to use it in Bulk and automated briefs.
           </p>
           <p
             *ngIf="aiInsightsVideoSummaryUrl && !isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
@@ -887,7 +888,9 @@
             *ngIf="hasUnsavedAIInsightsVideoUrl() && isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
             class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-300"
           >
-            Unsaved change — save or clear it before sending the brief.
+            {{ aiInsightsMode === 'single'
+              ? 'Single will use the link shown here. Save it to update the weekly link.'
+              : 'Save or clear this change before sending in Bulk.' }}
           </p>
           <p *ngIf="aiInsightsVideoSummaryMessage" class="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
             {{ aiInsightsVideoSummaryMessage }}
@@ -897,16 +900,16 @@
           </p>
 
           <div class="mt-4 space-y-3">
-            <button type="button" (click)="previewBriefVideo()" [disabled]="briefPreviewBusy || !aiInsightsVideoSummaryUrl" class="rounded-lg border border-violet-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Preview selected video</button>
+            <button type="button" (click)="previewBriefVideo()" [disabled]="briefPreviewBusy || aiInsightsVideoSummarySaving || !aiInsightsVideoSummaryUrl || !isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)" class="rounded-lg border border-violet-300 px-4 py-2 text-sm font-semibold disabled:opacity-50">Preview selected video</button>
             <div *ngIf="briefPreviewVideo?.status === 'ready'" class="max-w-lg overflow-hidden rounded-xl bg-slate-900 text-white">
               <a [href]="briefPreviewVideo.url" target="_blank" rel="noopener"><img [src]="briefPreviewVideo.thumbnailUrl" [alt]="briefPreviewVideo.title" class="w-full" /></a>
               <div class="p-4"><p class="text-xs text-teal-300">WEEKLY VIDEO BRIEFING</p><p class="mt-2 text-xl font-bold">{{ briefPreviewVideo.title }}</p><p class="mt-2 text-sm">{{ briefPreviewVideo.teaser }}</p><a [href]="briefPreviewVideo.url" target="_blank" rel="noopener" class="mt-3 inline-block rounded bg-teal-400 px-4 py-2 font-semibold text-slate-900">▶ Watch this week’s briefing</a></div>
             </div>
+            <p *ngIf="briefVideoPreviewError" role="alert" class="text-sm text-rose-600">{{ briefVideoPreviewError }}</p>
             <p *ngIf="briefPreviewVideo?.reason" class="text-sm text-amber-700 dark:text-amber-300">{{ briefPreviewVideo.reason }}</p>
-            <p class="text-xs text-slate-500">Edit the video in NWG News to choose its thumbnail and update its title or description.</p>
             <div class="flex flex-wrap gap-2">
-              <button type="button" (click)="previewAIInsightsBrief()" [disabled]="briefPreviewBusy || !aiInsightsSelectedSolution" class="rounded-lg bg-violet-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{{ briefPreviewBusy ? 'Preparing preview…' : 'Preview email & review sources' }}</button>
-              <button type="button" (click)="previewAIInsightsBrief(true)" [disabled]="briefPreviewBusy || !aiInsightsSelectedSolution" class="rounded-lg border border-violet-300 px-4 py-2 text-sm disabled:opacity-50">Find fresh sources</button>
+              <button type="button" (click)="previewAIInsightsBrief()" [disabled]="briefPreviewBusy || aiInsightsMode !== 'single' || !aiInsightsSelectedSolution" class="rounded-lg bg-violet-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{{ briefPreviewBusy ? 'Preparing preview…' : 'Preview email & review sources' }}</button>
+              <button type="button" (click)="previewAIInsightsBrief(true)" [disabled]="briefPreviewBusy || aiInsightsMode !== 'single' || !aiInsightsSelectedSolution" class="rounded-lg border border-violet-300 px-4 py-2 text-sm disabled:opacity-50">Find fresh sources</button>
             </div>
             <p class="text-xs text-slate-500">Select a solution in Single mode to review its recommendations. Preparing new sources may take several minutes. Preview does not send email.</p>
             <p *ngIf="briefPreviewError" role="alert" class="text-sm text-rose-600">{{ briefPreviewError }}</p>
@@ -924,7 +927,7 @@
             </details>
             <details *ngIf="briefPreviewHtml" class="rounded border p-3">
               <summary class="cursor-pointer font-semibold">Email preview</summary>
-              <iframe title="Weekly brief email preview" sandbox="" referrerpolicy="no-referrer" [srcdoc]="briefPreviewHtml" class="mt-3 w-full bg-white border-0" style="height:1000px"></iframe>
+              <iframe title="Weekly brief email preview" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer" [srcdoc]="briefPreviewHtml" class="mt-3 w-full bg-white border-0" style="height:1000px"></iframe>
             </details>
           </div>
 
@@ -1022,7 +1025,7 @@
               {{ aiInsightsAdditionalLinksValidationError() }}
             </p>
             <p *ngIf="hasUnsavedAIInsightsAdditionalLinks() && !aiInsightsAdditionalLinksValidationError()" class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-300">
-              Unsaved link changes — save or clear them before sending the brief.
+              Save or clear these changes before sending to recipients. Tests use the saved additional links.
             </p>
             <p *ngIf="aiInsightsAdditionalLinksMessage" class="mt-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
               {{ aiInsightsAdditionalLinksMessage }}
@@ -1201,20 +1204,21 @@
             </div>
 
             <!-- Success Message -->
-            <div *ngIf="aiInsightsSent" class="rounded-lg bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-200 dark:border-emerald-800">
+            <div *ngIf="aiInsightsSentTo" role="status" class="rounded-lg bg-emerald-50 dark:bg-emerald-900/20 p-4 border border-emerald-200 dark:border-emerald-800">
               <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
-                <p class="text-sm text-emerald-700 dark:text-emerald-300">Intelligence brief sent to {{ aiInsightsSelectedUserData?.user?.email }}</p>
+                <p class="text-sm text-emerald-700 dark:text-emerald-300">Intelligence brief sent to {{ aiInsightsSentTo }}</p>
               </div>
             </div>
 
             <!-- Send Button -->
-            <div class="pt-2">
+            <div class="flex flex-wrap gap-2 pt-2">
               <button
+                type="button"
                 (click)="sendAIInsightsEmail()"
-                [disabled]="!aiInsightsSelectedUserData || !aiInsightsSelectedSolution || aiInsightsSending || hasUnsavedAIInsightsVideoUrl()"
+                [disabled]="!aiInsightsSelectedUserData?.user?.email || !aiInsightsSelectedSolution?.solutionId || aiInsightsSending || !isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-medium text-white transition-all duration-200
                        bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white
                        disabled:opacity-40 disabled:cursor-not-allowed"
@@ -1228,7 +1232,18 @@
                 </svg>
                 {{ aiInsightsSending ? 'Sending Brief...' : 'Send Intelligence Brief' }}
               </button>
+              <button
+                type="button"
+                (click)="sendAIInsightsEmail(true)"
+                [disabled]="!auth.currentUser?.email || !aiInsightsSelectedSolution?.solutionId || aiInsightsSending || !isValidAIInsightsVideoUrl(aiInsightsVideoSummaryUrl)"
+                class="rounded-lg border border-violet-300 px-4 py-3 text-sm font-semibold text-violet-700 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-violet-800 dark:text-violet-300 dark:hover:bg-violet-950/40"
+              >
+                Send test to me
+              </button>
             </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Choose a recipient and solution above to enable sending. Send test to me delivers the selected solution’s brief to your signed-in email.
+            </p>
           </div>
 
           <!-- Right Column: Preview -->

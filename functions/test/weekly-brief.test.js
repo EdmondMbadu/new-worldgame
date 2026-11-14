@@ -76,6 +76,47 @@ test('NWG resolver selects the exact id and uses saved title, teaser and thumbna
   const html=renderBriefVideo(video); assert.ok(html.includes('2:05')); assert.ok(html.includes('Water &amp; food')); assert.ok(html.includes('https://storage.example/thumb.jpg')); assert.ok(!html.includes('<video'));
   assert.equal((html.match(/href="https:\/\/newworld-game.org\/nwg-news\?v=exact-id"/g)||[]).length,3);
 });
+
+test('YouTube share links render a clickable thumbnail without fetching the watch page', async () => {
+  const unexpectedLookup = async () => { throw Error('Unexpected video lookup'); };
+  for (const url of [
+    'https://www.youtube.com/watch?feature=share&v=vLIhfgoP7-s&t=30',
+    'https://youtu.be/vLIhfgoP7-s?t=30',
+    'https://www.youtube.com/shorts/vLIhfgoP7-s',
+    'https://www.youtube.com/live/vLIhfgoP7-s',
+  ]) {
+    const video = await resolveVideoWithProbe(url, unexpectedLookup, unexpectedLookup);
+    assert.equal(video.status, 'ready');
+    assert.equal(video.url, url);
+    assert.equal(video.thumbnailUrl, 'https://img.youtube.com/vi/vLIhfgoP7-s/hqdefault.jpg');
+    const html = renderBriefVideo(video);
+    assert.ok(html.includes(`href="${sources.escapeBriefHtml(url)}" target="_blank"`));
+    assert.ok(html.includes('Watch this week'));
+  }
+});
+
+test('other video shares remain clickable with their original access parameters and the default thumbnail', async () => {
+  for (const url of [
+    'https://player.vimeo.com/video/123456789?h=913062c8ff',
+    'https://video.example/briefing.mp4?token=abc#t=20',
+    'https://video.example/watch/briefing',
+  ]) {
+    const video = await resolveVideoWithProbe(url, async () => null, async () => false);
+    assert.equal(video.status, 'ready');
+    assert.equal(video.url, url);
+    assert.ok(video.thumbnailUrl.endsWith('landing-intro-sofia-thumbnail.jpg'));
+    assert.ok(renderBriefVideo(video).includes(`href="${url}"`));
+  }
+});
+
+test('invalid YouTube shares and local destinations do not produce a video card', async () => {
+  for (const url of ['https://www.youtube.com/watch', 'http://127.0.0.1/video.mp4', 'javascript:alert(1)']) {
+    const video = await resolveBriefVideo(url, async () => null);
+    assert.equal(video.status, 'unavailable');
+    assert.equal(renderBriefVideo(video), '');
+  }
+});
+
 test('missing selected videos are omitted and never replaced by a different video', async () => {
   assert.equal(await resolveBriefVideo('',async()=>null),undefined);
   const missing=await resolveBriefVideo('https://newworld-game.org/nwg-news?v=missing',async()=>null);

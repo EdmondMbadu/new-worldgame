@@ -245,7 +245,7 @@ export class UserManagementComponent implements OnInit {
     null;
   aiInsightsSelectedSolution: Solution | null = null;
   aiInsightsSending = false;
-  aiInsightsSent = false;
+  aiInsightsSentTo = '';
   aiInsightsError = '';
   usersWithInProgressSolutions: { user: User; solutions: Solution[] }[] = [];
   aiInsightsMode: 'single' | 'bulk' = 'single';
@@ -286,6 +286,7 @@ export class UserManagementComponent implements OnInit {
   };
   briefPreviewBusy = false;
   briefPreviewError = '';
+  briefVideoPreviewError = '';
   briefPreviewHtml: SafeHtml | string = '';
   briefPreviewVideo: any = null;
   briefPreviewSources: any[] = [];
@@ -295,17 +296,24 @@ export class UserManagementComponent implements OnInit {
   async previewBriefVideo(): Promise<boolean> {
     if (this.briefPreviewBusy) return false;
     const requestedUrl = this.aiInsightsVideoSummaryUrl;
-    this.briefPreviewBusy = true; this.briefPreviewError = '';
+    this.briefPreviewBusy = true;
+    this.briefVideoPreviewError = '';
+    this.briefPreviewVideo = null;
     try {
-      const result = await firstValueFrom(this.fns.httpsCallable('previewAIInsightsBrief', { timeout: 540000 })({ mode: 'video', videoSummaryUrl: this.aiInsightsVideoSummaryUrl }));
-      if (requestedUrl !== this.aiInsightsVideoSummaryUrl) { this.briefPreviewError = 'The link changed. Preview it again.'; return false; }
-      this.briefPreviewVideo = result.video;
+      const result = await firstValueFrom(this.fns.httpsCallable('previewAIInsightsBrief', { timeout: 540000 })({
+        mode: 'video', videoSummaryUrl: requestedUrl,
+      }));
+      if (requestedUrl !== this.aiInsightsVideoSummaryUrl) return false;
       if (result.video?.status !== 'ready') {
-        this.briefPreviewError = result.video?.reason || 'Choose a video first.';
+        this.briefVideoPreviewError = result.video?.reason || 'Choose a video first.';
         return false;
       }
+      this.briefPreviewVideo = result.video;
       return true;
-    } catch (error: any) { this.briefPreviewError = error.message || 'Unable to preview video.'; return false; }
+    } catch (error: any) {
+      this.briefVideoPreviewError = error.message || 'Unable to preview video.';
+      return false;
+    }
     finally { this.briefPreviewBusy = false; }
   }
 
@@ -313,16 +321,22 @@ export class UserManagementComponent implements OnInit {
     const solution = this.aiInsightsSelectedSolution;
     if (!solution) { this.briefPreviewError = 'Select a solution in Single mode to review its sources.'; return; }
     if (this.briefPreviewBusy) return;
+    const videoSummaryUrl = this.aiInsightsVideoSummaryUrl;
+    if (!this.isValidAIInsightsVideoUrl(videoSummaryUrl)) {
+      this.briefPreviewError = 'Enter a valid http or https video link.';
+      return;
+    }
     this.briefPreviewBusy = true; this.briefPreviewError = '';
     try {
       const result = await firstValueFrom(this.fns.httpsCallable('previewAIInsightsBrief', { timeout: 540000 })({
-        solutionId: solution.solutionId, videoSummaryUrl: this.aiInsightsSavedVideoSummaryUrl,
+        solutionId: solution.solutionId, videoSummaryUrl: videoSummaryUrl.trim(),
         additionalLinks: this.aiInsightsSavedAdditionalLinks, force, excludeUrl, restoreUrl,
       }));
-      if (this.aiInsightsSelectedSolution?.solutionId !== solution.solutionId) return;
+      if (this.aiInsightsSelectedSolution?.solutionId !== solution.solutionId ||
+          this.aiInsightsVideoSummaryUrl !== videoSummaryUrl) return;
       // The exact email HTML is isolated in a sandbox without scripts, forms or same-origin privileges.
       this.briefPreviewHtml = this.previewSanitizer?.bypassSecurityTrustHtml(result.html) || result.html; this.briefPreviewSources = result.sources || [];
-      this.briefPreviewQuality = result.quality; this.briefPreviewVideo = result.video;
+      this.briefPreviewQuality = result.quality;
       this.briefPreviewOmittedLinks = result.omittedAdditionalLinks || 0;
     } catch (error: any) { this.briefPreviewError = error.message || 'Unable to prepare preview.'; }
     finally { this.briefPreviewBusy = false; }
@@ -624,9 +638,9 @@ export class UserManagementComponent implements OnInit {
 
     try {
       const parsed = new URL(raw);
-      return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-        ? parsed.toString()
-        : '';
+      if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password ||
+          (parsed.port && !['80', '443'].includes(parsed.port))) return '';
+      return parsed.toString();
     } catch {
       return '';
     }
@@ -798,6 +812,8 @@ export class UserManagementComponent implements OnInit {
 
   clearAIInsightsVideoSummaryStatus(): void {
     this.briefPreviewVideo = null;
+    this.briefVideoPreviewError = '';
+    this.briefPreviewHtml = '';
     this.aiInsightsVideoSummaryMessage = '';
     this.aiInsightsVideoSummaryError = '';
   }
@@ -813,16 +829,14 @@ export class UserManagementComponent implements OnInit {
       return;
     }
 
-    if (normalized && !(await this.previewBriefVideo())) {
-      this.aiInsightsVideoSummaryError = this.briefPreviewError;
-      return;
-    }
+    if (normalized && !(await this.previewBriefVideo())) return;
     await this.persistAIInsightsVideoSummaryUrl(normalized);
   }
 
   async clearAIInsightsVideoSummaryUrl(): Promise<void> {
     if (this.aiInsightsVideoSummarySaving) return;
     this.aiInsightsVideoSummaryUrl = '';
+    this.clearAIInsightsVideoSummaryStatus();
     await this.persistAIInsightsVideoSummaryUrl('');
   }
 
@@ -830,7 +844,8 @@ export class UserManagementComponent implements OnInit {
     videoSummaryUrl: string
   ): Promise<void> {
     this.aiInsightsVideoSummarySaving = true;
-    this.clearAIInsightsVideoSummaryStatus();
+    this.aiInsightsVideoSummaryMessage = '';
+    this.aiInsightsVideoSummaryError = '';
 
     try {
       const aiInsightsBrief = {
@@ -973,10 +988,13 @@ export class UserManagementComponent implements OnInit {
           this.automationAIInsightsExcludeEmailsDraft = (
             this.weeklyAutomationConfig.aiInsightsBrief.excludeEmails || []
           ).join('\n');
+          const hasVideoDraft = this.hasUnsavedAIInsightsVideoUrl();
           this.aiInsightsSavedVideoSummaryUrl =
             this.weeklyAutomationConfig.aiInsightsBrief.videoSummaryUrl || '';
-          this.aiInsightsVideoSummaryUrl =
-            this.aiInsightsSavedVideoSummaryUrl;
+          if (!hasVideoDraft && this.aiInsightsVideoSummaryUrl !== this.aiInsightsSavedVideoSummaryUrl) {
+            this.aiInsightsVideoSummaryUrl = this.aiInsightsSavedVideoSummaryUrl;
+            this.clearAIInsightsVideoSummaryStatus();
+          }
           this.aiInsightsSavedAdditionalLinks = (
             this.weeklyAutomationConfig.aiInsightsBrief.additionalLinks || []
           ).map((link) => ({ ...link }));
@@ -3357,7 +3375,7 @@ ${solutionSources}`;
     this.aiInsightsSelectedSolution = null;
     this.aiInsightsSolutionSearch = '';
     this.filteredAIInsightsSolutions = [...item.solutions];
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
     this.aiInsightsError = '';
   }
 
@@ -3369,7 +3387,7 @@ ${solutionSources}`;
     this.aiInsightsSolutionSearch = '';
     this.filteredAIInsightsUsers = [...this.usersWithInProgressSolutions];
     this.filteredAIInsightsSolutions = [];
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
     this.aiInsightsError = '';
   }
 
@@ -3398,7 +3416,7 @@ ${solutionSources}`;
     this.aiInsightsSelectedSolution = sol;
     this.aiInsightsSolutionSearch = sol.title || 'Untitled Solution';
     this.showAIInsightsSolutionDropdown = false;
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
     this.aiInsightsError = '';
   }
 
@@ -3411,56 +3429,55 @@ ${solutionSources}`;
         ...this.aiInsightsSelectedUserData.solutions,
       ];
     }
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
     this.aiInsightsError = '';
   }
 
   // Called when user selection changes (legacy - keeping for compatibility)
   onAIInsightsUserChange() {
     this.aiInsightsSelectedSolution = null;
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
     this.aiInsightsError = '';
   }
 
   // Called when solution selection changes (legacy - keeping for compatibility)
   onAIInsightsSolutionChange() {
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
     this.aiInsightsError = '';
   }
 
   // Send AI insights email
-  async sendAIInsightsEmail() {
-    if (!this.aiInsightsSelectedUserData || !this.aiInsightsSelectedSolution) {
-      this.aiInsightsError = 'Please select a user and a solution.';
+  async sendAIInsightsEmail(testToSelf = false) {
+    if (this.aiInsightsSending) return;
+    const user = testToSelf ? this.auth.currentUser : this.aiInsightsSelectedUserData?.user;
+    const solution = this.aiInsightsSelectedSolution;
+    if (!user?.email || !solution?.solutionId) {
+      this.aiInsightsError = 'Select a recipient and a solution to prepare the brief.';
       return;
     }
 
-    if (this.hasUnsavedAIInsightsVideoUrl()) {
+    const videoSummaryUrl = this.normalizeAIInsightsVideoUrl(this.aiInsightsVideoSummaryUrl);
+    if (this.aiInsightsVideoSummaryUrl.trim() && !videoSummaryUrl) {
       this.aiInsightsError =
-        'Save or clear the weekly video summary link before sending.';
+        'Enter a valid http or https video link, or leave the field blank.';
       return;
     }
-    if (this.hasUnsavedAIInsightsAdditionalLinks()) {
+    if (!testToSelf && this.hasUnsavedAIInsightsAdditionalLinks()) {
       this.aiInsightsError =
         'Save or clear the additional links before sending.';
       return;
     }
-    const videoSummaryUrl = this.aiInsightsSavedVideoSummaryUrl;
     const additionalLinks = this.aiInsightsSavedAdditionalLinks;
-
-    const user = this.aiInsightsSelectedUserData.user;
-    const solution = this.aiInsightsSelectedSolution;
 
     this.aiInsightsSending = true;
     this.aiInsightsError = '';
-    this.aiInsightsSent = false;
+    this.aiInsightsSentTo = '';
 
     try {
       const callable = this.fns.httpsCallable('sendAIInsightsEmail', { timeout: 540000 });
-      await firstValueFrom(
+      const result = await firstValueFrom(
         callable({
-          userEmail: user.email,
-          userFirstName: user.firstName || 'there',
+          ...(testToSelf ? { testToSelf } : { userEmail: user.email, userFirstName: user.firstName || 'there' }),
           solutionId: solution.solutionId,
           solutionTitle: solution.title || 'Untitled Solution',
           solutionDescription: solution.description || '',
@@ -3474,8 +3491,7 @@ ${solutionSources}`;
         })
       );
 
-      this.aiInsightsSent = true;
-      console.log('AI Insights email sent to:', user.email);
+      this.aiInsightsSentTo = result.recipientEmail || user.email;
     } catch (error: any) {
       console.error('Error sending AI insights email:', error);
       this.aiInsightsError =

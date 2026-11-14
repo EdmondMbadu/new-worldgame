@@ -39,3 +39,50 @@ test('single-send preparation passes verified content and resolved video through
   const result=await renderer.build(payload);
   assert.equal(calls[0][0],'water-project');assert.ok(result.html.includes('The weekly video'));assert.equal(result.quality.snapshotId,'snapshot-1');
 });
+
+test('the test-send callable sends one email to the authenticated admin', async () => {
+  const adminCheck = sourceFile.statements.find(statement =>
+    ts.isFunctionDeclaration(statement) && statement.name?.text === 'requireBriefAdmin'
+  );
+  const code = ts.transpileModule(
+    `${adminCheck.getText(sourceFile)}\n${extract('sendAIInsightsEmail').replace(/^export /, '')}\nglobalThis.send = sendAIInsightsEmail;`,
+    { compilerOptions: { target: ts.ScriptTarget.ES2022 } }
+  ).outputText;
+  class HttpsError extends Error {
+    constructor(code, message) {
+      super(message);
+      this.code = code;
+    }
+  }
+  const messages = [];
+  const logs = [];
+  const sandbox = {
+    console: { log() {}, error() {} },
+    functions: {
+      https: { HttpsError },
+      runWith: () => ({ https: { onCall: handler => handler } }),
+    },
+    admin: { firestore: () => ({
+      doc: path => ({ get: async () => ({
+        data: () => path === 'users/admin' ? { admin: true, firstName: 'Edmond' } : {},
+      }) }),
+    }) },
+    hydrateAIInsightsTeamMembers: async () => [],
+    hydrateAIInsightsJoinOpportunities: async () => [],
+    buildAIInsightsEmail: async data => ({ html: data.videoSummaryUrl, subject: data.solutionTitle }),
+    sgMail: { send: async message => { messages.push(message); } },
+    writeAIInsightsLog: async log => { logs.push(log); },
+  };
+  vm.runInNewContext(code, sandbox);
+  const request = { ...payload, testToSelf: true, videoSummaryUrl: 'https://youtu.be/vLIhfgoP7-s' };
+  await assert.rejects(sandbox.send(request, { auth: { uid: 'other', token: { email: 'other@example.org' } } }),
+    error => error.code === 'permission-denied');
+  const result = await sandbox.send(request, { auth: { uid: 'admin', token: { email: 'admin@example.org' } } });
+
+  assert.equal(result.recipientEmail, 'admin@example.org');
+  assert.equal(messages.length, 1);
+  assert.equal(messages[0].to, 'admin@example.org');
+  assert.equal(messages[0].subject, '[Test] Clean Water');
+  assert.equal(messages[0].html, request.videoSummaryUrl);
+  assert.equal(logs[0].recipients[0].email, 'admin@example.org');
+});
