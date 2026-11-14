@@ -5,6 +5,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const ts = require('typescript');
 const { buildBriefEditionPlan } = require('../lib/brief-personalization');
+const { withWeeklyBriefFallback } = require('../lib/brief-personalization');
 
 const filename = path.join(__dirname, '../src/index.ts');
 const source = ts.createSourceFile(filename, fs.readFileSync(filename, 'utf8'), ts.ScriptTarget.Latest, true);
@@ -15,17 +16,26 @@ function loadQueue() {
   let id = 0;
   let failCommit = false;
   let worker;
+  const messages = [];
   let transaction = Promise.resolve();
   const ref = (key) => ({
     id: key.split('/').at(-1),
     key,
     collection: (name) => collection(`${key}/${name}`),
-    get: async () => ({ data: () => docs.get(key) }),
+    get: async () => ({ exists: docs.has(key), data: () => docs.get(key) }),
+    update: async data => docs.set(key, { ...docs.get(key), ...data }),
+    set: async data => docs.set(key, data),
   });
   const collection = (name) => ({ doc: (docId = String(++id)) => ref(`${name}/${docId}`) });
   const db = {
     collection,
     doc: ref,
+    batch: () => ({
+      set() {},
+      update() {},
+      create() {},
+      commit: async () => {},
+    }),
     runTransaction(callback) {
       const run = transaction.then(async () => {
         const pending = new Map();
@@ -39,6 +49,7 @@ function loadQueue() {
             const existing = docs.get(target.key);
             pending.set(target.key, { ...existing, aiInsightsBrief: { ...existing?.aiInsightsBrief, ...data.aiInsightsBrief } });
           },
+          update: (target, data) => pending.set(target.key, { ...docs.get(target.key), ...data }),
         });
         if (failCommit) throw new Error('commit failed');
         pending.forEach((data, key) => docs.set(key, data));
@@ -56,7 +67,9 @@ function loadQueue() {
   const code = ts.transpileModule(`${statements.join('\n')}\nglobalThis.enqueue = enqueueAIInsightsBulkJob;\nglobalThis.recordFailure = recordBriefQueueFailure;`, {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
   }).outputText;
-  const firestore = Object.assign(() => db, { FieldValue: { serverTimestamp: () => 123 } });
+  const firestore = Object.assign(() => db, { FieldValue: {
+    serverTimestamp: () => 123, increment: n => n, arrayUnion: (...values) => values,
+  } });
   const runKey = '2026-11-15@13:00';
   const sandbox = {
     admin: { firestore },
@@ -71,11 +84,24 @@ function loadQueue() {
     getAutomationTimezone: () => 'America/Los_Angeles',
     getDueAutomationRun: (schedule) => ({ due: schedule?.enabled && schedule.lastAttemptKey !== runKey, runKey }),
     buildBriefEditionPlan,
+    loadWeeklyBriefFallback: async () => [{ kind: 'funding' }, { kind: 'news' }],
+    hasWeeklyBriefFallback: (sources) => sources.length === 2,
+    console: { log() {}, error() {} },
+    runWithConcurrency: (items, _, callback) => Promise.all(items.map(callback)),
+    prepareSharedBriefPack: async () => { throw new Error('Test provider outage'); },
+    briefContentFromStoredSources: () => ({ fundersHtml: '', newsHtml: '', validFundersCount: 0, validNewsCount: 0 }),
+    hydrateAIInsightsTeamMembers: async () => [],
+    loadAIInsightsJoinOpportunityPool: async () => [],
+    selectAIInsightsJoinOpportunities: () => [],
+    hydrateBriefExtras: async payload => payload,
+    withWeeklyBriefFallback,
+    buildAIInsightsEmailFromCache: (_, content) => ({ html: `${content.fundersHtml}${content.newsHtml}`, subject: 'Brief' }),
+    sgMail: { send: async message => messages.push(message) },
   };
   docs.set(automationPath, { aiInsightsBrief: { enabled: true } });
   vm.runInNewContext(code, sandbox);
   return {
-    docs, automationPath, runKey, enqueue: sandbox.enqueue, recordFailure: sandbox.recordFailure, worker,
+    docs, ref, messages, automationPath, runKey, enqueue: sandbox.enqueue, recordFailure: sandbox.recordFailure, worker,
     setFailCommit: (value) => { failCommit = value; },
   };
 }
@@ -114,4 +140,23 @@ test('a 287-recipient edition queues small batches and claims the scheduled slot
 
   // The worker can load the new payload before it attempts to claim or deliver the job.
   await queue.worker({ data: () => firstJob, ref: { key: 'unused', get: async () => ({ data: () => ({ status: 'processing' }) }) } });
+});
+
+test('the bulk worker delivers both backup sections during a research provider outage', async () => {
+  const queue = loadQueue();
+  const job = await queue.enqueue({
+    recipients: [{ userEmail: 'maker@example.org', userFirstName: 'Maker', solutionId: 'water', solutionTitle: 'Clean Water' }],
+    createdBy: 'admin',
+  });
+  const edition = queue.docs.get(`ai_insights_content_cache/${job.editionDocId}`);
+  const now = Date.now();
+  edition.backupSources = [
+    { kind: 'funding', title: 'Public grant', url: 'https://funding.example.org/apply', date: '', eligibility: 'Community projects', checkedAt: now, score: 90, status: 'verified' },
+    { kind: 'news', title: 'Public article', url: 'https://news.example.org/article', date: new Date(now).toISOString().slice(0, 10), checkedAt: now, score: 90, status: 'verified' },
+  ];
+  const ref = queue.ref(`ai_insights_bulk_jobs/${job.jobId}`);
+  await queue.worker({ data: () => queue.docs.get(ref.key), ref });
+  assert.equal(queue.messages.length, 1);
+  assert.match(queue.messages[0].html, /Public grant/);
+  assert.match(queue.messages[0].html, /Public article/);
 });

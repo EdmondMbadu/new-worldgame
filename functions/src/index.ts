@@ -17,6 +17,7 @@ import { buildICS } from './ics';
 import { prepareBriefContent, BriefContent } from './brief-research';
 import { resolveBriefVideo, renderBriefVideo, BriefVideo } from './brief-video';
 import { loadNewsVideoWithThumbnail } from './news-video-thumbnail';
+import { hasWeeklyBriefFallback, loadWeeklyBriefFallback } from './brief-bulk-fallback';
 import { BriefSource, fetchSourcePage, pageProblem, selectBriefSources } from './brief-sources';
 import {
   BRIEF_PACK_RESERVATION_USD,
@@ -28,6 +29,7 @@ import {
   buildBriefEditionPlan,
   mergeBriefHistory,
   personalizeBriefContent,
+  withWeeklyBriefFallback,
 } from './brief-personalization';
 // At the top, with your other imports
 import Stripe from 'stripe';
@@ -1392,7 +1394,7 @@ export const weeklyReminder = functions.https.onCall(
 );
 
 export const runWeeklyEmailAutomation = functions
-  .runWith({ memory: '1GB' })
+  .runWith({ memory: '2GB', timeoutSeconds: 300 })
   .pubsub
   .schedule('every 15 minutes')
   .timeZone('Etc/UTC')
@@ -4239,6 +4241,10 @@ async function enqueueAIInsightsBulkJob(data: {
 }, automation?: { runKey: string; summary: string }) {
   const db = admin.firestore();
   const rawRecipients = Array.isArray(data.recipients) ? data.recipients : [];
+  const backupSources = await loadWeeklyBriefFallback();
+  if (!hasWeeklyBriefFallback(backupSources)) {
+    throw new Error('Unable to verify backup coverage for both funding and news. Try again once the sources are reachable.');
+  }
   const editionKey = briefEditionKeyForRun(automation?.runKey);
   const editionPlan = buildBriefEditionPlan(rawRecipients, editionKey);
   const recipients = editionPlan.recipients;
@@ -4287,6 +4293,7 @@ async function enqueueAIInsightsBulkJob(data: {
     source,
     status: 'preparing',
     packs: editionPlan.packs,
+    backupSources,
     packCount: Object.keys(editionPlan.packs).length,
     recipientCount: recipients.length,
     maxEstimatedCostUsd: BRIEF_WEEKLY_AI_BUDGET_USD,
@@ -4409,7 +4416,7 @@ export const startAIInsightsBulkJob = functions
   );
 
 export const processAIInsightsBulkJob = functions
-  .runWith({ timeoutSeconds: 540, memory: '1GB' })
+  .runWith({ timeoutSeconds: 540, memory: '2GB' })
   .firestore.document('ai_insights_bulk_jobs/{jobId}')
   .onCreate(async (snap) => {
     const data = snap.data() || {};
@@ -4493,6 +4500,9 @@ export const processAIInsightsBulkJob = functions
 
     const contentCache = new Map<string, BriefContent>();
     const editionData = editionRef ? (await editionRef.get()).data() || {} : {};
+    const backupSources: BriefSource[] = Array.isArray(editionData.backupSources)
+      ? editionData.backupSources
+      : await loadWeeklyBriefFallback();
     const editionPacks = (editionData.packs || {}) as Record<string, BriefPackDefinition>;
     const uniquePacks = new Map<string, BriefPackDefinition>();
     batchRecipients.forEach((recipient: AIInsightsPayload) => {
@@ -4570,7 +4580,7 @@ export const processAIInsightsBulkJob = functions
       );
     }
 
-    // Resolve each distinct video/link configuration once per batch.
+    // Reuse the shared video and resource checks across every batch in the edition.
     const extrasCache = new Map<string, Promise<AIInsightsPayload>>();
     const batchQuality: Record<string, unknown> = {};
     // ===== PHASE 2: Send emails using cached content =====
@@ -4583,10 +4593,7 @@ export const processAIInsightsBulkJob = functions
 
       try {
         const packId = String(recipient.briefPackId || '');
-        const cachedContent = contentCache.get(packId || solutionId);
-        if (!cachedContent) {
-          throw new Error('Source preparation failed; retry this recipient after checking the job log.');
-        }
+        const cachedContent = contentCache.get(packId || solutionId) || briefContentFromStoredSources({});
 
         let renderedContent: {
           fundersHtml: string;
@@ -4616,12 +4623,26 @@ export const processAIInsightsBulkJob = functions
           personalizedQuality = personalized.quality;
         }
 
-        if (!renderedContent.validFundersCount && !renderedContent.validNewsCount) {
-          throw new Error('No sources passed verification for this brief.');
+        const neededFundingBackup = !renderedContent.validFundersCount;
+        const neededNewsBackup = !renderedContent.validNewsCount;
+        renderedContent = withWeeklyBriefFallback(renderedContent, backupSources, `${userEmail}:${recipient.briefEditionKey || ''}`);
+        if (!renderedContent.validFundersCount || !renderedContent.validNewsCount) {
+          throw new Error('This bulk brief could not verify both funding and news.');
         }
 
         const extrasKey = JSON.stringify([recipient.videoSummaryUrl || '', recipient.additionalLinks || []]);
-        if (!extrasCache.has(extrasKey)) extrasCache.set(extrasKey, hydrateBriefExtras(recipient));
+        if (!extrasCache.has(extrasKey)) {
+          const loadExtras = async () => {
+            if (!editionRef) return hydrateBriefExtras(recipient);
+            const ref = editionRef.collection('brief_extras').doc(briefInternalDocId('extras', extrasKey));
+            const saved = (await ref.get()).data();
+            if (saved) return { ...recipient, briefVideo: saved.briefVideo || undefined, additionalLinks: saved.additionalLinks };
+            const hydrated = await hydrateBriefExtras(recipient);
+            await ref.set({ briefVideo: hydrated.briefVideo || null, additionalLinks: hydrated.additionalLinks || [] });
+            return hydrated;
+          };
+          extrasCache.set(extrasKey, loadExtras());
+        }
         const extras = await extrasCache.get(extrasKey)!;
         const enrichedRecipient: AIInsightsPayload = {
           ...(recipient as AIInsightsPayload),
@@ -4654,6 +4675,8 @@ export const processAIInsightsBulkJob = functions
           ...personalizedQuality,
           verifiedFunders: renderedContent.validFundersCount,
           verifiedNews: renderedContent.validNewsCount,
+          usedFundingBackup: neededFundingBackup,
+          usedNewsBackup: neededNewsBackup,
         };
         successCount += 1;
         successfulEmails.push(userEmail.toLowerCase());

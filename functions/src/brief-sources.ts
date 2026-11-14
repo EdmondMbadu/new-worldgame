@@ -158,8 +158,8 @@ export function selectBriefSources(sources: BriefSource[], kind: SourceKind, now
     urls.add(url); titles.add(title); hosts.set(host, (hosts.get(host) || 0) + 1); return true;
   }).slice(0, 5);
 }
-export function renderBriefSources(sources: BriefSource[], kind: SourceKind): string {
-  const items = selectBriefSources(sources, kind);
+export function renderBriefSources(sources: BriefSource[], kind: SourceKind, now = Date.now()): string {
+  const items = selectBriefSources(sources, kind, now);
   if (!items.length) return `<tr><td style="padding:16px 0;color:#6b7280;">No verified ${kind === 'news' ? 'news' : 'funding'} links available today.</td></tr>`;
   return items.map(s => `<tr><td style="padding:16px 0;border-bottom:1px solid #f1f5f9;">
     <p style="margin:0 0 6px;font-size:16px;font-weight:600;color:#111827;">${escapeBriefHtml(s.title)}</p>

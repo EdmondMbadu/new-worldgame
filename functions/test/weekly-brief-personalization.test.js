@@ -7,8 +7,10 @@ const {
   buildBriefSolutionProfile,
   buildBriefEditionPlan,
   personalizeBriefContent,
+  withWeeklyBriefFallback,
   mergeBriefHistory,
 } = require('../lib/brief-personalization');
+const { loadWeeklyBriefFallback, hasWeeklyBriefFallback } = require('../lib/brief-bulk-fallback');
 
 const now = Date.now();
 const date = new Date(now - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
@@ -52,6 +54,39 @@ test('profiles use descriptions and SDGs when legacy solution areas are missing'
   assert.equal(profile.regionId, 'sub_saharan_africa');
   assert.ok(profile.keywords.includes('solar'));
   assert.ok(profile.confidence >= 0.75);
+});
+
+test('bulk backup fills only missing sections with eligible public sources', () => {
+  const result = withWeeklyBriefFallback({
+    fundersHtml: '',
+    newsHtml: 'Personalized news',
+    validFundersCount: 0,
+    validNewsCount: 1,
+  }, [source(1, 'funding'), source(2, 'news')], 'edition', now);
+  assert.equal(result.validFundersCount, 1);
+  assert.match(result.fundersHtml, /source1\.example/);
+  assert.equal(result.newsHtml, 'Personalized news');
+  assert.equal(result.validNewsCount, 1);
+});
+
+test('bulk backup excludes inaccessible pages and skips the year-end closure', async () => {
+  const editionTime = Date.parse('2026-12-12T21:00:00Z');
+  const fallback = await loadWeeklyBriefFallback(editionTime, async url => {
+    if (url.includes('pollination')) assert.fail('The scheduled closure must prevent fetching this grant');
+    if (url.includes('awesomefoundation')) return {
+      url, status: 200, title: 'Awesome Foundation FAQs',
+      text: 'Anyone is eligible for a grant — individuals, groups, and organizations alike. Most chapters show a strong preference for projects that contribute to their own communities. Check the chapter that serves your project.',
+    };
+    if (url.includes('greater-possibilities-mali')) return {
+      url, status: 200, title: 'Small Investments',
+      text: 'Published on October 29, 2026. In Mali, solar power now helps health workers keep essential services running, including emergency care and vaccine storage. The article discusses implications for new community projects.',
+    };
+    return { url, status: 503, title: 'Unavailable', text: '' };
+  });
+  assert.equal(fallback.length, 2);
+  assert.ok(fallback.every(item => item.status === 'verified'));
+  assert.ok(fallback.every(item => !item.url.includes('pollination')));
+  assert.ok(hasWeeklyBriefFallback(fallback, editionTime));
 });
 
 test('profiling handles legacy language without substring geography mistakes', () => {

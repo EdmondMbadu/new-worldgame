@@ -4,6 +4,7 @@ import {
   eligibleSource,
   normalizeSourceUrl,
   renderBriefSources,
+  selectBriefSources,
 } from './brief-sources';
 
 export const BRIEF_MAX_RESEARCH_PACKS = 18;
@@ -302,10 +303,11 @@ function personalizedSelection(
   profile: BriefSolutionProfile,
   solutionTitle: string,
   recent: Set<string>,
-  seed: string
+  seed: string,
+  now: number
 ): BriefSource[] {
   const topic = TOPIC_BY_ID.get(profile.primaryTopic)!;
-  const scored = sources.filter(source => source.kind === kind && eligibleSource(source) && sourceMatchesRegion(source, profile)).map(source => {
+  const scored = sources.filter(source => source.kind === kind && eligibleSource(source, now) && sourceMatchesRegion(source, profile)).map(source => {
     const text = normalize([source.title, source.publisher, source.relevance, source.evidence, source.eligibility].join(' '));
     const matchedKeywords = profile.keywords.filter(keyword => containsTerm(text, keyword)).slice(0, 4);
     const matchedTopic = topic.terms.filter(term => containsTerm(text, term)).slice(0, 3);
@@ -349,15 +351,15 @@ export function personalizeBriefContent(
   now = Date.now()
 ): PersonalizedBriefContent {
   const recent = new Set(history.filter(item => item.sentAt >= now - BRIEF_HISTORY_WINDOW_MS).map(item => normalizeSourceUrl(item.url)));
-  const funding = personalizedSelection(sources, 'funding', profile, solutionTitle, recent, `${recipientSeed}:funding`);
-  const news = personalizedSelection(sources, 'news', profile, solutionTitle, recent, `${recipientSeed}:news`);
+  const funding = personalizedSelection(sources, 'funding', profile, solutionTitle, recent, `${recipientSeed}:funding`, now);
+  const news = personalizedSelection(sources, 'news', profile, solutionTitle, recent, `${recipientSeed}:news`, now);
   const selectedUrls: BriefHistoryItem[] = [...funding, ...news].map(source => ({ url: normalizeSourceUrl(source.url), sentAt: now, kind: source.kind }));
   const newCount = selectedUrls.filter(item => !recent.has(item.url)).length;
   const selectedText = normalize([...funding, ...news].map(source => `${source.title} ${source.relevance}`).join(' '));
   const matchedKeywords = profile.keywords.filter(keyword => containsTerm(selectedText, keyword)).slice(0, 8);
   return {
-    fundersHtml: renderBriefSources(funding, 'funding'),
-    newsHtml: renderBriefSources(news, 'news'),
+    fundersHtml: renderBriefSources(funding, 'funding', now),
+    newsHtml: renderBriefSources(news, 'news', now),
     validFundersCount: funding.length,
     validNewsCount: news.length,
     selectedUrls,
@@ -367,6 +369,29 @@ export function personalizeBriefContent(
       newSourceRatio: selectedUrls.length ? Number((newCount / selectedUrls.length).toFixed(2)) : 1,
       matchedKeywords,
     },
+  };
+}
+
+export function withWeeklyBriefFallback<T extends {
+  fundersHtml: string;
+  newsHtml: string;
+  validFundersCount: number;
+  validNewsCount: number;
+}>(content: T, sources: BriefSource[], seed: string, now = Date.now()): T {
+  const funding = selectBriefSources(sources, 'funding', now);
+  const news = selectBriefSources(sources, 'news', now);
+  const backupFunding = funding.length ? [funding[hashNumber(`${seed}:funding`) % funding.length]] : [];
+  const backupNews = news.length ? [news[hashNumber(`${seed}:news`) % news.length]] : [];
+  return {
+    ...content,
+    ...(!content.validFundersCount && backupFunding.length ? {
+      fundersHtml: renderBriefSources(backupFunding, 'funding', now),
+      validFundersCount: backupFunding.length,
+    } : {}),
+    ...(!content.validNewsCount && backupNews.length ? {
+      newsHtml: renderBriefSources(backupNews, 'news', now),
+      validNewsCount: backupNews.length,
+    } : {}),
   };
 }
 
