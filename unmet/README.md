@@ -2,6 +2,8 @@
 
 `/unmet` — pick a country, see which of twelve basic needs are met for everyone, which are closing, and the year the rest arrive at today's pace. Drawn on Buckminster Fuller's Dymaxion map.
 
+Links carry the state: `/unmet?c=COD` opens a country, `&n=electricity` one need, and `&vs=RWA` compares it with a second country (the first is drawn in gold, the second in white).
+
 It is a standalone document, like the games: the Angular app never imports it, so it adds nothing to the Angular bundle. `angular.json` copies `unmet/dist` into the site as static files.
 
 ## Commands

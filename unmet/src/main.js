@@ -5,7 +5,7 @@ import { createMap } from './map.js';
 import { summarize, assess, lens, world, needsIn } from './model.js';
 import { needById } from './needs.js';
 import { LANGS, countryName, lackParts } from './i18n.js';
-import { countryPanel, needPanel, paceStrip, aboutHtml, esc } from './panel.js';
+import { countryPanel, needPanel, paceStrip, aboutHtml, esc, pickPanel, comparePanel, compareNeedPanel, comparePace } from './panel.js';
 
 const cfg = window.UNMET;
 const $ = (id) => document.getElementById(id);
@@ -20,6 +20,8 @@ const state = {
   lang: ['en', 'fr'].includes(query.get('lang')) ? query.get('lang') : store.get('unmet.lang') || (['en', 'fr'].includes(store.get('nwg_language')) ? store.get('nwg_language') : '') || ((navigator.language || 'en').toLowerCase().startsWith('fr') ? 'fr' : 'en'),
   country: null, // ISO3
   need: null,
+  vs: null, // a second country to compare with (ISO3)
+  picking: false, // waiting for the visitor to choose that second country
   pin: null, // { x, y, lat, lon, label } in map space
 };
 let t = LANGS[state.lang];
@@ -32,7 +34,7 @@ const set = small.matches ? 's' : 'l';
 
 const map = createMap($('map'), {
   reducedMotion: reduced,
-  onPick: (who) => { if (who) selectCountry(geo.countries[who - 1].id); },
+  onPick: (who) => { if (who) pick(geo.countries[who - 1].id); },
   onHover: hover,
   onView: () => { placePin(); if (pending && map.mode === 'map') { const p = pending; pending = null; selectCountry(p.id, p); } },
 });
@@ -59,6 +61,7 @@ async function boot() {
     const [land, xy] = await Promise.all([landP, xyP]);
     map.setLand(land, geo.sets[set]); map.setXY(xy, geo.sets[set]); map.showMap();
     selectCountry(wanted.id, { need: needById[query.get('n')] ? query.get('n') : null, replace: true });
+    if (byId[(query.get('vs') || '').toUpperCase()]) setVs(query.get('vs').toUpperCase(), true);
   } else {
     map.setLand(await landP, geo.sets[set]);
     xyP.then((xy) => {
@@ -103,7 +106,8 @@ function stageRect() {
   const edge = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--edge')) || 44;
   if (state.country) {
     const panel = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--panel')) || 452;
-    return { x: edge + 8, y: 130, w: W - panel - edge * 2 - 40, h: H - 130 - 150 - 76 - 34 };
+    const strip = state.vs && !state.picking ? 250 : 150; // the pace strip is two rows tall when comparing
+    return { x: edge + 8, y: 130, w: W - panel - edge * 2 - 40, h: Math.max(140, H - 130 - strip - 76 - 34) };
   }
   const left = Math.min(W * 0.34, 520) + edge - 6;
   return { x: left, y: 104, w: W - left - edge + 8, h: H - 104 - 96 };
@@ -116,6 +120,18 @@ new ResizeObserver(() => { map.resize(); layout(performance.now() < animateUntil
 small.addEventListener('change', () => location.reload()); // dot density is chosen once, at load
 
 // ---------- state changes ----------
+function loadOutline(id) {
+  if (outlines.has(id)) return;
+  get(`geo/outlines/${id}.txt`, 'text').then((d) => { outlines.set(id, d); map.setOutline(byId[id].i, d); }).catch(() => {});
+}
+/** Tells the map which country (or pair of countries) is chosen, and how to colour itself. */
+function syncMap(sweep = true) {
+  const a = byId[state.country], b = byId[state.vs];
+  map.select(a ? a.i : 0, a && outlines.get(a.id), b ? b.i : 0, b && outlines.get(b.id), state.picking);
+  if (a) loadOutline(a.id);
+  if (b) loadOutline(b.id);
+  if (data) map.setLens(lensFor(state.need), sweep);
+}
 function selectCountry(id, { need = null, pin = null, replace = false, keepNeed = false } = {}) {
   if (!byId[id]) return;
   if (map.mode !== 'map') { pending = { id, need, pin, replace, keepNeed }; if (map.ready) map.unfold(); return; }
@@ -123,12 +139,39 @@ function selectCountry(id, { need = null, pin = null, replace = false, keepNeed 
   state.country = id;
   state.need = keepNeed ? state.need : need;
   state.pin = pin;
-  const c = byId[id];
-  map.select(c.i, outlines.get(id));
-  if (!outlines.has(id)) get(`geo/outlines/${id}.txt`, 'text').then((d) => { outlines.set(id, d); map.setOutline(c.i, d); }).catch(() => {});
-  if (data) map.setLens(lensFor(state.need), changed ? false : true);
+  state.vs = null; state.picking = false;
+  syncMap(!changed);
   commit(replace);
   if (changed && small.matches) window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+}
+/** A click on the map: choose a country, or the one to compare with. */
+function pick(id) {
+  if (state.country && (state.picking || state.vs)) setVs(id);
+  else selectCountry(id);
+}
+function startCompare() {
+  state.picking = true; state.vs = null; state.pin = null;
+  syncMap();
+  commit(true);
+  if (!small.matches) $('panel').querySelector('input')?.focus();
+}
+function setVs(id, replace = false) {
+  if (!byId[id] || !state.country || id === state.country) return;
+  state.vs = id; state.picking = false; state.pin = null;
+  syncMap();
+  commit(replace);
+  $('panel').scrollTo?.({ top: 0 });
+}
+function endCompare() {
+  state.vs = null; state.picking = false;
+  syncMap();
+  commit();
+}
+function swap() {
+  if (!state.vs) return;
+  [state.country, state.vs] = [state.vs, state.country];
+  syncMap();
+  commit();
 }
 function selectNeed(needId, replace = false) {
   state.need = needId;
@@ -137,14 +180,14 @@ function selectNeed(needId, replace = false) {
   $('panel').scrollTo?.({ top: 0 });
 }
 function goWorld() {
-  state.country = null; state.need = null; state.pin = null;
-  map.select(0);
-  if (data) map.setLens(lensFor(null));
+  state.country = null; state.need = null; state.pin = null; state.vs = null; state.picking = false;
+  syncMap();
   commit();
 }
 function commit(replace) {
   animateUntil = performance.now() + 400;
   document.body.classList.toggle('is-country', !!state.country);
+  document.body.classList.toggle('is-compare', !!state.vs);
   render();
   layout(true);
   placePin();
@@ -154,6 +197,7 @@ function commit(replace) {
 function shareUrl() {
   const q = new URLSearchParams();
   if (state.country) q.set('c', state.country);
+  if (state.country && state.vs) q.set('vs', state.vs);
   if (state.country && state.need) q.set('n', state.need);
   if (query.get('lang') || state.lang !== 'en') q.set('lang', state.lang);
   const s = q.toString();
@@ -161,18 +205,26 @@ function shareUrl() {
 }
 addEventListener('popstate', () => {
   const q = new URLSearchParams(location.search);
-  const c = byId[(q.get('c') || '').toUpperCase()];
-  if (!c) { state.country = null; state.need = null; state.pin = null; map.select(0); if (data) map.setLens(lensFor(null)); }
-  else {
-    state.country = c.id; state.need = needById[q.get('n')] ? q.get('n') : null; state.pin = null;
-    map.select(c.i, outlines.get(c.id));
-    if (!outlines.has(c.id)) get(`geo/outlines/${c.id}.txt`, 'text').then((d) => { outlines.set(c.id, d); map.setOutline(c.i, d); }).catch(() => {});
-    if (data) map.setLens(lensFor(state.need));
-  }
+  const c = byId[(q.get('c') || '').toUpperCase()], v = byId[(q.get('vs') || '').toUpperCase()];
+  state.country = c ? c.id : null;
+  state.vs = c && v && v.id !== c.id ? v.id : null;
+  state.need = c && needById[q.get('n')] ? q.get('n') : null;
+  state.pin = null; state.picking = false;
+  syncMap();
   animateUntil = performance.now() + 400;
   document.body.classList.toggle('is-country', !!state.country);
+  document.body.classList.toggle('is-compare', !!state.vs);
   render(); layout(true); placePin();
 });
+
+/** The three countries closest on the map, as quick picks for a comparison. */
+function nearby(id) {
+  const [x, y] = byId[id].c;
+  return geo.countries
+    .filter((c) => c.id !== id && data.countries[c.id] && summaryOf(c.id).measured)
+    .map((c) => ({ id: c.id, name: nameOf(c.id), far: Math.hypot(c.c[0] - x, c.c[1] - y) }))
+    .sort((p, q) => p.far - q.far).slice(0, 3);
+}
 
 // ---------- rendering ----------
 function renderStatic() {
@@ -198,7 +250,7 @@ function renderStatic() {
   // Re-label the hero search in place: rebuilding it would throw away
   // whatever the visitor has already typed.
   const field = $('search-hero').querySelector('input');
-  if (!field) mountSearch($('search-hero'), false);
+  if (!field) mountSearch($('search-hero'), 'hero');
   else {
     field.placeholder = t.searchShort; field.setAttribute('aria-label', t.search);
     const here = $('search-hero').querySelector('[data-act="locate"]');
@@ -220,12 +272,23 @@ function render() {
   const a = state.need && summary.list.find((x) => x.need === state.need);
   // Keep the pace strip out of the panel while we rebuild it.
   if (pace.parentElement !== document.body) document.body.insertBefore(pace, panel.nextSibling);
-  panel.innerHTML = a ? needPanel({ ...ctx, a }) : countryPanel(ctx);
-  pace.innerHTML = paceStrip({ t, summary, thisYear, current: state.need });
-  if (small.matches) (panel.querySelector('#pace-slot') || panel).appendChild(pace);
-  mountSearch(panel.querySelector('#search-panel'), true);
+  if (state.picking) {
+    panel.innerHTML = pickPanel({ t, name, nearby: nearby(state.country) });
+    pace.hidden = true;
+  } else if (state.vs) {
+    const other = summaryOf(state.vs), nameB = nameOf(state.vs);
+    document.title = `${name} ${t.vs} ${nameB} · Unmet`;
+    panel.innerHTML = a
+      ? compareNeedPanel({ t, lang: state.lang, data, a, b: other.list.find((x) => x.need === state.need), countryA: country, nameA: name, nameB, line: povertyLine(), thisYear })
+      : comparePanel({ t, lang: state.lang, A: summary, B: other, nameA: name, nameB });
+    pace.innerHTML = comparePace({ t, A: summary, B: other, nameA: name, nameB, thisYear, current: state.need });
+  } else {
+    panel.innerHTML = a ? needPanel({ ...ctx, a }) : countryPanel(ctx);
+    pace.innerHTML = paceStrip({ t, summary, thisYear, current: state.need });
+  }
+  if (small.matches && !pace.hidden) (panel.querySelector('#pace-slot') || panel).appendChild(pace);
+  mountSearch(panel.querySelector('#search-panel'), state.picking || state.vs ? 'vs' : 'panel');
 }
-
 function tickWorld() {
   const lines = needsIn(data).map((n) => {
     const a = world(data, n.id, thisYear);
@@ -280,18 +343,22 @@ async function cities(q, signal) {
   }).filter(Boolean).slice(0, 4);
 }
 
-function mountSearch(host, inPanel) {
+/** mode: 'hero' (landing), 'panel' (change the country), 'vs' (choose the country to compare with) */
+function mountSearch(host, mode) {
   if (!host) return;
+  const inPanel = mode !== 'hero', versus = mode === 'vs';
   const id = inPanel ? 'sg-panel' : 'sg-hero';
+  const shown = () => (versus ? (state.vs ? nameOf(state.vs) : '') : state.country ? nameOf(state.country) : '');
   host.innerHTML = `<div class="search" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-owns="${id}">
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="6.3" cy="6.3" r="4.8"/><path d="m10 10 4 4"/></svg>
-    <input type="text" inputmode="search" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false" aria-autocomplete="list" aria-controls="${id}" aria-label="${esc(t.search)}" placeholder="${esc(t.searchShort)}" value="${inPanel && state.country ? esc(nameOf(state.country)) : ''}">
-    ${inPanel ? `<button class="locate mono" data-act="change" style="color:var(--accent)">${t.change}</button>` : `<kbd>/</kbd>&nbsp;&nbsp;<button class="locate mono" data-act="locate" aria-label="${esc(t.locate)}"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor"><circle cx="6.5" cy="6.5" r="3"/><path d="M6.5 0v3M6.5 10v3M0 6.5h3M10 6.5h3"/></svg><span>${t.locate}</span></button>`}
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="6.3" cy="6.3" r="4.8"/><path d="m10 10 4 4"/></svg>${versus && state.vs ? `<span class="vs mono">${t.vs}</span>` : ''}
+    <input type="text" inputmode="search" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false" aria-autocomplete="list" aria-controls="${id}" aria-label="${esc(t.search)}" placeholder="${esc(versus ? t.compareSearch : t.searchShort)}" value="${inPanel ? esc(shown()) : ''}">
+    ${versus && !state.vs ? '' : inPanel ? `<button class="locate mono" data-act="change" style="color:var(--accent)">${t.change}</button>` : `<kbd>/</kbd>&nbsp;&nbsp;<button class="locate mono" data-act="locate" aria-label="${esc(t.locate)}"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor"><circle cx="6.5" cy="6.5" r="3"/><path d="M6.5 0v3M6.5 10v3M0 6.5h3M10 6.5h3"/></svg><span>${t.locate}</span></button>`}
     <ul class="suggest" id="${id}" role="listbox" hidden></ul>
   </div>`;
   const box = host.firstElementChild, input = box.querySelector('input'), list = box.querySelector('ul');
   let items = [], active = 0, typed = '';
   const paint = () => {
+    if (versus) items = items.filter((s) => s.id !== state.country);
     list.hidden = !typed.trim();
     box.setAttribute('aria-expanded', String(!list.hidden));
     list.innerHTML = items.length
@@ -303,6 +370,7 @@ function mountSearch(host, inPanel) {
     list.hidden = true; typed = ''; input.blur();
     let pin = null;
     if (s.spot) { const d = map.nearestDot(s.spot.lon, s.spot.lat, byId[s.id].i); if (d) pin = { ...s.spot, x: d.x, y: d.y }; }
+    if (versus) return setVs(s.id);
     selectCountry(s.id, { pin });
   };
   input.addEventListener('input', () => {
@@ -324,10 +392,10 @@ function mountSearch(host, inPanel) {
   input.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (items.length) { active = (active + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length; paint(); } }
     else if (e.key === 'Enter') { e.preventDefault(); choose(items[active]); }
-    else if (e.key === 'Escape') { e.stopPropagation(); list.hidden = true; input.blur(); if (inPanel) input.value = nameOf(state.country); }
+    else if (e.key === 'Escape') { e.stopPropagation(); list.hidden = true; input.blur(); if (inPanel) input.value = shown(); }
   });
   input.addEventListener('focus', () => { if (inPanel) input.select(); });
-  input.addEventListener('blur', () => setTimeout(() => { list.hidden = true; if (inPanel && state.country) input.value = nameOf(state.country); }, 160));
+  input.addEventListener('blur', () => setTimeout(() => { list.hidden = true; if (inPanel && state.country) input.value = shown(); }, 160));
   list.addEventListener('pointerdown', (e) => { const li = e.target.closest('li[data-i]'); if (li) { e.preventDefault(); choose(items[+li.dataset.i]); } });
   box.addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
@@ -349,7 +417,18 @@ function locate() {
 }
 
 // ---------- small things ----------
+function placeTags() {
+  const show = map.mode === 'map' && state.country && (state.vs || state.picking);
+  for (const [el, id] of [[$('tag-a'), state.country], [$('tag-b'), state.vs]]) {
+    if (!show || !id) { el.hidden = true; continue; }
+    const [x, y] = map.toScreen(byId[id].c[0], byId[id].c[1]);
+    el.hidden = false;
+    el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    el.firstElementChild.textContent = nameOf(id);
+  }
+}
 function placePin() {
+  if (geo) placeTags();
   const el = $('pin'), p = state.pin;
   if (!p || map.mode !== 'map') { el.hidden = true; return; }
   const [x, y] = map.toScreen(p.x, p.y);
@@ -371,6 +450,7 @@ function hover(who, x, y) {
   const c = geo.countries[who - 1];
   let sub = '';
   if (data) { const s = summaryOf(c.id); sub = s.known && s.measured ? t.tip(s.unmet, s.total) : t.tipNone; }
+  if (state.country && (state.picking || state.vs) && c.id !== state.country && c.id !== state.vs) sub = t.tipCompare(nameOf(state.country));
   showTip(countryName(c, state.lang), sub, x, y);
 }
 document.addEventListener('pointerover', (e) => {
@@ -392,7 +472,7 @@ function toast(message, sticky) {
 
 async function share() {
   const url = location.origin + shareUrl();
-  const title = state.country ? `${nameOf(state.country)} · Unmet` : t.title;
+  const title = state.country ? document.title : t.title;
   if (navigator.share && small.matches) { try { await navigator.share({ title, url }); } catch { /* dismissed */ } return; }
   try { await navigator.clipboard.writeText(url); toast(t.copied); } catch { toast(url); }
 }
@@ -414,17 +494,22 @@ function setLang(lang) {
 }
 
 document.addEventListener('click', (e) => {
-  const el = e.target.closest('[data-country],[data-need],[data-act],[data-lang],#how,#back,#brand');
+  const el = e.target.closest('[data-country],[data-need],[data-vs],[data-solo],[data-act],[data-lang],#how,#back,#brand');
   if (!el || el.closest('.search')) return;
   if (el.id === 'how') return openAbout(true);
   if (el.id === 'back') return goWorld();
   if (el.id === 'brand' || el.matches('.about .brand')) { e.preventDefault(); openAbout(false); return goWorld(); }
   if (el.dataset.lang) return setLang(el.dataset.lang);
+  if (el.dataset.vs) return setVs(el.dataset.vs);
+  if (el.dataset.solo) return selectCountry(el.dataset.solo, { keepNeed: true });
   if (el.dataset.country) return selectCountry(el.dataset.country, { keepNeed: el.hasAttribute('data-keep-need') });
   if (el.dataset.need) return selectNeed(el.dataset.need);
   const act = el.dataset.act;
   if (act === 'all') selectNeed(null);
   else if (act === 'share') share();
+  else if (act === 'compare') startCompare();
+  else if (act === 'swap') swap();
+  else if (act === 'end-compare') endCompare();
   else if (act === 'close-about') openAbout(false);
   else if (act === 'surprise' && data) {
     const pool = geo.countries.filter((c) => data.countries[c.id] && summaryOf(c.id).unmet >= 3 && c.id !== state.country);
@@ -438,6 +523,7 @@ addEventListener('keydown', (e) => {
     if (!$('about').hidden) return openAbout(false);
     if (typing) return;
     if (state.need) return selectNeed(null);
+    if (state.vs || state.picking) return endCompare();
     if (state.country) return goWorld();
   }
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return;

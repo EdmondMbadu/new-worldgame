@@ -45,6 +45,7 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   let fly = null, morphAnim = null, appearAnim = null, wave = null;
   let lensValues = null, pendingShade = null;
   let selected = 0, hovered = 0, outline = null, outlineFor = 0, glow = 0;
+  let second = 0, outline2 = null, outlineFor2 = 0, wide = false; // a second country, when two are compared
   let raf = 0, last = 0, userMoved = false;
   let quality = 1, slowFrames = 0; // resolution steps down if this device cannot keep up
 
@@ -173,13 +174,20 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   // ---------- geometry ----------
   const homeScale = () => Math.min(stage.w / geo.w, stage.h / geo.h) * 0.985;
   const home = () => ({ ox: stage.x + stage.w / 2, oy: stage.y + stage.h / 2, cx: geo.w / 2, cy: geo.h / 2, k: homeScale() });
-  function frameView(f) {
+  function frameView(f, room = 1.75, least = 1.2) {
     const k0 = homeScale();
     const fw = Math.max(f[2] - f[0], 6), fh = Math.max(f[3] - f[1], 6);
-    const k = clamp(Math.min(stage.w / (fw * 1.75), stage.h / (fh * 1.75)), k0 * 1.2, k0 * 11);
+    const k = clamp(Math.min(stage.w / (fw * room), stage.h / (fh * room)), k0 * least, k0 * 11);
     return { ox: stage.x + stage.w / 2, oy: stage.y + stage.h / 2, cx: (f[0] + f[2]) / 2, cy: (f[1] + f[3]) / 2, k };
   }
-  const targetView = () => (selected && geo ? frameView(geo.countries[selected - 1].frame) : home());
+  function targetView() {
+    if (!selected || !geo || wide) return home();
+    const a = geo.countries[selected - 1].frame;
+    if (!second) return frameView(a);
+    // Two countries: frame them together, however far apart they are.
+    const b = geo.countries[second - 1].frame;
+    return frameView([Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])], 1.45, 1);
+  }
 
   function flyTo(to, duration = 1250) {
     if (reducedMotion || mode !== 'map') { Object.assign(view, to); fly = null; onView?.(); return start(); }
@@ -207,18 +215,28 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
   }
 
   // ---------- selection ----------
-  /** Marks a country as chosen. The camera follows on the next setStage(). */
-  function select(index, outlinePath) {
+  /**
+   * Marks the chosen country, and optionally a second one to compare it with.
+   * `showAll` keeps the whole world in view (while a second country is being
+   * picked). The camera follows on the next setStage().
+   */
+  function select(index, outlinePath, other = 0, otherPath = null, showAll = false) {
+    const had = selected;
     selected = index || 0;
-    outline = null; outlineFor = 0;
+    second = selected && other && other !== selected ? other : 0;
+    wide = !!showAll;
+    if (outlineFor !== selected) { outline = null; outlineFor = 0; }
+    if (outlineFor2 !== second) { outline2 = null; outlineFor2 = 0; }
     if (selected && outlinePath) setOutline(selected, outlinePath);
+    if (second && otherPath) setOutline(second, otherPath);
     userMoved = false;
-    glow = performance.now();
+    if (!had || !selected) glow = performance.now();
     start();
   }
   function setOutline(index, d) {
-    if (index !== selected) return;
-    outline = new Path2D(d); outlineFor = index;
+    if (!index) return;
+    if (index === selected && outlineFor !== index) { outline = new Path2D(d); outlineFor = index; }
+    if (index === second && outlineFor2 !== index) { outline2 = new Path2D(d); outlineFor2 = index; }
     start();
   }
 
@@ -311,7 +329,9 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
     const ct = Math.cos(theta), st = Math.sin(theta), cT = Math.cos(TILT), sT = Math.sin(TILT);
     const tx = ox - cx * k, ty = oy - cy * k;
     const reach = Math.hypot(geo.w, geo.h) * k * 0.5 || 1;
-    const dim = selected ? 0.34 + 0.66 * (1 - ease(glowT)) : 1;
+    // While a second country is being picked, the rest of the world stays easy to see.
+    const floor = wide ? 0.6 : 0.34;
+    const dim = selected ? floor + (1 - floor) * (1 - ease(glowT)) : 1;
     const pad = 4;
     for (let i = 0; i < n; i++) {
       let x, y, a = 1;
@@ -334,7 +354,7 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
       let s = shade[i];
       if (wave && pendingShade && (mode === 'map' ? mx[i] / geo.w : 0.5 - uy[i] / 2) < sweep * 1.15 - 0.075) s = pendingShade[i];
       const who = owner[i];
-      const mine = selected && who === selected, hot = hovered && who === hovered && !mine;
+      const mine = selected && (who === selected || who === second), hot = hovered && who === hovered && !mine;
       if (selected && !mine) a *= hot ? Math.max(dim, 0.7) : dim;
       const level = a > 0.82 ? 3 : a > 0.55 ? 2 : a > 0.3 ? 1 : a > 0.08 ? 0 : -1;
       if (level < 0) continue;
@@ -369,6 +389,15 @@ export function createMap(canvas, { onPick, onHover, onView, reducedMotion }) {
       ctx.lineJoin = 'round';
       ctx.fillStyle = `rgba(${ACCENT},0.07)`; ctx.fill(outline, 'evenodd');
       ctx.lineWidth = 1.15 / k; ctx.strokeStyle = `rgba(${ACCENT},0.95)`; ctx.stroke(outline);
+      ctx.restore();
+    }
+    // The country it is compared with, outlined in white.
+    if (mode === 'map' && second && outline2 && outlineFor2 === second) {
+      ctx.save();
+      ctx.translate(tx, ty); ctx.scale(k, k);
+      ctx.lineJoin = 'round';
+      ctx.fillStyle = 'rgba(233,229,219,0.06)'; ctx.fill(outline2, 'evenodd');
+      ctx.lineWidth = 1.15 / k; ctx.strokeStyle = 'rgba(233,229,219,0.95)'; ctx.stroke(outline2);
       ctx.restore();
     }
     if (busy) {

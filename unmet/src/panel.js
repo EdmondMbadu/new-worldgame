@@ -49,7 +49,7 @@ export function countryPanel({ t, lang, summary, name, line }) {
   <section>
     <h2 class="name">${esc(name)}.</h2>
     <p class="verdict">${esc(head)}</p>${widest}
-    <div class="row-actions"><button class="btn mono" data-act="share"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor"><path d="M6 8V1M3.5 3.5 6 1l2.5 2.5M1.5 7v3.5h9V7"/></svg>${t.share}</button></div>
+    <div class="row-actions"><button class="btn mono" data-act="share"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor"><path d="M6 8V1M3.5 3.5 6 1l2.5 2.5M1.5 7v3.5h9V7"/></svg>${t.share}</button><button class="btn mono" data-act="compare"><svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor"><path d="M1 3.5h9M7.5 1 10 3.5 7.5 6M12 8.5H3M5.5 6 3 8.5 5.5 11"/></svg>${t.compare}</button></div>
   </section>
   <section class="ladder">${['met', 'closing', 'stuck', 'none'].map(cell).join('')}</section>
   <div id="pace-slot"></div>
@@ -59,47 +59,57 @@ export function countryPanel({ t, lang, summary, name, line }) {
   </section>`;
 }
 
-function chart({ t, lang, a, need, thisYear }) {
+/**
+ * The trend chart. One line per country in `series`; `line` and `ahead` are
+ * the CSS colours of its readings and of its dashed projection.
+ */
+function chart({ t, lang, need, thisYear, series }) {
   const W = 400, H = 172, L = 30, R = 14, T = 14, B = 24;
-  const pts = a.points.map(([y, v]) => [y, metShare(need, v)]);
   const goal = goalShare(need);
-  const [ly, lv] = pts[pts.length - 1];
-  const perYear = a.pace == null ? null : need.kind === 'rate' ? a.pace / 10 : a.pace;
-  const landing = a.state === 'closing' ? ly + (goal - lv) / perYear : null;
-  const x0 = Math.max(1990, Math.min(2000, pts[0][0]));
-  const x1 = landing ? Math.min(HORIZON, Math.max(2040, Math.ceil((landing + 4) / 5) * 5)) : 2045;
-  const lo = Math.min(goal, ...pts.map((p) => p[1]));
+  const lines = series.map(({ a, line, ahead }) => {
+    const pts = a.points.map(([y, v]) => [y, metShare(need, v)]);
+    const [ly, lv] = pts[pts.length - 1];
+    const perYear = a.pace == null ? null : need.kind === 'rate' ? a.pace / 10 : a.pace;
+    return { a, pts, ly, lv, perYear, line, ahead, landing: a.state === 'closing' ? ly + (goal - lv) / perYear : null };
+  });
+  const furthest = Math.max(0, ...lines.map((l) => l.landing || 0));
+  const x0 = Math.max(1990, Math.min(2000, ...lines.map((l) => l.pts[0][0])));
+  const x1 = furthest ? Math.min(HORIZON, Math.max(2040, Math.ceil((furthest + 4) / 5) * 5)) : 2045;
+  const lo = Math.min(goal, ...lines.flatMap((l) => l.pts.map((p) => p[1])));
   const y0 = Math.max(0, Math.floor((lo - (100 - lo) * 0.12 - 2) / 5) * 5), y1 = 100;
   const X = (y) => L + ((y - x0) / (x1 - x0)) * (W - L - R);
   const Y = (v) => T + (1 - (Math.min(y1, Math.max(y0, v)) - y0) / (y1 - y0)) * (H - T - B);
   const f = (v) => v.toFixed(1);
-  const seen = pts.filter((p) => p[0] >= x0);
-  const d = seen.map((p, i) => `${i ? 'L' : 'M'}${f(X(p[0]))} ${f(Y(p[1]))}`).join('');
-  const dots = seen.length <= 9 ? seen.map((p) => `<circle cx="${f(X(p[0]))}" cy="${f(Y(p[1]))}" r="2" fill="#e9e5db"/>`).join('') : '';
-  let ahead = '';
-  if (landing) {
-    const ex = Math.min(landing, x1);
-    ahead = `<path d="M${f(X(ly))} ${f(Y(lv))}L${f(X(ex))} ${f(Y(lv + perYear * (ex - ly)))}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>
-      <circle cx="${f(X(ex))}" cy="${f(Y(goal))}" r="3.4" fill="none" style="stroke:var(--accent)" stroke-width="1.4"/>
-      <text class="hot" x="${f(X(ex))}" y="${f(Y(goal) - 9)}" text-anchor="${ex > x1 - 6 ? 'end' : 'middle'}">${a.due ? esc(t.now.toUpperCase()) : a.arrival}</text>`;
-  } else if (perYear != null && a.state === 'stuck') {
-    const ex = x1;
-    ahead = `<path d="M${f(X(ly))} ${f(Y(lv))}L${f(X(ex))} ${f(Y(lv + perYear * (ex - ly)))}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>`;
-  }
+  const drawn = lines.map((l, n) => {
+    const seen = l.pts.filter((p) => p[0] >= x0);
+    const d = seen.map((p, i) => `${i ? 'L' : 'M'}${f(X(p[0]))} ${f(Y(p[1]))}`).join('');
+    const dots = seen.length <= 9 ? seen.map((p) => `<circle cx="${f(X(p[0]))}" cy="${f(Y(p[1]))}" r="2" style="fill:${l.line}"/>`).join('') : '';
+    const dash = (ex) => `<path d="M${f(X(l.ly))} ${f(Y(l.lv))}L${f(X(ex))} ${f(Y(l.lv + l.perYear * (ex - l.ly)))}" style="stroke:${l.ahead}" stroke-width="1.5" stroke-dasharray="3 4" fill="none"/>`;
+    let ahead = '';
+    if (l.landing) {
+      const ex = Math.min(l.landing, x1);
+      // A second country's year sits under the goal line, so two labels never collide.
+      ahead = `${dash(ex)}<circle cx="${f(X(ex))}" cy="${f(Y(goal))}" r="3.4" fill="none" style="stroke:${l.ahead}" stroke-width="1.4"/>
+      <text style="fill:${l.ahead}" x="${f(X(ex))}" y="${f(Y(goal) + (n ? 16 : -9))}" text-anchor="${ex > x1 - 6 ? 'end' : 'middle'}">${l.a.due ? esc(t.now.toUpperCase()) : l.a.arrival}</text>`;
+    } else if (l.perYear != null && l.a.state === 'stuck') ahead = dash(x1);
+    return `<path d="${d}" style="stroke:${l.line}" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round"/>${dots}${ahead}
+    <circle cx="${f(X(l.ly))}" cy="${f(Y(l.lv))}" r="3.2" style="fill:${l.line}"/>`;
+  }).join('');
+  const latest = Math.max(...lines.map((l) => l.ly));
   const years = [x0, SDG_YEAR, x1].filter((y, i, all) => all.indexOf(y) === i);
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t.needs[need.id].name)}: ${percent(lv, lang)}, ${ly}">
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(t.needs[need.id].name)}: ${lines.map((l) => `${percent(l.lv, lang)} (${l.ly})`).join(', ')}">
     <line x1="${L}" x2="${W - R}" y1="${f(Y(goal))}" y2="${f(Y(goal))}" stroke="rgba(233,229,219,.3)" stroke-dasharray="1 4"/>
     <text x="${L + 3}" y="${f(Y(goal) - 5)}">${esc(t.goal.toUpperCase())} ${percent(goal, lang)}</text>
     <line x1="${f(X(SDG_YEAR))}" x2="${f(X(SDG_YEAR))}" y1="${T}" y2="${H - B}" stroke="rgba(233,229,219,.16)" stroke-dasharray="2 4"/>
-    ${thisYear > ly && thisYear < x1 ? `<line x1="${f(X(thisYear))}" x2="${f(X(thisYear))}" y1="${H - B - 5}" y2="${H - B}" stroke="rgba(233,229,219,.5)"/>` : ''}
+    ${thisYear > latest && thisYear < x1 ? `<line x1="${f(X(thisYear))}" x2="${f(X(thisYear))}" y1="${H - B - 5}" y2="${H - B}" stroke="rgba(233,229,219,.5)"/>` : ''}
     <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="rgba(233,229,219,.26)"/>
     <text x="${L - 6}" y="${f(Y(y0) + 3)}" text-anchor="end">${y0}</text>
     <text x="${L - 6}" y="${f(Y(y1) + 3)}" text-anchor="end">100</text>
     ${years.map((y) => `<text x="${f(X(y))}" y="${H - 8}" text-anchor="${y === x0 ? 'start' : y === x1 ? 'end' : 'middle'}">${y}</text>`).join('')}
-    <path d="${d}" stroke="#e9e5db" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round"/>${dots}${ahead}
-    <circle cx="${f(X(ly))}" cy="${f(Y(lv))}" r="3.2" fill="#e9e5db"/>
+    ${drawn}
   </svg>`;
 }
+const charted = (a) => a.points.length && a.value != null && a.state !== 'none';
 
 export function needPanel({ t, lang, data, geo, summary, country, name, a, line, thisYear }) {
   const need = needById[a.need];
@@ -137,7 +147,7 @@ export function needPanel({ t, lang, data, geo, summary, country, name, a, line,
     <h2 class="d-h">${esc(big)}.</h2>
     ${sub ? `<p class="d-sub">${esc(sub)}</p>` : ''}
   </section>
-  ${a.points.length && a.value != null && a.state !== 'none' ? `<section>${chart({ t, lang, a, need, thisYear })}</section>` : ''}
+  ${charted(a) ? `<section>${chart({ t, lang, need, thisYear, series: [{ a, line: 'var(--ink)', ahead: 'var(--accent)' }] })}</section>` : ''}
   <section class="s-${a.state}">
     <div class="pace-big"><span class="mono mut">${glyph(a.state)}&nbsp; ${t.states[a.state]}<br>${t.atThisPace}</span><strong>${esc(t.paceBig[a.reason](a))}</strong></div>
     <p class="pace-note">${esc(t.paceNote[a.reason](a, SDG_YEAR))}</p>
@@ -151,7 +161,7 @@ export function needPanel({ t, lang, data, geo, summary, country, name, a, line,
   <section><p class="fine"><span class="mono">${t.source}</span><br>${esc(t.sourceLine(info.name || need.code, need.code))} ${t.goal}: ${esc(t.goalText(need))}.</p></section>`;
 }
 
-export function paceStrip({ t, summary, thisYear, current }) {
+function paceTrack({ t, summary, thisYear, current, side = '' }) {
   const pos = (year) => Math.pow(Math.min(1, Math.max(0, (year - thisYear) / (HORIZON - thisYear))), 0.62) * 100;
   const tipOf = (a) => `data-tip="${esc(t.needs[a.need].name)}|${esc(reason(t, a))}"`;
   const btn = (a) => `<button data-need="${a.need}" ${tipOf(a)} aria-label="${esc(t.needs[a.need].name)}"${current === a.need ? ' aria-current="true"' : ''}>${glyph(a.state)}</button>`;
@@ -166,12 +176,121 @@ export function paceStrip({ t, summary, thisYear, current }) {
   }).join('');
   const ticks = [[thisYear, t.now], [SDG_YEAR, SDG_YEAR], [2050, 2050], [2075, 2075], [HORIZON, HORIZON]]
     .map(([y, label]) => `<span class="yr mono${y === SDG_YEAR ? ' sdg' : y === 2075 ? ' far' : ''}" style="left:${pos(y).toFixed(1)}%">${label}</span>`).join('');
-  return `<div class="sec-h mono"><span>03 /</span><b>${t.paceTitle}</b><span>· ${t.paceSub}</span></div>
-  <div class="track">
+  return `<div class="track ${side}">
     <div class="zone"><div class="dots">${by('met').map(btn).join('')}</div><span class="mono">${by('met').length} ${t.states.met}</span></div>
     <div class="axis">${ticks}${marks}</div>
     <div class="zone"><div class="dots">${by('stuck').map(btn).join('')}</div><span class="mono">${by('stuck').length} ${t.paceStuck}</span></div>
   </div>`;
+}
+const paceHead = (t) => `<div class="sec-h mono"><span>03 /</span><b>${t.paceTitle}</b><span>· ${t.paceSub}</span></div>`;
+
+export function paceStrip({ t, summary, thisYear, current }) {
+  return paceHead(t) + paceTrack({ t, summary, thisYear, current });
+}
+
+/** Two countries on the same time axis, one above the other. */
+export function comparePace({ t, A, B, nameA, nameB, thisYear, current }) {
+  return `${paceHead(t)}
+  <div class="who is-a mono">${esc(nameA)}</div>${paceTrack({ t, summary: A, thisYear, current, side: 'is-a' })}
+  <div class="who is-b mono">${esc(nameB)}</div>${paceTrack({ t, summary: B, thisYear, current, side: 'is-b' })}`;
+}
+
+// ---------- comparing two countries ----------
+const shortPace = (t, a) => (a.state === 'met' ? t.states.met : a.state === 'none' ? '—' : t.paceBig[a.reason](a));
+const icons = {
+  share: '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor"><path d="M6 8V1M3.5 3.5 6 1l2.5 2.5M1.5 7v3.5h9V7"/></svg>',
+  swap: '<svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor"><path d="M1 3.5h9M7.5 1 10 3.5 7.5 6M12 8.5H3M5.5 6 3 8.5 5.5 11"/></svg>',
+};
+
+/** Shown while the visitor is choosing the second country. */
+export function pickPanel({ t, name, nearby }) {
+  const [before, , after] = t.compareWith(name);
+  return `<header><div id="search-panel"></div></header>
+  <section>
+    <h2 class="pick-h">${esc(before)} <em>${esc(name)}</em> ${esc(after)}</h2>
+    <p class="widest">${t.comparePick}</p>
+    ${nearby.length ? `<div class="label mono" style="margin-top:26px"><span>${t.nearby}</span></div>
+    <div class="chips">${nearby.map((c) => `<button class="chip mono" data-vs="${c.id}">${esc(c.name)}</button>`).join('')}</div>` : ''}
+    <div class="row-actions" style="margin-top:28px"><button class="btn mono" data-act="end-compare">${t.cancel}</button></div>
+  </section>`;
+}
+
+export function comparePanel({ t, lang, A, B, nameA, nameB }) {
+  const usable = (s) => s.known && s.measured;
+  const verdict = !usable(A) ? t.compareNoData(nameA) : !usable(B) ? t.compareNoData(nameB)
+    : A.unmet === B.unmet ? t.compareEqual(A.unmet, A.total)
+    : t.compareFewer(A.unmet < B.unmet ? nameA : nameB, Math.abs(A.unmet - B.unmet));
+  const side = (s, name, cls) => `<div class="${cls}"><h2 class="name">${esc(name)}</h2><span class="mono">${usable(s) ? t.unmetOf(s.unmet, s.total) : t.headlineNone}</span></div>`;
+  const tally = ['met', 'closing', 'stuck', 'none'].map((state) => `<div class="s-${state}"><span class="mono">${glyph(state)}${t.states[state]}</span><b class="is-a">${A[state]}</b><b class="is-b">${B[state]}</b></div>`).join('');
+
+  const pairs = A.list.map((a, i) => {
+    const b = B.list[i], need = needById[a.need];
+    const sa = a.state === 'none' || a.value == null ? null : metShare(need, a.value);
+    const sb = b.state === 'none' || b.value == null ? null : metShare(need, b.value);
+    return { a, b, need, sa, sb, gap: sa == null || sb == null ? -1 : Math.abs(sa - sb) };
+  }).sort((x, y) => y.gap - x.gap);
+  const line = (a, share, need, cls, lead) => `<span class="cmp-line ${cls} s-${a.state}">${glyph(a.state)}
+      <span class="bar">${share == null ? '' : `<i style="width:${Math.max(0.8, share).toFixed(1)}%"></i>`}<u style="left:${goalShare(need)}%"></u></span>
+      <b${lead ? ' class="lead"' : ''}>${share == null ? '—' : percent(share, lang)}</b><span class="mono">${esc(shortPace(t, a))}</span></span>`;
+  const rows = pairs.map(({ a, b, need, sa, sb, gap }) => {
+    const points = Math.round(gap);
+    const ahead = gap < 0 || points === 0 ? '' : t.ahead(sa > sb ? nameA : nameB, points);
+    return `<li><button class="cmp" data-need="${a.need}">
+      <span class="n-name">${esc(t.needs[a.need].name)}</span><span class="cmp-gap mono">${esc(ahead)}</span>
+      ${line(a, sa, need, 'is-a', sa != null && sb != null && sa > sb)}${line(b, sb, need, 'is-b', sa != null && sb != null && sb > sa)}
+    </button></li>`;
+  }).join('');
+
+  return `<header><div id="search-panel"></div></header>
+  <section>
+    <div class="cmp-names">${side(A, nameA, 'is-a')}<span class="vs mono">${t.vs}</span>${side(B, nameB, 'is-b')}</div>
+    <p class="verdict">${esc(verdict)}</p>
+    <div class="row-actions">
+      <button class="btn mono" data-act="swap">${icons.swap}${t.swap}</button>
+      <button class="btn mono" data-act="share">${icons.share}${t.share}</button>
+      <button class="btn mono" data-act="end-compare">× ${t.endCompare}</button>
+    </div>
+  </section>
+  <section class="tally"><div class="tally-h mono"><span></span><b class="is-a">${esc(nameA)}</b><b class="is-b">${esc(nameB)}</b></div>${tally}</section>
+  <div id="pace-slot"></div>
+  <section>
+    <div class="sec-h mono"><span>01 /</span><b>${t.needsTitle}</b><span>· ${t.compareOrder}</span></div>
+    <ul class="needs">${rows}</ul>
+  </section>`;
+}
+
+/** One need, both countries: the two trends on one chart, then each country's own line. */
+export function compareNeedPanel({ t, lang, data, a, b, countryA, nameA, nameB, line, thisYear }) {
+  const need = needById[a.need], words = t.needs[need.id];
+  const order = needsIn(data).map((n) => n.id), at = order.indexOf(need.id);
+  const info = data.needs[need.id] || {};
+  const series = [{ a, line: 'var(--accent)', ahead: 'var(--accent)' }, { a: b, line: 'var(--ink)', ahead: 'var(--ink)' }].filter((x) => charted(x.a));
+  const block = (x, name, cls, id) => {
+    const fact = x.value == null ? reason(t, x) : cap(lackLine(t, lang, need, x, line) || statLine(t, lang, need, x, line));
+    return `<div class="cmp-block ${cls} s-${x.state}">
+      <h3 class="name">${esc(name)}</h3>
+      <p class="fact">${esc(fact)}.</p>
+      <p class="mono mut">${glyph(x.state)}&nbsp; ${esc(x.state === 'met' || x.state === 'none' ? reason(t, x) : `${t.states[x.state]} · ${shortPace(t, x)}`)}${x.year && x.state !== 'none' ? ` · ${esc(t.reading(x.year))}` : ''}</p>
+      <button class="solo mono" data-solo="${id}">${esc(t.alone(name))} →</button>
+    </div>`;
+  };
+  const seed = a.value == null ? '' : t.seed(nameA, lackLine(t, lang, need, a, line) || statLine(t, lang, need, a, line), a.year);
+  const href = `/start-a-solution?from=unmet&place=${encodeURIComponent(countryA.name)}&need=${need.id}${seed ? `&problem=${encodeURIComponent(seed)}` : ''}`;
+  return `<header><div id="search-panel"></div></header>
+  <section>
+    <div class="d-top mono">
+      <button data-act="all">← ${t.allNeeds}</button>
+      <span class="d-nav"><button data-need="${order[(at - 1 + order.length) % order.length]}" aria-label="‹">‹</button>${at + 1} / ${order.length}<button data-need="${order[(at + 1) % order.length]}" aria-label="›">›</button></span>
+    </div>
+    <div class="sec-h mono" style="margin:20px 0 0"><b>${esc(words.name)}</b><span>· ${esc(nameA)} ${t.vs} ${esc(nameB)}</span></div>
+  </section>
+  ${series.length ? `<section>${chart({ t, lang, need, thisYear, series })}</section>` : ''}
+  <section class="cmp-blocks">${block(a, nameA, 'is-a', a.id)}${block(b, nameB, 'is-b', b.id)}</section>
+  <section>
+    <a class="cta" href="${href}"><span><strong>${t.start}</strong><span>${esc(t.startFor(nameA, words.name))}</span></span>
+      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11h14M12 5l6 6-6 6"/></svg></a>
+  </section>
+  <section><p class="fine"><span class="mono">${t.source}</span><br>${esc(t.sourceLine(info.name || need.code, need.code))} ${t.goal}: ${esc(t.goalText(need))}.</p></section>`;
 }
 
 export function aboutHtml({ t, lang, data }) {
