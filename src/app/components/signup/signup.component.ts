@@ -51,6 +51,16 @@ export class SignupComponent implements OnInit {
     window.scroll(0, 0);
     if (this.gameReturnUrl) this.goal = t('Play Let There Be Light, save my progress, and join the player leaderboard.');
     this.formLoadTime = Date.now(); // Record form load time
+    // A link from the guessing game (/unmet/play) carries the player's name and
+    // email, so the form starts filled in. Nothing is submitted for them.
+    const from = new URLSearchParams(window.location.search);
+    if (from.get('from') === 'play') {
+      const [first, ...rest] = (from.get('name') || '').trim().slice(0, 80).split(/\s+/);
+      if (first && !this.firstName) this.firstName = first;
+      if (rest.length && !this.lastName) this.lastName = rest.join(' ');
+      const email = (from.get('email') || '').trim();
+      if (!this.email && email.length <= 200 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) this.email = email;
+    }
   }
   constructor(private auth: AuthService, private router: Router) {}
 

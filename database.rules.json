@@ -44,6 +44,152 @@
           }
         }
       }
+    },
+    "play": {
+      "rooms": {
+        "$code": {
+          ".write": "$code.matches(/^[A-Z]{4}$/) && newData.child('pub/created').val() === now && newData.child('sec/hk').isString() && (!data.exists() || data.child('pub/created').val() < now - 86400000)",
+          ".validate": "newData.hasChildren(['pub', 'sec'])",
+          "pub": {
+            ".read": true,
+            ".validate": "newData.hasChildren(['host', 'created', 'cfg', 'state'])",
+            "host": {
+              ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{8,24}$/)"
+            },
+            "created": {
+              ".validate": "newData.val() === now"
+            },
+            "hw": {
+              ".write": "newData.parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().child('sec/px/' + newData.parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()",
+              ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{16,32}$/)"
+            },
+            "live": {
+              ".write": "newData.parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().child('sec/px/' + newData.parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()",
+              ".validate": "newData.isBoolean()"
+            },
+            "cfg": {
+              ".write": "newData.parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().child('sec/px/' + newData.parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()",
+              ".validate": "newData.hasChildren(['rounds', 'secs'])",
+              "rounds": {
+                ".validate": "newData.isNumber() && newData.val() >= 3 && newData.val() <= 12"
+              },
+              "secs": {
+                ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 60"
+              },
+              "max": {
+                ".validate": "newData.isNumber() && newData.val() >= 2 && newData.val() <= 300"
+              },
+              "region": {
+                ".validate": "newData.isString() && newData.val().length <= 12"
+              },
+              "topics": {
+                ".validate": "newData.isString() && newData.val().length <= 160"
+              },
+              "auto": {
+                ".validate": "newData.isBoolean()"
+              },
+              "hostPlays": {
+                ".validate": "newData.isBoolean()"
+              },
+              "email": {
+                ".validate": "newData.isBoolean()"
+              },
+              "locked": {
+                ".validate": "newData.isBoolean()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            },
+            "state": {
+              ".write": "newData.parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().child('sec/px/' + newData.parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()",
+              ".validate": "newData.child('phase').isString() && newData.child('phase').val().matches(/^(lobby|guess|reveal|final)$/)"
+            },
+            "players": {
+              "$pid": {
+                ".write": "(newData.parent().parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().parent().child('sec/px/' + newData.parent().parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()) || (newData.child('w').isString() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.child('w').val()).exists() && newData.parent().parent().parent().child('sec/pk/' + $pid).isString() && newData.parent().parent().parent().child('sec/px/' + newData.child('w').val()).val() === newData.parent().parent().parent().child('sec/pk/' + $pid).val() && !root.child('play/rooms/' + $code).child('pub/kicked/' + $pid).exists() && (data.exists() || root.child('play/rooms/' + $code).child('pub/cfg/locked').val() !== true))",
+                ".validate": "newData.hasChildren(['name', 'at', 'w']) && $pid.matches(/^[A-Za-z0-9]{8,24}$/)",
+                "name": {
+                  ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+                },
+                "at": {
+                  ".validate": "newData.isNumber() && newData.val() <= now"
+                },
+                "on": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "left": {
+                  ".validate": "newData.isBoolean()"
+                },
+                "w": {
+                  ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{16,32}$/)"
+                },
+                "$other": {
+                  ".validate": false
+                }
+              }
+            },
+            "kicked": {
+              "$pid": {
+                ".write": "newData.parent().parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().parent().child('sec/px/' + newData.parent().parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()",
+                ".validate": "newData.isBoolean()"
+              }
+            },
+            "guesses": {
+              "$key": {
+                "$pid": {
+                  ".write": "!data.exists() && newData.child('w').isString() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.child('w').val()).exists() && newData.parent().parent().parent().parent().child('sec/pk/' + $pid).isString() && newData.parent().parent().parent().parent().child('sec/px/' + newData.child('w').val()).val() === newData.parent().parent().parent().parent().child('sec/pk/' + $pid).val() && !root.child('play/rooms/' + $code).child('pub/kicked/' + $pid).exists() && root.child('play/rooms/' + $code).child('pub/state/phase').val() === 'guess' && root.child('play/rooms/' + $code).child('pub/state/key').val() === $key && root.child('play/rooms/' + $code).child('pub/players/' + $pid).exists()",
+                  ".validate": "newData.hasChildren(['v', 'at', 'w'])",
+                  "v": {
+                    ".validate": "(newData.isNumber() && newData.val() >= 0 && newData.val() <= 100) || (newData.isString() && newData.val().matches(/^[ab]$/))"
+                  },
+                  "at": {
+                    ".validate": "newData.val() === now"
+                  },
+                  "w": {
+                    ".validate": "newData.isString() && newData.val().matches(/^[A-Za-z0-9]{16,32}$/)"
+                  },
+                  "$other": {
+                    ".validate": false
+                  }
+                }
+              }
+            },
+            "scores": {
+              ".write": "newData.parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().child('sec/px/' + newData.parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()"
+            },
+            "final": {
+              ".write": "newData.parent().parent().child('pub/hw').isString() && root.child('play/rooms/' + $code).child('sec/hk').exists() && !root.child('play/rooms/' + $code).child('sec/px/' + newData.parent().parent().child('pub/hw').val()).exists() && newData.parent().parent().child('sec/px/' + newData.parent().parent().child('pub/hw').val()).val() === root.child('play/rooms/' + $code).child('sec/hk').val()"
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "sec": {
+            "hk": {
+              ".validate": "newData.isString() && newData.val().length >= 20 && newData.val().length <= 64"
+            },
+            "pk": {
+              "$pid": {
+                ".write": "!data.exists() && newData.exists() && root.child('play/rooms/' + $code).child('sec/hk').exists()",
+                ".validate": "newData.isString() && newData.val().length >= 20 && newData.val().length <= 64 && $pid.matches(/^[A-Za-z0-9]{8,24}$/)"
+              }
+            },
+            "px": {
+              "$proof": {
+                ".write": "!data.exists() && newData.exists() && root.child('play/rooms/' + $code).child('sec/hk').exists()",
+                ".validate": "newData.isString() && newData.val().length <= 64 && $proof.matches(/^[A-Za-z0-9]{16,32}$/)"
+              }
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
     }
   }
 }

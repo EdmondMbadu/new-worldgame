@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Out of 100 · Global Solutions Lab</title>
+<meta name="description" content="A live guessing game on real data. Out of 100 people, how many have electricity, clean water, a school? Guess, then see the truth. Play with friends, a whole class, or solo in two minutes.">
+<!-- Hidden from search engines until you are ready to launch: delete the next line. -->
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#08090b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How well do you know the world?">
+<meta property="og:description" content="Out of 100 people, how many have electricity? Guess, then see the truth. Play live with friends or solo in two minutes.">
+<meta property="og:site_name" content="Global Solutions Lab">
+<link rel="icon" type="image/png" href="%S%/gsl-logo.png">
+<link rel="apple-touch-icon" href="%S%/gsl-logo.png">
+<link rel="preload" href="%S%/fonts/instrument-serif-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="%S%/fonts/instrument-serif-400-italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="%S%/fonts/dm-mono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="%S%/geo/map.json" as="fetch" crossorigin>
+<link rel="preload" href="%S%/geo/dots-l.land.bin" as="fetch" crossorigin media="(min-width: 900px)">
+<link rel="preload" href="%S%/geo/dots-s.land.bin" as="fetch" crossorigin media="(max-width: 899px)">
+<link rel="modulepreload" href="%JS%">
+<style>%CSS%</style>
+</head>
+<body data-screen="landing">
+<div class="stage" id="stage">
+  <canvas id="map" aria-label="World map" role="img"></canvas>
+  <div class="tag is-a mono" id="tag-a" hidden><span></span></div>
+  <div class="tag is-b mono" id="tag-b" hidden><span></span></div>
+</div>
+<div class="clock" id="clock" hidden><i></i></div>
+<div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+<header class="top">
+  <div>
+    <a class="brand" href="/unmet/play/" id="brand"><span id="brand-name">Out of 100</span><i>.</i></a>
+    <button class="how mono" id="how"><span>How to play</span> <kbd>?</kbd></button>
+  </div>
+  <nav>
+    <span class="room-chip mono" id="room-chip" hidden></span>
+    <button class="sound mono" id="sound" aria-pressed="true" aria-label="Sound"><svg width="15" height="13" viewBox="0 0 15 13" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M1 4.5h2.5L7 1.5v10l-3.5-3H1z"/><path class="waves" d="M9.5 4a3.4 3.4 0 0 1 0 5M11.5 2a6.2 6.2 0 0 1 0 9"/></svg></button>
+    <a class="gsl-home mono" href="/" aria-label="Global Solutions Lab">
+      <img src="%S%/gsl-logo.png" width="28" height="28" alt="">
+      <span>Global Solutions Lab ↗</span>
+    </a>
+    <div class="lang mono" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button><button data-lang="fr" aria-pressed="false">FR</button>
+    </div>
+  </nav>
+</header>
+
+<main id="app"></main>
+
+<footer class="foot mono mut">
+  <div><span id="f-count">&nbsp;</span><br><span id="f-source">&nbsp;</span></div>
+  <div id="f-right">&nbsp;</div>
+</footer>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden></div>
+<div class="banner mono" id="banner" role="status" hidden></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="toast" id="toast" role="status"></div>
+<script>window.PLAY=%CONFIG%</script>
+<script type="module" src="%JS%"></script>
+</body>
+</html>

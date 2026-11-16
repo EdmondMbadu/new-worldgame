@@ -1,5 +1,6 @@
 export { generateStarterBrief, manageStarterBrief, getStarterBrief, manageStarterTeam, serveStarterBrief } from './community-starter';
 export { createClassSpace, listAccessibleChallengeSpaces, resolveAccessibleChallengeSpace, checkChallengeSpaceSlug } from './class-spaces';
+export { playLeadCreated } from './play';
 import { lastLightReturn } from './last-light-return';
 /**
  * Import function triggers from their respective submodules:

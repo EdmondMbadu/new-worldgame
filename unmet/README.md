@@ -6,6 +6,8 @@ Links carry the state: `/unmet?c=COD` opens a country, `&n=electricity` one need
 
 It is a standalone document, like the games: the Angular app never imports it, so it adds nothing to the Angular bundle. `angular.json` copies `unmet/dist` into the site as static files.
 
+There is also a game built on this page: a live guess-then-reveal room at `/unmet/play/`. It is a separate document that leaves Unmet as it is. See [src/play/README.md](src/play/README.md).
+
 ## Commands
 
 | Command | What it does |

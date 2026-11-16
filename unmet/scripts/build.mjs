@@ -13,6 +13,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statS
 import { gzipSync } from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { buildPlay } from './build-play.mjs';
 
 const here = fileURLToPath(new URL('../', import.meta.url));
 const at = (...p) => path.join(here, ...p);
@@ -100,6 +101,8 @@ export async function buildUnmet({ sample = false, dev = false, quiet = false } 
     console.log(`  script ${gz(path.join(dist, js.slice(BASE.length)))} KiB gzip`);
     console.log(`  data   ${gz(path.join(sdir, 'data.json'))} KiB gzip · map ${gz(path.join(sdir, 'geo/map.json'))} KiB gzip · dots ${kb(path.join(sdir, 'geo/dots-l.land.bin'))} + ${kb(path.join(sdir, 'geo/dots-l.xy.bin'))} KiB (desktop), ${kb(path.join(sdir, 'geo/dots-s.land.bin'))} + ${kb(path.join(sdir, 'geo/dots-s.xy.bin'))} KiB (phone)`);
   }
+  // The game at /unmet/play/ is built into the same folder and shares the files above.
+  await buildPlay({ dist, S, sample, quiet });
   return { dist, sample };
 }
 

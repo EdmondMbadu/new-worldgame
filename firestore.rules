@@ -66,6 +66,64 @@ service cloud.firestore {
         && request.resource.data.subscribedAt == request.time;
     }
 
+    // ---- The live guessing game at /unmet/play ----
+    // What an admin can change without a deploy (name, join address, defaults).
+    // Anyone reads it; only platform admins write it.
+    match /playSettings/{settingId} {
+      allow read: if true;
+      allow create, update, delete: if isPlatformAdmin();
+    }
+
+    // An email a player chose to leave at the end of a game. Players are not
+    // signed in, so anyone may add one well-formed entry per player per room;
+    // it can never be changed, and only platform admins (and the Cloud
+    // Function that answers it) can read it.
+    match /playLeads/{leadId} {
+      allow read, delete: if isPlatformAdmin();
+      allow create: if request.resource.data.keys().hasOnly([
+          'pid', 'room', 'email', 'name', 'lang', 'score', 'max', 'rank', 'of', 'view', 'by', 'at'
+        ])
+        && request.resource.data.keys().hasAll(['pid', 'room', 'email', 'at'])
+        && request.resource.data.pid is string
+        && request.resource.data.pid.matches('^[A-Za-z0-9]{8,24}$')
+        && request.resource.data.room is string
+        && request.resource.data.room.matches('^([A-Z]{4}|SOLO[0-9]{8})$')
+        && leadId == request.resource.data.room + '_' + request.resource.data.pid
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+        && request.resource.data.get('name', '') is string
+        && request.resource.data.get('name', '').size() <= 20
+        && request.resource.data.get('lang', 'en') in ['en', 'fr']
+        && request.resource.data.get('view', '') in ['', 'optimist', 'pessimist', 'realist']
+        && request.resource.data.get('score', 0) is int
+        && request.resource.data.get('max', 0) is int
+        && request.resource.data.get('rank', 0) is int
+        && request.resource.data.get('of', 0) is int
+        && request.resource.data.get('by', 0) is int
+        && request.resource.data.at is timestamp;
+    }
+
+    // A record of a finished game, saved by the host's browser. Written once,
+    // read only by platform admins.
+    match /playGames/{gameId} {
+      allow read, delete: if isPlatformAdmin();
+      allow create: if request.resource.data.keys().hasOnly([
+          'code', 'game', 'host', 'at', 'lang', 'players', 'rounds', 'region', 'topics', 'view', 'by', 'board', 'questions'
+        ])
+        && request.resource.data.code is string
+        && request.resource.data.code.matches('^[A-Z]{4}$')
+        && request.resource.data.host is string
+        && request.resource.data.host.matches('^[A-Za-z0-9]{8,24}$')
+        && request.resource.data.players is int
+        && request.resource.data.players <= 300
+        && request.resource.data.board is list
+        && request.resource.data.board.size() <= 60
+        && request.resource.data.questions is list
+        && request.resource.data.questions.size() <= 12
+        && request.resource.data.at is timestamp;
+    }
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -495,7 +553,8 @@ service cloud.firestore {
         && topLevelCollection != 'campaignRoutes'
         && topLevelCollection != 'ai_insights_content_cache'
         && topLevelCollection != 'ai_insights_content_snapshots'
-        && !(topLevelCollection in ['lastLightPlayers', 'lastLightRuns', 'lastLightBoards', 'lastLightLimits']);
+        && !(topLevelCollection in ['lastLightPlayers', 'lastLightRuns', 'lastLightBoards', 'lastLightLimits'])
+        && !(topLevelCollection in ['playSettings', 'playLeads', 'playGames']);
       allow write: if request.time < timestamp.date(2028, 11, 3)
         && topLevelCollection != 'avatar_intro_videos'
         && topLevelCollection != 'nwgNewsSettings'
@@ -513,7 +572,8 @@ service cloud.firestore {
         && topLevelCollection != 'campaignRoutes'
         && topLevelCollection != 'ai_insights_content_cache'
         && topLevelCollection != 'ai_insights_content_snapshots'
-        && !(topLevelCollection in ['lastLightPlayers', 'lastLightRuns', 'lastLightBoards', 'lastLightLimits']);
+        && !(topLevelCollection in ['lastLightPlayers', 'lastLightRuns', 'lastLightBoards', 'lastLightLimits'])
+        && !(topLevelCollection in ['playSettings', 'playLeads', 'playGames']);
     }
   }
 }

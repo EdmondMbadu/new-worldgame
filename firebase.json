@@ -135,6 +135,15 @@
         ]
       },
       {
+        "source": "/unmet/play{,/**}",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
         "source": "/unmet/assets/**",
         "headers": [
           {
@@ -230,6 +239,21 @@
         "source": "/home-challenge/entp-601-2026",
         "destination": "/home-challenge/sJBETWwiB3IZ9kDvjDCv",
         "type": 302
+      },
+      {
+        "source": "/play",
+        "destination": "/unmet/play/",
+        "type": 302
+      },
+      {
+        "source": "/play/",
+        "destination": "/unmet/play/",
+        "type": 302
+      },
+      {
+        "source": "/play/:code",
+        "destination": "/unmet/play/:code",
+        "type": 302
       }
     ],
     "rewrites": [
@@ -244,6 +268,10 @@
       {
         "source": "/unmet/",
         "destination": "/unmet/index.html"
+      },
+      {
+        "source": "/unmet/play/**",
+        "destination": "/unmet/play/index.html"
       },
       {
         "source": "/campaigns/power-drc-clinics",
