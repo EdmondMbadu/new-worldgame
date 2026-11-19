@@ -179,6 +179,7 @@ class GeodesicSphere {
   templateUrl: './for-professors.component.html',
   styleUrls: [
     './for-professors.component.css',
+    './for-professors.film.css',
     './for-professors.sections.css',
     './for-professors.closing.css',
   ],

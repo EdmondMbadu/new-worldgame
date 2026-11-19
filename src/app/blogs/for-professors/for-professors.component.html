@@ -133,10 +133,44 @@
         </div>
       </div>
 
-      <button type="button" class="fp-scroll-cue" aria-label="Scroll to the next section" (click)="scrollToId('the-problem')">
+      <button type="button" class="fp-scroll-cue" aria-label="Scroll to the film" (click)="scrollToId('the-film')">
         <span></span>
       </button>
     </header>
+
+    <section id="the-film" class="fp-section fp-film" aria-labelledby="fp-film-heading">
+      <div class="fp-wrap fp-film-layout">
+        <div class="fp-film-copy">
+          <p class="fp-label">Watch the film</p>
+          <h2 id="fp-film-heading" class="fp-h2">Real problems.<br /><em>New possibilities.</em></h2>
+          <p class="fp-intro">Get to know Global Solutions Lab and the idea behind bringing real-world problem solving into your classroom.</p>
+          <div class="fp-actions">
+            <a class="fp-btn fp-btn-light" [routerLink]="demoLink">
+              <span>Book a 20-minute demo</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </a>
+          </div>
+        </div>
+        <figure class="fp-film-figure">
+          <div class="fp-film-player">
+            <iframe
+              src="https://www.youtube-nocookie.com/embed/vLIhfgoP7-s?rel=0&amp;playsinline=1"
+              title="The Global Solutions Lab film"
+              width="960"
+              height="540"
+              loading="lazy"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <figcaption>
+            <span>The Global Solutions Lab film</span>
+            <a href="https://www.youtube.com/watch?v=vLIhfgoP7-s" target="_blank" rel="noopener noreferrer">Watch on YouTube <span aria-hidden="true">↗</span></a>
+          </figcaption>
+        </figure>
+      </div>
+    </section>
 
     <!-- ============================ THE PROBLEM ============================ -->
     <section id="the-problem" class="fp-section" aria-labelledby="fp-problem-heading">
