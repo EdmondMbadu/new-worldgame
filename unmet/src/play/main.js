@@ -625,12 +625,13 @@ function setLang(lang) {
 document.addEventListener('click', (e) => {
   const el = e.target.closest('[data-act],[data-lang],#how,#sound,#brand');
   if (!el) return;
-  if (el.id === 'how') return openSheet(V.how({ t, name: name() }));
+  if (el.id === 'how') return openSheet(V.how({ t, name: name(), s: cfg.s }));
   if (el.id === 'sound') { app.muted = !app.muted; setMuted(app.muted); keep.set('play.muted', app.muted ? '1' : '0'); return renderChrome(); }
   if (el.id === 'brand') { e.preventDefault(); if (app.mode === 'live' && !confirm(t.leaveAsk)) return; if (app.player && !app.host) app.player.leave(); return goHome(); }
   if (el.dataset.lang) return setLang(el.dataset.lang);
   const act = el.dataset.act, host = app.host;
   if (act === 'host') return hostRoom();
+  if (act === 'watch') { openSheet(V.how({ t, name: name(), s: cfg.s })); const v = $('sheet').querySelector('video'); v?.play().catch(() => {}); return v?.focus(); }
   if (act === 'solo') return startSolo();
   if (act === 'resume') return enterCode(el.dataset.code);
   if (act === 'home') return goHome();
@@ -694,7 +695,7 @@ addEventListener('keydown', (e) => {
   const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) && document.activeElement.type !== 'range';
   if (e.key === 'Escape' && !$('sheet').hidden) return closeSheet();
   if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
-  if (e.key === '?') openSheet(V.how({ t, name: name() }));
+  if (e.key === '?') openSheet(V.how({ t, name: name(), s: cfg.s }));
   if (app.screen === 'guess' && role().plays && !app.draft.sent) {
     if (e.key === 'ArrowLeft' && document.activeElement?.id !== 'slider') nudge(e.shiftKey ? -10 : -1);
     if (e.key === 'ArrowRight' && document.activeElement?.id !== 'slider') nudge(e.shiftKey ? 10 : 1);

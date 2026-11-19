@@ -2,6 +2,7 @@
 // the same functions draw the solo game, a player's phone and the host's big
 // screen. main.js decides which to show and fills in the live parts.
 import * as E from './engine.js';
+import { howVideoUrl } from './config.js';
 import { LANGS, needName, questionHtml, saidLine, peopleLine, paceLine } from './strings.js';
 
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -27,6 +28,7 @@ export function landing({ t, tagline, day, today, resume, solo }) {
         <button class="choice" data-act="host"><b>${esc(t.host)}</b><span class="mono">${esc(t.hostSub)}</span></button>
         ${solo ? `<button class="choice hot" data-act="solo"><b>${esc(t.solo)}</b><span class="mono">${esc(today ? t.soloDone(today.score, today.max) : t.soloSub(day))}</span></button>` : ''}
       </div>
+      <button class="watch mono" data-act="watch"><span class="watch-icon" aria-hidden="true"><svg width="8" height="10" viewBox="0 0 8 10"><path d="M0 0l8 5-8 5z" fill="currentColor"/></svg></span>${esc(t.watch)} <span class="watch-len">· ${esc(t.watchLen)}</span></button>
       ${resume ? `<button class="resume mono" data-act="resume" data-code="${esc(resume)}">${esc(t.resume(resume))} ${arrow}</button>` : ''}
     </div>
     <a class="credit mono" href="/">${esc(t.credit)}</a>
@@ -328,10 +330,16 @@ export function soloFinal({ t, day, score, max, rounds, view, streak, askEmail, 
 }
 
 // ---------- sheets ----------
-export function how({ t, name }) {
+export function how({ t, name, s }) {
   return `<header><div><span class="brand">${esc(name)}<i>.</i></span></div><button class="mono" data-act="close-sheet">${esc(t.close)} <kbd>esc</kbd></button></header>
   <article>
     <h2>${h1([t.howH[0], t.howH[1], ''])}</h2>
+    <figure class="how-video">
+      <video controls playsinline preload="none" poster="${s}/video/how-to-play.jpg">
+        <source src="${esc(howVideoUrl)}" type="video/mp4">
+      </video>
+      <figcaption class="mono">${esc(t.howVideo)}</figcaption>
+    </figure>
     <ol class="steps">${t.howSteps.map(([a, b], k) => `<li><span class="mono">0${k + 1}</span><div><h3>${esc(a)}</h3><p>${esc(b)}</p></div></li>`).join('')}</ol>
     <p class="fine">${esc(t.howData)}</p>
     <p class="fine">${esc(t.howMap)}</p>

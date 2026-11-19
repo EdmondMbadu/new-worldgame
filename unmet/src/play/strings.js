@@ -65,6 +65,8 @@ const en = {
   emailH: 'Keep your result', emailSub: 'One email with your score and a link to pick up where you left off. Nothing else.', emailPlaceholder: 'you@example.com', emailSend: 'Send it', emailSent: 'Sent. Check your inbox.', emailBad: 'That does not look like an email address.', emailFail: 'Could not send it. Try again in a moment.',
   // how to play
   howH: ['How to', 'play.'],
+  howVideo: 'The whole game in five minutes',
+  watch: 'Watch how to play', watchLen: '5 min',
   howSteps: [
     ['Guess', 'Each round asks about one country and one basic need. Drag to your best guess out of 100 and lock it in.'],
     ['See the truth', 'The real figure appears with everyone’s guesses around it. You lose 3 points for every point you are off; a perfect guess is 100.'],
@@ -141,6 +143,8 @@ const fr = {
   streak: (n) => (n === 1 ? '1 jour d’affilée' : `${n} jours d’affilée`), comeBack: 'Cinq nouvelles questions demain.', soloLive: 'C’est mieux à plusieurs.',
   emailH: 'Gardez votre résultat', emailSub: 'Un seul e-mail avec votre score et un lien pour continuer. Rien d’autre.', emailPlaceholder: 'vous@exemple.com', emailSend: 'Envoyer', emailSent: 'Envoyé. Consultez votre boîte de réception.', emailBad: 'Cette adresse e-mail ne semble pas valide.', emailFail: 'Envoi impossible. Réessayez dans un instant.',
   howH: ['Comment', 'jouer.'],
+  howVideo: 'Tout le jeu en cinq minutes · en anglais',
+  watch: 'Voir comment jouer', watchLen: '5 min · en anglais',
   howSteps: [
     ['Devinez', 'Chaque manche porte sur un pays et un besoin essentiel. Faites glisser jusqu’à votre meilleure estimation sur 100, puis validez.'],
     ['Découvrez la réalité', 'Le vrai chiffre apparaît, entouré des réponses de tous. Vous perdez 3 points par point d’écart ; une réponse parfaite vaut 100.'],
